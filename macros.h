@@ -44,11 +44,11 @@
 #define STDERR		2	/*   stderr's? */
 #define ERROR_EXIT	1	/* exit() with this will scare the shell */
 #define	OK_EXIT		0	/* exit() with this is considered 'normal' */
-#define	MAX_FNAME	100	/* max length of internally generated fn */
-#define	MAX_COMMAND	1000	/* max length of internally generated cmd */
-#define	MAX_ENVSTR	1000	/* max length of envvar=value\0 strings */
-#define	MAX_TEMPSTR	100	/* obvious */
-#define	MAX_UNAME	33	/* max length of username, should be overkill */
+#define	MAX_FNAME	PATH_MAX/* max length of internally generated fn */
+#define	MAX_COMMAND	131072	/* max length of internally generated cmd (max sh cmd line length) */
+#define	MAX_ENVSTR	131072	/* max length of envvar=value\0 strings */
+#define	MAX_TEMPSTR	131072	/* obvious */
+#define	MAX_UNAME	256	/* max length of username  */
 #define	ROOT_UID	0	/* don't change this, it really must be root */
 #define	ROOT_USER	"root"	/* ditto */
 
