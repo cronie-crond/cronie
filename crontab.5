@@ -86,8 +86,15 @@ when the minute, hour, and month of year fields match the current time,
 .I and
 when at least one of the two day fields (day of month, or day of week)
 match the current time (see ``Note'' below).
+Note that this means that non-existant times, such as "missing hours"
+during daylight savings conversion, will never match, causing jobs
+scheduled during the "missing times" not to be run.  Similarly, times
+that occur more than once (again, during daylight savings conversion)
+will cause matching jobs to be run twice.
+.PP
 .IR cron (8)
 examines cron entries once every minute.
+.PP
 The time and date fields are:
 .IP
 .ta 1.5i
@@ -101,7 +108,7 @@ hour	0-23
 .br
 day of month	1-31
 .br
-month	0-12 (or names, see below)
+month	1-12 (or names, see below)
 .br
 day of week	0-7 (0 or 7 is Sun, or use names)
 .br
@@ -164,6 +171,9 @@ MAILTO=paul
 23 0-23/2 * * * echo "run 23 minutes after midn, 2am, 4am ..., everyday"
 5 4 * * sun     echo "run at 5 after 4 every sunday"
 .fi
+.SH FILES
+/etc/crontab			System crontab file
+
 .SH SEE ALSO
 cron(8), crontab(1)
 .SH EXTENSIONS

@@ -82,3 +82,8 @@ Features of ISC cron relative to BSD 4.[23] and SysV crons:
 	act this way and do the more reasonable thing, which is (IMHO) to "or"
 	the various field-matches together.  In that sense this cron may not
 	be completely similar to some AT&T crons.
+
+--	If it exists, the /etc/cron.d/ directory is parsed like the cron
+	spool directory, except that the files in it are not user-specific
+	and are therefore read with /etc/crontab syntax (the user is
+	specified explicitly in the 6th column).

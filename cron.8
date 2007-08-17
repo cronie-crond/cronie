@@ -36,10 +36,11 @@ behavior causing it to run in the foreground.  This can be useful when
 starting it out of init.
 .PP
 .I Cron
-searches /var/cron/tabs for crontab files which are named after accounts in
+searches /var/spool/cron for crontab files which are named after accounts in
 /etc/passwd; crontabs found are loaded into memory.
 .I Cron
-also searches for /etc/crontab which is in a different format (see
+also searches for /etc/crontab and the files in the /etc/cron.d directory,
+which are in a different format (see
 .IR crontab (5)).
 .I Cron
 then wakes up every minute, examining all stored crontabs, checking each
