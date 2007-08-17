@@ -83,6 +83,11 @@ main(int argc, char *argv[]) {
 #if defined(BSD)
 	setlinebuf(stderr);
 #endif
+	char *n="-";			/*set the n string to - so we have a valid string to use*/ 
+		 			/*should we desire to make changes to behavior later.*/
+	if(argv[1] == NULL){ 		/* change behavior to allow crontab to take stdin with no '-'*/
+		argv[1] =n;
+	}
 	parse_args(argc, argv);		/* sets many globals, opens a file */
 	set_cron_cwd();
 	if (!allowed(RealUser, CRON_ALLOW, CRON_DENY)) {
