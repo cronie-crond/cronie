@@ -44,15 +44,26 @@ static	int get_security_context(const char *name,
 	security_context_t  file_context=NULL;
 	struct av_decision avd;
 	int retval=0;
+	char *seuser=NULL;
+	char *level=NULL;
 	*rcontext = NULL;
-	if (get_default_context(name, NULL, &scontext)) {
-		if (security_getenforce() > 0) {
-			log_it(name, getpid(), "No SELinux security context",tabname);
-			return -1;
-		} else {
-			log_it(name, getpid(), "No security context but SELinux in permissive mode, continuing",tabname);
-			return 0;
+
+	if (getseuserbyname(name, &seuser, &level) == 0) {
+		retval=get_default_context_with_level(seuser, level, NULL, &scontext);
+		free(seuser);
+		free(level);
+		if (retval) {
+			if (security_getenforce() > 0) {
+				log_it(name, getpid(), "No SELinux security context",tabname);
+				return -1;
+			} else {
+				log_it(name, getpid(), "No security context but SELinux in permissive mode, continuing",tabname);
+				return 0;
+			}
 		}
+	} else {
+		log_it(name, getpid(), "getseusername FAILED", name);
+		return (security_getenforce() > 0);
 	}
 	
 	if (fgetfilecon(crontab_fd, &file_context) < OK) {
