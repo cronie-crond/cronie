@@ -34,6 +34,12 @@ static	void		process_crontab(const char *, const char *,
 					const char *, struct stat *,
 					cron_db *, cron_db *);
 
+static int not_a_crontab( DIR_T *dp ); 
+/* return 1 if we should skip this file */
+
+static void max_mtime( char *dir_name, struct stat *max_st ); 
+/* record max mtime of any file under dir_name in max_st */
+
 void
 load_database(cron_db *old_db) {
 	struct stat statbuf, syscron_stat, crond_stat;
@@ -52,11 +58,19 @@ load_database(cron_db *old_db) {
 		log_it("CRON", getpid(), "STAT FAILED", SPOOL_DIR);
 		(void) exit(ERROR_EXIT);
 	}
+	
+	/* As pointed out in Red Hat bugzilla 198019, with modern Linux it
+	 * is possible to modify a file without modifying the mtime of the
+         * containing directory. Hence, we must check the mtime of each file:
+         */
+	max_mtime(SPOOL_DIR, &statbuf);
 
 	if (stat(RH_CROND_DIR, &crond_stat) < OK) {
 		log_it("CRON", getpid(), "STAT FAILED", RH_CROND_DIR);
 		(void) exit(ERROR_EXIT);
 	}
+
+	max_mtime(RH_CROND_DIR, &crond_stat);
 
 	/* track system crontab file
 	 */
@@ -97,40 +111,12 @@ load_database(cron_db *old_db) {
 	}
 
 	while (NULL != (dp = readdir(dir))) {
-		char	fname[MAXNAMLEN+1],
-			tabname[MAXNAMLEN+1];
-		size_t len;
+		char   tabname[MAXNAMLEN+1];
 
-		/* avoid file names beginning with ".".  this is good
-		 * because we would otherwise waste two guaranteed calls
-		 * to getpwnam() for . and .., and there shouldn't be 
-		 * hidden files in here anyway
-		 */
-		if (dp->d_name[0] == '.')
+		if ( not_a_crontab( dp ) )
 			continue;
 
-		/* ignore files starting with # and ending with ~ */
-		if (dp->d_name[0] == '#')
-			continue;
-		
-		len = strlen(dp->d_name);
-
-		if (len >= sizeof fname)
-			continue;	/* XXX log? */
-
-		if ((len > 0) && (dp->d_name[len - 1] == '~'))
-			continue;
-
-		(void) strcpy(fname, dp->d_name);
-		
-		if ((len > 8) && (strncmp(fname + len - 8, ".rpmsave", 8) == 0))
-			continue;
-		if ((len > 8) && (strncmp(fname + len - 8, ".rpmorig", 8) == 0))
-			continue;
-		if ((len > 7) && (strncmp(fname + len - 7, ".rpmnew", 7) == 0))
-			continue;
-
-		if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, fname, '/'))
+		if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
 			continue;	/* XXX log? */
 
 		process_crontab("root", NULL, tabname,
@@ -142,6 +128,7 @@ load_database(cron_db *old_db) {
 	 * efficiency.  however, we need to close it in every fork, and
 	 * we fork a lot more often than the mtime of the dir changes.
 	 */
+
 	if (!(dir = opendir(SPOOL_DIR))) {
 		log_it("CRON", getpid(), "OPENDIR FAILED", SPOOL_DIR);
 		(void) exit(ERROR_EXIT);
@@ -150,20 +137,12 @@ load_database(cron_db *old_db) {
 	while (NULL != (dp = readdir(dir))) {
 		char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
 
-		/* avoid file names beginning with ".".  this is good
-		 * because we would otherwise waste two guaranteed calls
-		 * to getpwnam() for . and .., and also because user names
-		 * starting with a period are just too nasty to consider.
-		 */
-		if (dp->d_name[0] == '.')
+		if ( not_a_crontab( dp ) )
 			continue;
 
-		if (strlen(dp->d_name) >= sizeof fname)
-			continue;	/* XXX log? */
-		(void) strcpy(fname, dp->d_name);
-		
-		if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR,
-				  fname, '/'))
+		strncpy(fname, dp->d_name, MAXNAMLEN);
+
+		if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
 			continue;	/* XXX log? */
 
 		process_crontab(fname, fname, tabname,
@@ -321,4 +300,68 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		Debug(DLOAD, (" [done]\n"))
 		close(crontab_fd);
 	}
+}
+
+static int not_a_crontab( DIR_T *dp )
+{
+	int len;
+
+	/* avoid file names beginning with ".".  this is good
+	 * because we would otherwise waste two guaranteed calls
+	 * to getpwnam() for . and .., and there shouldn't be 
+	 * hidden files in here anyway
+	 */
+	if (dp->d_name[0] == '.')
+		return(1);
+
+	/* ignore files starting with # and ending with ~ */
+	if (dp->d_name[0] == '#')
+		return(1);
+
+	len = strlen(dp->d_name);
+
+	if (len >= MAXNAMLEN)
+		return(1);	/* XXX log? */
+
+	if ((len > 0) && (dp->d_name[len - 1] == '~'))
+		return(1);
+
+	if ((len > 8) && (strncmp(dp->d_name + len - 8, ".rpmsave", 8) == 0))
+		return(1);
+	if ((len > 8) && (strncmp(dp->d_name + len - 8, ".rpmorig", 8) == 0))
+		return(1);
+	if ((len > 7) && (strncmp(dp->d_name + len - 7, ".rpmnew", 7) == 0))
+		return(1);
+
+	return(0);
+}
+
+static void max_mtime( char *dir_name, struct stat *max_st )
+{
+	DIR * dir;
+	DIR_T *dp;
+	struct stat st;
+
+	if (!(dir = opendir(dir_name))) {
+		log_it("CRON", getpid(), "OPENDIR FAILED", dir_name);
+		(void) exit(ERROR_EXIT);
+	}
+
+	while (NULL != (dp = readdir(dir))) 
+	{
+		char tabname[MAXNAMLEN+1];
+
+		if ( not_a_crontab ( dp ) )
+			continue;
+
+		if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, dp->d_name, '/'))
+			continue;	/* XXX log? */
+
+		if ( stat( tabname, &st ) < OK )
+			continue;       /* XXX log? */
+		
+		if ( st.st_mtime > max_st->st_mtime )
+			max_st->st_mtime = st.st_mtime;		
+	}
+	closedir(dir);
 }
