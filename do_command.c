@@ -185,6 +185,7 @@ child_process(entry *e, user *u) {
 	PAM_FAIL_CHECK;
 	retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
 	PAM_FAIL_CHECK;
+	log_close(); /* PAM has now re-opened our log to auth.info ! */
 #endif
 
 	/* fork again, this time so we can exec the user's command.
