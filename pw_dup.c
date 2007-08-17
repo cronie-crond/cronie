@@ -47,7 +47,7 @@ static char rcsid[] = "$Id: pw_dup.c,v 1.2 2004/01/23 18:56:43 vixie Exp $";
 struct passwd *
 pw_dup(const struct passwd *pw) {
 	char		*cp;
-	size_t		 nsize, psize, csize, gsize, dsize, ssize, total;
+	size_t		 nsize=0, psize=0, csize=0, gsize=0, dsize=0, ssize=0, total=0;
 	struct passwd	*newpw;
 
 	/* Allocate in one big chunk for easy freeing */

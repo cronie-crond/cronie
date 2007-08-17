@@ -446,7 +446,7 @@ child_process(entry *e, user *u) {
 		int	ch = getc(in);
 
 		if (ch != EOF) {
-			FILE	*mail;
+			FILE	*mail=0L;
 			int	bytes = 1;
 			int	status = 0;
 

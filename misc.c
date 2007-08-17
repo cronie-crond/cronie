@@ -274,7 +274,7 @@ acquire_daemonlock(int closeflag) {
 	char buf[3*MAX_FNAME];
 	const char *pidfile;
 	char *ep;
-	long otherpid;
+	long otherpid=-1;
 	ssize_t num;
 
 	if (closeflag) {
