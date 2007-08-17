@@ -7,10 +7,5 @@ auth       required   pam_env.so
 auth       include    system-auth
 account    required   pam_access.so
 account    include    system-auth
-session    include    system-auth
 session    required   pam_loginuid.so
-# To enable PAM user limits for cron jobs, 
-# configure /etc/security/limits.conf and 
-# uncomment this line:
-# session  required   pam_limits.so
-#
+session	   required   pam_limits.so
