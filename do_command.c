@@ -33,6 +33,7 @@ static const struct pam_conv conv = {
 #define PAM_FAIL_CHECK if (retcode != PAM_SUCCESS) { \
 	fprintf(stderr,"\n%s\n",pam_strerror(pamh, retcode)); \
 	syslog(LOG_ERR,"%s",pam_strerror(pamh, retcode)); \
+	pam_close_session(pamh, PAM_SILENT); \
 	pam_end(pamh, retcode); exit(1); \
    }
 #endif
