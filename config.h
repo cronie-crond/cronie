@@ -51,15 +51,15 @@
 			 */
 #define MAILARG _PATH_SENDMAIL				/*-*/
 
-/* #define MAILFMT "%s -d %s"				/*-*/
+/* #define MAILFMT "%s -d %s"				-*/
 			/* -d = undocumented but common flag: deliver locally?
 			 */
-/* #define MAILARG "/bin/mail",mailto                   /*-*/
+/* #define MAILARG "/bin/mail",mailto                   -*/
 
-/* #define MAILFMT "%s -mlrxto %s"			/*-*/
-/* #define MAILARG "/usr/mmdf/bin/submit",mailto	/*-*/
+/* #define MAILFMT "%s -mlrxto %s"			-*/
+/* #define MAILARG "/usr/mmdf/bin/submit",mailto	-*/
 
-/* #define MAIL_DATE				/*-*/
+/* #define MAIL_DATE				-*/
 			/* should we include an ersatz Date: header in
 			 * generated mail?  if you are using sendmail
 			 * as the mailer, it is better to let sendmail
@@ -84,18 +84,18 @@
 			/* if you want cron to capitalize its name in ps
 			 * when running a job.  Does not work on SYSV.
 			 */
-/*#define CAPITALIZE_FOR_PS		/*-*/
+/*#define CAPITALIZE_FOR_PS		-*/
 
 			/* if you have a tm_gmtoff member in struct tm.
 			 * If not, we will have to compute the value ourselves.
 			 */
-/*#define HAVE_TM_GMTOFF		/*-*/
+/*#define HAVE_TM_GMTOFF		-*/
 
 			/* if your OS supports a BSD-style login.conf file */
-/*#define LOGIN_CAP			/*-*/
+/*#define LOGIN_CAP			-*/
 
 			/* if your OS supports BSD authentication */
-/*#define BSD_AUTH			/*-*/
+/*#define BSD_AUTH			-*/
 
 			/* Define this to run crontab setgid instead of   
 			 * setuid root.  Group access will be used to read
@@ -103,4 +103,4 @@
 			 * If this is not defined then crontab and at
 			 * must be setuid root.
 			 */
-/*#define CRON_GROUP	"crontab"	/*-*/
+/*#define CRON_GROUP	"crontab"	-*/
