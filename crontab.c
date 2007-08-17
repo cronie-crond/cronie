@@ -463,7 +463,7 @@ edit_cmd(void) {
 
 	/* parent */
 	for (;;) {
-		xpid = waitpid(pid, &waiter, WUNTRACED);
+		xpid = waitpid(pid, &waiter, 0);
 		if (xpid == -1) {
 			if (errno != EINTR)
 				fprintf(stderr, "%s: waitpid() failed waiting for PID %ld from \"%s\": %s\n",
@@ -472,8 +472,6 @@ edit_cmd(void) {
 			fprintf(stderr, "%s: wrong PID (%ld != %ld) from \"%s\"\n",
 				ProgramName, (long)xpid, (long)pid, editor);
 			goto fatal;
-		} else if (WIFSTOPPED(waiter)) {
-			kill(getpid(), WSTOPSIG(waiter));
 		} else if (WIFEXITED(waiter) && WEXITSTATUS(waiter)) {
 			fprintf(stderr, "%s: \"%s\" exited with status %d\n",
 				ProgramName, editor, WEXITSTATUS(waiter));
