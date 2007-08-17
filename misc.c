@@ -472,18 +472,25 @@ log_it(const char *username, PID_T xpid, const char *event, const char *detail) 
 	char *msg;
 	TIME_T now = time((TIME_T) 0);
 	struct tm *t = localtime(&now);
+	int msg_size;
 #endif /*LOG_FILE*/
 
 #if defined(LOG_FILE)
 	/* we assume that MAX_TEMPSTR will hold the date, time, &punctuation.
 	 */
-	msg = malloc(strlen(username)
+	msg = malloc(msg_size =
+		     ( strlen(username)
 		     + strlen(event)
 		     + strlen(detail)
-		     + MAX_TEMPSTR);
+		     + MAX_TEMPSTR
+		     )
+	            );
 	if (msg == NULL)
-		return;
-
+	{   /* damn, out of mem and we did not test that before... */
+	    fprintf(stderr, "%s: Run OUT OF MEMORY while %s\n",
+		    ProgramName, __FUNCTION__);
+	    return;
+	}
 	if (LogFD < OK) {
 		LogFD = open(LOG_FILE, O_WRONLY|O_APPEND|O_CREAT, 0600);
 		if (LogFD < OK) {
@@ -495,11 +502,11 @@ log_it(const char *username, PID_T xpid, const char *event, const char *detail) 
 		}
 	}
 
-	/* we have to sprintf() it because fprintf() doesn't always write
+	/* we have to snprintf() it because fprintf() doesn't always write
 	 * everything out in one chunk and this has to be atomically appended
 	 * to the log file.
 	 */
-	sprintf(msg, "%s (%02d/%02d-%02d:%02d:%02d-%d) %s (%s)\n",
+	snprintf(msg, msg_size, "%s (%02d/%02d-%02d:%02d:%02d-%d) %s (%s)\n",
 		username,
 		t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec, pid,
 		event, detail);
