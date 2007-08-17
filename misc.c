@@ -449,16 +449,27 @@ int
 allowed(const char *username, const char *allow_file, const char *deny_file) {
 	FILE	*fp;
 	int	isallowed;
+	char    buf[128];
 
-	if (strcmp(username, ROOT_USER) == 0)
-		return (TRUE);
 	isallowed = FALSE;
 	if ((fp = fopen(allow_file, "r")) != NULL) {
 		isallowed = in_file(username, fp, FALSE);
 		fclose(fp);
+		if( ( getuid() == 0 ) && (!isallowed) )
+		{
+		    snprintf(buf,sizeof(buf),"root used -u for user %s not in cron.allow",username);
+		    log_it("crontab",getpid(),"warning",buf);
+		    isallowed = TRUE;
+		}
 	} else if ((fp = fopen(deny_file, "r")) != NULL) {
 		isallowed = !in_file(username, fp, FALSE);
 		fclose(fp);
+		if( ( getuid() == 0 ) && (!isallowed) )
+		{
+		    snprintf(buf,sizeof(buf),"root used -u for user %s in cron.deny",username);
+		    log_it("crontab",getpid(),"warning",buf);
+		    isallowed = TRUE;
+		}
 	}
 	return (isallowed);
 }
