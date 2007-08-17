@@ -283,14 +283,14 @@ list_cmd(void) {
 
 static void
 delete_cmd(void) {
-	char n[MAX_FNAME];
+        char n[MAX_FNAME]="";
 	if( PromptOnDelete == 1 )
 	{
 	    printf("crontab: really delete %s's crontab? ", User);
 	    fflush(stdout);
-	    fgets(n, MAX_FNAME-1, stdin);
-	    if((n[0] != 'Y') && (n[0] != 'y'))
-		exit(0);
+	    if( (fgets(n, MAX_FNAME-1, stdin)==0L)
+	      ||((n[0] != 'Y') && (n[0] != 'y'))
+	      )	exit(0);
 	}
 
 	log_it(RealUser, Pid, "DELETE", User);
@@ -534,7 +534,8 @@ edit_cmd(void) {
 			printf("Do you want to retry the same edit? ");
 			fflush(stdout);
 			q[0] = '\0';
-			(void) fgets(q, sizeof q, stdin);
+			if( fgets(q, sizeof q, stdin) == 0L )
+			    continue;
 			switch (q[0]) {
 			case 'y':
 			case 'Y':
@@ -575,7 +576,6 @@ replace_cmd(void) {
 	int error = 0;
 	entry *e;
 	uid_t file_owner;
-	time_t now = time(NULL);
 	char **envp = env_init();
 
 	if (envp == NULL) {
@@ -618,9 +618,15 @@ replace_cmd(void) {
 	Set_LineNum(1)
 	while (EOF != (ch = get_char(NewCrontab)))
 		putc(ch, tmp);
-	ftruncate(fileno(tmp), ftell(tmp));	/* XXX redundant with "w+"? */
+	if( ftruncate(fileno(tmp), ftell(tmp)) == -1 )
+	{
+	    fprintf(stderr, "%s: error while writing new crontab to %s\n",
+		    ProgramName, TempFilename);
+	    fclose(tmp);
+	    error = -2;
+	    goto done;  
+	}
 	fflush(tmp);  rewind(tmp);
-
 	if (ferror(tmp)) {
 		fprintf(stderr, "%s: error while writing new crontab to %s\n",
 			ProgramName, TempFilename);

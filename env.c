@@ -48,8 +48,8 @@ env_copy(char **envp) {
 	int count, i, save_errno;
 	char **p;
 
-	for (count = 0; envp[count] != NULL; count++)
-		NULL;
+	for (count = 0; envp[count] != NULL; count++);
+
 	p = (char **) malloc((count+1) * sizeof(char *));  /* 1 for the NULL */
 	if (p != NULL) {
 		for (i = 0; i < count; i++)

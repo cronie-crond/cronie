@@ -137,8 +137,17 @@ child_process(entry *e, user *u) {
 
 	/* create some pipes to talk to our future child
 	 */
-	pipe(stdin_pipe);	/* child's stdin */
-	pipe(stdout_pipe);	/* child's stdout */
+	if( pipe(stdin_pipe) == -1 )	/* child's stdin */
+	{
+	    log_it("CRON", getpid(), "pipe() failed:", strerror(errno));
+	    return;
+	}
+
+	if( pipe(stdout_pipe) == -1 )	/* child's stdout */
+	{
+	    log_it("CRON", getpid(), "pipe() failed:", strerror(errno));
+	    return;
+	}	
 	
 	/* since we are a forked process, we can diddle the command string
 	 * we were passed -- nobody else is going to use it again, right?
@@ -318,7 +327,11 @@ child_process(entry *e, user *u) {
 		setuid(e->pwd->pw_uid);	/* we aren't root after this... */
 
 #endif /* LOGIN_CAP */
-		chdir(env_get("HOME", e->envp));
+		if ( chdir(env_get("HOME", e->envp)) == -1 )
+		{
+		    log_it("CRON", getpid(), "chdir(HOME) failed:", strerror(errno));
+		    _exit(ERROR_EXIT);
+		}
 
 		/*
 		 * Exec the command.

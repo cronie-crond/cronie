@@ -153,7 +153,7 @@ set_debug_flags(const char *flags) {
 		for (test = DebugFlagNames, mask = 1;
 		     *test != NULL && strcmp_until(*test, pc, ',');
 		     test++, mask <<= 1)
-			NULL;
+		    ;
 
 		if (!*test) {
 			fprintf(stderr,
@@ -255,9 +255,17 @@ set_cron_cwd(void) {
 	}
 	if (grp != NULL) {
 		if (sb.st_gid != grp->gr_gid)
-			chown(SPOOL_DIR, -1, grp->gr_gid);
+		    if( chown(SPOOL_DIR, -1, grp->gr_gid) == -1 )
+		    {
+			fprintf(stderr,"chdir %s failed: %s\n", SPOOL_DIR, strerror(errno));
+			exit(ERROR_EXIT);
+		    }
 		if (sb.st_mode != 01730)
-			chmod(SPOOL_DIR, 01730);
+		    if( chmod(SPOOL_DIR, 01730) == -1 )
+		    {
+			fprintf(stderr,"chmod 01730 %s failed: %s\n", SPOOL_DIR, strerror(errno));
+			exit(ERROR_EXIT);
+		    }
 	}
 }
 
@@ -275,7 +283,7 @@ acquire_daemonlock(int closeflag) {
 	const char *pidfile;
 	char *ep;
 	long otherpid=-1;
-	ssize_t num;
+	ssize_t num, len;
 
 	if (closeflag) {
 		/* close stashed fd for child so we don't leak it. */
@@ -324,8 +332,14 @@ acquire_daemonlock(int closeflag) {
 
 	sprintf(buf, "%ld\n", (long)getpid());
 	(void) lseek(fd, (off_t)0, SEEK_SET);
-	num = write(fd, buf, strlen(buf));
-	(void) ftruncate(fd, num);
+	len =  strlen(buf);
+	if( (num = write(fd, buf, len)) != len )
+	    log_it("CRON", getpid(), "write() failed:", strerror(errno));
+	else
+	{	    
+	    if( ftruncate(fd, num) == -1 )
+		log_it("CRON", getpid(), "ftruncate() failed:", strerror(errno));
+	}
 
 	/* abandon fd even though the file is open. we need to keep
 	 * it open and locked, but we don't need the handles elsewhere.
