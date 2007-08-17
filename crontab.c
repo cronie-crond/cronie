@@ -381,10 +381,10 @@ edit_cmd(void) {
 
 	Set_LineNum(1)
 
-	/* ignore the top few comments since we probably put them there.
+	/* ignore the top NHEADER_LINES comment lines since we put them there.
 	 */
 	x = 0;
-	while (EOF != (ch = get_char(f))) {
+	while ((x < NHEADER_LINES) && (EOF != (ch = get_char(f)))) {
 		if ('#' != ch) {
 			putc(ch, NewCrontab);
 			break;
@@ -392,8 +392,7 @@ edit_cmd(void) {
 		while (EOF != (ch = get_char(f)))
 			if (ch == '\n')
 				break;
-		if (++x >= NHEADER_LINES)
-			break;
+		++x;
 	}
 
 	/* copy the rest of the crontab (if any) to the temp file.
