@@ -48,11 +48,12 @@ typedef	struct _entry {
 typedef	struct _user {
 	struct _user	*next, *prev;	/* links */
 	char		*name;
+        char            *tabname;       /* /etc/cron.d/ file name or NULL */
 	time_t		mtime;		/* last modtime of crontab */
 	entry		*crontab;	/* this person's crontab */
 #ifdef WITH_SELINUX
         security_context_t scontext;    /* SELinux security context */
-#endif
+#endif        
 } user;
 
 typedef	struct _cron_db {

@@ -99,6 +99,7 @@ free_user(user *u) {
 	entry *e, *ne;
 
 	free(u->name);
+	free(u->tabname);
 	for (e = u->crontab;  e != NULL;  e = ne) {
 		ne = e->next;
 		free_entry(e);
@@ -130,12 +131,16 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 	 */
 	if ((u = (user *) malloc(sizeof(user))) == NULL)
 		return (NULL);
-	if ((u->name = strdup(fname)) == NULL) {
+
+	if ( ((u->name = strdup(fname)) == NULL) 
+           ||((u->tabname = strdup(tabname)) == NULL)
+           ){
 		save_errno = errno;
 		free(u);
 		errno = save_errno;
 		return (NULL);
 	}
+	
 	u->crontab = NULL;
 
 	/* init environment.  this will be copied/augmented for each entry.

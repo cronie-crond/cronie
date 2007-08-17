@@ -218,12 +218,15 @@ unlink_user(cron_db *db, user *u) {
 }
 
 user *
-find_user(cron_db *db, const char *name) {
+find_user(cron_db *db, const char *name, const char *tabname) {
 	user *u;
 
 	for (u = db->head;  u != NULL;  u = u->next)
-		if (strcmp(u->name, name) == 0)
-			break;
+	    if (  (strcmp(u->name, name) == 0) 
+		&&(   (tabname == NULL) 
+		   || ( strcmp(tabname, u->tabname) == 0 )
+		  )
+	       ) break;
 	return (u);
 }
 
@@ -234,6 +237,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	struct passwd *pw = NULL;
 	int crontab_fd = OK - 1;
 	user *u;
+	int crond_crontab = (fname == NULL) && (strcmp(tabname, SYSCRONTAB) != 0);
 
 	if (fname == NULL) {
 		/* must be set to something for logging purposes.
@@ -280,7 +284,9 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	}
 
 	Debug(DLOAD, ("\t%s:", fname))
-	u = find_user(old_db, fname);
+
+	u = find_user(old_db, fname, crond_crontab ? tabname : NULL );
+
 	if (u != NULL) {
 		/* if crontab has not changed since we last read it
 		 * in, then we can just use our existing entry.
