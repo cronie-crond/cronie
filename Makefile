@@ -55,6 +55,7 @@ DESTROOT	=	$(DESTDIR)/usr
 DESTSBIN	=	$(DESTROOT)/sbin
 DESTBIN		=	$(DESTROOT)/bin
 DESTMAN		=	$(DESTROOT)/share/man
+DESTETC		=	$(DESTROOT)/../etc
 #<<need bitstring.h>>
 INCLUDE		=	-I.
 #INCLUDE	=
@@ -113,6 +114,7 @@ crontab		:	$(CRONTAB_OBJ)
 install		:	all
 			$(INSTALL) -c -m 755 cron    $(DESTSBIN)/crond
 			$(INSTALL) -c -m 4755 crontab $(DESTBIN)/
+			$(INSTALL) -c -m 0600 crond.pam $(DESTETC)/pam.d/crond
 #			$(INSTALL) -c -m  111 -o root -g crontab -s cron $(DESTSBIN)/
 #			$(INSTALL) -c -m 2111 -o root -g crontab -s crontab $(DESTBIN)/
 			sh putman.sh crontab.1 $(DESTMAN)
