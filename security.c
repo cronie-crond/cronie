@@ -32,6 +32,16 @@ static char ** build_env(char **cronenv);
 
 int cron_set_job_security_context( entry *e, user *u, char ***jobenv )
 {
+    time_t minutely_time = 0;
+    if((e->flags & MIN_STAR)==MIN_STAR)
+    {
+	/* "minute-ly" job: Every minute for given hour/dow/month/dom. 
+	 * Ensure that these jobs never run in the same minute:
+	 */
+	minutely_time = time(0);
+	Debug(DSCH, ("Minute-ly job. Recording time %lu\n", minutely_time))
+    }
+
     if ( cron_open_security_session( e->pwd ) != 0 )
     {
 	syslog(LOG_INFO, "CRON (%s) ERROR: failed to open PAM security session: %s", 
@@ -57,12 +67,32 @@ int cron_set_job_security_context( entry *e, user *u, char ***jobenv )
 
     *jobenv = build_env( e->envp );
 
+    log_close();
+    openlog(ProgramName, LOG_PID, LOG_CRON);
+
     if ( chdir(env_get("HOME", *jobenv)) == -1 )
     {
 	log_it("CRON", getpid(), "chdir(HOME) failed:", strerror(errno));
 	return -1;
     }
 
+    time_t job_run_time = time(0L);
+
+    if( (minutely_time > 0)
+	&&((job_run_time / 60) != (minutely_time / 60))
+      )
+    {/* if a per-minute job is delayed into the next minute 
+      * (eg. by network authentication method timeouts), skip it.
+      */
+	struct tm tmS, tmN;
+	localtime_r(&job_run_time, &tmN);
+	localtime_r(&minutely_time,&tmS);
+	syslog(LOG_ERR, 
+	       "(%s) error: Job execution of per-minute job scheduled for "
+	       "%.2u:%.2u delayed into subsequent minute %.2u:%.2u. Skipping job run.",
+	       e->pwd->pw_name, tmS.tm_hour, tmS.tm_min, tmN.tm_hour, tmN.tm_min);
+	return -1;
+    }
     return 0;
 }
 
@@ -96,6 +126,7 @@ int cron_open_security_session( struct passwd *pw )
     retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
     PAM_FAIL_CHECK;
     log_close(); /* PAM has now re-opened our log to auth.info ! */
+    openlog(ProgramName, LOG_PID, LOG_CRON);
 #endif
 
     return retcode;
