@@ -133,7 +133,7 @@ load_database(cron_db *old_db) {
 		if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, fname, '/'))
 			continue;	/* XXX log? */
 
-		process_crontab("root", "*system*", tabname,
+		process_crontab("root", NULL, tabname,
 				&crond_stat, &new_db, old_db);
 	}
 	closedir(dir);
