@@ -35,7 +35,7 @@
 			 * to; SPOOL_DIR, CRON_ALLOW, CRON_DENY, and LOG_FILE
 			 * are all relative to this directory.
 			 */
-#define CRONDIR		"/var/cron"
+#define CRONDIR		"/var/spool"
 #endif
 
 			/* SPOOLDIR is where the crontabs live.
@@ -46,13 +46,13 @@
 			 * newer than they were last time around (or which
 			 * didn't exist last time around...)
 			 */
-#define SPOOL_DIR	"tabs"
+#define SPOOL_DIR	"cron"
 
 			/* cron allow/deny file.  At least cron.deny must
 			 * exist for ordinary users to run crontab.
 			 */
-#define	CRON_ALLOW	"cron.allow"
-#define	CRON_DENY	"cron.deny"
+#define	CRON_ALLOW	"/etc/cron.allow"
+#define	CRON_DENY	"/etc/cron.deny"
 
 			/* undefining this turns off logging to a file.  If
 			 * neither LOG_FILE or SYSLOG is defined, we don't log.
@@ -60,8 +60,8 @@
 			 * LOG_CRON is defined by <syslog.h>, LOG_FILE will not
 			 * be used.
 			 */
-#define LOG_FILE	"log"
-
+/*#define LOG_FILE	"/var/log/cron"*/
+#define SYSLOG
 			/* where should the daemon stick its PID?
 			 * PIDDIR must end in '/'.
 			 */
@@ -70,11 +70,14 @@
 #else
 # define PIDDIR "/etc/"
 #endif
-#define PIDFILE		"cron.pid"
+#define PIDFILE		"crond.pid"
 #define _PATH_CRON_PID	PIDDIR PIDFILE
 
 			/* 4.3BSD-style crontab */
 #define SYSCRONTAB	"/etc/crontab"
+
+                        /* Red Hat crond crontab dir */ 
+#define RH_CROND_DIR    "/etc/cron.d"
 
 			/* what editor to use if no EDITOR or VISUAL
 			 * environment variable specified.
