@@ -502,8 +502,8 @@ edit_cmd(void) {
 	}
 	(void)signal(SIGHUP, SIG_DFL);
 	(void)signal(SIGINT, SIG_DFL);
-	(void)signal(SIGQUIT, SIG_DFL);
-	if (fstat(t, &statbuf) < 0) {
+	(void)signal(SIGQUIT, SIG_DFL);      
+	if (stat(Filename, &statbuf) < 0) {
 		perror("fstat");
 		goto fatal;
 	}
@@ -513,6 +513,13 @@ edit_cmd(void) {
 		goto remove;
 	}
 	fprintf(stderr, "%s: installing new crontab\n", ProgramName);
+        fclose(NewCrontab);
+	NewCrontab=fopen(Filename,"r+");
+	if( NewCrontab == 0L )
+	{
+	    perror("fopen");
+	    goto fatal;
+	}
 	switch (replace_cmd()) {
 	case 0:
 		break;
