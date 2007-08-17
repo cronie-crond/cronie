@@ -36,7 +36,7 @@ static	void		process_crontab(const char *, const char *,
 
 void
 load_database(cron_db *old_db) {
-	struct stat statbuf, syscron_stat;
+	struct stat statbuf, syscron_stat, crond_stat;
 	cron_db new_db;
 	DIR_T *dp;
 	DIR *dir;
@@ -53,6 +53,11 @@ load_database(cron_db *old_db) {
 		(void) exit(ERROR_EXIT);
 	}
 
+	if (stat(RH_CROND_DIR, &crond_stat) < OK) {
+		log_it("CRON", getpid(), "STAT FAILED", RH_CROND_DIR);
+		(void) exit(ERROR_EXIT);
+	}
+
 	/* track system crontab file
 	 */
 	if (stat(SYSCRONTAB, &syscron_stat) < OK)
@@ -65,7 +70,9 @@ load_database(cron_db *old_db) {
 	 * so is guaranteed to be different than the stat() mtime the first
 	 * time this function is called.
 	 */
-	if (old_db->mtime == TMAX(statbuf.st_mtime, syscron_stat.st_mtime)) {
+	if (old_db->mtime == TMAX(crond_stat.st_mtime,
+				  TMAX(statbuf.st_mtime, syscron_stat.st_mtime))
+	   ){
 		Debug(DLOAD, ("[%ld] spool dir mtime unch, no load needed.\n",
 			      (long)getpid()))
 		return;
@@ -76,12 +83,60 @@ load_database(cron_db *old_db) {
 	 * actually changed.  Whatever is left in the old database when
 	 * we're done is chaff -- crontabs that disappeared.
 	 */
-	new_db.mtime = TMAX(statbuf.st_mtime, syscron_stat.st_mtime);
+	new_db.mtime = TMAX(crond_stat.st_mtime,
+			    TMAX(statbuf.st_mtime, syscron_stat.st_mtime));
 	new_db.head = new_db.tail = NULL;
 
 	if (syscron_stat.st_mtime)
 		process_crontab("root", NULL, SYSCRONTAB, &syscron_stat,
 				&new_db, old_db);
+
+	if (!(dir = opendir(RH_CROND_DIR))) {
+		log_it("CRON", getpid(), "OPENDIR FAILED", RH_CROND_DIR);
+		(void) exit(ERROR_EXIT);
+	}
+
+	while (NULL != (dp = readdir(dir))) {
+		char	fname[MAXNAMLEN+1],
+			tabname[MAXNAMLEN+1];
+		size_t len;
+
+		/* avoid file names beginning with ".".  this is good
+		 * because we would otherwise waste two guaranteed calls
+		 * to getpwnam() for . and .., and there shouldn't be 
+		 * hidden files in here anyway
+		 */
+		if (dp->d_name[0] == '.')
+			continue;
+
+		/* ignore files starting with # and ending with ~ */
+		if (dp->d_name[0] == '#')
+			continue;
+		
+		len = strlen(dp->d_name);
+
+		if (len >= sizeof fname)
+			continue;	/* XXX log? */
+
+		if ((len > 0) && (dp->d_name[len - 1] == '~'))
+			continue;
+
+		(void) strcpy(fname, dp->d_name);
+		
+		if ((len > 8) && (strncmp(fname + len - 8, ".rpmsave", 8) == 0))
+			continue;
+		if ((len > 8) && (strncmp(fname + len - 8, ".rpmorig", 8) == 0))
+			continue;
+		if ((len > 7) && (strncmp(fname + len - 7, ".rpmnew", 7) == 0))
+			continue;
+
+		if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, fname, '/'))
+			continue;	/* XXX log? */
+
+		process_crontab("root", "*system*", tabname,
+				&crond_stat, &new_db, old_db);
+	}
+	closedir(dir);
 
 	/* we used to keep this dir open all the time, for the sake of
 	 * efficiency.  however, we need to close it in every fork, and
