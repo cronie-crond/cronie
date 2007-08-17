@@ -33,6 +33,7 @@ static char rcsid[] = "$Id: crontab.c,v 1.12 2004/01/23 18:56:42 vixie Exp $";
 #include "cron.h"
 #ifdef WITH_SELINUX
 #include <selinux/selinux.h>
+#include <selinux/context.h>
 #include <selinux/av_permissions.h>
 #endif
 
@@ -408,8 +409,25 @@ edit_cmd(void) {
 #ifdef WITH_SELINUX
 	if ( selinux_context )
 	{
-		fprintf(NewCrontab,"SELINUX_ROLE_TYPE=%s\n", selinux_context);
-		selinux_context = 0;
+                context_t ccon = NULL;
+                char *level = NULL;
+
+                if (!(ccon = context_new(selinux_context)))
+                {
+                        fprintf(stderr, "context_new failed\n");
+                        goto fatal;
+                }
+                
+                if (!(level = context_range_get(ccon)))
+                {
+                        fprintf(stderr, "context_range failed\n");
+                        goto fatal;
+                }
+                
+		fprintf(NewCrontab,"MLS_LEVEL=%s\n", level);
+                context_free(ccon);
+		freecon(selinux_context);
+                selinux_context = NULL;
 	}
 #endif
 

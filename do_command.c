@@ -238,6 +238,7 @@ child_process(entry *e, user *u) {
 		}
 		break;
 	default:
+		cron_restore_default_security_context();
 		/* parent process */
 		break;
 	}

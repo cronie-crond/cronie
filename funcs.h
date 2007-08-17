@@ -80,13 +80,15 @@ long		get_gmtoff(time_t *, struct tm *);
 
 /* Red Hat security stuff (security.c): 
  */
+int cron_restore_default_security_context( void );
+
 int cron_set_job_security_context( entry *e, user *u, char ***jobenvp );
 
 int cron_open_security_session( struct passwd *pw );
 
 void cron_close_security_session( void );
 
-int cron_change_user( struct passwd *pw );
+int cron_change_user( struct passwd *pw, char *homedir );
 
 int cron_get_job_context( user *u, void *scontextp, void *file_contextp, char **envp );
 

@@ -23,6 +23,7 @@
 
 #ifdef WITH_SELINUX
 #include <selinux/selinux.h>
+#include <selinux/context.h>
 #include <selinux/flask.h>
 #include <selinux/av_permissions.h>
 #include <selinux/get_context_list.h>
@@ -30,6 +31,15 @@
 
 static char ** build_env(char **cronenv);
 
+#ifdef WITH_SELINUX
+static int cron_change_selinux_range( user *u,
+                                      security_context_t ucontext );
+static int cron_get_job_range( user *u, security_context_t *ucontextp, char **jobenv );
+#endif
+
+int cron_restore_default_security_context() {
+	setexeccon(NULL);
+}
 int cron_set_job_security_context( entry *e, user *u, char ***jobenv )
 {
     time_t minutely_time = 0;
@@ -58,9 +68,9 @@ int cron_set_job_security_context( entry *e, user *u, char ***jobenv )
      * we'll not be permitted to read the cron spool directory :-)
      */
 
-    security_context_t scontext=0, file_context=0; 
+    security_context_t ucontext=0; 
 
-    if ( cron_get_job_context(u, &scontext, &file_context, *jobenv) < OK )
+    if ( cron_get_job_range(u, &ucontext, *jobenv) < OK )
     {
 	syslog(LOG_ERR, "CRON (%s) ERROR: failed to get selinux context: %s", 
 	       e->pwd->pw_name, strerror(errno)
@@ -68,9 +78,27 @@ int cron_set_job_security_context( entry *e, user *u, char ***jobenv )
 	return -1;
     }
 
+    if (cron_change_selinux_range(u, ucontext) != 0)
+    {
+        syslog(LOG_INFO,"CRON (%s) ERROR: failed to change SELinux context", 
+	       e->pwd->pw_name);
+	if ( ucontext )
+		freecon(ucontext);
+	return -1;
+    }
+    if ( ucontext )
+	freecon(ucontext);
 #endif
 
-    if ( cron_change_user( e->pwd ) != 0 )
+    if ( cron_start_security_session( e->pwd ) != 0 )
+    {
+	syslog(LOG_INFO, "CRON (%s) ERROR: failed to open PAM security session: %s", 
+	       e->pwd->pw_name, strerror(errno)
+	      );
+	return -1;
+    }
+
+    if ( cron_change_user( e->pwd, env_get("HOME", *jobenv)) != 0 )
     {
 	syslog(LOG_INFO, "CRON (%s) ERROR: failed to open PAM security session: %s", 
 	       e->pwd->pw_name, strerror(errno)
@@ -78,27 +106,8 @@ int cron_set_job_security_context( entry *e, user *u, char ***jobenv )
 	return -1;
     }	
 
-#if WITH_SELINUX
-    if ( cron_change_selinux_context( u, scontext, file_context ) != 0 )
-    {
-        syslog(LOG_INFO,"CRON (%s) ERROR: failed to change SELinux context", 
-	       e->pwd->pw_name);
-	if ( file_context )
-		freecon(file_context);
-	return -1;
-    }
-    if ( file_context )
-	freecon(file_context);
-#endif
-
     log_close();
     openlog(ProgramName, LOG_PID, LOG_CRON);
-
-    if ( chdir(env_get("HOME", *jobenv)) == -1 )
-    {
-	log_it("CRON", getpid(), "chdir(HOME) failed:", strerror(errno));
-	return -1;
-    }
 
     time_t job_run_time = time(0L);
 
@@ -145,9 +154,19 @@ int cron_open_security_session( struct passwd *pw )
     PAM_FAIL_CHECK;
     retcode = pam_acct_mgmt(pamh, PAM_SILENT);
     PAM_FAIL_CHECK;
-    retcode = pam_open_session(pamh, PAM_SILENT);
-    PAM_FAIL_CHECK;
+#endif
+
+    return retcode;
+}
+
+int cron_start_security_session( struct passwd *pw )
+{
+    int	retcode = 0;
+
+#if defined(WITH_PAM)
     retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
+    PAM_FAIL_CHECK;
+    retcode = pam_open_session(pamh, PAM_SILENT);
     PAM_FAIL_CHECK;
     log_close(); /* PAM has now re-opened our log to auth.info ! */
     openlog(ProgramName, LOG_PID, LOG_CRON);
@@ -165,7 +184,7 @@ void cron_close_security_session( void )
 #endif
 }
 
-int cron_change_user( struct passwd *pw )
+int cron_change_user( struct passwd *pw, char *homedir )
 {    	
     /* set our directory, uid and gid.  Set gid first, since once
      * we set uid, we've lost root privledges.
@@ -173,6 +192,13 @@ int cron_change_user( struct passwd *pw )
     if ( setgid( pw->pw_gid ) != 0 )
     {
 	log_it("CRON", getpid(), "setgid failed:", strerror(errno));
+	return -1;
+    }
+
+    if ( chdir(homedir) == -1 )
+    {
+	log_it("CRON", getpid(), "chdir(HOME) failed:", strerror(errno));
+	log_it("CRON", getpid(), homedir, strerror(errno));
 	return -1;
     }
 
@@ -201,6 +227,7 @@ cron_authorize_context
 #ifdef WITH_SELINUX
 	struct av_decision avd;
 	int retval;
+        unsigned int bit = FILE__ENTRYPOINT;
 	/*
 	 * Since crontab files are not directly executed,
 	 * crond must ensure that the crontab file has
@@ -208,13 +235,35 @@ cron_authorize_context
 	 * the user cron job.  It performs an entrypoint
 	 * permission check for this purpose.
 	 */
-	retval = security_compute_av(scontext,
-				     file_context,
-				     SECCLASS_FILE,
-				     FILE__ENTRYPOINT,
-				     &avd);
+	retval = security_compute_av(scontext, file_context,
+				     SECCLASS_FILE, bit, &avd);
 
-	if (retval || ((FILE__ENTRYPOINT & avd.allowed) != FILE__ENTRYPOINT))
+	if (retval || ((bit & avd.allowed) != bit))
+		return 0;
+#endif
+	return 1;
+}
+
+static int 
+cron_authorize_range
+( 
+	security_context_t scontext,
+	security_context_t ucontext
+)	
+{
+#ifdef WITH_SELINUX
+	struct av_decision avd;
+	int retval;
+        unsigned int bit = CONTEXT__CONTAINS;
+	/*
+	 * Since crontab files are not directly executed,
+	 * so crond must ensure that any user specified range
+	 * falls within the seusers-specified range for that Linux user.
+	 */
+	retval = security_compute_av(scontext, ucontext,
+				     SECCLASS_CONTEXT, bit, &avd);
+
+	if (retval || ((bit & avd.allowed) != bit))
 		return 0;
 #endif
 	return 1;
@@ -264,6 +313,75 @@ int cron_get_job_context( user *u, void *scontextp, void *file_contextp, char **
 #endif
 	return 0;
 }
+
+#if WITH_SELINUX
+/* always uses u->scontext as the default process context, then changes the
+   level, and retuns it in ucontextp (or NULL otherwise) */
+static int cron_get_job_range( user *u, security_context_t *ucontextp,
+                               char **jobenv )
+{
+	char *range;
+
+	if ( is_selinux_enabled() <= 0 )
+		return 0;
+	if ( ucontextp == 0L )
+		return -1;
+
+	*ucontextp = 0L;
+
+	if ( (range = env_get("MLS_LEVEL",jobenv)) != 0L )
+	{
+                context_t ccon;
+
+                if (!(ccon = context_new(u->scontext)))
+                {
+			log_it(u->name, 
+                               getpid(), "context_new FAILED for MLS_LEVEL", 
+                               range);
+                        return -1;
+                }                  
+
+                if (context_range_set(ccon, range))
+                {
+                        log_it(u->name, 
+                               getpid(), "context_range_set FAILED for MLS_LEVEL", 
+                               range);
+                        return -1;
+                }
+
+                if (!(*ucontextp = context_str(ccon)))
+                {
+                        log_it(u->name, 
+                               getpid(), "context_str FAILED for MLS_LEVEL", 
+                               range);
+                        return -1;
+                }
+
+                if (!(*ucontextp = strdup(*ucontextp)))
+                {
+                        log_it(u->name, 
+                               getpid(), "strdup FAILED for MLS_LEVEL", 
+                               range);
+                        return -1;
+                }
+
+                context_free(ccon);
+	}
+        else if (!u->scontext)
+        { /* cron_change_selinux_range() deals with this */
+                return 0;
+        }
+        else if (!(*ucontextp = strdup(u->scontext)))
+        {
+                log_it(u->name, 
+                       getpid(), "strdup FAILED for MLS_LEVEL", 
+                       range);
+                return -1;
+        }
+
+	return 0;
+}
+#endif
 
 int cron_change_selinux_context( user *u, void *scontext, void *file_context )
 {
@@ -331,6 +449,84 @@ int cron_change_selinux_context( user *u, void *scontext, void *file_context )
 #endif
 	return 0;
 }
+
+#ifdef WITH_SELINUX
+static int cron_change_selinux_range( user *u,
+                                      security_context_t ucontext )
+{
+	if ( is_selinux_enabled() <= 0 )
+		return 0;
+
+	if ( u->scontext == 0L )
+	{
+		if (security_getenforce() > 0) 
+		{
+			log_it( u->name, getpid(), 
+				"NULL security context for user", 
+				""
+			      );
+			return -1;
+		}else
+		{
+			log_it( u->name, getpid(), 
+				"NULL security context for user, "
+				"but SELinux in permissive mode, continuing",
+				""
+				);
+			return 0;
+		}
+	}
+
+	if ( strcmp(u->scontext, ucontext) )
+	{		
+                if ( ! cron_authorize_range( u->scontext, ucontext ))
+		{
+			if ( security_getenforce() > 0 ) 
+			{
+				syslog(LOG_ERR,
+				       "CRON (%s) ERROR:"
+				       "Unauthorized range %s in MLS_LEVEL for user %s ", 
+				       u->name, (char*)ucontext, u->scontext
+				      );
+				return -1;
+			} else
+			{
+				syslog(LOG_INFO,
+				       "CRON (%s) WARNING:"
+				       "Unauthorized range %s in MLS_LEVEL for user %s,"
+				       " but SELinux in permissive mode, continuing", 
+				       u->name, (char*)ucontext, u->scontext
+				      );
+			}
+		}
+	} 
+
+	if ( setexeccon(ucontext) < 0 ) 
+	{
+		if (security_getenforce() > 0) 
+		{
+			syslog(LOG_ERR,
+			       "CRON (%s) ERROR:"
+			       "Could not set exec context to %s for user", 
+			       u->name, (char*)ucontext
+			      );
+
+			return -1;
+		} else
+		{
+			syslog(LOG_ERR,
+			       "CRON (%s) ERROR:"
+			       "Could not set exec context to %s for user, "
+                               " but SELinux in permissive mode, continuing", 
+			       u->name, (char*)ucontext
+			      );
+
+			return 0;
+		}
+	}
+	return 0;
+}
+#endif
 
 int get_security_context( const char *name, 
 			  int crontab_fd, 
@@ -449,3 +645,4 @@ static char ** build_env(char **cronenv)
     return env_copy(cronenv);
 #endif
 }
+
