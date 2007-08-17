@@ -84,7 +84,7 @@ cron_popen(char *program, char *type, struct passwd *pw) {
 			break;
 	argv[MAX_ARGV-1] = NULL;
 
-	switch (pid = vfork()) {
+	switch (pid = fork()) {
 	case -1:			/* error */
 		(void)close(pdes[0]);
 		(void)close(pdes[1]);

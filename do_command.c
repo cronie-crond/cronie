@@ -136,13 +136,13 @@ child_process(entry *e, user *u) {
 
 	/* fork again, this time so we can exec the user's command.
 	 */
-	switch (vfork()) {
+	switch (fork()) {
 	case -1:
-		log_it("CRON", getpid(), "error", "can't vfork");
+		log_it("CRON", getpid(), "error", "can't fork");
 		exit(ERROR_EXIT);
 		/*NOTREACHED*/
 	case 0:
-		Debug(DPROC, ("[%ld] grandchild process vfork()'ed\n",
+		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n",
 			      (long)getpid()))
 
 		/* write a log message.  we've waited this long to do it
@@ -186,6 +186,13 @@ child_process(entry *e, user *u) {
 			close(stdout_pipe[WRITE_PIPE]);
 		}
 		dup2(STDOUT, STDERR);
+
+		/* Our grandparent is watching for our parent's death by
+		 * catching SIGCHLD. Meanwhile, our parent will use wait
+		 * explicitly and so has disabled SIGCHLD. So now it's
+		 * time to reset SIGCHLD handling.
+		 */
+		(void) signal(SIGCHLD, SIG_DFL);
 
 		/* set our directory, uid and gid.  Set gid first, since once
 		 * we set uid, we've lost root privledges.
