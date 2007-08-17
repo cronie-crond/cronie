@@ -696,7 +696,7 @@ int swap_uids(void) {
 }
 
 int swap_uids_back(void) {
-	return ((setegid(getgid()) || seteuid(getuid())) ? -1 : 0);
+	return ((setegid(save_egid) || seteuid(save_euid)) ? -1 : 0);
 }
 
 #else /*HAVE_SAVED_UIDS*/
