@@ -354,7 +354,7 @@ static void max_mtime( char *dir_name, struct stat *max_st )
 		if ( not_a_crontab ( dp ) )
 			continue;
 
-		if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, dp->d_name, '/'))
+		if (!glue_strings(tabname, sizeof tabname, dir_name, dp->d_name, '/'))
 			continue;	/* XXX log? */
 
 		if ( stat( tabname, &st ) < OK )

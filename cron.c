@@ -33,7 +33,7 @@ static	void	usage(void),
 		run_reboot_jobs(cron_db *),
 		find_jobs(int, cron_db *, int, int),
 		set_time(int),
-		cron_sleep(int),
+		cron_sleep(int, cron_db *),
 		sigchld_handler(int),
 		sighup_handler(int),
 		sigchld_reaper(void),
@@ -165,7 +165,7 @@ main(int argc, char *argv[]) {
 
 		/* ... wait for the time (in minutes) to change ... */
 		do {
-			cron_sleep(timeRunning + 1);
+			cron_sleep(timeRunning + 1, &database);
 			set_time(FALSE);
 		} while (clockTime == timeRunning);
 		timeRunning = clockTime;
@@ -270,6 +270,7 @@ main(int argc, char *argv[]) {
 		/* Check to see if we received a signal while running jobs. */
 		if (got_sighup) {
 			got_sighup = 0;
+			database.mtime = (time_t) 0;
 			log_close();
 		}
 		if (got_sigchld) {
@@ -368,7 +369,7 @@ set_time(int initialize) {
  * Try to just hit the next minute.
  */
 static void
-cron_sleep(int target) {
+cron_sleep(int target, cron_db *db) {
 	time_t t1, t2;
 	int seconds_to_wait;
 
@@ -387,6 +388,7 @@ cron_sleep(int target) {
 		 */
 		if (got_sighup) {
 			got_sighup = 0;
+			db->mtime = (time_t) 0;
 			log_close();
 		}
 		if (got_sigchld) {
