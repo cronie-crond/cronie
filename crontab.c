@@ -488,7 +488,7 @@ edit_cmd(void) {
 	(void)signal(SIGHUP, SIG_DFL);
 	(void)signal(SIGINT, SIG_DFL);
 	(void)signal(SIGQUIT, SIG_DFL);      
-	if (stat(Filename, &statbuf) < 0) {
+	if (lstat(Filename, &statbuf) < 0) {
 		perror("fstat");
 		goto fatal;
 	}
@@ -497,6 +497,21 @@ edit_cmd(void) {
 			ProgramName);
 		goto remove;
 	}
+
+	if (  (!S_ISREG(statbuf.st_mode))
+	    ||(S_ISLNK(statbuf.st_mode))
+	    ||(S_ISDIR(statbuf.st_mode))
+            ||(S_ISCHR(statbuf.st_mode))
+	    ||(S_ISBLK(statbuf.st_mode))
+            ||(S_ISFIFO(statbuf.st_mode))
+	    ||(S_ISSOCK(statbuf.st_mode))
+	    )
+	{
+	    fprintf(stderr, "%s: illegal crontab\n",
+			ProgramName);
+		goto remove;	    
+	}
+
 	fprintf(stderr, "%s: installing new crontab\n", ProgramName);
         fclose(NewCrontab);
 	NewCrontab=fopen(Filename,"r+");
