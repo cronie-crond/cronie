@@ -103,7 +103,8 @@ free_user(user *u) {
 		free_entry(e);
 	}
 #ifdef WITH_SELINUX
-	freecon(u->scontext);
+	if( u->scontext != NULL )
+	    freecon(u->scontext);
 #endif	
 	free(u);
 }
@@ -159,7 +160,8 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 			u = NULL;
 			goto done;
 		}
-	}
+	}else
+	    u->scontext = NULL;
 #endif
 
 	/* load the crontab
