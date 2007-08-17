@@ -175,7 +175,8 @@ main(int argc, char *argv[]) {
 		 * clock.  Classify the change into one of 4 cases.
 		 */
 		timeDiff = timeRunning - virtualTime;
-
+		
+		load_database(&database);
 		/* shortcut for the most common case */
 		if (timeDiff == 1) {
 			virtualTime = timeRunning;
@@ -275,7 +276,6 @@ main(int argc, char *argv[]) {
 			got_sigchld = 0;
 			sigchld_reaper();
 		}
-		load_database(&database);
 	}
 }
 
