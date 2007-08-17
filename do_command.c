@@ -330,7 +330,7 @@ child_process(entry *e, user *u) {
 # endif /*DEBUGGING*/
 
 #ifdef WITH_SELINUX
-			if (is_selinux_enabled() >0 ) {
+			if ((is_selinux_enabled() >0) && (u->scontext != 0L)) {
 				if (setexeccon(u->scontext) < 0) {
 					if (security_getenforce() > 0) {
 						fprintf(stderr, 

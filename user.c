@@ -40,7 +40,7 @@ static	int get_security_context(const char *name,
 				 int crontab_fd, 
 				 security_context_t *rcontext, 
 				 const char *tabname) {
-	security_context_t scontext;
+	security_context_t scontext=NULL;
 	security_context_t  file_context=NULL;
 	struct av_decision avd;
 	int retval=0;
@@ -51,6 +51,7 @@ static	int get_security_context(const char *name,
 			return -1;
 		} else {
 			log_it(name, getpid(), "No security context but SELinux in permissive mode, continuing",tabname);
+			return 0;
 		}
 	}
 	
