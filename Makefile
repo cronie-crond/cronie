@@ -62,7 +62,8 @@ INCLUDE		=	-I.
 LIBS		=
 #<<optimize or debug?>>
 #CDEBUG		=	-O
-CDEBUG		=	-g
+#CDEBUG		=	-g
+CDEBUG		=       $(RPM_OPT_FLAGS)
 #<<lint flags of choice?>>
 LINTFLAGS	=	-hbxa $(INCLUDE) $(DEBUGGING)
 #<<want to use a nonstandard CC?>>
@@ -104,27 +105,30 @@ lint		:
 			|grep -v "constant argument to NOT" 2>&1
 
 cron		:	$(CRON_OBJ)
-			$(CC) $(LDFLAGS) -o cron $(CRON_OBJ) $(LIBS)
+			$(CC) $(LDFLAGS) -o cron -pie $(CRON_OBJ) $(LIBS)
 
 crontab		:	$(CRONTAB_OBJ)
 			$(CC) $(LDFLAGS) -o crontab $(CRONTAB_OBJ) $(LIBS)
 
 install		:	all
-			$(INSTALL) -c -m  111 -o root -s cron    $(DESTSBIN)/
-			$(INSTALL) -c -m 4111 -o root -s crontab $(DESTBIN)/
+			$(INSTALL) -c -m 755 cron    $(DESTSBIN)/crond
+			$(INSTALL) -c -m 4755 crontab $(DESTBIN)/
 #			$(INSTALL) -c -m  111 -o root -g crontab -s cron $(DESTSBIN)/
 #			$(INSTALL) -c -m 2111 -o root -g crontab -s crontab $(DESTBIN)/
 			sh putman.sh crontab.1 $(DESTMAN)
+			chmod 644 $(DESTMAN)/man1/crontab.1
 			sh putman.sh cron.8    $(DESTMAN)
+			chmod 644 $(DESTMAN)/man8/cron.8
+			ln -sf cron.8 $(DESTMAN)/man8/crond.8
 			sh putman.sh crontab.5 $(DESTMAN)
+			chmod 644 $(DESTMAN)/man5/crontab.5
 
 distclean	:	clean
 			rm -f *.orig *.rej *.BAK *.CKP *~ #*
 			rm -f a.out core tags
 
 clean		:
-			rm -f *.o
-			rm -f cron crontab
+			rm -f *.o cron crontab a.out core tags *~ #*
 
 tags		:;	ctags ${SOURCES}
 
@@ -133,3 +137,6 @@ kit		:	$(SHAR_SOURCE)
 
 $(CRON_OBJ)	:	cron.h config.h externs.h pathnames.h Makefile
 $(CRONTAB_OBJ)	:	cron.h config.h externs.h pathnames.h Makefile
+
+$(CRON_OBJ): %.o: %.c
+	$(CC) $(CFLAGS) -fpie -c $<
