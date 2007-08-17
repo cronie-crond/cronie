@@ -488,33 +488,39 @@ edit_cmd(void) {
 	(void)signal(SIGHUP, SIG_DFL);
 	(void)signal(SIGINT, SIG_DFL);
 	(void)signal(SIGQUIT, SIG_DFL);      
+
 	if (lstat(Filename, &statbuf) < 0) {
-		perror("fstat");
+		perror("lstat");
 		goto fatal;
 	}
-	if (utimebuf.modtime == statbuf.st_mtime) {
-		fprintf(stderr, "%s: no changes made to crontab\n",
-			ProgramName);
-		goto remove;
-	}
 
-	if (  (!S_ISREG(statbuf.st_mode))
-	    ||(S_ISLNK(statbuf.st_mode))
-	    ||(S_ISDIR(statbuf.st_mode))
-            ||(S_ISCHR(statbuf.st_mode))
-	    ||(S_ISBLK(statbuf.st_mode))
-            ||(S_ISFIFO(statbuf.st_mode))
-	    ||(S_ISSOCK(statbuf.st_mode))
-	    )
+	if ( !S_ISREG(statbuf.st_mode) )
 	{
 	    fprintf(stderr, "%s: illegal crontab\n",
 			ProgramName);
 		goto remove;	    
 	}
 
+	if (utimebuf.modtime == statbuf.st_mtime) {
+		fprintf(stderr, "%s: no changes made to crontab\n",
+			ProgramName);
+		goto remove;
+	}
+
 	fprintf(stderr, "%s: installing new crontab\n", ProgramName);
         fclose(NewCrontab);
-	NewCrontab=fopen(Filename,"r+");
+	if (swap_uids() < OK) {
+	    perror("swapping uids");
+	    goto remove;
+	}
+	if (!(NewCrontab = fopen(Filename, "r+"))) {
+	    perror("cannot read new crontab");
+	    goto remove;	    
+	}
+	if (swap_uids_back() < OK) {
+	    perror("swapping uids back");
+	    exit(ERROR_EXIT);
+	}
 	if( NewCrontab == 0L )
 	{
 	    perror("fopen");
