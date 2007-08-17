@@ -60,6 +60,7 @@ main(int argc, char *argv[]) {
 	struct sigaction sact;
 	cron_db	database;
 	int fd;
+	char *cs;
 
 	ProgramName = argv[0];
 
@@ -99,6 +100,16 @@ main(int argc, char *argv[]) {
 	if ( getenv("CRON_VALIDATE_MAILRCPTS") != 0L )
 	    ValidateMailRcpts=1;
 
+	/* Get the default locale character set for the mail 
+	 * "Content-Type: ...; charset=" header
+	 */
+	setlocale(LC_ALL,""); /* set locale to system defaults or to
+				 that specified by any  LC_* env vars */
+	if ( ( cs = nl_langinfo( CODESET ) ) != 0L )
+	    strncpy( cron_default_mail_charset, cs, MAX_ENVSTR );
+	else
+	    strcpy( cron_default_mail_charset, "US-ASCII" );
+	
 	/* if there are no debug flags turned on, fork as a daemon should.
 	 */
 	if (DebugFlags) {

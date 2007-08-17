@@ -61,6 +61,12 @@
 # include <bsd_auth.h>
 #endif /*BSD_AUTH*/
 
+/* include locale stuff for mailer "Content-Type": 
+ */
+#include <locale.h>
+#include <nl_types.h>
+#include <langinfo.h>
+
 #define DIR_T	struct dirent
 #define WAIT_T	int
 #define SIG_T	sig_t
