@@ -84,9 +84,9 @@ followed by a command.  Commands are executed by
 .IR cron (8)
 when the minute, hour, and month of year fields match the current time,
 .I and
-when at least one of the two day fields (day of month, or day of week)
+at least one of the two day fields (day of month, or day of week)
 match the current time (see ``Note'' below).
-Note that this means that non-existant times, such as "missing hours"
+Note that this means that non-existent times, such as "missing hours"
 during daylight savings conversion, will never match, causing jobs
 scheduled during the "missing times" not to be run.  Similarly, times
 that occur more than once (again, during daylight savings conversion)
@@ -194,6 +194,18 @@ Command output is mailed to the crontab owner (BSD can't do this), can be
 mailed to a person other than the crontab owner (SysV can't do this), or the
 feature can be turned off and no mail will be sent at all (SysV can't do this
 either).
+.PP
+These special time specification "nicknames" are supported, which replace
+the 5 initial time and date fields, and are prefixed by the '@' character:
+.nf
+@reboot    :    Run once, at startup.
+@yearly    :    Run once a year, ie.  "0 0 1 1 *".
+@annually  :    Run once a year, ie.  "0 0 1 1 *".
+@monthly   :    Run once a month, ie. "0 0 1 * *".
+@weekly    :    Run once a week, ie.  "0 0 * * 0".
+@daily     :    Run once a day, ie.   "0 0 * * *".
+@hourly    :    Run once an hour, ie. "0 * * * *".
+.fi
 .SH AUTHOR
 .nf
 Paul Vixie <vixie@isc.org>
