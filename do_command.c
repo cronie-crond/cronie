@@ -188,6 +188,7 @@ child_process(entry *e, user *u) {
 	PAM_FAIL_CHECK;
 	retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
 	PAM_FAIL_CHECK;
+	build_env(e->envp);
 	log_close(); /* PAM has now re-opened our log to auth.info ! */
 #endif
 
