@@ -29,6 +29,11 @@
  */
 
 #define CRON_VERSION "V5.0"
+
+#ifdef WITH_SELINUX
+#include <selinux/selinux.h>
+#endif
+
 #include "config.h"
 #include "externs.h"
 #include "pathnames.h"
@@ -36,3 +41,4 @@
 #include "structs.h"
 #include "funcs.h"
 #include "globals.h"
+

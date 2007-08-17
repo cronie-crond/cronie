@@ -265,6 +265,20 @@ child_process(entry *e, user *u) {
 				_exit(OK_EXIT);
 			}
 # endif /*DEBUGGING*/
+
+#ifdef WITH_SELINUX
+			if (is_selinux_enabled() >0 ) {
+				if (setexeccon(u->scontext) < 0) {
+					if (security_getenforce() > 0) {
+						fprintf(stderr, 
+							"Could not set exec context to %s for user  %s\n", 
+							u->scontext,u->name);
+						_exit(ERROR_EXIT);
+					}
+				}
+			}
+#endif
+
 			execle(shell, shell, "-c", e->cmd, (char *)0, e->envp);
 			fprintf(stderr, "execl: couldn't exec `%s'\n", shell);
 			perror("execl");

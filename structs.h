@@ -50,6 +50,9 @@ typedef	struct _user {
 	char		*name;
 	time_t		mtime;		/* last modtime of crontab */
 	entry		*crontab;	/* this person's crontab */
+#ifdef WITH_SELINUX
+        security_context_t scontext;    /* SELinux security context */
+#endif
 } user;
 
 typedef	struct _cron_db {

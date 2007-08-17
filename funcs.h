@@ -65,7 +65,7 @@ char		*env_get(char *, char **),
 		**env_copy(char **),
 		**env_set(char **, char *);
 
-user		*load_user(int, struct passwd *, const char *),
+user		*load_user(int, struct passwd *, const char *, const char *, const char *),
 		*find_user(cron_db *, const char *);
 
 entry		*load_entry(FILE *, void (*)(), struct passwd *, char **);

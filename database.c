@@ -245,7 +245,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		free_user(u);
 		log_it(fname, getpid(), "RELOAD", tabname);
 	}
-	u = load_user(crontab_fd, pw, fname);
+	u = load_user(crontab_fd, pw, uname, fname, tabname);
 	if (u != NULL) {
 		u->mtime = statbuf->st_mtime;
 		link_user(new_db, u);
