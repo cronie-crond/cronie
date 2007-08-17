@@ -2,6 +2,7 @@
 # The PAM configuration file for the cron daemon
 #
 #
+auth	   sufficient /lib/security/$ISA/pam_rootok.so
 auth       required  /lib/security/$ISA/pam_stack.so service=system-auth
 auth       required  pam_env.so
 account    required  /lib/security/$ISA/pam_stack.so service=system-auth
