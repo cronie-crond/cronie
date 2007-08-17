@@ -363,13 +363,6 @@ edit_cmd(void) {
 		}
 	}
 
-	if (fstat(fileno(f), &statbuf) < 0) {
-		perror("fstat");
-		goto fatal;
-	}
-	utimebuf.actime = statbuf.st_atime;
-	utimebuf.modtime = statbuf.st_mtime;
-
 	/* Turn off signals. */
 	(void)signal(SIGHUP, SIG_IGN);
 	(void)signal(SIGINT, SIG_IGN);
@@ -425,6 +418,9 @@ edit_cmd(void) {
 		perror(Filename);
 		exit(ERROR_EXIT);
 	}
+	/* Set it to 1970 */
+	utimebuf.actime = 0;
+	utimebuf.modtime = 0;
 	utime(Filename, &utimebuf);
  again:
 	rewind(NewCrontab);
@@ -521,7 +517,7 @@ edit_cmd(void) {
 		goto remove;	    
 	}
 
-	if (utimebuf.modtime == statbuf.st_mtime) {
+	if (statbuf.st_mtime == 0) {
 		fprintf(stderr, "%s: no changes made to crontab\n",
 			ProgramName);
 		goto remove;
