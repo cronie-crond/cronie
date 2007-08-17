@@ -436,6 +436,11 @@ child_process(entry *e, user *u) {
 					fprintf(mail,"Content-Transfer-Encoding: %s\n", content_transfer_encoding);
 				}
 
+				/* The Auto-Submitted header is
+				 * defined (and suggested by) RFC3834.
+				 */
+				fprintf(mail, "Auto-Submitted: auto-generated\n");
+
 				for (env = jobenv;  *env;  env++)
 					fprintf(mail, "X-Cron-Env: <%s>\n",
 						*env);
