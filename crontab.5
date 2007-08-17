@@ -206,6 +206,13 @@ the 5 initial time and date fields, and are prefixed by the '@' character:
 @daily     :    Run once a day, ie.   "0 0 * * *".
 @hourly    :    Run once an hour, ie. "0 * * * *".
 .fi
+.SH CAVEATS
+In this version of
+.BR cron ,
+/etc/crontab must not be writable by any user other than root.
+No crontab files may be links, or linked to by any other file.
+No crontab files may be executable, or be writable by any user
+other than their owner.
 .SH AUTHOR
 .nf
 Paul Vixie <vixie@isc.org>

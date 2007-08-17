@@ -261,7 +261,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		log_it(fname, getpid(), "NOT REGULAR", tabname);
 		goto next_crontab;
 	}
-	if ((statbuf->st_mode & 07777) != 0600) {
+	if ((statbuf->st_mode & 07733) != 0600) {
 		log_it(fname, getpid(), "BAD FILE MODE", tabname);
 		goto next_crontab;
 	}

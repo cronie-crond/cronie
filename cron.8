@@ -90,8 +90,10 @@ Naturally this is not relevant if cron was built to use
 .SH CAVEATS
 In this version of
 .BR cron ,
-/etc/crontab must not be readable or writable by any user other than root.
-In other words, it should be mode 0600.
+/etc/crontab must not be writable by any user other than root.
+No crontab files may be links, or linked to by any other file.
+No crontab files may be executable, or be writable by any user
+other than their owner.
 .SH "SEE ALSO"
 .IR crontab (1),
 .IR crontab (5),
