@@ -30,15 +30,16 @@ static char rcsid[] = "$Id: user.c,v 1.5 2004/01/23 18:56:43 vixie Exp $";
 #include <selinux/selinux.h>
 #include <selinux/flask.h>
 #include <selinux/av_permissions.h>
+#include <selinux/get_context_list.h>
 #endif
 
 #include "cron.h"
 
 #ifdef WITH_SELINUX
-static	int get_security_context(char *name, 
+static	int get_security_context(const char *name, 
 				 int crontab_fd, 
 				 security_context_t *rcontext, 
-				 char *tabname) {
+				 const char *tabname) {
 	security_context_t scontext;
 	security_context_t  file_context=NULL;
 	struct av_decision avd;
@@ -147,7 +148,7 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 
 #ifdef WITH_SELINUX
 	if (is_selinux_enabled() > 0) {
-		char *sname=uname;
+		const char *sname=uname;
 		if (pw==NULL) {
 			sname="system_u";
 		}

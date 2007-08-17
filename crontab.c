@@ -31,6 +31,39 @@ static char rcsid[] = "$Id: crontab.c,v 1.12 2004/01/23 18:56:42 vixie Exp $";
 #define	MAIN_PROGRAM
 
 #include "cron.h"
+#ifdef WITH_SELINUX
+#include <selinux/selinux.h>
+#include <selinux/flask.h>
+#include <selinux/av_permissions.h>
+#include <selinux/context.h>
+
+static int checkAccess(int selaccess) {
+	int status=-1;
+	security_context_t user_context;
+	if (is_selinux_enabled() == 0) 
+		return 0;
+	if( getprevcon(&user_context)==0 ) {
+		struct av_decision avd;
+		int retval = security_compute_av(user_context,
+						 user_context,
+						 SECCLASS_PASSWD,
+						 selaccess,
+						 &avd);
+		
+		if ((retval == 0) && 
+		    ((selaccess & avd.allowed) == selaccess)) {
+			status=0;
+		}
+		freecon(user_context);
+	}
+	
+	if (status != 0 && security_getenforce()==0) 
+		status=0;
+	
+	return status;
+}
+#endif
+
 
 #define NHEADER_LINES 0
 
@@ -155,6 +188,13 @@ parse_args(int argc, char *argv[]) {
 					"must be privileged to use -u\n");
 				exit(ERROR_EXIT);
 			}
+#ifdef WITH_SELINUX
+			if (checkAccess(PASSWD__ROOTOK)!=0) {
+				fprintf(stderr,
+					"Access denied by SELinux, must be privileged to use -u\n");
+				exit(ERROR_EXIT);
+			}
+#endif
 			if (!(pw = getpwnam(optarg))) {
 				fprintf(stderr, "%s:  user `%s' unknown\n",
 					ProgramName, optarg);
