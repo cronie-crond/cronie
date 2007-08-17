@@ -196,6 +196,11 @@ child_process(entry *e, user *u) {
 	switch (fork()) {
 	case -1:
 		log_it("CRON", getpid(), "error", "can't fork");
+#ifdef WITH_PAM
+                pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
+                pam_close_session(pamh, PAM_SILENT);
+                pam_end(pamh, PAM_ABORT);
+#endif
 		exit(ERROR_EXIT);
 		/*NOTREACHED*/
 	case 0:
