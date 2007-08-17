@@ -31,7 +31,7 @@ crontab \- maintain crontab files for individual users (ISC Cron V4.1)
 .B crontab
 .RB [ -u
 .IR user ]
-.RB [ -l " | " -r " | " -e ]
+.RB [ -l " | " -r " | " -e ] [ -i ]
 .SH DESCRIPTION
 .I Crontab
 is the program used to install, deinstall or list the tables
@@ -84,6 +84,11 @@ The
 option is used to edit the current crontab using the editor specified by
 the \s-1VISUAL\s+1 or \s-1EDITOR\s+1 environment variables.  After you exit
 from the editor, the modified crontab will be installed automatically.
+.PP
+The
+.I -i
+option modifies the -r option to prompt the user for a 'y/Y' response
+before actually removing the crontab.
 .SH "SEE ALSO"
 crontab(5), cron(8)
 .SH FILES
