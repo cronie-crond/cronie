@@ -451,6 +451,8 @@ allowed(const char *username, const char *allow_file, const char *deny_file) {
 	int	isallowed;
 	char    buf[128];
 
+	if ( getuid() == 0 )
+	    return TRUE;
 	isallowed = FALSE;
 	if ((fp = fopen(allow_file, "r")) != NULL) {
 		isallowed = in_file(username, fp, FALSE);
