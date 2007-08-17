@@ -59,7 +59,7 @@ DESTMAN		=	$(DESTROOT)/share/man
 INCLUDE		=	-I.
 #INCLUDE	=
 #<<need getopt()>>
-LIBS		=
+LIBS		= 	-lselinux
 #<<optimize or debug?>>
 #CDEBUG		=	-O
 #CDEBUG		=	-g
@@ -69,7 +69,7 @@ LINTFLAGS	=	-hbxa $(INCLUDE) $(DEBUGGING)
 #<<want to use a nonstandard CC?>>
 CC		=	gcc -Wall -Wno-unused -Wno-comment
 #<<manifest defines>>
-DEFS		=
+DEFS		=	-DWITH_SELINUX
 #(SGI IRIX systems need this)
 #DEFS		=	-D_BSD_SIGNALS -Dconst=
 #<<the name of the BSD-like install program>>
