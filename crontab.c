@@ -318,7 +318,7 @@ static void
 edit_cmd(void) {
 	char n[MAX_FNAME], q[MAX_TEMPSTR], *editor;
 	FILE *f;
-	int ch, t, x;
+	int ch='\0', t, x;
 	struct stat statbuf;
 	struct utimbuf utimebuf;
 	WAIT_T waiter;

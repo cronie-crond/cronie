@@ -77,7 +77,7 @@ DEFS		=	-DWITH_SELINUX -DWITH_PAM
 #INSTALL = installbsd
 INSTALL = install
 #<<any special load flags>>
-LDFLAGS		=
+LDFLAGS		=	-g
 #################################### end configurable stuff
 
 SHELL		=	/bin/sh
