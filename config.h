@@ -41,8 +41,9 @@
 			 * (hint: MAILTO= was added for this reason).
 			 */
 
-#define MAILFMT "%s -FCronDaemon -odi -oem -oi -t" /*-*/
-			/* -Fx	 = Set full-name of sender
+#define MAILFMT "%s -FCronDaemon -i -odi -oem -oi -t" /*-*/                        
+                        /* -i    = don't terminate on "." by itself
+			 * -Fx	 = Set full-name of sender
 			 * -odi	 = Option Deliverymode Interactive
 			 * -oem	 = Option Errors Mailedtosender
 			 * -oi   = Ignore "." alone on a line
@@ -53,7 +54,7 @@
 /* #define MAILFMT "%s -d %s"				/*-*/
 			/* -d = undocumented but common flag: deliver locally?
 			 */
-/* #define MAILARG "/bin/mail",mailto
+/* #define MAILARG "/bin/mail",mailto                   /*-*/
 
 /* #define MAILFMT "%s -mlrxto %s"			/*-*/
 /* #define MAILARG "/usr/mmdf/bin/submit",mailto	/*-*/
@@ -78,7 +79,7 @@
 			 * are both defined, then logging will go to both
 			 * places.
 			 */
-#define SYSLOG	 			/*-*/
+#define SYSLOG	 			   
 
 			/* if you want cron to capitalize its name in ps
 			 * when running a job.  Does not work on SYSV.
