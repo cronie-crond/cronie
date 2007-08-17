@@ -65,6 +65,7 @@ XTRN time_t	StartTime INIT(0);
 XTRN int	NoFork INIT(0);
 XTRN int        PermitAnyCrontab INIT(0);
 XTRN int        ValidateMailRcpts INIT(0);
+XTRN char       MailCmd[MAX_COMMAND] INIT("");
 
 #if DEBUGGING
 XTRN int	DebugFlags INIT(0);

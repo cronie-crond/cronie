@@ -29,6 +29,7 @@ cron \- daemon to execute scheduled commands (ISC Cron V4.1)
 .IR load_avg ]
 .RB [ \-n ]
 .RB [ \-p ]
+.RB [ \-m <mail command> ]
 .SH DESCRIPTION
 .I Cron
 should be started from /etc/rc or /etc/rc.local.  It will return immediately,
@@ -63,6 +64,16 @@ need not be restarted whenever a crontab file is modified.  Note that the
 .IR Crontab (1)
 command updates the modtime of the spool directory whenever it changes a
 crontab.
+.PP 
+The
+.B -m
+option allows you to specify a shell command string to use for sending
+cron mail output instead of 
+.IR sendmail (8).
+This command must accept a fully
+formatted mail message (with headers) on stdin and send it as a mail
+message to the recipients specified in the mail headers.
+.PP 
 .SS Daylight Saving Time and other time changes
 Local time changes of less than three hours, such as those caused
 by the start or end of Daylight Saving Time, are handled specially.

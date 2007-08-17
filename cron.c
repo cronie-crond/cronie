@@ -48,7 +48,7 @@ static void
 usage(void) {
 	const char **dflags;
 
-	fprintf(stderr, "usage:  %s [-n] [-p] [-x [", ProgramName);
+	fprintf(stderr, "usage:  %s [-n] [-p] [-m <mail command>] [-x [", ProgramName);
 	for (dflags = DebugFlagNames; *dflags; dflags++)
 		fprintf(stderr, "%s%s", *dflags, dflags[1] ? "," : "]");
 	fprintf(stderr, "]\n");
@@ -437,7 +437,7 @@ static void
 parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "npx:"))) {
+	while (-1 != (argch = getopt(argc, argv, "npx:m:"))) {
 		switch (argch) {
 		default:
 			usage();
@@ -450,6 +450,9 @@ parse_args(int argc, char *argv[]) {
 			break;
 		case 'p':
 		        PermitAnyCrontab=1;
+			break;
+		case 'm':
+			strncpy(MailCmd, optarg, MAX_COMMAND);
 			break;
 		}
 	}

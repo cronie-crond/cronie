@@ -508,16 +508,24 @@ child_process(entry *e, user *u) {
 				char	hostname[MAXHOSTNAMELEN];
 
 				gethostname(hostname, MAXHOSTNAMELEN);
-				if (strlens(MAILFMT, MAILARG, NULL) + 1
-				    >= sizeof mailcmd) {
-					fprintf(stderr, "mailcmd too long\n");
-					(void) _exit(ERROR_EXIT);
+				
+				if ( MailCmd[0] == '\0' )
+				{
+					if (strlens(MAILFMT, MAILARG, NULL) + 1
+					    >= sizeof mailcmd) {
+						fprintf(stderr, "mailcmd too long\n");
+						(void) _exit(ERROR_EXIT);
+					}
+					(void)sprintf(mailcmd, MAILFMT, MAILARG);
+				}else
+				{
+					strncpy( mailcmd, MailCmd, MAX_COMMAND );
 				}
-				(void)sprintf(mailcmd, MAILFMT, MAILARG);
 				if (!(mail = cron_popen(mailcmd, "w", e->pwd))) {
 					perror(mailcmd);
 					(void) _exit(ERROR_EXIT);
 				}
+				
 				fprintf(mail, "From: root (Cron Daemon)\n");
 				fprintf(mail, "To: %s\n", mailto);
 				fprintf(mail, "Subject: Cron <%s@%s> %s\n",
