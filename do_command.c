@@ -25,47 +25,8 @@ static char rcsid[] = "$Id: do_command.c,v 1.9 2004/01/23 18:56:42 vixie Exp $";
 
 #include "cron.h"
 
-#ifdef WITH_PAM
-static pam_handle_t *pamh = NULL;
-static const struct pam_conv conv = {
-	NULL
-};
-#define PAM_FAIL_CHECK if (retcode != PAM_SUCCESS) { \
-	fprintf(stderr,"\n%s\n",pam_strerror(pamh, retcode)); \
-	syslog(LOG_ERR,"%s",pam_strerror(pamh, retcode)); \
-	pam_close_session(pamh, PAM_SILENT); \
-	pam_end(pamh, retcode); exit(1); \
-   }
-#endif
-
 static void		child_process(entry *, user *);
 static int		safe_p(const char *, const char *);
-
-/* Build up the job environment from the PAM environment plus the
-   crontab environment */
-static char ** build_env(char **cronenv)
-{
-        char **jobenv = cronenv;
-#if defined(WITH_PAM)
-        char **pamenv = pam_getenvlist(pamh);
-        char *cronvar;
-        int count = 0;
-
-        jobenv = env_copy(pamenv);
-
-        /* Now add the cron environment variables. Since env_set()
-           overwrites existing variables, this will let cron's
-           environment settings override pam's */
-
-        while ((cronvar = cronenv[count++])) {
-                if (!(jobenv = env_set(jobenv, cronvar))) {
-                        syslog(LOG_ERR, "Setting Cron environment variable %s failed", cronvar);
-                        return NULL;
-                }
-        }
-#endif
-    return jobenv;
-}
 
 void
 do_command(entry *e, user *u) {
@@ -104,10 +65,15 @@ child_process(entry *e, user *u) {
 	int stdin_pipe[2], stdout_pipe[2];
 	char *input_data, *usernm, *mailto;
 	int children = 0; 
-#if defined(WITH_PAM)
-	int		retcode = 0;
-#endif
+        char **jobenv=0L;
 
+	/* Set up the Red Hat security context for both mail/minder and job processes:
+         */
+	if ( cron_set_job_security_context( e, u, &jobenv ) != 0 )
+	{
+	    syslog(LOG_INFO, "CRON (%s) ERROR: cannot set security context", e->pwd->pw_name);
+	    exit(ERROR_EXIT);
+	}
 
 	Debug(DPROC, ("[%ld] child_process('%s')\n", (long)getpid(), e->cmd))
 
@@ -126,7 +92,7 @@ child_process(entry *e, user *u) {
 	/* discover some useful and important environment settings
 	 */
 	usernm = e->pwd->pw_name;
-	mailto = env_get("MAILTO", e->envp);
+	mailto = env_get("MAILTO", jobenv);
 
 	/* our parent is watching for our death by catching SIGCHLD.  we
 	 * do not care to watch for our children's deaths this way -- we
@@ -186,31 +152,13 @@ child_process(entry *e, user *u) {
 		*p = '\0';
 	}
 
-#if defined(WITH_PAM)
-	retcode = pam_start("crond", usernm, &conv, &pamh);
-	PAM_FAIL_CHECK;
-	retcode = pam_set_item(pamh, PAM_TTY, "cron");
-	PAM_FAIL_CHECK;
-	retcode = pam_acct_mgmt(pamh, PAM_SILENT);
-	PAM_FAIL_CHECK;
-	retcode = pam_open_session(pamh, PAM_SILENT);
-	PAM_FAIL_CHECK;
-	retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
-	PAM_FAIL_CHECK;
-	build_env(e->envp);
-	log_close(); /* PAM has now re-opened our log to auth.info ! */
-#endif
 
 	/* fork again, this time so we can exec the user's command.
 	 */
 	switch (fork()) {
 	case -1:
 		log_it("CRON", getpid(), "error", "can't fork");
-#ifdef WITH_PAM
-                pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
-                pam_close_session(pamh, PAM_SILENT);
-                pam_end(pamh, PAM_ABORT);
-#endif
+		cron_close_security_session();
 		exit(ERROR_EXIT);
 		/*NOTREACHED*/
 	case 0:
@@ -266,78 +214,12 @@ child_process(entry *e, user *u) {
 		 */
 		(void) signal(SIGCHLD, SIG_DFL);
 
-		/* set our directory, uid and gid.  Set gid first, since once
-		 * we set uid, we've lost root privledges.
-		 */
-#ifdef LOGIN_CAP
-		{
-#ifdef BSD_AUTH
-			auth_session_t *as;
-#endif
-			login_cap_t *lc;
-			char **p;
-			extern char **environ;
-
-			if ((lc = login_getclass(e->pwd->pw_class)) == NULL) {
-				fprintf(stderr,
-				    "unable to get login class for %s\n",
-				    e->pwd->pw_name);
-				_exit(ERROR_EXIT);
-			}
-			if (setusercontext(lc, e->pwd, e->pwd->pw_uid, LOGIN_SETALL) < 0) {
-				fprintf(stderr,
-				    "setusercontext failed for %s\n",
-				    e->pwd->pw_name);
-				_exit(ERROR_EXIT);
-			}
-#ifdef BSD_AUTH
-			as = auth_open();
-			if (as == NULL || auth_setpwd(as, e->pwd) != 0) {
-				fprintf(stderr, "can't malloc\n");
-				_exit(ERROR_EXIT);
-			}
-			if (auth_approval(as, lc, usernm, "cron") <= 0) {
-				fprintf(stderr, "approval failed for %s\n",
-				    e->pwd->pw_name);
-				_exit(ERROR_EXIT);
-			}
-			auth_close(as);
-#endif /* BSD_AUTH */
-			login_close(lc);
-
-			/* If no PATH specified in crontab file but
-			 * we just added one via login.conf, add it to
-			 * the crontab environment.
-			 */
-			if (env_get("PATH", e->envp) == NULL && environ != NULL) {
-				for (p = environ; *p; p++) {
-					if (strncmp(*p, "PATH=", 5) == 0) {
-						e->envp = env_set(e->envp, *p);
-						break;
-					}
-				}
-			}
-		}
-#else
-		setgid(e->pwd->pw_gid);
-		initgroups(usernm, e->pwd->pw_gid);
-#if (defined(BSD)) && (BSD >= 199103)
-		setlogin(usernm);
-#endif /* BSD */
-		setuid(e->pwd->pw_uid);	/* we aren't root after this... */
-
-#endif /* LOGIN_CAP */
-		if ( chdir(env_get("HOME", e->envp)) == -1 )
-		{
-		    log_it("CRON", getpid(), "chdir(HOME) failed:", strerror(errno));
-		    _exit(ERROR_EXIT);
-		}
 
 		/*
 		 * Exec the command.
 		 */
 		{
-			char	*shell = env_get("SHELL", e->envp);
+			char	*shell = env_get("SHELL", jobenv);
 
 # if DEBUGGING
 			if (DebugFlags & DTEST) {
@@ -349,20 +231,7 @@ child_process(entry *e, user *u) {
 			}
 # endif /*DEBUGGING*/
 
-#ifdef WITH_SELINUX
-			if ((is_selinux_enabled() >0) && (u->scontext != 0L)) {
-				if (setexeccon(u->scontext) < 0) {
-					if (security_getenforce() > 0) {
-						fprintf(stderr, 
-							"Could not set exec context to %s for user  %s\n", 
-							u->scontext,u->name);
-						_exit(ERROR_EXIT);
-					}
-				}
-			}
-#endif
-
-			execle(shell, shell, "-c", e->cmd, (char *)0, e->envp);
+			execle(shell, shell, "-c", e->cmd, (char *)0, jobenv);
 			fprintf(stderr, "execl: couldn't exec `%s'\n", shell);
 			perror("execl");
 			_exit(ERROR_EXIT);
@@ -535,7 +404,7 @@ child_process(entry *e, user *u) {
 				fprintf(mail, "Date: %s\n",
 					arpadate(&StartTime));
 #endif /*MAIL_DATE*/
-				for (env = e->envp;  *env;  env++)
+				for (env = jobenv;  *env;  env++)
 					fprintf(mail, "X-Cron-Env: <%s>\n",
 						*env);
 				fprintf(mail, "\n");
@@ -616,12 +485,8 @@ child_process(entry *e, user *u) {
 			Debug(DPROC, (", dumped core"))
 		Debug(DPROC, ("\n"))
 	}
-
-#if defined(WITH_PAM)
-	pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
-	retcode = pam_close_session(pamh, PAM_SILENT);
-	pam_end(pamh, retcode);
-#endif
+	cron_close_security_session();
+	env_free(jobenv);
 }
 
 static int

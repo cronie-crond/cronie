@@ -163,15 +163,14 @@ parse_args(int argc, char *argv[]) {
 					"must be privileged to use -u\n");
 				exit(ERROR_EXIT);
 			}
-#ifdef WITH_SELINUX
-			if (is_selinux_enabled() > 0) {
-				if (selinux_check_passwd_access(PASSWD__CRONTAB)!=0) {
-					fprintf(stderr,
-						"Access denied by SELinux, must be privileged to use -u\n");
-					exit(ERROR_EXIT);
-				}
+			
+			if( crontab_security_access() != 0 )
+			{
+			        fprintf(stderr,
+				    "Access denied by SELinux, must be privileged to use -u\n");
+			        exit(ERROR_EXIT);
 			}
-#endif
+
 			if (!(pw = getpwnam(optarg))) {
 				fprintf(stderr, "%s:  user `%s' unknown\n",
 					ProgramName, optarg);

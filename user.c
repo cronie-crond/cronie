@@ -26,84 +26,7 @@ static char rcsid[] = "$Id: user.c,v 1.5 2004/01/23 18:56:43 vixie Exp $";
 /* vix 26jan87 [log is in RCS file]
  */
 
-#ifdef WITH_SELINUX
-#include <selinux/selinux.h>
-#include <selinux/flask.h>
-#include <selinux/av_permissions.h>
-#include <selinux/get_context_list.h>
-#endif
-
 #include "cron.h"
-
-#ifdef WITH_SELINUX
-static	int get_security_context(const char *name, 
-				 int crontab_fd, 
-				 security_context_t *rcontext, 
-				 const char *tabname) {
-	security_context_t scontext=NULL;
-	security_context_t  file_context=NULL;
-	struct av_decision avd;
-	int retval=0;
-	char *seuser=NULL;
-	char *level=NULL;
-	*rcontext = NULL;
-
-	if (getseuserbyname(name, &seuser, &level) == 0) {
-		retval=get_default_context_with_level(seuser, level, NULL, &scontext);
-		free(seuser);
-		free(level);
-		if (retval) {
-			if (security_getenforce() > 0) {
-				log_it(name, getpid(), "No SELinux security context",tabname);
-				return -1;
-			} else {
-				log_it(name, getpid(), "No security context but SELinux in permissive mode, continuing",tabname);
-				return 0;
-			}
-		}
-	} else {
-		log_it(name, getpid(), "getseusername FAILED", name);
-		return (security_getenforce() > 0);
-	}
-	
-	if (fgetfilecon(crontab_fd, &file_context) < OK) {
-		if (security_getenforce() > 0) {
-			log_it(name, getpid(), "getfilecon FAILED", tabname);
-			freecon(scontext);
-			return -1;
-		} else {
-			log_it(name, getpid(), "getfilecon FAILED but SELinux in permissive mode, continuing", tabname);
-			*rcontext=scontext;
-			return 0;
-		}
-	}
-    
-	/*
-	 * Since crontab files are not directly executed,
-	 * crond must ensure that the crontab file has
-	 * a context that is appropriate for the context of
-	 * the user cron job.  It performs an entrypoint
-	 * permission check for this purpose.
-	 */
-	retval = security_compute_av(scontext,
-				     file_context,
-				     SECCLASS_FILE,
-				     FILE__ENTRYPOINT,
-				     &avd);
-	freecon(file_context);
-	if (retval || ((FILE__ENTRYPOINT & avd.allowed) != FILE__ENTRYPOINT)) {
-		if (security_getenforce() > 0) {
-			log_it(name, getpid(), "ENTRYPOINT FAILED", tabname);
-			freecon(scontext);
-			return -1;
-		} else {
-			log_it(name, getpid(), "ENTRYPOINT FAILED but SELinux in permissive mode, continuing", tabname);
-		}
-	}
-	*rcontext=scontext;
-	return 0;
-}
-#endif
 
 void
 free_user(user *u) {
@@ -115,10 +38,7 @@ free_user(user *u) {
 		ne = e->next;
 		free_entry(e);
 	}
-#ifdef WITH_SELINUX
-	if( u->scontext != NULL )
-	    freecon(u->scontext);
-#endif	
+	free_security_context(&(u->scontext));
 	free(u);
 }
 
@@ -164,23 +84,14 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 		return (NULL);
 	}
 
-#ifdef WITH_SELINUX
-	if (is_selinux_enabled() > 0) {
-		const char *sname=uname;
-		if (pw==NULL) {
-			sname="system_u";
-		}
-
-		if (get_security_context(sname, crontab_fd, 
-					 &u->scontext, tabname) != 0) {
-			free_user(u);
-			u = NULL;
-			goto done;
-		}
-	}else
-	    u->scontext = NULL;
-#endif
-
+	if (get_security_context(pw == NULL ? "system_u" : uname, 
+				 crontab_fd, 
+				 &u->scontext, tabname) != 0) {
+	    free_user(u);
+	    u = NULL;
+	    goto done;
+	}
+	
 	/* load the crontab
 	 */
 	while ((status = load_env(envstr, file)) >= OK) {

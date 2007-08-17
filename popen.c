@@ -91,33 +91,6 @@ cron_popen(char *program, char *type, struct passwd *pw) {
 		return (NULL);
 		/* NOTREACHED */
 	case 0:				/* child */
-		if (pw) {
-#ifdef LOGIN_CAP
-			if (setusercontext(0, pw, pw->pw_uid, LOGIN_SETALL) < 0) {
-				fprintf(stderr,
-				    "setusercontext failed for %s\n",
-				    pw->pw_name);
-				_exit(ERROR_EXIT);
-			}
-#else
-			if (setgid(pw->pw_gid) < 0 ||
-			    initgroups(pw->pw_name, pw->pw_gid) < 0) {
-				fprintf(stderr,
-				    "unable to set groups for %s\n",
-				    pw->pw_name);
-				_exit(1);
-			}
-#if (defined(BSD)) && (BSD >= 199103)
-			setlogin(pw->pw_name);
-#endif /* BSD */
-			if (setuid(pw->pw_uid)) {
-				fprintf(stderr,
-				    "unable to set uid for %s\n",
-				    pw->pw_name);
-				_exit(1);
-			}
-#endif /* LOGIN_CAP */
-		}
 		if (*type == 'r') {
 			if (pdes[1] != STDOUT) {
 				dup2(pdes[1], STDOUT);

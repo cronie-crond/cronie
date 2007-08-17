@@ -77,3 +77,25 @@ struct passwd	*pw_dup(const struct passwd *);
 #ifndef HAVE_TM_GMTOFF
 long		get_gmtoff(time_t *, struct tm *);
 #endif
+
+/* Red Hat security stuff (security.c): 
+ */
+int cron_set_job_security_context( entry *e, user *u, char ***jobenvp );
+
+int cron_open_security_session( struct passwd *pw );
+
+void cron_close_security_session( void );
+
+int cron_change_user( struct passwd *pw );
+
+int cron_change_selinux_context( user *u );
+
+int get_security_context(const char *name, 
+			 int crontab_fd, 
+			 security_context_t *rcontext, 
+			 const char *tabname
+                        );
+
+void free_security_context( security_context_t *scontext );
+
+int crontab_security_access(void);
