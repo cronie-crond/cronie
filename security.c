@@ -78,17 +78,15 @@ int cron_set_job_security_context( entry *e, user *u, char ***jobenv )
 	return -1;
     }	
 
+#if WITH_SELINUX
     if ( cron_change_selinux_context( u, scontext, file_context ) != 0 )
     {
         syslog(LOG_INFO,"CRON (%s) ERROR: failed to change SELinux context", 
 	       e->pwd->pw_name);
-#if WITH_SELINUX
 	if ( file_context )
 		freecon(file_context);
-#endif
 	return -1;
     }
-#if WITH_SELINUX
     if ( file_context )
 	freecon(file_context);
 #endif
