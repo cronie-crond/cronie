@@ -32,6 +32,7 @@ crontab \- maintain crontab files for individual users (ISC Cron V4.1)
 .RB [ -u
 .IR user ]
 .RB [ -l " | " -r " | " -e ] [ -i ]
+.RB [ -s ]
 .SH DESCRIPTION
 .I Crontab
 is the program used to install, deinstall or list the tables
@@ -89,6 +90,13 @@ The
 .I -i
 option modifies the -r option to prompt the user for a 'y/Y' response
 before actually removing the crontab.
+.PP
+The
+.I -s
+option will append the current SELinux security context string as an
+SELINUX_ROLE_TYPE setting to the crontab file before editing / replacement
+occurs - see the documentation of SELINUX_ROLE_TYPE in 
+.IR crontab(5) .
 .SH "SEE ALSO"
 crontab(5), cron(8)
 .SH FILES

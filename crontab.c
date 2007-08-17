@@ -43,10 +43,19 @@ enum opt_t	{ opt_unknown, opt_list, opt_delete, opt_edit, opt_replace };
 
 #if DEBUGGING
 static char	*Options[] = { "???", "list", "delete", "edit", "replace" };
+#   ifdef WITH_SELINUX
+static char	*getoptargs = "u:lerisx:";
+#   else
 static char	*getoptargs = "u:lerix:";
+#   endif
 #else
+#   ifdef WITH_SELINUX
+static char	*getoptargs = "u:leris";
+#   else
 static char	*getoptargs = "u:leri";
+#   endif
 #endif
+static char     *selinux_context = 0;
 
 static	PID_T		Pid;
 static	char		User[MAX_UNAME], RealUser[MAX_UNAME];
@@ -75,6 +84,9 @@ usage(const char *msg) {
 	fprintf(stderr, "\t-l\t(list user's crontab)\n");
 	fprintf(stderr, "\t-r\t(delete user's crontab)\n");
 	fprintf(stderr, "\t-i\t(prompt before deleting user's crontab)\n");
+#ifdef WITH_SELINUX
+	fprintf(stderr, "\t-s\t(selinux context)\n");
+#endif
 	exit(ERROR_EXIT);
 }
 
@@ -198,6 +210,16 @@ parse_args(int argc, char *argv[]) {
 		case 'i':
        		        PromptOnDelete = 1;
 			break;
+#ifdef WITH_SELINUX
+	        case 's':
+		        if ( getprevcon( (security_context_t*)&(selinux_context) ) ) 
+			{
+				fprintf(stderr,
+					"Cannot obtain SELinux process context\n");
+				exit(ERROR_EXIT);
+			}
+			break;
+#endif 
 		default:
 			usage("unrecognized option");
 		}
@@ -317,7 +339,7 @@ static void
 edit_cmd(void) {
 	char n[MAX_FNAME], q[MAX_TEMPSTR], *editor;
 	FILE *f;
-	int ch='\0', t, x;
+	int ch='\0', t;
 	struct stat statbuf;
 	struct utimbuf utimebuf;
 	WAIT_T waiter;
@@ -379,26 +401,25 @@ edit_cmd(void) {
 	}
 
 	Set_LineNum(1)
-
-	/* ignore the top NHEADER_LINES comment lines since we put them there.
+	/* 
+	 * NHEADER_LINES processing removed for clarity
+	 * (NHEADER_LINES == 0 in all Red Hat crontabs)
 	 */
-	x = 0;
-	while ((x < NHEADER_LINES) && (EOF != (ch = get_char(f)))) {
-		if ('#' != ch) {
-			putc(ch, NewCrontab);
-			break;
-		}
-		while (EOF != (ch = get_char(f)))
-			if (ch == '\n')
-				break;
-		++x;
-	}
-
+	
 	/* copy the rest of the crontab (if any) to the temp file.
 	 */
 	if (EOF != ch)
 		while (EOF != (ch = get_char(f)))
 			putc(ch, NewCrontab);
+
+#ifdef WITH_SELINUX
+	if ( selinux_context )
+	{
+		fprintf(NewCrontab,"SELINUX_ROLE_TYPE=%s\n", selinux_context);
+		selinux_context = 0;
+	}
+#endif
+
 	fclose(f);
 	if (fflush(NewCrontab) < OK) {
 		perror(Filename);
@@ -610,6 +631,10 @@ replace_cmd(void) {
 	 *fprintf(tmp, "# (%s installed on %-24.24s)\n", Filename, ctime(&now));
 	 *fprintf(tmp, "# (Cron version %s -- %s)\n", CRON_VERSION, rcsid);
 	 */
+#ifdef WITH_SELINUX
+	if ( selinux_context )
+		fprintf(tmp,"SELINUX_ROLE_TYPE=%s\n", selinux_context);
+#endif
 
 	/* copy the crontab to the tmp
 	 */

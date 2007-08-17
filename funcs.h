@@ -88,7 +88,9 @@ void cron_close_security_session( void );
 
 int cron_change_user( struct passwd *pw );
 
-int cron_change_selinux_context( user *u );
+int cron_get_job_context( user *u, void *scontextp, void *file_contextp, char **envp );
+
+int cron_change_selinux_context( user *, void *scontext, void *file_context );
 
 int get_security_context(const char *name, 
 			 int crontab_fd, 
