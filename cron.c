@@ -95,6 +95,9 @@ main(int argc, char *argv[]) {
 		log_it("CRON", getpid(), "DEATH", "can't malloc");
 		exit(1);
 	}
+	
+	if ( getenv("CRON_VALIDATE_MAILRCPTS") != 0L )
+	    ValidateMailRcpts=1;
 
 	/* if there are no debug flags turned on, fork as a daemon should.
 	 */
