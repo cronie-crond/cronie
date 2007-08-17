@@ -76,6 +76,12 @@ jobs twice.
 .PP
 Time changes of more than 3 hours are considered to be corrections to
 the clock or timezone, and the new time is used immediately.
+.SS PAM Access Control
+On Red Hat systems, crond now supports access control with PAM - see 
+.IR pam (8) .
+A PAM configuration file for crond is installed in /etc/pam.d/crond .
+crond loads the PAM environment from the pam_env module, but these
+can be overriden by settings in the crontab file.
 .SH SIGNALS
 On receipt of a \s-2SIGHUP\s+2, the cron daemon will close and reopen its
 log file.  This is useful in scripts which rotate and age log files.  
@@ -88,7 +94,8 @@ In this version of
 In other words, it should be mode 0600.
 .SH "SEE ALSO"
 .IR crontab (1),
-.IR crontab (5)
+.IR crontab (5),
+.IR pam (8)
 .SH AUTHOR
 .nf
 Paul Vixie <vixie@isc.org>

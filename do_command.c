@@ -25,8 +25,46 @@ static char rcsid[] = "$Id: do_command.c,v 1.9 2004/01/23 18:56:42 vixie Exp $";
 
 #include "cron.h"
 
+#ifdef WITH_PAM
+static pam_handle_t *pamh = NULL;
+static const struct pam_conv conv = {
+	NULL
+};
+#define PAM_FAIL_CHECK if (retcode != PAM_SUCCESS) { \
+	fprintf(stderr,"\n%s\n",pam_strerror(pamh, retcode)); \
+	syslog(LOG_ERR,"%s",pam_strerror(pamh, retcode)); \
+	pam_end(pamh, retcode); exit(1); \
+   }
+#endif
+
 static void		child_process(entry *, user *);
 static int		safe_p(const char *, const char *);
+
+/* Build up the job environment from the PAM environment plus the
+   crontab environment */
+static char ** build_env(char **cronenv)
+{
+        char **jobenv = cronenv;
+#if defined(WITH_PAM)
+        char **pamenv = pam_getenvlist(pamh);
+        char *cronvar;
+        int count = 0;
+
+        jobenv = env_copy(pamenv);
+
+        /* Now add the cron environment variables. Since env_set()
+           overwrites existing variables, this will let cron's
+           environment settings override pam's */
+
+        while ((cronvar = cronenv[count++])) {
+                if (!(jobenv = env_set(jobenv, cronvar))) {
+                        syslog(LOG_ERR, "Setting Cron environment variable %s failed", cronvar);
+                        return NULL;
+                }
+        }
+#endif
+    return jobenv;
+}
 
 void
 do_command(entry *e, user *u) {
@@ -64,7 +102,11 @@ static void
 child_process(entry *e, user *u) {
 	int stdin_pipe[2], stdout_pipe[2];
 	char *input_data, *usernm, *mailto;
-	int children = 0;
+	int children = 0; 
+#if defined(WITH_PAM)
+	int		retcode = 0;
+#endif
+
 
 	Debug(DPROC, ("[%ld] child_process('%s')\n", (long)getpid(), e->cmd))
 
@@ -133,6 +175,17 @@ child_process(entry *e, user *u) {
 		}
 		*p = '\0';
 	}
+
+#if defined(WITH_PAM)
+	retcode = pam_start("crond", usernm, &conv, &pamh);
+	PAM_FAIL_CHECK;
+	retcode = pam_acct_mgmt(pamh, PAM_SILENT);
+	PAM_FAIL_CHECK;
+	retcode = pam_open_session(pamh, PAM_SILENT);
+	PAM_FAIL_CHECK;
+	retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
+	PAM_FAIL_CHECK;
+#endif
 
 	/* fork again, this time so we can exec the user's command.
 	 */
@@ -528,6 +581,12 @@ child_process(entry *e, user *u) {
 			Debug(DPROC, (", dumped core"))
 		Debug(DPROC, ("\n"))
 	}
+
+#if defined(WITH_PAM)
+	pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
+	retcode = pam_close_session(pamh, PAM_SILENT);
+	pam_end(pamh, retcode);
+#endif
 }
 
 static int

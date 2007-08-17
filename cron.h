@@ -30,12 +30,17 @@
 
 #define CRON_VERSION "V5.0"
 
+#include "config.h"
+#include "externs.h"
+
 #ifdef WITH_SELINUX
 #include <selinux/selinux.h>
 #endif
 
-#include "config.h"
-#include "externs.h"
+#ifdef WITH_PAM
+#include <security/pam_appl.h>
+#endif
+
 #include "pathnames.h"
 #include "macros.h"
 #include "structs.h"
