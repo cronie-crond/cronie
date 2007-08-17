@@ -48,7 +48,7 @@ static void
 usage(void) {
 	const char **dflags;
 
-	fprintf(stderr, "usage:  %s [-n] [-x [", ProgramName);
+	fprintf(stderr, "usage:  %s [-n] [-p] [-x [", ProgramName);
 	for (dflags = DebugFlagNames; *dflags; dflags++)
 		fprintf(stderr, "%s%s", *dflags, dflags[1] ? "," : "]");
 	fprintf(stderr, "]\n");
@@ -434,7 +434,7 @@ static void
 parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "nx:"))) {
+	while (-1 != (argch = getopt(argc, argv, "npx:"))) {
 		switch (argch) {
 		default:
 			usage();
@@ -444,6 +444,9 @@ parse_args(int argc, char *argv[]) {
 			break;
 		case 'n':
 			NoFork = 1;
+			break;
+		case 'p':
+		        PermitAnyCrontab=1;
 			break;
 		}
 	}

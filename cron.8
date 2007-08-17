@@ -28,6 +28,7 @@ cron \- daemon to execute scheduled commands (ISC Cron V4.1)
 .RB [ \-l
 .IR load_avg ]
 .RB [ \-n ]
+.RB [ \-p ]
 .SH DESCRIPTION
 .I Cron
 should be started from /etc/rc or /etc/rc.local.  It will return immediately,
@@ -89,11 +90,12 @@ Naturally this is not relevant if cron was built to use
 .IR syslog (3).
 .SH CAVEATS
 In this version of
-.BR cron ,
-/etc/crontab must not be writable by any user other than root.
-No crontab files may be links, or linked to by any other file.
-No crontab files may be executable, or be writable by any user
-other than their owner.
+.BR cron
+, without the -p option,
+/etc/crontab must not be writable by any user other than root,
+no crontab files may be links, or linked to by any other file,
+and no crontab files may be executable, or be writable by any
+user other than their owner.
 .SH "SEE ALSO"
 .IR crontab (1),
 .IR crontab (5),

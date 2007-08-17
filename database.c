@@ -257,22 +257,26 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		log_it(fname, getpid(), "FSTAT FAILED", tabname);
 		goto next_crontab;
 	}
-	if (!S_ISREG(statbuf->st_mode)) {
-		log_it(fname, getpid(), "NOT REGULAR", tabname);
-		goto next_crontab;
-	}
-	if ((statbuf->st_mode & 07733) != 0600) {
-		log_it(fname, getpid(), "BAD FILE MODE", tabname);
-		goto next_crontab;
-	}
-	if (statbuf->st_uid != ROOT_UID && (pw == NULL ||
-	    statbuf->st_uid != pw->pw_uid || strcmp(uname, pw->pw_name) != 0)) {
-		log_it(fname, getpid(), "WRONG FILE OWNER", tabname);
-		goto next_crontab;
-	}
-	if (statbuf->st_nlink != 1) {
-		log_it(fname, getpid(), "BAD LINK COUNT", tabname);
-		goto next_crontab;
+
+	if ( PermitAnyCrontab == 0 )
+	{
+	    if (!S_ISREG(statbuf->st_mode)) {
+		    log_it(fname, getpid(), "NOT REGULAR", tabname);
+		    goto next_crontab;
+	    }
+	    if ((statbuf->st_mode & 07533) != 0400) {
+		    log_it(fname, getpid(), "BAD FILE MODE", tabname);
+		    goto next_crontab;
+	    }
+	    if (statbuf->st_uid != ROOT_UID && (pw == NULL ||
+		statbuf->st_uid != pw->pw_uid || strcmp(uname, pw->pw_name) != 0)) {
+		    log_it(fname, getpid(), "WRONG FILE OWNER", tabname);
+		    goto next_crontab;
+	    }
+	    if (statbuf->st_nlink != 1) {
+		    log_it(fname, getpid(), "BAD LINK COUNT", tabname);
+		    goto next_crontab;
+	    }
 	}
 
 	Debug(DLOAD, ("\t%s:", fname))

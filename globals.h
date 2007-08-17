@@ -63,6 +63,7 @@ XTRN char	*ProgramName INIT("amnesia");
 XTRN int	LineNumber INIT(0);
 XTRN time_t	StartTime INIT(0);
 XTRN int	NoFork INIT(0);
+XTRN int        PermitAnyCrontab INIT(0);
 
 #if DEBUGGING
 XTRN int	DebugFlags INIT(0);
