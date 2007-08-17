@@ -29,6 +29,9 @@ static char rcsid[] = "$Id: misc.c,v 1.16 2004/01/23 18:56:43 vixie Exp $";
 
 #include "cron.h"
 #include <limits.h>
+#ifdef WITH_AUDIT
+#include <libaudit.h>
+#endif
 
 #if defined(SYSLOG) && defined(LOG_FILE)
 # undef LOG_FILE
@@ -487,6 +490,14 @@ allowed(const char *username, const char *allow_file, const char *deny_file) {
 		    isallowed = TRUE;
 		}
 	}
+#ifdef WITH_AUDIT
+	if (isallowed == FALSE) {
+		int audit_fd = audit_open();
+		audit_log_user_message(audit_fd, AUDIT_USER_START, "cron deny",
+			NULL, NULL, NULL, 0);
+		close(audit_fd);
+	}
+#endif
 	return (isallowed);
 }
 

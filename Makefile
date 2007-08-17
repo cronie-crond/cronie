@@ -60,7 +60,7 @@ DESTETC		=	$(DESTROOT)/../etc
 INCLUDE		=	-I.
 #INCLUDE	=
 #<<need getopt()>>
-LIBS		= 	-lselinux -lpam -lpam_misc
+LIBS		= 	-lselinux -lpam -lpam_misc -laudit
 #<<optimize or debug?>>
 #CDEBUG		=	-O
 #CDEBUG		=	-g
@@ -70,7 +70,7 @@ LINTFLAGS	=	-hbxa $(INCLUDE) $(DEBUGGING)
 #<<want to use a nonstandard CC?>>
 CC		=	gcc -Wall -Wno-unused -Wno-comment
 #<<manifest defines>>
-DEFS		=	-DWITH_SELINUX -DWITH_PAM
+DEFS		=	-DWITH_SELINUX -DWITH_PAM -DWITH_AUDIT
 #(SGI IRIX systems need this)
 #DEFS		=	-D_BSD_SIGNALS -Dconst=
 #<<the name of the BSD-like install program>>
