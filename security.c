@@ -190,6 +190,7 @@ int get_security_context( const char *name,
 			  int crontab_fd, 
 			  security_context_t *rcontext, 
 			  const char *tabname) {
+#ifdef WITH_SELINUX
 	security_context_t scontext=NULL;
 	security_context_t  file_context=NULL;
 	struct av_decision avd;
@@ -198,8 +199,6 @@ int get_security_context( const char *name,
 	char *level=NULL;
 
 	*rcontext = NULL;
-
-#ifdef WITH_SELINUX
 
 	if (is_selinux_enabled() <= 0) 
 	    return 0;
@@ -286,13 +285,13 @@ int crontab_security_access(void)
    crontab environment */
 static char ** build_env(char **cronenv)
 {
+#ifdef WITH_PAM
     char **jobenv = cronenv;
-
     char **pamenv = pam_getenvlist(pamh);
     char *cronvar;
     int count = 0;
-
     jobenv = env_copy(pamenv);
+
 
         /* Now add the cron environment variables. Since env_set()
            overwrites existing variables, this will let cron's
@@ -304,6 +303,8 @@ static char ** build_env(char **cronenv)
 	    return NULL;
 	}
     }
-
-    return jobenv;
+    return jobenv;    
+#else
+    return env_copy(cronenv);
+#endif
 }

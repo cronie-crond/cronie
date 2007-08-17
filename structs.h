@@ -44,6 +44,9 @@ typedef	struct _entry {
 			 *
 			 * These are the crontabs.
 			 */
+#ifndef WITH_SELINUX
+#define security_context_t unsigned
+#endif
 
 typedef	struct _user {
 	struct _user	*next, *prev;	/* links */
@@ -51,9 +54,7 @@ typedef	struct _user {
         char            *tabname;       /* /etc/cron.d/ file name or NULL */
 	time_t		mtime;		/* last modtime of crontab */
 	entry		*crontab;	/* this person's crontab */
-#ifdef WITH_SELINUX
         security_context_t scontext;    /* SELinux security context */
-#endif        
 } user;
 
 typedef	struct _cron_db {
