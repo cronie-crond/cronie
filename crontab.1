@@ -19,7 +19,7 @@
 .\"
 .\" $Id: crontab.1,v 1.7 2004/01/23 19:03:32 vixie Exp $
 .\"
-.TH CRONTAB 1 "29 December 1993"
+.TH CRONTAB 1 "16 Januar 2007"
 .UC 4
 .SH NAME
 crontab \- maintain crontab files for individual users (ISC Cron V4.1)
@@ -31,15 +31,18 @@ crontab \- maintain crontab files for individual users (ISC Cron V4.1)
 .B crontab
 .RB [ -u
 .IR user ]
-.RB [ -l " | " -r " | " -e ] [ -i ]
+.RB [ -l " | " -r " | " -e ]\ [ -i ]
 .RB [ -s ]
 .SH DESCRIPTION
 .I Crontab
 is the program used to install, deinstall or list the tables
 used to drive the
-.IR cron (8)
-daemon in ISC Cron.  Each user can have their own crontab, and though
-these are files in /var, they are not intended to be edited directly.
+.BR cron (8)
+daemon in ISC Cron.  Each user can have their own crontab, and though these are files in 
+.I /var/spool/
+, they are not intended to be edited directly. For SELinux in mls mode can be even 
+more crontabs - for each range. For more see
+.BR selinux (8).
 .PP
 If the
 .I cron.allow
@@ -48,55 +51,52 @@ this command.  If the
 .I cron.allow
 file does not exist but the
 .I cron.deny
-file does exist, then you must \fBnot\fR be listed in the
+file does exist, then you must \fInot\fR be listed in the
 .I cron.deny
 file in order to use this command.  If neither of these files exists,
 only the super user will be allowed to use this command.
 .PP
-If the
-.I -u
-option is given, it specifies the name of the user whose crontab is to be
-tweaked.  If this option is not given,
+.SH "OPTIONS"
+.TP
+.B "\-u"
+It specifies the name of the user whose crontab is to be tweaked.  If this option 
+is not given,
 .I crontab
 examines "your" crontab, i.e., the crontab of the person executing the
 command.  Note that
-.IR su (8)
+.BR su (8)
 can confuse
 .I crontab
 and that if you are running inside of
-.IR su (8)
+.BR su (8)
 you should always use the
-.I -u
+.B -u
 option for safety's sake.
-.PP
 The first form of this command is used to install a new crontab from some
-named file or standard input if the pseudo-filename ``-'' is given.
-.PP
-The
-.I -l
-option causes the current crontab to be displayed on standard output.
-.PP
-The
-.I -r
-option causes the current crontab to be removed.
-.PP
-The
-.I -e
-option is used to edit the current crontab using the editor specified by
+named file or standard input if the pseudo-filename "-" is given.
+.TP
+.B "\-l"
+The current crontab will be displayed on standard output.
+.TP
+.B "\-r"
+The current crontab will be be removed.
+.TP
+.B "\-e"
+This option is used to edit the current crontab using the editor specified by
 the \s-1VISUAL\s+1 or \s-1EDITOR\s+1 environment variables.  After you exit
 from the editor, the modified crontab will be installed automatically.
-.PP
-The
-.I -i
-option modifies the -r option to prompt the user for a 'y/Y' response
+.TP
+.B "\-i"
+This option modifies the 
+.B "\-r"
+option to prompt the user for a 'y/Y' response
 before actually removing the crontab.
-.PP
-The
-.I -s
-option will append the current SELinux security context string as an
-SELINUX_ROLE_TYPE setting to the crontab file before editing / replacement
-occurs - see the documentation of SELINUX_ROLE_TYPE in 
-.IR crontab(5) .
+.TP
+.B "\-s"
+It will append the current SELinux security context string as an
+MLS_LEVEL setting to the crontab file before editing / replacement
+occurs - see the documentation of MLS_LEVEL in 
+.BR crontab(5)\.
 .SH "SEE ALSO"
 crontab(5), cron(8)
 .SH FILES

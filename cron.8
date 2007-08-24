@@ -19,31 +19,40 @@
 .\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
 .\" 
-.TH CRON "8" "10 January 1996" "Linux Programmer's Manual"
+.TH CRON "8" "10 January 2007" "Linux Programmer's Manual"
 .UC 4
 .SH NAME
 cron \- daemon to execute scheduled commands (ISC Cron V4.1)
 .SH SYNOPSIS
 .B cron
-.RB [ \-l
-.IR load_avg ]
-.RB [ \-n ]
-.RB [ \-p ]
-.RB [ \-m <mail command> ]
+.RB [ -n " | " -p " | " -m \fP\fI<mail command>\fP\fB ]
+.br
+.B cron
+.B -x 
+.RB [ext,sch,proc,pars,load,misc,test,bit]
+.br
 .SH DESCRIPTION
 .I Cron
-should be started from /etc/rc.d/rc or /etc/rc.d/rc.local.  It will return 
-immediately, so you don't need to start it with '&'.  The \-n option changes 
-this default behavior causing it to run in the foreground.  This can be 
-useful when starting it out of init.
+should be started from 
+.I /etc/rc.d/init.d 
+or 
+.I /etc/init.d
+. It will return immediately, so you don't need to start it with '&'. 
 .PP
 .I Cron
-searches /var/spool/cron for crontab files which are named after accounts in
-/etc/passwd; crontabs found are loaded into memory.
+searches 
+.I /var/spool/cron 
+for crontab files which are named after accounts in
+.I/etc/passwd; 
+crontabs found are loaded into memory.
 .I Cron
-also searches for /etc/crontab and the files in the /etc/cron.d directory,
-which are in a different format (see
-.IR crontab (5)).
+also searches for 
+.I /etc/crontab 
+and the files in the 
+.I/etc/cron.d 
+directory, which are in a different format (see
+.BR crontab (5)
+).
 .I Cron
 then wakes up every minute, examining all stored crontabs, checking each
 command to see if it should be run in the current minute.  When executing
@@ -61,18 +70,9 @@ will then examine the modtime on all crontabs and reload those which have
 changed.  Thus
 .I cron
 need not be restarted whenever a crontab file is modified.  Note that the
-.IR Crontab (1)
+.BR crontab (1)
 command updates the modtime of the spool directory whenever it changes a
 crontab.
-.PP 
-The
-.B -m
-option allows you to specify a shell command string to use for sending
-cron mail output instead of 
-.IR sendmail (8).
-This command must accept a fully
-formatted mail message (with headers) on stdin and send it as a mail
-message to the recipients specified in the mail headers.
 .PP 
 .SS Daylight Saving Time and other time changes
 Local time changes of less than three hours, such as those caused
@@ -94,6 +94,24 @@ On Red Hat systems, crond now supports access control with PAM - see
 A PAM configuration file for crond is installed in /etc/pam.d/crond.
 crond loads the PAM environment from the pam_env module, but these
 can be overriden by settings in the crontab file.
+.SH "OPTIONS"                                                                                                                 
+.TP                                                                                                                           
+.B "\-m"                                                                                                                      
+This option allows you to specify a shell command string to use for sending cron mail                                         
+output instead of                                                                                                             
+.BR sendmail (8).                                                                                                             
+This command must accept a fully formatted mail message (with headers) on stdin and send it                                   
+as a mail message to the recipients specified in the mail headers.
+.TP                                                                                                                           
+.B "\-n"                                                                                                                      
+This option changes default behavior causing it to run crond in the foreground.  This can be                                  
+useful when starting it out of init.
+.TP
+.B "\-p"
+Cron permit any crontab, which user set.
+.TP
+.B "\-x"
+With this option is possible to set debug flags.
 .SH SIGNALS
 On receipt of a \s-2SIGHUP\s+2, the cron daemon will close and reopen its
 log file.  This is useful in scripts which rotate and age log files.  
@@ -102,8 +120,9 @@ Naturally this is not relevant if cron was built to use
 .SH CAVEATS
 In this version of
 .BR cron
-, without the -p option,
-/etc/crontab must not be writable by any user other than root,
+, without the \fB-p\fP option,
+.I /etc/crontab 
+must not be writable by any user other than root,
 no crontab files may be links, or linked to by any other file,
 and no crontab files may be executable, or be writable by any
 user other than their owner.
