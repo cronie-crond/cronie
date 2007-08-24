@@ -37,7 +37,6 @@ static char rcsid[] = "$Id: crontab.c,v 1.12 2004/01/23 18:56:42 vixie Exp $";
 #include <selinux/av_permissions.h>
 #endif
 
-
 #define NHEADER_LINES 0
 
 enum opt_t	{ opt_unknown, opt_list, opt_delete, opt_edit, opt_replace };
@@ -118,7 +117,14 @@ main(int argc, char *argv[]) {
 		fprintf(stderr, "See crontab(1) for more information\n");
 		log_it(RealUser, Pid, "AUTH", "crontab command not allowed");
 		exit(ERROR_EXIT);
-	}
+	}	
+	if (cron_start_pam(pw) != PAM_SUCCESS) {
+		fprintf(stderr,
+			"You (%s) are not allowed to access to (%s) because of pam configuration.\n",
+			User, ProgramName);
+		exit(ERROR_EXIT);
+	};
+
 	exitstatus = OK_EXIT;
 	switch (Option) {
 	case opt_unknown:
@@ -140,6 +146,7 @@ main(int argc, char *argv[]) {
 	default:
 		abort();
 	}
+	cron_close_pam();
 	exit(exitstatus);
 	/*NOTREACHED*/
 }
@@ -384,31 +391,14 @@ edit_cmd(void) {
 		fprintf(stderr, "path too long\n");
 		goto fatal;
 	}
-	//syslog(LOG_ERR,"%s%s",Filename,tmp_path());
-	//syslog(LOG_ERR,"BEFORE MKSTEMP pid: %d uid: %d gid: %d",Pid,MY_UID(pw), MY_GID(pw));//uid, gid);
 	uid = MY_UID(pw);
 	setreuid(0, uid);
-  //syslog(LOG_ERR,"BEFORE MKSTEMP SETREUID pid: %d uid: %d gid: %d",Pid,MY_UID(pw), MY_GID(pw));//uid,gid);
 	if (-1 == (t = mkstemp(Filename))) {
 		perror(Filename);
 		goto fatal;
 	}
 
-/* instead of chown we're using setreuid */
-/*#ifdef HAS_FCHOWN
-	if (fchown(t, MY_UID(pw), MY_GID(pw)) < 0) {
-		perror("fchown");
-		goto fatal;
-	}
-#else
-	if (chown(Filename, MY_UID(pw), MY_GID(pw)) < 0) {
-		perror("chown");
-		goto fatal;
-	}
-#endif*/
-	
     setreuid(uid,0);
-	//syslog(LOG_ERR,"AFTER MKSTEMP pid: %d uid: %d gid: %d",Pid,uid, MY_GID(pw));
 	if (!(NewCrontab = fdopen(t, "r+"))) {
 		perror("fdopen");
 		goto fatal;
@@ -497,10 +487,6 @@ edit_cmd(void) {
 			perror("setuid(getuid())");
 			exit(ERROR_EXIT);
 		}
-/*		if (chdir(_PATH_TMP) < 0) {
-			perror(_PATH_TMP);
-			exit(ERROR_EXIT);
-		}*/
 		if (!glue_strings(q, sizeof q, editor, Filename, ' ')) {
 			fprintf(stderr, "%s: editor command line too long\n",
 			    ProgramName);

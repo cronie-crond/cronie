@@ -71,7 +71,7 @@ child_process(entry *e, user *u) {
          */
 	if ( cron_set_job_security_context( e, u, &jobenv ) != 0 )
 	{
-	    syslog(LOG_INFO, "CRON (%s) ERROR: cannot set security context", e->pwd->pw_name);
+	    //syslog(LOG_INFO, "CRON (%s) ERROR: cannot set security context", e->pwd->pw_name);
 	    exit(ERROR_EXIT);
 	}
 
@@ -158,7 +158,7 @@ child_process(entry *e, user *u) {
 	switch (fork()) {
 	case -1:
 		log_it("CRON", getpid(), "error", "can't fork");
-		cron_close_security_session();
+		cron_close_pam();
 		exit(ERROR_EXIT);
 		/*NOTREACHED*/
 	case 0:
@@ -523,7 +523,7 @@ child_process(entry *e, user *u) {
 			Debug(DPROC, (", dumped core"))
 		Debug(DPROC, ("\n"))
 	}
-	cron_close_security_session();
+	cron_close_pam();
 	env_free(jobenv);
 }
 
