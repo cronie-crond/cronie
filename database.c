@@ -256,7 +256,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		    log_it(fname, getpid(), "WRONG FILE OWNER", tabname);
 		    goto next_crontab;
 	    }
-	    if (statbuf->st_nlink != 1) {
+	    if (pw && statbuf->st_nlink != 1) {
 		    log_it(fname, getpid(), "BAD LINK COUNT", tabname);
 		    goto next_crontab;
 	    }
