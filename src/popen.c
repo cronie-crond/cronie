@@ -1,3 +1,5 @@
+/*	$NetBSD: popen.c,v 1.9 2005/03/16 02:53:55 xtraeme Exp $	*/
+
 /*
  * Copyright (c) 1988, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
@@ -13,10 +15,6 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
  *
  * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,71 +30,74 @@
  *
  */
 
-/* this came out of the ftpd sources; it's been modified to avoid the
- * globbing stuff since we don't need it.  also execvp instead of execv.
- */
-
+#include <sys/cdefs.h>
 #ifndef lint
 #if 0
-static sccsid[] = "@(#)popen.c	8.3 (Berkeley) 4/6/94";
-#else
-static char rcsid[] = "$Id: popen.c,v 1.6 2003/02/16 04:40:01 vixie Exp $";
+static char rcsid[] = "Id: popen.c,v 1.5 1994/01/15 20:43:43 vixie Exp";
+static char sccsid[] = "@(#)popen.c	5.7 (Berkeley) 2/14/89";
+//#else
+//__RCSID("$NetBSD: popen.c,v 1.9 2005/03/16 02:53:55 xtraeme Exp $");
 #endif
 #endif /* not lint */
 
 #include "cron.h"
-
-#define MAX_ARGV	100
-#define MAX_GARGV	1000
+#include <signal.h>
 
 /*
- * Special version of popen which avoids call to shell.  This ensures noone
+ * Special version of popen which avoids call to shell.  This insures noone
  * may create a pipe to a hidden program as a side effect of a list or dir
  * command.
  */
 static PID_T *pids;
 static int fds;
 
+#define MAX_ARGS 1024
+
 FILE *
-cron_popen(char *program, char *type, struct passwd *pw) {
+cron_popen(char *program, const char *type, struct passwd *pw)
+{
 	char *cp;
 	FILE *iop;
 	int argc, pdes[2];
 	PID_T pid;
-	char *argv[MAX_ARGV];
+	char *argv[MAX_ARGS];
 
-	if ((*type != 'r' && *type != 'w') || type[1] != '\0')
-		return (NULL);
+#ifdef __GNUC__
+	(void) &iop;	/* Avoid fork clobbering */
+#endif
+
+	if ((*type != 'r' && *type != 'w') || type[1])
+		return(NULL);
 
 	if (!pids) {
-		if ((fds = sysconf(_SC_OPEN_MAX)) <= 0)
-			return (NULL);
-		if (!(pids = (PID_T *)malloc((size_t)(fds * sizeof(PID_T)))))
-			return (NULL);
-		bzero(pids, fds * sizeof(PID_T));
+		if ((fds = getdtablesize()) <= 0)
+			return(NULL);
+		if (!(pids = (PID_T *)malloc((u_int)(fds * sizeof(PID_T)))))
+			return(NULL);
+		bzero((char *)pids, fds * sizeof(PID_T));
 	}
 	if (pipe(pdes) < 0)
-		return (NULL);
+		return(NULL);
 
 	/* break up string into pieces */
-	for (argc = 0, cp = program; argc < MAX_ARGV - 1; cp = NULL)
+	for (argc = 0, cp = program; argc < MAX_ARGS; cp = NULL)
 		if (!(argv[argc++] = strtok(cp, " \t\n")))
 			break;
-	argv[MAX_ARGV-1] = NULL;
 
-	switch (pid = fork()) {
+	iop = NULL;
+	switch(pid = fork()) {
 	case -1:			/* error */
 		(void)close(pdes[0]);
 		(void)close(pdes[1]);
-		return (NULL);
+		goto pfree;
 		/* NOTREACHED */
 	case 0:				/* child */
 		if (*type == 'r') {
 			if (pdes[1] != STDOUT) {
 				dup2(pdes[1], STDOUT);
+				dup2(pdes[1], STDERR);	/* stderr, too! */
 				(void)close(pdes[1]);
 			}
-			dup2(STDOUT, STDERR);	/* stderr too! */
 			(void)close(pdes[0]);
 		} else {
 			if (pdes[0] != STDIN) {
@@ -108,7 +109,6 @@ cron_popen(char *program, char *type, struct passwd *pw) {
 		execvp(argv[0], argv);
 		_exit(1);
 	}
-
 	/* parent; assume fdopen can't fail...  */
 	if (*type == 'r') {
 		iop = fdopen(pdes[0], type);
@@ -119,35 +119,34 @@ cron_popen(char *program, char *type, struct passwd *pw) {
 	}
 	pids[fileno(iop)] = pid;
 
-	return (iop);
+pfree:
+	return(iop);
 }
 
 int
-cron_pclose(FILE *iop) {
+cron_pclose(FILE *iop)
+{
 	int fdes;
+	sigset_t oset, nset;
+	WAIT_T stat_loc;
 	PID_T pid;
-	WAIT_T status;
-	sigset_t sigset, osigset;
 
 	/*
 	 * pclose returns -1 if stream is not associated with a
 	 * `popened' command, or, if already `pclosed'.
 	 */
 	if (pids == 0 || pids[fdes = fileno(iop)] == 0)
-		return (-1);
+		return(-1);
 	(void)fclose(iop);
-	sigemptyset(&sigset);
-	sigaddset(&sigset, SIGINT);
-	sigaddset(&sigset, SIGQUIT);
-	sigaddset(&sigset, SIGHUP);
-	sigprocmask(SIG_BLOCK, &sigset, &osigset);
-	while ((pid = waitpid(pids[fdes], &status, 0)) < 0 && errno == EINTR)
-		continue;
-	sigprocmask(SIG_SETMASK, &osigset, NULL);
+	
+	sigemptyset(&nset);
+	sigaddset(&nset, SIGINT);
+	sigaddset(&nset, SIGQUIT);
+	sigaddset(&nset, SIGHUP);
+	(void)sigprocmask(SIG_BLOCK, &nset, &oset);
+	while ((pid = wait(&stat_loc)) != pids[fdes] && pid != -1)
+		;
+	(void)sigprocmask(SIG_SETMASK, &oset, NULL);
 	pids[fdes] = 0;
-	if (pid < 0)
-		return (pid);
-	if (WIFEXITED(status))
-		return (WEXITSTATUS(status));
-	return (1);
+	return (pid == -1 ? -1 : WEXITSTATUS(stat_loc));
 }
