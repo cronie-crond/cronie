@@ -773,7 +773,7 @@ long get_gmtoff(time_t *clock, struct tm *local)
 	if (local->tm_year < gmt.tm_year)
 		offset -= 24 * 3600;
 	else if (local->tm_year > gmt.tm_year)
-		offset -= 24 * 3600;
+		offset += 24 * 3600;
 	else if (local->tm_yday < gmt.tm_yday)
 		offset -= 24 * 3600;
 	else if (local->tm_yday > gmt.tm_yday)
