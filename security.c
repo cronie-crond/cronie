@@ -201,13 +201,6 @@ int cron_change_user( struct passwd *pw, char *homedir )
 	return -1;
     }
 
-    if ( chdir(homedir) == -1 )
-    {
-	log_it("CRON", getpid(), "chdir(HOME) failed:", strerror(errno));
-	log_it("CRON", getpid(), homedir, strerror(errno));
-	return -1;
-    }
-
     if ( initgroups( pw->pw_name, pw->pw_gid ) != 0 )
     {
 	log_it("CRON", getpid(), "initgroups failed:", strerror(errno));
@@ -219,7 +212,14 @@ int cron_change_user( struct passwd *pw, char *homedir )
 	log_it("CRON", getpid(), "setuid failed:", strerror(errno));
 	return -1;
     }
-    
+
+	if ( chdir(homedir) == -1 )
+    {
+    log_it("CRON", getpid(), "chdir(HOME) failed:", strerror(errno));
+    log_it("CRON", getpid(), homedir, strerror(errno));
+    return -1;
+    }
+   
     return 0;
 }
 
