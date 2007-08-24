@@ -196,7 +196,18 @@ MAILTO=paul
 0 22 * * 1-5    mail -s "It's 10pm" joe%Joe,%%Where are your kids?%                                                           
 23 0-23/2 * * * echo "run 23 minutes after midn, 2am, 4am ..., everyday"                                                      
 5 4 * * sun     echo "run at 5 after 4 every sunday"                                                                          
-.fi     
+.fi
+.SH Jobs in /etc/cron.d/
+The jobs in cron.d are system jobs, which are used usually for more than
+one user. That's the reason why is name of the user needed. MAILTO on the first line
+is optional.
+.SH EXAMPLE FOR JOB IN /etc/cron.d/job
+.nf
+#login as root
+#create job with preferred editor (e.g. vim)
+MAILTO=root
+* * * * * root touch /tmp/file
+.fi
 .SH SELinux with multi level security (MLS)
 In crontab is important specified security level by \fIcrontab\ -s\fR or specifying 
 the required level on the first line of the crontab. Each level is specified 
