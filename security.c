@@ -29,6 +29,12 @@
 #include <selinux/get_context_list.h>
 #endif
 
+#ifdef WITH_AUDIT
+#include <libaudit.h>
+#define _GNU_SOURCE
+#include <stdio.h>
+#endif
+
 static char ** build_env(char **cronenv);
 
 #ifdef WITH_SELINUX
@@ -483,6 +489,15 @@ static int cron_change_selinux_range( user *u,
 		{
 			if ( security_getenforce() > 0 ) 
 			{
+#ifdef WITH_AUDIT
+				char *msg = NULL;
+				if (asprintf(&msg, "cron: Unauthorized MLS range acct=%s new_scontext=%s old_scontext=%s",  u->name, (char*)ucontext, u->scontext) >= 0) {
+					int audit_fd = audit_open();
+					audit_log_user_message(audit_fd, AUDIT_USER_ROLE_CHANGE, msg, NULL, NULL, NULL, 0);
+					close(audit_fd);
+				}
+				free(msg);
+#endif
 				syslog(LOG_ERR,
 				       "CRON (%s) ERROR:"
 				       "Unauthorized range %s in MLS_LEVEL for user %s ", 
