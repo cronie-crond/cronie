@@ -74,6 +74,7 @@ static	void		list_cmd(void),
 			parse_args(int c, char *v[]),
 			die(int);
 static	int		replace_cmd(void);
+static  char	*tmp_path(void);
 
 static void
 usage(const char *msg) {
@@ -336,6 +337,14 @@ check_error(const char *msg) {
 	fprintf(stderr, "\"%s\":%d: %s\n", Filename, LineNumber-1, msg);
 }
 
+static char *
+tmp_path() {
+   char *tmpdir;
+
+   tmpdir = getenv("TMPDIR");
+   return tmpdir ? tmpdir : "/tmp";
+}
+
 static void
 edit_cmd(void) {
 	char n[MAX_FNAME], q[MAX_TEMPSTR], *editor;
@@ -345,7 +354,8 @@ edit_cmd(void) {
 	struct utimbuf utimebuf;
 	WAIT_T waiter;
 	PID_T pid, xpid;
-
+	int uid;
+	
 	log_it(RealUser, Pid, "BEGIN EDIT", User);
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, User, '/')) {
 		fprintf(stderr, "path too long\n");
@@ -369,16 +379,23 @@ edit_cmd(void) {
 	(void)signal(SIGINT, SIG_IGN);
 	(void)signal(SIGQUIT, SIG_IGN);
 
-	if (!glue_strings(Filename, sizeof Filename, _PATH_TMP,
+	if (!glue_strings(Filename, sizeof Filename, tmp_path(),
 	    "crontab.XXXXXXXXXX", '/')) {
 		fprintf(stderr, "path too long\n");
 		goto fatal;
 	}
+	//syslog(LOG_ERR,"%s%s",Filename,tmp_path());
+	//syslog(LOG_ERR,"BEFORE MKSTEMP pid: %d uid: %d gid: %d",Pid,MY_UID(pw), MY_GID(pw));//uid, gid);
+	uid = MY_UID(pw);
+	setreuid(0, uid);
+  //syslog(LOG_ERR,"BEFORE MKSTEMP SETREUID pid: %d uid: %d gid: %d",Pid,MY_UID(pw), MY_GID(pw));//uid,gid);
 	if (-1 == (t = mkstemp(Filename))) {
 		perror(Filename);
 		goto fatal;
 	}
-#ifdef HAS_FCHOWN
+
+/* instead of chown we're using setreuid */
+/*#ifdef HAS_FCHOWN
 	if (fchown(t, MY_UID(pw), MY_GID(pw)) < 0) {
 		perror("fchown");
 		goto fatal;
@@ -388,7 +405,10 @@ edit_cmd(void) {
 		perror("chown");
 		goto fatal;
 	}
-#endif
+#endif*/
+	
+    setreuid(uid,0);
+	//syslog(LOG_ERR,"AFTER MKSTEMP pid: %d uid: %d gid: %d",Pid,uid, MY_GID(pw));
 	if (!(NewCrontab = fdopen(t, "r+"))) {
 		perror("fdopen");
 		goto fatal;
@@ -477,10 +497,10 @@ edit_cmd(void) {
 			perror("setuid(getuid())");
 			exit(ERROR_EXIT);
 		}
-		if (chdir(_PATH_TMP) < 0) {
+/*		if (chdir(_PATH_TMP) < 0) {
 			perror(_PATH_TMP);
 			exit(ERROR_EXIT);
-		}
+		}*/
 		if (!glue_strings(q, sizeof q, editor, Filename, ' ')) {
 			fprintf(stderr, "%s: editor command line too long\n",
 			    ProgramName);
