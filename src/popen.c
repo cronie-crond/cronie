@@ -106,7 +106,8 @@ cron_popen(char *program, const char *type, struct passwd *pw)
 			}
 			(void)close(pdes[1]);
 		}
-		execvp(argv[0], argv);
+		if (execvp(argv[0], argv) < 0)
+		    log_it("CRON", getpid(), "Mail wan't set up, some jobs could failed", strerror(errno));
 		_exit(1);
 	}
 	/* parent; assume fdopen can't fail...  */
