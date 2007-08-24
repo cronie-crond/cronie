@@ -19,7 +19,7 @@
 .\"
 .\" $Id: crontab.1,v 1.7 2004/01/23 19:03:32 vixie Exp $
 .\"
-.TH CRONTAB 1 "16 January 2007"
+.TH CRONTAB 1 "27 July 2007"
 .UC 4
 .SH NAME
 crontab \- maintain crontab files for individual users (ISC Cron V4.1)
@@ -44,7 +44,13 @@ daemon in ISC Cron.  Each user can have their own crontab, and though these are 
 more crontabs - for each range. For more see
 .BR selinux (8).
 .PP
-If the
+The cron jobs could be allow or disallow for different users. For classical
+crontab there exists
+.I cron.allow
+and
+.I cron.deny
+files.
+If
 .I cron.allow
 file exists, then you must be listed therein in order to be allowed to use
 this command.  If the
@@ -55,11 +61,16 @@ file does exist, then you must \fInot\fR be listed in the
 .I cron.deny
 file in order to use this command.  If neither of these files exists,
 only the super user will be allowed to use this command.
+The second option is using PAM authentication, where you set up users,
+which could or couldn't use
+.I crontab
+and \fBalso\fR system cron jobs from
+/etc/cron.d/.
 .PP
 .SH "OPTIONS"
 .TP
 .B "\-u"
-It specifies the name of the user whose crontab is to be tweaked.  If this option 
+Append the name of the user whose crontab is to be tweaked.  If this option 
 is not given,
 .I crontab
 examines "your" crontab, i.e., the crontab of the person executing the

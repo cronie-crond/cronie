@@ -19,7 +19,7 @@
 .\"
 .\" $Id: crontab.5,v 1.6 2004/01/23 19:03:33 vixie Exp $
 .\" 
-.TH CRONTAB 5 "16 January 2007"
+.TH CRONTAB 5 "27 July 2007"
 .UC 4
 .SH NAME
 crontab \- tables for driving cron (ISC Cron V4.1)
@@ -226,7 +226,7 @@ crontab -e
 # write in crontab file
 MLS_LEVEL=SystemHigh
 0-59 * * * * id -Z > /tmp/SystemHigh/crontest
-Now if I log in as a normal user it can't work, because /tmp/SystemHigh is
+When I log in as a normal user, it can't work, because \fI/tmp/SystemHigh\fR is
 higher than my level.
 .fi
 .SH FILES
