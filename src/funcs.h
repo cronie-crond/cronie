@@ -103,3 +103,7 @@ int get_security_context(const char *name,
 void free_security_context( security_context_t *scontext );
 
 int crontab_security_access(void);
+
+/* PAM */
+int cron_start_pam(struct passwd *pw);
+void cron_close_pam(void);

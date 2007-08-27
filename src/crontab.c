@@ -423,7 +423,7 @@ edit_cmd(void) {
 	if ( selinux_context )
 	{
                 context_t ccon = NULL;
-                char *level = NULL;
+                const char *level = NULL;
 
                 if (!(ccon = context_new(selinux_context)))
                 {
