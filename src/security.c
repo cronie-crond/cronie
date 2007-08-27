@@ -58,10 +58,13 @@ int cron_set_job_security_context(entry *e, user *u, char ***jobenv) {
 		Debug(DSCH, ("Minute-ly job. Recording time %lu\n", minutely_time))
     }
 
+#ifdef WITH_PAM
     if (cron_start_pam(e->pwd) != 0) {
 		syslog(LOG_INFO, "CRON (%s): failed to open PAM security session: %s", e->pwd->pw_name, pam_strerror(pamh,cron_start_pam(e->pwd)));
 		return -1;
     }
+#endif
+
     *jobenv = build_env( e->envp );
 
 #ifdef WITH_SELINUX
