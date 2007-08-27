@@ -117,13 +117,16 @@ main(int argc, char *argv[]) {
 		fprintf(stderr, "See crontab(1) for more information\n");
 		log_it(RealUser, Pid, "AUTH", "crontab command not allowed");
 		exit(ERROR_EXIT);
-	}	
+	}
+
+#if defined(WITH_PAM)
 	if (cron_start_pam(pw) != PAM_SUCCESS) {
 		fprintf(stderr,
 			"You (%s) are not allowed to access to (%s) because of pam configuration.\n",
 			User, ProgramName);
 		exit(ERROR_EXIT);
 	};
+#endif
 
 	exitstatus = OK_EXIT;
 	switch (Option) {
