@@ -270,37 +270,6 @@ set_cron_cwd(void) {
 			exit(ERROR_EXIT);
 		    }
 	}
-	/* now check the RH_CROND_DIR */
-	if (stat(RH_CROND_DIR, &sb) < OK && errno == ENOENT) {
-        perror(RH_CROND_DIR);
-        if (OK == mkdir(RH_CROND_DIR, 0700)) {
-            fprintf(stderr, "%s: created\n", RH_CROND_DIR);
-            stat(RH_CROND_DIR, &sb);
-        } else {
-            fprintf(stderr, "%s: ", RH_CROND_DIR);
-            perror("mkdir");
-            exit(ERROR_EXIT);
-        }
-    }
-    if (!S_ISDIR(sb.st_mode)) {
-        fprintf(stderr, "'%s' is not a directory, bailing out.\n",
-            RH_CROND_DIR);
-        exit(ERROR_EXIT);
-    }
-    if (grp != NULL) {
-        if (sb.st_gid != grp->gr_gid)
-            if( chown(RH_CROND_DIR, -1, grp->gr_gid) == -1 )
-            {
-            fprintf(stderr,"chdir %s failed: %s\n", RH_CROND_DIR, strerror(errno));
-            exit(ERROR_EXIT);
-            }
-        if (sb.st_mode != 01730)
-            if( chmod(RH_CROND_DIR, 01730) == -1 )
-            {
-            fprintf(stderr,"chmod 01730 %s failed: %s\n", RH_CROND_DIR, strerror(errno));
-            exit(ERROR_EXIT);
-            }
-    }
 }
 
 /* acquire_daemonlock() - write our PID into /etc/cron.pid, unless
