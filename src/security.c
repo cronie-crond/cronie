@@ -136,6 +136,7 @@ int cron_start_pam(struct passwd *pw) {
     return retcode;
 }
 
+#if 0
 int cron_open_pam_session(struct passwd *pw) {
     int	retcode = 0;
 
@@ -150,6 +151,7 @@ int cron_open_pam_session(struct passwd *pw) {
 
     return retcode;
 }
+#endif
 
 void cron_close_pam(void) {
 #if defined(WITH_PAM)
