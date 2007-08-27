@@ -42,7 +42,7 @@ static char rcsid[] = "$Id: pw_dup.c,v 1.2 2004/01/23 18:56:43 vixie Exp $";
 #include <stdio.h>
 #include <string.h>
 
-#include "config.h"
+#include "../config.h"
 
 struct passwd *
 pw_dup(const struct passwd *pw) {
