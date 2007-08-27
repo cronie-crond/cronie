@@ -5,7 +5,7 @@ AC_PREREQ(2.7)
 
 VERSION="4.2"
 if test "X$CFLAGS" = "X"; then
-CFLAGS="-O2 -g -Wall -Wno-unused -Wno-comment"
+CFLAGS="-O2 -g -Wall -Wno-unused -Wno-comment -D_GNU_SOURCE"
 LDFLAGS="-pie"
 fi
 

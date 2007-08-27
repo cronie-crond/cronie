@@ -31,8 +31,6 @@
 
 #ifdef WITH_AUDIT
 #include <libaudit.h>
-#define _GNU_SOURCE
-#include <stdio.h>
 #endif
 
 static char ** build_env(char **cronenv);
