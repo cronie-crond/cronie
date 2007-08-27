@@ -213,7 +213,7 @@ AC_DEFINE(HAVE_TM_GMTOFF,0,[if your OS supports a BSD-style login.conf fil])
 
 ##AC_DEFINE(LOGIN_CAP,0,[if your OS supports BSD authentication])
 
-AC_DEFINE(CRON_GROUP,0,[crontab])
+##AC_DEFINE(CRON_GROUP,"crontab",[crontab])
 
 # Check whether user wants Linux audit support
 AC_DEFINE(WITH_AUDIT,1,[Define if you want audit trails])
