@@ -61,7 +61,7 @@
 			 * be used.
 			 */
 /*#define LOG_FILE	"/var/log/cron"*/
-#define SYSLOG
+/*#define SYSLOG*/
 			/* where should the daemon stick its PID?
 			 * PIDDIR must end in '/'.
 			 */
