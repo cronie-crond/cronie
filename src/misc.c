@@ -705,7 +705,7 @@ arpadate(clock)
 		       tm.tm_sec,
 		       hours,
 		       minutes,
-		       TZONE(*tm));
+		       TZONE(tm));
 	return (ret);
 }
 #endif /*MAIL_DATE*/
