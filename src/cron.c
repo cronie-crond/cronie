@@ -132,7 +132,7 @@ main(int argc, char *argv[]) {
 				if (fd != STDERR)
 					(void) close(fd);
 			}
-			log_it("CRON",getpid(),"STARTUP",CRON_VERSION);
+			log_it("CRON",getpid(),"STARTUP",PACKAGE_VERSION);
 			break;
 		default:
 			/* parent process should just die */

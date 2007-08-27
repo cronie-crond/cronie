@@ -28,8 +28,6 @@
  * vix 30dec86 [written]
  */
 
-#define CRON_VERSION "V5.0"
-
 #include "../config.h"
 #include "externs.h"
 

@@ -11,8 +11,6 @@ fi
 
 AM_INIT_AUTOMAKE(foreign)
 
-AC_SUBST(VERSION)
-
 AC_CANONICAL_HOST
 
 dnl Checks for programs.
