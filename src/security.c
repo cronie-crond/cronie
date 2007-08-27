@@ -43,7 +43,7 @@ static int cron_change_selinux_range( user *u,
 static int cron_get_job_range( user *u, security_context_t *ucontextp, char **jobenv );
 #endif
 
-int cron_restore_default_security_context() {
+void cron_restore_default_security_context() {
 	setexeccon(NULL);
 }
 
