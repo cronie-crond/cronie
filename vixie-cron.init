@@ -32,7 +32,7 @@ prog="crond"
 
 start() {
 	echo -n $"Starting $prog: "
-	daemon $prog $OPTIONS && success || failure
+	daemon $prog $CRONDARGS && success || failure
 	RETVAL=$?
 	[ "$RETVAL" = 0 ] && touch $LOCK_FILE
 	echo
