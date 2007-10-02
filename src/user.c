@@ -28,6 +28,13 @@ static char rcsid[] = "$Id: user.c,v 1.5 2004/01/23 18:56:43 vixie Exp $";
 
 #include "cron.h"
 
+static const char *FileName;
+
+static void
+log_error(const char *msg) {
+        syslog(LOG_ERR,"CRON: error in (%s) problem is (%s)",FileName,msg);
+}
+
 void
 free_user(user *u) {
 	entry *e, *ne;
@@ -101,7 +108,8 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 			u = NULL;
 			goto done;
 		case FALSE:
-			e = load_entry(file, NULL, pw, envp);
+			FileName = tabname;
+			e = load_entry(file, log_error, pw, envp);
 			if (e) {
 				e->next = u->crontab;
 				u->crontab = e;
