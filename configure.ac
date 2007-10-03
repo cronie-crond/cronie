@@ -1,13 +1,8 @@
 AC_INIT([vixie-cron],[4.2],[mmaslano@redhat.com])
-AC_PREFIX_DEFAULT(/usr)
 AC_CONFIG_HEADER([config.h])
 AC_PREREQ(2.7)
 
 VERSION="4.2"
-if test "X$CFLAGS" = "X"; then
-CFLAGS="-O2 -g -Wall -Wno-unused -Wno-comment -D_GNU_SOURCE"
-LDFLAGS="-pie"
-fi
 
 AM_INIT_AUTOMAKE(foreign)
 
@@ -49,6 +44,7 @@ AC_CHECK_HEADERS( \
         paths.h \
         pty.h \
         security/pam_appl.h \
+        selinux/selinux.h \
         stddef.h \
         stdint.h \
 		sys/audit.h \
@@ -141,18 +137,22 @@ AC_ARG_WITH(daemon_groupname,
 AC_SUBST(DAEMON_GROUPNAME)
 
 # Check whether user wants SELinux support
-WITH_SELINUX_LIB=
-with_selinuxval=no
-case "$target" in
-    *-*-linux*) with_selinuxval=yes ;;
-    esac
-    withval=${with_selinuxval}
-    AC_ARG_WITH(selinux, [  --with-selinux          build with selinux support ])
-    if test $withval != no ; then
-	AC_DEFINE(WITH_SELINUX, 1, [Build with selinux support?])
-	WITH_SELINUX_LIB="-lselinux"
-    fi
-AC_SUBST(WITH_SELINUX_LIB)
+SELINUX_MSG="no"
+LIBSELINUX=""
+AC_ARG_WITH(selinux,
+        [  --with-selinux   Enable SELinux support],
+        [ if test "x$withval" != "xno" ; then
+                saved_LIBS="$LIBS"
+                AC_DEFINE(WITH_SELINUX,1,[Define if you want SELinux support.])
+                SELINUX_MSG="yes"
+                AC_CHECK_HEADER([selinux/selinux.h], ,AC_MSG_ERROR(SELinux support requires selinux.h header))
+                AC_CHECK_LIB(selinux, setexeccon, [ LIBSELINUX="-lselinux" ],
+                    AC_MSG_ERROR(SELinux support requires libselinux library))
+                AC_CHECK_FUNCS(getseuserbyname get_default_context_with_level)
+                LIBS="$saved_LIBS $LIBSELINUX"
+                AC_SUBST(LIBSELINUX)
+        fi ]
+)
         
 # Check whether user wants PAM support
 AC_ARG_WITH(pam,
@@ -216,7 +216,17 @@ AC_DEFINE(HAVE_TM_GMTOFF,0,[if your OS supports a BSD-style login.conf fil])
 ##AC_DEFINE(CRON_GROUP,"crontab",[crontab])
 
 # Check whether user wants Linux audit support
-AC_DEFINE(WITH_AUDIT,1,[Define if you want audit trails])
+AC_ARG_WITH(audit,
+        [  --with-audit   Enable audit trails],
+        [ if test "x$withval" != "xno" ; then
+                saved_LIBS="$LIBS"
+                AC_DEFINE(WITH_AUDIT,1,[Define if you want Audit trails.])
+                SELINUX_MSG="yes"
+                AC_CHECK_HEADER([libaudit.h], ,AC_MSG_ERROR(Audit trails requires libaudit.h header))
+                LIBS="$saved_LIBS $LIBAUDIT"
+                AC_SUBST(LIBAUDIT)
+        fi ]
+)
 
 AC_ARG_ENABLE(debug,
     [  --enable-debug    Turn on debugging],
@@ -233,7 +243,7 @@ AC_SUBST(pamdir)
 docdir=${datadir}/doc/cron/
 AC_SUBST(docdir)
 
-AC_CONFIG_FILES(Makefile src/Makefile man/Makefile doc/Makefile\
+AC_CONFIG_FILES(Makefile src/Makefile man/Makefile \
 	man/bitstring.3 man/cron.8 man/crontab.1 man/crontab.5)
 AC_CONFIG_SUBDIRS([src])
 AC_OUTPUT

@@ -13,13 +13,13 @@ crontab_SOURCES = \
 	crontab.c misc.c entry.c env.c pw_dup.c security.c
 
 crontab_LDADD = \
-	-lselinux -lpam -lpam_misc -laudit
+	$(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 
 crond_LDADD = \
-	-lselinux -lpam -lpam_misc -laudit
+	$(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 
 crond_LDFLAGS = \
-	-fpie
+	$(LDFLAGS)
 
 if DEBUG
 DBG = debug

@@ -1,0 +1,6 @@
+3. October 2007 	mmaslano (at) redhat (dot) com
+This is a clone of 'original' vixie-cron. It was used in Red Hat|Fedora 
+system and patched for a long time. Now was made clone tagged with 
+version 4.2.
+Changes are mainly in git commit messages, some older changes could be
+found in spec changelog (contrib/vixie-cron.spec). 

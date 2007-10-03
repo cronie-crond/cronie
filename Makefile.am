@@ -1,2 +1,2 @@
-SUBDIRS = src man doc
+SUBDIRS = src man
 
