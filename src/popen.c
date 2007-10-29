@@ -61,6 +61,8 @@ cron_popen(char *program, const char *type, struct passwd *pw)
 	int argc, pdes[2];
 	PID_T pid;
 	char *argv[MAX_ARGS];
+	ssize_t out;
+	char buf[PIPE_BUF];
 
 #ifdef __GNUC__
 	(void) &iop;	/* Avoid fork clobbering */
@@ -106,8 +108,16 @@ cron_popen(char *program, const char *type, struct passwd *pw)
 			}
 			(void)close(pdes[1]);
 		}
-		if (execvp(argv[0], argv) < 0)
-		    log_it("CRON", getpid(), "Mail wan't set up, some jobs could failed", strerror(errno));
+
+		if (execvp(argv[0], argv) < 0) {
+			syslog(LOG_ERR, "CRON: Exec of (%s) failed: (%s)", program, strerror(errno));
+			if (*type != 'r') {
+				while (0 != (out = read(STDIN, buf, PIPE_BUF))) {
+					if ((out == -1) && (errno != EINTR))
+						break;
+				}
+			}
+		}
 		_exit(1);
 	}
 	/* parent; assume fdopen can't fail...  */
