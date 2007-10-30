@@ -1,8 +1,8 @@
-AC_INIT([vixie-cron],[4.2],[mmaslano@redhat.com])
+AC_INIT([vixie-cron],[4.3],[mmaslano@redhat.com])
 AC_CONFIG_HEADER([config.h])
 AC_PREREQ(2.7)
 
-VERSION="4.2"
+VERSION="4.3"
 
 AM_INIT_AUTOMAKE(foreign)
 
