@@ -89,14 +89,15 @@ int cron_set_job_security_context(entry *e, user *u, char ***jobenv) {
     if (ucontext)
 		freecon(ucontext);
 #endif
-
-/*    if (cron_open_pam_session(e->pwd) != 0) {
+#ifdef WITH_PAM
+    if (cron_open_pam_session(e->pwd) != 0) {
 		syslog(LOG_INFO, "CRON (%s) ERROR: failed to open PAM security session: %s", e->pwd->pw_name, strerror(errno));
 		return -1;
     }
-*/
+#endif
+
     if (cron_change_user(e->pwd, env_get("HOME", *jobenv)) != 0) {
-		syslog(LOG_INFO, "CRON (%s) ERROR: failed to open PAM security session: %s", e->pwd->pw_name, strerror(errno));
+		syslog(LOG_INFO, "CRON (%s) ERROR: failed to open change cron user: %s", e->pwd->pw_name, strerror(errno));
 		return -1;
     }	
 
@@ -136,7 +137,6 @@ int cron_start_pam(struct passwd *pw) {
     return retcode;
 }
 
-#if 0
 int cron_open_pam_session(struct passwd *pw) {
     int	retcode = 0;
 
@@ -151,7 +151,6 @@ int cron_open_pam_session(struct passwd *pw) {
 
     return retcode;
 }
-#endif
 
 void cron_close_pam(void) {
 #if defined(WITH_PAM)
