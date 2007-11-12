@@ -192,7 +192,7 @@ AC_ARG_WITH(pam,
 
 AC_DEFINE(DEBUGGING,1,[Code will be built with debug info.])
 
-AC_DEFINE(MAILARG,"/usr/lib/sendmail",[There will be path to sendmail.])
+AC_DEFINE(MAILARG,"/usr/sbin/sendmail",[There will be path to sendmail.])
 
 AC_DEFINE(MAILFMT,"%s -FCronDaemon -i -odi -oem -oi -t",
 [-i    = don't terminate on "." by itself
