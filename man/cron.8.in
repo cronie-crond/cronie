@@ -88,9 +88,13 @@ jobs twice.
 .PP
 Time changes of more than 3 hours are considered to be corrections to
 the clock or timezone, and the new time is used immediately.
+.PP
+It's possible to use different time zones for cron tables. More could
+be found in
+.IR crontab (5).
 .SS PAM Access Control
 On Red Hat systems, crond now supports access control with PAM - see 
-.IR pam (8) .
+.IR pam (8).
 A PAM configuration file for crond is installed in /etc/pam.d/crond.
 crond loads the PAM environment from the pam_env module, but these
 can be overriden by settings in the crontab file.

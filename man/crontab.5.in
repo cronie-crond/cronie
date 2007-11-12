@@ -77,7 +77,8 @@ option is useful if you decide on /bin/mail instead of /usr/lib/sendmail as
 your mailer when you install cron -- /bin/mail doesn\'t do aliasing, and UUCP
 usually doesn\'t read its mail.
 .PP
-By default, cron will send mail using the mail 'Content-Type:' header of 'text/plain' with the 'charset=' parameter set to the charmap / codeset of the locale in which 
+By default, cron will send mail using the mail 'Content-Type:' header of 'text/plain' 
+with the 'charset=' parameter set to the charmap / codeset of the locale in which 
 .BR crond (8)
 is started up - ie. either the default system locale, if no LC_* environment
 variables are set, or the locale specified by the LC_* environment variables
@@ -86,6 +87,10 @@ variables are set, or the locale specified by the LC_* environment variables
 You can use different character encodings for mailed cron job output by 
 setting the CONTENT_TYPE and CONTENT_TRANSFER_ENCODING variables in crontabs,
 to the correct values of the mail headers of those names.  
+.PP
+The CRON_TZ specifies the time zone specific for the cron table. User type into
+the chosen table times in the time of the specified time zone. The time into log
+is taken from local time zone, where is the daemon running.
 .PP
 The MLS_LEVEL environment variable provides support for multiple per-job 
 SELinux security contexts in the same crontab.
@@ -187,7 +192,8 @@ month, plus every Friday.
 SHELL=/bin/sh                                                                                                                 
 # mail any output to `paul', no matter whose crontab this is                                                                  
 MAILTO=paul                                                                                                                   
-#                                                                                                                             
+#
+CRON_TZ=Japan
 # run five minutes after midnight, every day                                                                                  
 5 0 * * *       $HOME/bin/daily.job >> $HOME/tmp/out 2>&1                                                                     
 # run at 2:15pm on the first of every month -- output mailed to paul                                                          
