@@ -506,12 +506,10 @@ log_it(const char *username, PID_T xpid, const char *event, const char *detail) 
 #if defined(LOG_FILE) || DEBUGGING
 	PID_T pid = xpid;
 #endif
-#if defined(LOG_FILE)
 	char *msg;
 	TIME_T now = time((TIME_T) 0);
 	struct tm *t = localtime(&now);
 	int msg_size;
-#endif /*LOG_FILE*/
 
 #if defined(LOG_FILE)
 	/* we assume that MAX_TEMPSTR will hold the date, time, &punctuation.

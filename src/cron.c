@@ -296,6 +296,7 @@ run_reboot_jobs(cron_db *db) {
 
 static void
 find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
+	char orig_tz, *job_tz;
 	time_t virtualSecond  = vtime * SECONDS_PER_MINUTE;
 	struct tm *tm = gmtime(&virtualSecond);
 	int minute, hour, dom, month, dow;
@@ -304,11 +305,24 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 
 	/* make 0-based values out of these so we can use them as indicies
 	 */
-	minute = tm->tm_min -FIRST_MINUTE;
-	hour = tm->tm_hour -FIRST_HOUR;
-	dom = tm->tm_mday -FIRST_DOM;
-	month = tm->tm_mon +1 /* 0..11 -> 1..12 */ -FIRST_MONTH;
-	dow = tm->tm_wday -FIRST_DOW;
+#define maketime(tz1, tz2) do { \
+	char *t = tz1; \
+	if (t != NULL && *t != '\0') \
+		setenv("TZ", t, 1); \
+	else if ((tz2) != NULL) \
+		setenv("TZ", (tz2), 1); \
+	else \
+		unsetenv("TZ"); \
+	tm = localtime(&StartTime); \
+	minute = tm->tm_min -FIRST_MINUTE; \
+	hour = tm->tm_hour -FIRST_HOUR; \
+	dom = tm->tm_mday -FIRST_DOM; \
+	month = tm->tm_mon +1 /* 0..11 -> 1..12 */ -FIRST_MONTH; \
+	dow = tm->tm_wday -FIRST_DOW; \
+	} while (0)
+
+	orig_tz = getenv("TZ");
+	maketime(NULL, orig_tz);
 
 	Debug(DSCH, ("[%ld] tick(%d,%d,%d,%d,%d) %s %s\n",
 		     (long)getpid(), minute, hour, dom, month, dow,
@@ -325,6 +339,9 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 			Debug(DSCH|DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
 			    e->pwd->pw_name, (long)e->pwd->pw_uid,
 			    (long)e->pwd->pw_gid, e->cmd))
+
+			job_tz = env_get("CRON_TZ", e->envp);
+			maketime(job_tz, orig_tz);
 			if (bit_test(e->minute, minute) &&
 			    bit_test(e->hour, hour) &&
 			    bit_test(e->month, month) &&
@@ -340,6 +357,10 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 			}
 		}
 	}
+	if (orig_tz != NULL)
+		setenv("TZ", orig_tz, 1);
+	else
+		unsetenv("TZ");
 }
 
 /*
