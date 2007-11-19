@@ -3,8 +3,8 @@
 %bcond_without audit
 Summary: The Vixie cron daemon for executing specified programs at set times
 Name: vixie-cron
-Version: 4.2
-Release: 4%{?dist}
+Version: 4.3
+Release: 2%{?dist}
 Epoch: 4
 License: MIT and BSD
 Group: System Environment/Base
@@ -16,15 +16,15 @@ Requires: syslog, bash >= 2.0
 Buildrequires: automake, autoconf
 Conflicts: sysklogd < 1.4.1
 
-%if %{with_selinux}
+%if %{with selinux}
 Requires: libselinux >= 2.0.0
 Buildrequires: libselinux-devel >= 2.0.0
 %endif
-%if %{with_pam}
+%if %{with pam}
 Requires: pam >= 0.99.6.2
 Buildrequires: pam-devel >= 0.99.6.2
 %endif
-%if %{with_audit}
+%if %{with audit}
 Buildrequires: audit-libs-devel >= 1.4.1
 %endif
 
@@ -54,13 +54,13 @@ CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 LDFLAGS="$LDFLAGS -fpie"; export LDFLAGS
 
 %configure \
-%if %{with_pam}
+%if %{with pam}
 --with-pam \
 %endif
-%if %{with_selinux}
+%if %{with selinux}
 --with-selinux \
 %endif
-%if %{with_audit}
+%if %{with audit}
 --with-audit
 %endif
 
@@ -80,7 +80,7 @@ mv $RPM_BUILD_ROOT/%{_sysconfdir}/pam.d/crond.pam $RPM_BUILD_ROOT/%{_sysconfdir}
 mv ./vixie-cron.init $RPM_BUILD_ROOT/%{_sysconfdir}/rc.d/init.d/crond
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig/
 mv ./crond.sysconfig $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig/crond
-%if ! %{with_pam}
+%if ! %{with pam}
     rm -rf $RPM_BUILD_ROOT/%{_sysconfdir}/pam.d
 %endif
 touch $RPM_BUILD_ROOT/%{_sysconfdir}/cron.deny
@@ -117,14 +117,15 @@ fi
 %attr(755,root,root) %dir %{_localstatedir}/spool/cron
 %attr(755,root,root) %dir %{_sysconfdir}/cron.d
 %attr(755,root,root) %{_sysconfdir}/rc.d/init.d/crond
-%if %{with_pam}
+%if %{with pam}
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/pam.d/crond
 %endif
 %config(noreplace) %{_sysconfdir}/sysconfig/crond
 %config(noreplace) %{_sysconfdir}/cron.deny
 
 %changelog
-* Mon Oct 29 2007 Marcela Maslanova <mmaslano@redhat.com> - 4:4.2-4
+* Mon Oct 29 2007 Marcela Maslanova <mmaslano@redhat.com> - 4:4.3-2
+- rebuild with correct source file
 - 247228: cron jobs fail semi-randomly if sendmail incapacitated
 - 226529: Merge Review: vixie-cron (use bcond macros)
 
