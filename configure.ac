@@ -203,8 +203,6 @@ AC_DEFINE(MAILFMT,"%s -FCronDaemon -i -odi -oem -oi -t",
 -t    = Get recipient from headers
 -d = undocumented but common flag.])
 
-AC_DEFINE(MAIL_DATE,0,[Date is set by sendmail.])
-
 AC_DEFINE(SYSLOG,1,[Using syslog for log messages.])
 
 AC_DEFINE(CAPITALIZE_FOR_PS,0,[if you have a tm_gmtoff member in struct tm])
