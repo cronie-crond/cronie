@@ -15,6 +15,12 @@
 /* Define to 1 if you have the <getopt.h> header file. */
 #undef HAVE_GETOPT_H
 
+/* Define to 1 if you have the `getseuserbyname' function. */
+#undef HAVE_GETSEUSERBYNAME
+
+/* Define to 1 if you have the `get_default_context_with_level' function. */
+#undef HAVE_GET_DEFAULT_CONTEXT_WITH_LEVEL
+
 /* Define to 1 if you have the <glob.h> header file. */
 #undef HAVE_GLOB_H
 
@@ -50,6 +56,9 @@
 
 /* Define to 1 if you have the <security/pam_appl.h> header file. */
 #undef HAVE_SECURITY_PAM_APPL_H
+
+/* Define to 1 if you have the <selinux/selinux.h> header file. */
+#undef HAVE_SELINUX_SELINUX_H
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #undef HAVE_STDDEF_H
@@ -111,9 +120,6 @@
    undocumented but common flag. */
 #undef MAILFMT
 
-/* Date is set by sendmail. */
-#undef MAIL_DATE
-
 /* Name of package */
 #undef PACKAGE
 
@@ -147,13 +153,13 @@
 /* Version number of package */
 #undef VERSION
 
-/* Define if you want audit trails */
+/* Define if you want Audit trails. */
 #undef WITH_AUDIT
 
 /* Define if you want to enable PAM support */
 #undef WITH_PAM
 
-/* Build with selinux support? */
+/* Define if you want SELinux support. */
 #undef WITH_SELINUX
 
 /* Define to empty if `const' does not conform to ANSI C. */
