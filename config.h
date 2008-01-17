@@ -122,22 +122,22 @@
 #define MAILFMT "%s -FCronDaemon -i -odi -oem -oi -t"
 
 /* Name of package */
-#define PACKAGE "vixie-cron"
+#define PACKAGE "cronie"
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "mmaslano@redhat.com"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "vixie-cron"
+#define PACKAGE_NAME "cronie"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "vixie-cron 4.3"
+#define PACKAGE_STRING "cronie 1.0"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "vixie-cron"
+#define PACKAGE_TARNAME "cronie"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "4.3"
+#define PACKAGE_VERSION "1.0"
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
@@ -152,7 +152,7 @@
 /* #undef TM_IN_SYS_TIME */
 
 /* Version number of package */
-#define VERSION "4.3"
+#define VERSION "1.0"
 
 /* Define if you want Audit trails. */
 /* #undef WITH_AUDIT */

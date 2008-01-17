@@ -1,8 +1,8 @@
-AC_INIT([vixie-cron],[4.3],[mmaslano@redhat.com])
+AC_INIT([cronie],[1.0],[mmaslano@redhat.com])
 AC_CONFIG_HEADER([config.h])
 AC_PREREQ(2.7)
 
-VERSION="4.3"
+VERSION="1.0"
 
 AM_INIT_AUTOMAKE(foreign)
 
@@ -13,26 +13,6 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
-
-AC_MSG_CHECKING(HP-UX -Aa)
-
-case "$host" in
-  *-*-hpux*)
-    if test -z "$GCC"; then
-      CFLAGS="$CFLAGS -Aa -D_HPUX_SOURCE"
-    fi
-    AC_MSG_RESULT(yes)
-    ;;
-  *)
-    AC_MSG_RESULT(no)
-    ;;
-esac
-AC_MSG_CHECKING(Trying to compile a trivial ANSI C program)
-AC_TRY_RUN([ main(int ac, char **av) { return 0; } ],
-    AC_MSG_RESULT(yes),
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR(Could not compile and run even a trivial ANSI C program - check CC.),
-    AC_MSG_ERROR(Could not compile and run even a trivial ANSI C program - check CC.))
 
 AC_CHECK_HEADERS( \
         dirent.h \
@@ -73,26 +53,26 @@ AC_STRUCT_TM
 
 dnl Checking for programs
 
-AC_MSG_CHECKING(etcdir)
-AC_ARG_WITH(etcdir,
-[  --with-etcdir=PATH      Directory containing permission files (default /etc).],
+AC_MSG_CHECKING(sysconfdir)
+AC_ARG_WITH(sysconfdir,
+[  --with-sysconfdir=PATH      Directory containing permission files (default /etc).],
 [ case "$withval" in
   no)
-    AC_MSG_ERROR(Need ETCDIR.)
+    AC_MSG_ERROR(Need SYSCONFDIR.)
     ;;
   yes)
-    ETCDIR=/etc
+    SYSCONFDIR=/etc
     AC_MSG_RESULT(/etc)
     ;;
   *)
-    ETCDIR="$withval"
+    SYSCONFDIR="$withval"
     AC_MSG_RESULT($withval)
     ;;
   esac ],
-  ETCDIR="/etc"
+  SYSCONFDIR="/etc"
   AC_MSG_RESULT(/etc)
 )
-AC_SUBST(ETCDIR)
+AC_SUBST(SYSCONFDIR)
 
 AC_MSG_CHECKING(username to run under)
 AC_ARG_WITH(daemon_username,
@@ -136,6 +116,24 @@ AC_ARG_WITH(daemon_groupname,
 )
 AC_SUBST(DAEMON_GROUPNAME)
 
+# Check whether user wants sysconfig file
+#AC_ARG_WITH(config,
+#	[  --with-sysconf  Enable sysconfig file],
+#	[ if test "x$withval" != "xno" ; then
+#		configdir=${sysconfdir}/sysconfig/
+#		AC_SUBST(configdir)
+#	fi ]
+#)
+
+# Check whether user wants init file
+#AC_ARG_WITH(init,
+#        [  --with-initfile  Enable init file],
+#        [ if test "x$withval" != "xno" ; then
+#		initdir=${initrddir}
+#    		AC_SUBST(initdir)
+#	fi ]
+#)
+                                                        
 # Check whether user wants SELinux support
 SELINUX_MSG="no"
 LIBSELINUX=""
@@ -187,6 +185,8 @@ AC_ARG_WITH(pam,
                         fi
                         AC_SUBST(LIBPAM)
                 fi
+	    	pamdir=${sysconfdir}/pam.d/
+            AC_SUBST(pamdir)
         ]
 )
 
@@ -234,9 +234,6 @@ AC_ARG_ENABLE(debug,
     *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
     esac],[debug=false])
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
-
-pamdir=${sysconfdir}/pam.d
-AC_SUBST(pamdir)
 
 docdir=${datadir}/doc/cron/
 AC_SUBST(docdir)

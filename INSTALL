@@ -2,10 +2,7 @@ Basic Installation
 ==================
 
 In the vixie-cron directory run:
-aclocal
-autoheader
-automake -a
-autoconf
+autoreconf
 These commands create from configure.ac executable ./configure
 
 Then you can start installation:

@@ -1,3 +1,8 @@
+17. January 2008	mmaslano (at) redhat (dot) com
+Rename the fork on cronie. The source code could be found here: 
+http://mmaslano.fedorapeople.org/cronie/ or git archive here:
+git://git.fedorahosted.org/git/cronie.git
+
 3. October 2007 	mmaslano (at) redhat (dot) com
 This is a clone of 'original' vixie-cron. It was used in Red Hat|Fedora 
 system and patched for a long time. Now was made clone tagged with 

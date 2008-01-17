@@ -3,8 +3,6 @@
 sbin_PROGRAMS = crond
 bin_PROGRAMS = crontab
 
-pam_DATA = ../crond.pam
-
 crond_SOURCES = \
 	cron.c database.c user.c entry.c job.c do_command.c \
 	misc.c env.c popen.c pw_dup.c security.c
@@ -17,9 +15,6 @@ crontab_LDADD = \
 
 crond_LDADD = \
 	$(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
-
-crond_LDFLAGS = \
-	$(LDFLAGS)
 
 if DEBUG
 DBG = debug
