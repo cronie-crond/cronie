@@ -1,10 +1,8 @@
 AC_INIT([cronie],[1.0],[mmaslano@redhat.com])
 AC_CONFIG_HEADER([config.h])
-AC_PREREQ(2.7)
+AC_PREREQ(2.59)
 
-VERSION="1.0"
-
-AM_INIT_AUTOMAKE(foreign)
+AM_INIT_AUTOMAKE
 
 AC_CANONICAL_HOST
 
@@ -20,10 +18,8 @@ AC_CHECK_HEADERS( \
         getopt.h \
         glob.h \
         limits.h \
-        pam/pam_appl.h \
         paths.h \
         pty.h \
-        security/pam_appl.h \
         selinux/selinux.h \
         stddef.h \
         stdint.h \
@@ -55,7 +51,7 @@ dnl Checking for programs
 
 AC_MSG_CHECKING(sysconfdir)
 AC_ARG_WITH(sysconfdir,
-[  --with-sysconfdir=PATH      Directory containing permission files (default /etc).],
+[AS_HELP_STRING([--with-sysconfdir=PATH], [Directory containing permission files (default /etc).])],
 [ case "$withval" in
   no)
     AC_MSG_ERROR(Need SYSCONFDIR.)
@@ -76,7 +72,7 @@ AC_SUBST(SYSCONFDIR)
 
 AC_MSG_CHECKING(username to run under)
 AC_ARG_WITH(daemon_username,
-[ --with-daemon_username=DAEMON_USERNAME	Username to run under (default daemon) ],
+[AS_HELP_STRING([--with-daemon_username=DAEMON_USERNAME], [Username to run under (default daemon) ])],
 [ case "$withval" in
   no)
     AC_MSG_ERROR(Need DAEMON_USERNAME.)
@@ -97,7 +93,7 @@ AC_SUBST(DAEMON_USERNAME)
 
 AC_MSG_CHECKING(groupname to run under)
 AC_ARG_WITH(daemon_groupname,
-[ --with-daemon_groupname=DAEMON_GROUPNAME	Groupname to run under (default daemon) ],
+[AS_HELP_STRING([--with-daemon_groupname=DAEMON_GROUPNAME], [Groupname to run under (default daemon) ])],
 [ case "$withval" in
   no)
     AC_MSG_ERROR(Need DAEMON_GROUPNAME.)
@@ -118,7 +114,7 @@ AC_SUBST(DAEMON_GROUPNAME)
 
 # Check whether user wants sysconfig file
 #AC_ARG_WITH(config,
-#	[  --with-sysconf  Enable sysconfig file],
+#	[AS_HELP_STRING([--with-sysconf], [Enable sysconfig file])],
 #	[ if test "x$withval" != "xno" ; then
 #		configdir=${sysconfdir}/sysconfig/
 #		AC_SUBST(configdir)
@@ -127,7 +123,7 @@ AC_SUBST(DAEMON_GROUPNAME)
 
 # Check whether user wants init file
 #AC_ARG_WITH(init,
-#        [  --with-initfile  Enable init file],
+#        [AS_HELP_STRING([--with-initfile], [Enable init file])],
 #        [ if test "x$withval" != "xno" ; then
 #		initdir=${initrddir}
 #    		AC_SUBST(initdir)
@@ -138,7 +134,7 @@ AC_SUBST(DAEMON_GROUPNAME)
 SELINUX_MSG="no"
 LIBSELINUX=""
 AC_ARG_WITH(selinux,
-        [  --with-selinux   Enable SELinux support],
+        [AS_HELP_STRING([--with-selinux], [Enable SELinux support])],
         [ if test "x$withval" != "xno" ; then
                 saved_LIBS="$LIBS"
                 AC_DEFINE(WITH_SELINUX,1,[Define if you want SELinux support.])
@@ -152,43 +148,29 @@ AC_ARG_WITH(selinux,
         fi ]
 )
         
-# Check whether user wants PAM support
-AC_ARG_WITH(pam,
-        [  --with-pam              Enable PAM support ],
-        [  if test "x$withval" != "xno" ; then
-                        if test "x$ac_cv_header_security_pam_appl_h" != "xyes" && \
-                           test "x$ac_cv_header_pam_pam_appl_h" != "xyes" ; then
-                                AC_MSG_ERROR([PAM headers not found])
-                        fi
+AC_ARG_WITH(pam, [AS_HELP_STRING([--with-pam], [Enable PAM support])])
+AM_CONDITIONAL([PAM], [test "$enable_pam" != no])
 
-                        saved_LIBS="$LIBS"
-                        AC_CHECK_LIB(dl, dlopen, , )
-                        AC_CHECK_LIB(pam, pam_set_item, , AC_MSG_ERROR([*** libpam missing]))
-                        AC_CHECK_FUNCS(pam_getenvlist)
-                        AC_CHECK_FUNCS(pam_putenv)
-                        LIBS="$saved_LIBS"
+if test "$enable_pam" != no; then
+	AC_DEFINE(WITH_PAM, 1, [Define if you want to enable PAM support])
+	pam_appl_h_found=no
+	AC_CHECK_HEADERS([pam/pam_appl.h security/pam_appl.h],
+		[pam_appl_h_found=yes])
+	test "$pam_appl_h_found" = yes ||
+		AC_MSG_ERROR([PAM headers not found])
 
-                        PAM_MSG="yes"
+	saved_LIBS="$LIBS"
+	AC_CHECK_LIB([dl], [dlopen], [libdl_found=yes], [libdl_found=no])
+	AC_CHECK_LIB(pam, pam_set_item, , AC_MSG_ERROR([*** libpam missing]))
+	AC_CHECK_FUNCS([pam_getenvlist pam_putenv])
+	LIBS="$saved_LIBS"
 
-                        LIBPAM="-lpam -lpam_misc"
-			AC_DEFINE(WITH_PAM,1,
-				[Define if you want to enable PAM support])
-                        if test $ac_cv_lib_dl_dlopen = yes; then
-                                case "$LIBS" in
-                                *-ldl*)
-                                        # libdl already in LIBS
-                                        ;;
-                                *)
-                                        LIBPAM="$LIBPAM -ldl"
-                                        ;;
-                                esac
-                        fi
-                        AC_SUBST(LIBPAM)
-                fi
-	    	pamdir=${sysconfdir}/pam.d/
-            AC_SUBST(pamdir)
-        ]
-)
+	case $libdl_found:" $LIBS " in #(
+	*" -ldl "*) LIBPAM= ;; #(
+	yes:*) LIBPAM=-ldl ;; # libdl found, but is not in $LIBS
+	esac
+	AC_SUBST([LIBPAM], ["-lpam -lpam_misc $LIBPAM"])
+fi
 
 AC_DEFINE(DEBUGGING,1,[Code will be built with debug info.])
 
@@ -205,17 +187,17 @@ AC_DEFINE(MAILFMT,"%s -FCronDaemon -i -odi -oem -oi -t",
 
 AC_DEFINE(SYSLOG,1,[Using syslog for log messages.])
 
-AC_DEFINE(CAPITALIZE_FOR_PS,0,[if you have a tm_gmtoff member in struct tm])
+AC_DEFINE(CAPITALIZE_FOR_PS, 1, [if you have a tm_gmtoff member in struct tm])
 
-AC_DEFINE(HAVE_TM_GMTOFF,0,[if your OS supports a BSD-style login.conf fil])
+AC_DEFINE(HAVE_TM_GMTOFF, 1, [if your OS supports a BSD-style login.conf fil])
 
-##AC_DEFINE(LOGIN_CAP,0,[if your OS supports BSD authentication])
+##AC_DEFINE(LOGIN_CAP, 1, [if your OS supports BSD authentication])
 
 ##AC_DEFINE(CRON_GROUP,"crontab",[crontab])
 
 # Check whether user wants Linux audit support
 AC_ARG_WITH(audit,
-        [  --with-audit   Enable audit trails],
+        [AS_HELP_STRING([--with-audit], [Enable audit trails])],
         [ if test "x$withval" != "xno" ; then
                 saved_LIBS="$LIBS"
                 AC_DEFINE(WITH_AUDIT,1,[Define if you want Audit trails.])
@@ -226,20 +208,9 @@ AC_ARG_WITH(audit,
         fi ]
 )
 
-AC_ARG_ENABLE(debug,
-    [  --enable-debug    Turn on debugging],
-    [case "${enableval}" in
-    yes) debug=true ;;
-    no)  debug=false ;;
-    *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
-    esac],[debug=false])
-AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
+dnl AC_ARG_ENABLE(debug, [AS_HELP_STRING([--enable-debug], [Turn on debugging])])
+dnl AM_CONDITIONAL(DEBUG, test "$enable_debug" = true)
 
-docdir=${datadir}/doc/cron/
-AC_SUBST(docdir)
-
-AC_CONFIG_FILES(Makefile src/Makefile man/Makefile \
-	man/bitstring.3 man/cron.8 man/crontab.1 man/crontab.5)
-AC_CONFIG_SUBDIRS([src])
+AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
 AC_OUTPUT
 

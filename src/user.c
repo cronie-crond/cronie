@@ -26,7 +26,7 @@ static char rcsid[] = "$Id: user.c,v 1.5 2004/01/23 18:56:43 vixie Exp $";
 /* vix 26jan87 [log is in RCS file]
  */
 
-#include "cron.h"
+#include <cron.h>
 
 static const char *FileName;
 

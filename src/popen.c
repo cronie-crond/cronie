@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)popen.c	5.7 (Berkeley) 2/14/89";
 #endif
 #endif /* not lint */
 
-#include "cron.h"
+#include <cron.h>
 #include <signal.h>
 
 /*

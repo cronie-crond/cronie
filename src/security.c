@@ -19,7 +19,7 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cron.h"
+#include <cron.h>
 
 #ifdef WITH_SELINUX
 #include <selinux/selinux.h>

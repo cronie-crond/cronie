@@ -23,7 +23,7 @@
 static char rcsid[] = "$Id: do_command.c,v 1.9 2004/01/23 18:56:42 vixie Exp $";
 #endif
 
-#include "cron.h"
+#include <cron.h>
 
 static void		child_process(entry *, user *);
 static int		safe_p(const char *, const char *);

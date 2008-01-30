@@ -30,7 +30,7 @@ static char rcsid[] = "$Id: crontab.c,v 1.12 2004/01/23 18:56:42 vixie Exp $";
 
 #define	MAIN_PROGRAM
 
-#include "cron.h"
+#include <cron.h>
 #ifdef WITH_SELINUX
 #include <selinux/selinux.h>
 #include <selinux/context.h>

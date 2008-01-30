@@ -25,7 +25,7 @@ static char rcsid[] = "$Id: cron.c,v 1.12 2004/01/23 18:56:42 vixie Exp $";
 
 #define	MAIN_PROGRAM
 
-#include "cron.h"
+#include <cron.h>
 
 enum timejump { negative, small, medium, large };
 

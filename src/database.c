@@ -26,7 +26,7 @@ static char rcsid[] = "$Id: database.c,v 1.7 2004/01/23 18:56:42 vixie Exp $";
 /* vix 26jan87 [RCS has the log]
  */
 
-#include "cron.h"
+#include <cron.h>
 
 #define TMAX(a,b) ((a)>(b)?(a):(b))
 

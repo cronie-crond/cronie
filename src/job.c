@@ -23,7 +23,7 @@
 static char rcsid[] = "$Id: job.c,v 1.6 2004/01/23 18:56:43 vixie Exp $";
 #endif
 
-#include "cron.h"
+#include <cron.h>
 
 typedef	struct _job {
 	struct _job	*next;

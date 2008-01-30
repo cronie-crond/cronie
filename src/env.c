@@ -23,7 +23,7 @@
 static char rcsid[] = "$Id: env.c,v 1.10 2004/01/23 18:56:42 vixie Exp $";
 #endif
 
-#include "cron.h"
+#include <cron.h>
 
 char **
 env_init(void) {

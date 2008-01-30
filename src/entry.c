@@ -30,7 +30,7 @@ static char rcsid[] = "$Id: entry.c,v 1.17 2004/01/23 18:56:42 vixie Exp $";
  * vix 30dec86 [written]
  */
 
-#include "cron.h"
+#include <cron.h>
 
 typedef	enum ecode {
 	e_none, e_minute, e_hour, e_dom, e_month, e_dow,

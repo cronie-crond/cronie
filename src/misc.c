@@ -27,7 +27,7 @@ static char rcsid[] = "$Id: misc.c,v 1.16 2004/01/23 18:56:43 vixie Exp $";
  * vix 30dec86 [written]
  */
 
-#include "cron.h"
+#include <cron.h>
 #include <limits.h>
 #ifdef WITH_AUDIT
 #include <libaudit.h>

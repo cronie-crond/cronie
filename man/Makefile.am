@@ -1,4 +1,3 @@
-man1_MANS = crontab.1
-man5_MANS = crontab.5
-man8_MANS = cron.8 crond.8
+dist_man_MANS = crontab.1 crontab.5 cron.8 crond.8
+noinst_MANS = bitstring.3
 
