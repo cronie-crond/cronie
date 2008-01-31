@@ -2,7 +2,7 @@ SUBDIRS = src man
 
 if PAM
 pamdir = $(sysconfdir)/pam.d
-dist_pam_DATA = crond.pam
+dist_pam_DATA = pam/crond
 endif
 
 #config_DATA = crond.sysconfig

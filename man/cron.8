@@ -1,0 +1,139 @@
+.\"/* Copyright 1988,1990,1993,1996 by Paul Vixie
+.\" * All rights reserved
+.\" */
+.\" 
+.\" Copyright (c) 2004 by Internet Systems Consortium, Inc. ("ISC")
+.\" Copyright (c) 1997,2000 by Internet Software Consortium, Inc.
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+.\" OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
+.\" 
+.TH CRON "8" "10 January 2007" "Linux Programmer's Manual"
+.UC 4
+.SH NAME
+cron \- daemon to execute scheduled commands (ISC Cron V4.1)
+.SH SYNOPSIS
+.B cron
+.RB [ -n " | " -p " | " -m \fP\fI<mail command>\fP\fB ]
+.br
+.B cron
+.B -x 
+.RB [ext,sch,proc,pars,load,misc,test,bit]
+.br
+.SH DESCRIPTION
+.I Cron
+should be started from 
+.I /etc/rc.d/init.d 
+or 
+.I /etc/init.d
+. It will return immediately, so you don't need to start it with '&'. 
+.PP
+.I Cron
+searches 
+.I /var/spool/cron 
+for crontab files which are named after accounts in
+.I/etc/passwd; 
+crontabs found are loaded into memory.
+.I Cron
+also searches for 
+.I /etc/crontab 
+and the files in the 
+.I/etc/cron.d 
+directory, which are in a different format (see
+.BR crontab (5)
+).
+.I Cron
+then wakes up every minute, examining all stored crontabs, checking each
+command to see if it should be run in the current minute.  When executing
+commands, any output is mailed to the owner of the crontab (or to the user
+named in the MAILTO environment variable in the crontab, if such exists).
+.PP
+Additionally,
+.I cron
+checks each minute to see if its spool directory's modtime (or the modtime
+on
+.IR /etc/crontab )
+has changed, and if it has,
+.I cron
+will then examine the modtime on all crontabs and reload those which have
+changed.  Thus
+.I cron
+need not be restarted whenever a crontab file is modified.  Note that the
+.BR crontab (1)
+command updates the modtime of the spool directory whenever it changes a
+crontab.
+.PP 
+.SS Daylight Saving Time and other time changes
+Local time changes of less than three hours, such as those caused
+by the start or end of Daylight Saving Time, are handled specially.
+This only applies to jobs that run at a specific time and jobs that
+are run with a granularity greater than one hour.  Jobs that run
+more frequently are scheduled normally.
+.PP
+If time has moved forward, those jobs that would have run in the
+interval that has been skipped will be run immediately.
+Conversely, if time has moved backward, care is taken to avoid running
+jobs twice.
+.PP
+Time changes of more than 3 hours are considered to be corrections to
+the clock or timezone, and the new time is used immediately.
+.PP
+It's possible to use different time zones for cron tables. More could
+be found in
+.IR crontab (5).
+.SS PAM Access Control
+On Red Hat systems, crond now supports access control with PAM - see 
+.IR pam (8).
+A PAM configuration file for crond is installed in /etc/pam.d/crond.
+crond loads the PAM environment from the pam_env module, but these
+can be overriden by settings in the crontab file.
+.SH "OPTIONS"                                                                                                                 
+.TP                                                                                                                           
+.B "\-m"                                                                                                                      
+This option allows you to specify a shell command string to use for sending cron mail                                         
+output instead of                                                                                                             
+.BR sendmail (8).                                                                                                             
+This command must accept a fully formatted mail message (with headers) on stdin and send it                                   
+as a mail message to the recipients specified in the mail headers.
+.TP                                                                                                                           
+.B "\-n"                                                                                                                      
+This option changes default behavior causing it to run crond in the foreground.  This can be                                  
+useful when starting it out of init.
+.TP
+.B "\-p"
+Cron permit any crontab, which user set.
+.TP
+.B "\-x"
+With this option is possible to set debug flags.
+.SH SIGNALS
+On receipt of a \s-2SIGHUP\s+2, the cron daemon will close and reopen its
+log file.  This is useful in scripts which rotate and age log files.  
+Naturally this is not relevant if cron was built to use
+.IR syslog (3).
+.SH CAVEATS
+In this version of
+.BR cron
+, without the \fB-p\fP option,
+.I /etc/crontab 
+must not be writable by any user other than root,
+no crontab files may be links, or linked to by any other file,
+and no crontab files may be executable, or be writable by any
+user other than their owner.
+.SH "SEE ALSO"
+.IR crontab (1),
+.IR crontab (5),
+.IR pam (8)
+.SH AUTHOR
+.nf
+Paul Vixie <vixie@isc.org>

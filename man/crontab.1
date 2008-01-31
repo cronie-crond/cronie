@@ -1,0 +1,129 @@
+.\"/* Copyright 1988,1990,1993 by Paul Vixie
+.\" * All rights reserved
+.\" */
+.\" 
+.\" Copyright (c) 2004 by Internet Systems Consortium, Inc. ("ISC")
+.\" Copyright (c) 1997,2000 by Internet Software Consortium, Inc.
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+.\" OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.\" $Id: crontab.1,v 1.7 2004/01/23 19:03:32 vixie Exp $
+.\"
+.TH CRONTAB 1 "27 July 2007"
+.UC 4
+.SH NAME
+crontab \- maintain crontab files for individual users (ISC Cron V4.1)
+.SH SYNOPSIS
+.B crontab
+.RB [ -u
+.IR user ] " file"
+.br
+.B crontab
+.RB [ -u
+.IR user ]
+.RB [ -l " | " -r " | " -e ]\ [ -i ]
+.RB [ -s ]
+.SH DESCRIPTION
+.I Crontab
+is the program used to install, deinstall or list the tables
+used to drive the
+.BR cron (8)
+daemon in ISC Cron.  Each user can have their own crontab, and though these are files in 
+.I /var/spool/
+, they are not intended to be edited directly. For SELinux in mls mode can be even 
+more crontabs - for each range. For more see
+.BR selinux (8).
+.PP
+The cron jobs could be allow or disallow for different users. For classical
+crontab there exists
+.I cron.allow
+and
+.I cron.deny
+files.
+If
+.I cron.allow
+file exists, then you must be listed therein in order to be allowed to use
+this command.  If the
+.I cron.allow
+file does not exist but the
+.I cron.deny
+file does exist, then you must \fInot\fR be listed in the
+.I cron.deny
+file in order to use this command.  If neither of these files exists,
+only the super user will be allowed to use this command.
+The second option is using PAM authentication, where you set up users,
+which could or couldn't use
+.I crontab
+and \fBalso\fR system cron jobs from
+/etc/cron.d/.
+.PP
+.SH "OPTIONS"
+.TP
+.B "\-u"
+Append the name of the user whose crontab is to be tweaked.  If this option 
+is not given,
+.I crontab
+examines "your" crontab, i.e., the crontab of the person executing the
+command.  Note that
+.BR su (8)
+can confuse
+.I crontab
+and that if you are running inside of
+.BR su (8)
+you should always use the
+.B -u
+option for safety's sake.
+The first form of this command is used to install a new crontab from some
+named file or standard input if the pseudo-filename "-" is given.
+.TP
+.B "\-l"
+The current crontab will be displayed on standard output.
+.TP
+.B "\-r"
+The current crontab will be be removed.
+.TP
+.B "\-e"
+This option is used to edit the current crontab using the editor specified by
+the \s-1VISUAL\s+1 or \s-1EDITOR\s+1 environment variables.  After you exit
+from the editor, the modified crontab will be installed automatically.
+.TP
+.B "\-i"
+This option modifies the 
+.B "\-r"
+option to prompt the user for a 'y/Y' response
+before actually removing the crontab.
+.TP
+.B "\-s"
+It will append the current SELinux security context string as an
+MLS_LEVEL setting to the crontab file before editing / replacement
+occurs - see the documentation of MLS_LEVEL in 
+.BR crontab(5)\.
+.SH "SEE ALSO"
+crontab(5), cron(8)
+.SH FILES
+.nf
+/etc/cron.allow
+/etc/cron.deny
+.fi
+.SH STANDARDS
+The
+.I crontab
+command conforms to IEEE Std1003.2-1992 (``POSIX'').  This new command syntax
+differs from previous versions of Vixie Cron, as well as from the classic
+SVR3 syntax.
+.SH DIAGNOSTICS
+A fairly informative usage message appears if you run it with a bad command
+line.
+.SH AUTHOR
+.nf
+Paul Vixie <vixie@isc.org>
