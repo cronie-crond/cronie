@@ -91,7 +91,7 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 		return (NULL);
 	}
 
-	if (get_security_context(pw == NULL ? "system_u" : uname, 
+	if (get_security_context(pw == NULL ? NULL : uname, 
 				 crontab_fd, 
 				 &u->scontext, tabname) != 0) {
 	    free_user(u);
