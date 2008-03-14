@@ -94,7 +94,7 @@ usage(const char *msg) {
 int
 main(int argc, char *argv[]) {
 	int exitstatus;
-
+	
 	Pid = getpid();
 	ProgramName = argv[0];
 
@@ -530,8 +530,11 @@ edit_cmd(void) {
 	}
 	(void)signal(SIGHUP, SIG_DFL);
 	(void)signal(SIGINT, SIG_DFL);
-	(void)signal(SIGQUIT, SIG_DFL);      
+	(void)signal(SIGQUIT, SIG_DFL);
 
+	/* lstat doesn't make any harm, because 
+	 * the file is stat'ed only when crontab is touched
+	 */
 	if (lstat(Filename, &statbuf) < 0) {
 		perror("lstat");
 		goto fatal;

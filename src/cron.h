@@ -39,6 +39,10 @@
 #include <security/pam_appl.h>
 #endif
 
+#ifdef WITH_INOTIFY
+#include <sys/inotify.h>
+#endif
+
 #include "pathnames.h"
 #include "macros.h"
 #include "structs.h"

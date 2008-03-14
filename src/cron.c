@@ -27,6 +27,12 @@ static char rcsid[] = "$Id: cron.c,v 1.12 2004/01/23 18:56:42 vixie Exp $";
 
 #include <cron.h>
 
+#if defined WITH_INOTIFY
+int inotify_enabled;
+#else
+#define inotify_enabled 0
+#endif
+
 enum timejump { negative, small, medium, large };
 
 static	void	usage(void),
@@ -43,6 +49,48 @@ static	void	usage(void),
 static	volatile sig_atomic_t	got_sighup, got_sigchld;
 static	int			timeRunning, virtualTime, clockTime;
 static	long			GMToff;
+
+#if defined WITH_INOTIFY
+int wd1, wd2, wd3, wd4;
+
+void
+set_cron_watched(int fd) {
+    int ret1, ret2, ret3;
+
+    wd1 = inotify_add_watch(fd, CRONDIR, IN_MODIFY | IN_DELETE | IN_CREATE);
+    if (wd1 < 0) 
+        log_it("CRON",getpid(),"This directory can't be watched",strerror(errno));
+
+    wd2 = inotify_add_watch(fd, RH_CROND_DIR, IN_MODIFY | IN_DELETE | IN_CREATE);
+    if (wd2 < 0) 
+        log_it("CRON",getpid(),"This directory can't be watched",strerror(errno));
+
+    wd3 = inotify_add_watch(fd, SYSCRONTAB, IN_MODIFY | IN_DELETE | IN_CREATE);
+    if (wd3 < 0) 
+        log_it("CRON",getpid(),"This file can't be watched ",strerror(errno));
+
+    wd4 = inotify_add_watch(fd, "/var/spool/cron/", IN_MODIFY | IN_DELETE | IN_CREATE);
+    if (wd4 < 0)
+        log_it("CRON",getpid(),"This file can't be watched ",strerror(errno));
+
+    if (wd1 <0 || wd2<0 || wd3<0 || wd4<0) {
+		inotify_enabled = 0;
+        syslog(LOG_INFO, "CRON (%s) ERROR: run without inotify support");
+    }
+    else
+    	inotify_enabled = 1;
+}
+
+void
+set_cron_unwatched(int fd) {
+    int ret1, ret2, ret3, ret4;
+
+    ret1 = inotify_rm_watch(fd, wd1);
+    ret2 = inotify_rm_watch(fd, wd2);
+    ret3 = inotify_rm_watch(fd, wd3);
+    ret4 = inotify_rm_watch(fd, wd4);
+}
+#endif
 
 static void
 usage(void) {
@@ -61,6 +109,13 @@ main(int argc, char *argv[]) {
 	cron_db	database;
 	int fd;
 	char *cs;
+
+#if defined WITH_INOTIFY
+	int fildes;
+	fildes = inotify_init();
+	if (fildes < 0)
+		perror ("inotify_init");
+#endif
 
 	ProgramName = argv[0];
 
@@ -90,6 +145,9 @@ main(int argc, char *argv[]) {
 
 	acquire_daemonlock(0);
 	set_cron_uid();
+#if defined WITH_INOTIFY
+	set_cron_watched(fildes);
+#endif
 	set_cron_cwd();
 
 	if (putenv("PATH="_PATH_DEFPATH) < 0) {
@@ -132,7 +190,14 @@ main(int argc, char *argv[]) {
 				if (fd != STDERR)
 					(void) close(fd);
 			}
-			log_it("CRON",getpid(),"STARTUP",PACKAGE_VERSION);
+			if (inotify_enabled) {
+#if defined WITH_INOTIFY
+				log_it("CRON",getpid(),"STARTUP INOTIFY",PACKAGE_VERSION);
+#endif
+			}
+			else {
+				log_it("CRON",getpid(),"STARTUP",PACKAGE_VERSION);
+			}
 			break;
 		default:
 			/* parent process should just die */
@@ -143,8 +208,15 @@ main(int argc, char *argv[]) {
 	acquire_daemonlock(0);
 	database.head = NULL;
 	database.tail = NULL;
-	database.mtime = (time_t) 0;
-	load_database(&database);
+	if (inotify_enabled) {
+#if defined WITH_INOTIFY
+		load_inotify_database(&database, fildes);
+#endif
+	}
+	else {
+		database.mtime = (time_t) 0;
+		load_database(&database);
+	}
 	set_time(TRUE);
 	run_reboot_jobs(&database);
 	timeRunning = virtualTime = clockTime;
@@ -175,8 +247,14 @@ main(int argc, char *argv[]) {
 		 * clock.  Classify the change into one of 4 cases.
 		 */
 		timeDiff = timeRunning - virtualTime;
-		
-		load_database(&database);
+		if (inotify_enabled) {
+#if defined WITH_INOTIFY
+			check_inotify_database(&database, fildes);
+#endif
+		}
+		else
+			load_database(&database);
+
 		/* shortcut for the most common case */
 		if (timeDiff == 1) {
 			virtualTime = timeRunning;
@@ -205,8 +283,7 @@ main(int argc, char *argv[]) {
 					if (job_runqueue())
 						sleep(10);
 					virtualTime++;
-					find_jobs(virtualTime, &database,
-					    TRUE, TRUE);
+					find_jobs(virtualTime, &database, TRUE, TRUE);
 				} while (virtualTime < timeRunning);
 				break;
 
@@ -270,6 +347,7 @@ main(int argc, char *argv[]) {
 		/* Check to see if we received a signal while running jobs. */
 		if (got_sighup) {
 			got_sighup = 0;
+		if (!inotify_enabled)
 			database.mtime = (time_t) 0;
 			log_close();
 		}
@@ -278,6 +356,14 @@ main(int argc, char *argv[]) {
 			sigchld_reaper();
 		}
 	}
+#if defined WITH_INOTIFY
+	set_cron_unwatched(fildes);
+
+	int ret;
+	ret = close(fildes);
+	if (ret)
+       perror ("close");
+#endif
 }
 
 static void
@@ -327,7 +413,6 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 	Debug(DSCH, ("[%ld] tick(%d,%d,%d,%d,%d) %s %s\n",
 		     (long)getpid(), minute, hour, dom, month, dow,
 		     doWild?" ":"No wildcard",doNonWild?" ":"Wildcard only"))
-
 	/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
 	 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
 	 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
@@ -339,9 +424,9 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 			Debug(DSCH|DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
 			    e->pwd->pw_name, (long)e->pwd->pw_uid,
 			    (long)e->pwd->pw_gid, e->cmd))
-
 			job_tz = env_get("CRON_TZ", e->envp);
 			maketime(job_tz, orig_tz);
+			/* here we test whether time is NOW */
 			if (bit_test(e->minute, minute) &&
 			    bit_test(e->hour, hour) &&
 			    bit_test(e->month, month) &&
@@ -353,7 +438,7 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 				if ((doNonWild &&
 				    !(e->flags & (MIN_STAR|HR_STAR))) || 
 				    (doWild && (e->flags & (MIN_STAR|HR_STAR))))
-					job_add(e, u);
+					job_add(e, u);	/*will add job, if it isn't in queue already for NOW.*/
 			}
 		}
 	}
@@ -409,7 +494,8 @@ cron_sleep(int target, cron_db *db) {
 		 */
 		if (got_sighup) {
 			got_sighup = 0;
-			db->mtime = (time_t) 0;
+			if (!inotify_enabled)
+				db->mtime = (time_t) 0;
 			log_close();
 		}
 		if (got_sigchld) {

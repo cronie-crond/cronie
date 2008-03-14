@@ -30,6 +30,18 @@ static char rcsid[] = "$Id: database.c,v 1.7 2004/01/23 18:56:42 vixie Exp $";
 
 #define TMAX(a,b) ((a)>(b)?(a):(b))
 
+/* size of the event structure, not counting name */
+#define EVENT_SIZE  (sizeof (struct inotify_event))
+
+/* reasonable guess as to size of 1024 events */
+#define BUF_LEN 	(1024 * (EVENT_SIZE + 16))
+
+#if defined WITH_INOTIFY
+/* state say if we change the crontable */
+#define RELOAD		1
+void unlink_inotify_database(cron_db *, cron_db , int);
+#endif
+
 static	void		process_crontab(const char *, const char *,
 					const char *, struct stat *,
 					cron_db *, cron_db *);
@@ -39,6 +51,275 @@ static int not_a_crontab( DIR_T *dp );
 
 static void max_mtime( char *dir_name, struct stat *max_st ); 
 /* record max mtime of any file under dir_name in max_st */
+
+#if defined WITH_INOTIFY
+void
+process_inotify_crontab(const char *uname, const char *fname, const char *tabname,
+	cron_db *new_db, cron_db *old_db, int fd, int state) {
+	struct passwd *pw = NULL;
+	int crontab_fd = OK - 1;
+	user *u;
+	int crond_crontab = (fname == NULL) && (strcmp(tabname, SYSCRONTAB) != 0);
+
+	if (fname == NULL) {
+		/* must be set to something for logging purposes.
+		*/
+		fname = "*system*";
+	} else if ((pw = getpwnam(uname)) == NULL) {
+		/* file doesn't have a user in passwd file.
+		*/
+		log_it("CRON", getpid(), "ORPHAN", "no passwd entry");
+		goto next_crontab;
+	}
+
+/* need to rewrite this part because of statbuf related to stat'ing */
+/*
+	if (PermitAnyCrontab == 0) {
+	}
+*/
+	Debug(DLOAD, ("\t%s:", fname))
+	u = find_user(old_db, fname, crond_crontab ? tabname : NULL );	/* goes only through database in memory */
+
+	/* in first run is database empty and we need jump this section */
+	if (u != NULL) {
+		/* if crontab has not changed since we last read it
+		* in, then we can just use our existing entry.
+		*/
+		/* 6 because we want string reload or none */
+		if (state != RELOAD) {
+			Debug(DLOAD, (" [no change, using old data]"))
+			unlink_user(old_db, u);
+			link_user(new_db, u);
+			goto next_crontab;
+		}
+		/* before we fall through to the code that will reload
+		* the user, let's deallocate and unlink the user in
+		* the old database.  This is more a point of memory
+		* efficiency than anything else, since all leftover
+		* users will be deleted from the old database when
+		* we finish with the crontab...
+		*/
+
+		Debug(DLOAD, (" [delete old data]"))
+		unlink_user(old_db, u);
+		free_user(u);
+		Debug(DSCH, ("RELOAD %s\n", tabname))
+	}
+	if ((crontab_fd = open(tabname, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0)) < OK) {
+		log_it("CRON", getpid(), "CAN'T OPEN", tabname);
+		goto next_crontab;
+	}
+
+	u = load_user(crontab_fd, pw, uname, fname, tabname);	/* touch the disk */
+	if (u != NULL)
+		link_user(new_db, u);
+
+  next_crontab:
+	if (crontab_fd >= OK) {
+		Debug(DLOAD, (" [done]\n"))
+		close(crontab_fd);
+	}
+}
+
+void
+load_inotify_database(cron_db *old_db, int fd) {
+	cron_db new_db;
+	DIR_T *dp;
+	DIR *dir;
+
+	new_db.head = new_db.tail = NULL;
+	process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, RELOAD);
+
+	/* RH_CROND_DIR /etc/cron.d */
+	if (!(dir = opendir(RH_CROND_DIR))) {
+		log_it("CRON", getpid(), "OPENDIR FAILED", RH_CROND_DIR);
+		(void) exit(ERROR_EXIT);
+	}
+	while (NULL != (dp = readdir(dir))) {
+		char tabname[MAXNAMLEN+1];
+
+		if (not_a_crontab(dp))
+			continue;
+
+		if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
+			continue;
+		
+		process_inotify_crontab("root", NULL, tabname, &new_db, old_db, fd, RELOAD);
+	}
+	closedir(dir);
+	/* SPOOL_DIR */
+	if (!(dir = opendir(SPOOL_DIR))) {
+		syslog(LOG_INFO, "CRON: OPENDIR FAILED %s", SPOOL_DIR);
+		(void) exit(ERROR_EXIT);
+	}
+
+	while (NULL != (dp = readdir(dir))) {
+		char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
+
+		if (not_a_crontab(dp))
+			continue;
+
+		strncpy(fname, dp->d_name, MAXNAMLEN);
+
+		if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
+			continue;
+
+		process_inotify_crontab(fname, fname, tabname, &new_db, old_db, fd, RELOAD);
+	}
+	closedir(dir);
+
+	unlink_inotify_database(old_db, new_db, fd);
+}
+
+void
+check_inotify_database(cron_db *old_db, int fd) {
+	cron_db new_db;
+	DIR_T *dp;
+	DIR *dir;
+	struct timeval time;
+	fd_set rfds;
+	int retval = 0;
+	char buf[BUF_LEN];
+
+	time.tv_sec = 1;
+	time.tv_usec = 0;
+
+	FD_ZERO(&rfds);
+	FD_SET(fd, &rfds);
+
+	retval = select(fd + 1, &rfds, NULL, NULL, &time);
+	if (retval == -1) {
+		perror("select()");
+		syslog(LOG_INFO, "CRON: select failed: %s", strerror(errno));
+	}
+	else if (FD_ISSET(fd, &rfds)) {
+		new_db.head = new_db.tail = NULL;
+		if (read(fd, buf, sizeof(buf)) == -1)
+			log_it("CRON", getpid(), "reading problem",buf);
+		process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, RELOAD);
+
+		if (!(dir = opendir(RH_CROND_DIR))) {
+			log_it("CRON", getpid(), "OPENDIR FAILED", RH_CROND_DIR);
+			(void) exit(ERROR_EXIT);
+		}
+		while (NULL != (dp = readdir(dir))) {
+			char tabname[MAXNAMLEN+1];
+
+			if (not_a_crontab(dp))
+				continue;
+
+			if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
+				continue;
+			process_inotify_crontab("root", NULL, tabname, &new_db, old_db, fd, RELOAD);
+		}
+		closedir(dir);
+
+		if (!(dir = opendir(SPOOL_DIR))) {
+			syslog(LOG_INFO, "CRON: OPENDIR FAILED %s", SPOOL_DIR);
+			(void) exit(ERROR_EXIT);
+		}
+		while (NULL != (dp = readdir(dir))) {
+			char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
+
+			if (not_a_crontab(dp))
+				continue;
+
+			strncpy(fname, dp->d_name, MAXNAMLEN);
+
+			if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, dp->d_name, '/'))
+				continue;
+			process_inotify_crontab(fname, fname, tabname, &new_db, old_db, fd, RELOAD);
+		}
+		closedir(dir);
+	}
+	else {
+		new_db.head = new_db.tail = NULL;
+		process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, !RELOAD);
+		if (!(dir = opendir(RH_CROND_DIR))) {
+			log_it("CRON", getpid(), "OPENDIR FAILED", RH_CROND_DIR);
+			(void) exit(ERROR_EXIT);
+		}
+
+		while (NULL != (dp = readdir(dir))) {
+			char tabname[MAXNAMLEN+1];
+
+			if (not_a_crontab(dp))
+				continue;
+
+			if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
+				continue;
+			process_inotify_crontab("root", NULL, tabname, &new_db, old_db, fd, !RELOAD);
+		}
+		closedir(dir);
+
+		if (!(dir = opendir(SPOOL_DIR))) {
+			syslog(LOG_INFO, "CRON: OPENDIR FAILED %s", SPOOL_DIR);
+			(void) exit(ERROR_EXIT);
+		}
+
+		while (NULL != (dp = readdir(dir))) {
+			char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
+
+			if (not_a_crontab(dp))
+				continue;
+
+			strncpy(fname, dp->d_name, MAXNAMLEN);
+
+			if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
+				continue;
+
+			process_inotify_crontab(fname, fname, tabname, &new_db, old_db, fd, !RELOAD);
+		}
+		closedir(dir);
+	}
+	FD_CLR(fd, &rfds);
+
+	unlink_inotify_database(old_db, new_db, fd);
+}
+
+void
+unlink_inotify_database(cron_db *old_db, cron_db new_db, int fd) {
+	user *u, *nu;
+	/* whatever's left in the old database is now junk.
+	*/
+	Debug(DLOAD, ("unlinking old database:\n"))
+	for (u = old_db->head;  u != NULL;  u = nu) {
+		Debug(DLOAD, ("\t%s\n", u->name))
+		nu = u->next;
+		unlink_user(old_db, u);
+		free_user(u);
+	}
+
+	/* overwrite the database control block with the new one.
+	*/
+	*old_db = new_db;
+	Debug(DLOAD, ("load_database is done\n"))
+}
+
+/*void
+read_dir(char *dir_name, cron_db *new_db, cron_db *old_db, int fd, int state) {
+	DIR *dir;
+	DIR_T *dp;
+
+	if (!(dir = opendir(dir_name))) {
+		syslog(LOG_INFO, "CRON: OPENDIR FAILED %s", dir_name);
+		(void) exit(ERROR_EXIT);
+	}
+
+	while (NULL != (dp = readdir(dir))) {
+		char tabname[MAXNAMLEN+1];
+
+	    if (not_a_crontab(dp))
+			continue;
+		
+		if (!glue_strings(tabname, sizeof tabname, dir_name, dp->d_name, '/'))
+			continue;
+		process_inotify_crontab("root", NULL, tabname, &new_db, old_db, fd, state);
+	}
+	closedir(dir);
+}
+*/
+#endif
 
 void
 load_database(cron_db *old_db) {

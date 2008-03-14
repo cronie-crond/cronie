@@ -27,6 +27,7 @@
 #include <sys/wait.h>
 #include <sys/fcntl.h>
 #include <sys/file.h>
+/* stat is used even, when --with-inotify */
 #include <sys/stat.h>
 
 #include <bitstring.h>
