@@ -73,22 +73,26 @@ set_cron_watched(int fd) {
     if (wd4 < 0)
         log_it("CRON",getpid(),"This file can't be watched ",strerror(errno));
 
-    if (wd1 <0 || wd2<0 || wd3<0 || wd4<0) {
+	if (wd1 <0 || wd2<0 || wd3<0 || wd4<0) {
 		inotify_enabled = 0;
-        syslog(LOG_INFO, "CRON (%s) ERROR: run without inotify support");
-    }
-    else
-    	inotify_enabled = 1;
+		syslog(LOG_INFO, "CRON (%s) ERROR: run without inotify support");
+	}
+	else
+		inotify_enabled = 1;
 }
 
 void
 set_cron_unwatched(int fd) {
     int ret1, ret2, ret3, ret4;
 
-    ret1 = inotify_rm_watch(fd, wd1);
-    ret2 = inotify_rm_watch(fd, wd2);
-    ret3 = inotify_rm_watch(fd, wd3);
-    ret4 = inotify_rm_watch(fd, wd4);
+	if (wd1 >= 0)
+		ret1 = inotify_rm_watch(fd, wd1);
+	if (wd2 >= 0)
+		ret2 = inotify_rm_watch(fd, wd2);
+	if (wd3 >= 0)
+		ret3 = inotify_rm_watch(fd, wd3);
+	if (wd4 >= 0)
+		ret4 = inotify_rm_watch(fd, wd4);
 }
 #endif
 
@@ -114,7 +118,7 @@ main(int argc, char *argv[]) {
 	int fildes;
 	fildes = inotify_init();
 	if (fildes < 0)
-		perror ("inotify_init");
+		syslog(LOG_ERR, "Inotify init failed %m");
 #endif
 
 	ProgramName = argv[0];
@@ -190,14 +194,10 @@ main(int argc, char *argv[]) {
 				if (fd != STDERR)
 					(void) close(fd);
 			}
-			if (inotify_enabled) {
-#if defined WITH_INOTIFY
+			if (inotify_enabled) 
 				log_it("CRON",getpid(),"STARTUP INOTIFY",PACKAGE_VERSION);
-#endif
-			}
-			else {
+			else 
 				log_it("CRON",getpid(),"STARTUP",PACKAGE_VERSION);
-			}
 			break;
 		default:
 			/* parent process should just die */
@@ -356,13 +356,16 @@ main(int argc, char *argv[]) {
 			sigchld_reaper();
 		}
 	}
+	/* here stay ifdef, because some of the watches can be used even
+ 	* if inotify is disabled 
+ 	*/
 #if defined WITH_INOTIFY
 	set_cron_unwatched(fildes);
 
 	int ret;
 	ret = close(fildes);
 	if (ret)
-       perror ("close");
+		syslog(LOG_ERR, "Inotify can't remove watches %m");
 #endif
 }
 
