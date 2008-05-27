@@ -319,57 +319,6 @@ static int cron_get_job_range(user *u, security_context_t *ucontextp, char **job
 }
 #endif
 
-int cron_change_selinux_context(user *u, void *scontext, void *file_context) {
-#ifdef WITH_SELINUX
-	if (is_selinux_enabled() <= 0)
-		return 0;
-
-	if (scontext == 0L) {
-		if (security_getenforce() > 0) { 
-			log_it( u->name, getpid(), "NULL security context for user", "");
-			return -1;
-		} 
-		else {
-			log_it( u->name, getpid(), 
-				"NULL security context for user, "
-				"but SELinux in permissive mode, continuing",
-				"");
-			return 0;
-		}
-	}
-	
-	if (file_context) {
-		if (!cron_authorize_context( scontext, file_context)) {
-			if (security_getenforce() > 0) {
-				syslog(LOG_ERR,
-				       "CRON (%s) ERROR:"
-				       "Unauthorized exec context to SELINUX_ROLE_TYPE %s for user", 
-				       u->name, (char*)scontext);
-				return -1;
-			}
-			else {
-				syslog(LOG_INFO,
-				       "CRON (%s) WARNING:"
-				       "Unauthorized exec context to SELINUX_ROLE_TYPE %s for user,"
-				       " but SELinux in permissive mode, continuing", 
-				       u->name, (char*)scontext);
-			}
-		}
-	}
-
-	if (setexeccon(scontext) < 0) { 
-		if (security_getenforce() > 0) {
-			syslog(LOG_ERR,
-			       "CRON (%s) ERROR:"
-			       "Could not set exec context to %s for user", 
-			       u->name, (char*)scontext);
-			return -1;
-		}
-	}
-#endif
-	return 0;
-}
-
 #ifdef WITH_SELINUX
 static int cron_change_selinux_range(user *u,security_context_t ucontext) {
 	if (is_selinux_enabled() <= 0)
