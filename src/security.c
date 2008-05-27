@@ -370,7 +370,7 @@ static int cron_change_selinux_range(user *u,security_context_t ucontext) {
 		}
 	}
 
-	if (setexeccon(ucontext) < 0) {
+	if ((setexeccon(ucontext) < 0) && (setkeycreatecon(ucontext))) {
 		if (security_getenforce() > 0) {
 			syslog(LOG_ERR,
 			       "CRON (%s) ERROR:"
