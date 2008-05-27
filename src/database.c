@@ -59,7 +59,32 @@ process_inotify_crontab(const char *uname, const char *fname, const char *tabnam
 	struct passwd *pw = NULL;
 	int crontab_fd = OK - 1;
 	user *u;
+	struct stat statbuf;
 	int crond_crontab = (fname == NULL) && (strcmp(tabname, SYSCRONTAB) != 0);
+
+#define	permission if ( PermitAnyCrontab == 0 ) { \
+			if (stat(tabname, &statbuf) < OK) { \
+				log_it("CRON", getpid(), "STAT FAILED", tabname); \
+				goto next_crontab; \
+			} \
+			if (!S_ISREG(statbuf.st_mode)) { \
+				syslog(LOG_INFO, "NOT REGULAR %s", tabname); \
+				goto next_crontab; \
+			} \
+	    	if ((statbuf.st_mode & 07533) != 0400) { \
+		    	log_it(fname, getpid(), "BAD FILE MODE", tabname); \
+		    	goto next_crontab; \
+	    	} \
+	    	if (statbuf.st_uid != ROOT_UID && (pw == NULL || \
+			statbuf.st_uid != &(pw->pw_uid) || strcmp(uname, pw->pw_name) != 0)) { \
+		    	log_it(fname, getpid(), "WRONG FILE OWNER", tabname); \
+		    	goto next_crontab; \
+	    	} \
+	    	if (pw && statbuf.st_nlink != 1) { \
+		    	log_it(fname, getpid(), "BAD LINK COUNT", tabname); \
+		    	goto next_crontab; \
+	    	} \
+		}
 
 	if (fname == NULL) {
 		/* must be set to something for logging purposes.
@@ -71,17 +96,14 @@ process_inotify_crontab(const char *uname, const char *fname, const char *tabnam
 		log_it("CRON", getpid(), "ORPHAN", "no passwd entry");
 		goto next_crontab;
 	}
-
-/* need to rewrite this part because of statbuf related to stat'ing */
-/*
-	if (PermitAnyCrontab == 0) {
-	}
-*/
+	
 	Debug(DLOAD, ("\t%s:", fname))
 	u = find_user(old_db, fname, crond_crontab ? tabname : NULL );	/* goes only through database in memory */
 
-	/* in first run is database empty and we need jump this section */
-	if (u != NULL) {
+	/* in first run is database empty. Check permission when -p ISN'T used. */
+	if (u == NULL)
+		permission;
+	else {		/* second and other runs */
 		/* if crontab has not changed since we last read it
 		* in, then we can just use our existing entry.
 		*/
@@ -99,17 +121,19 @@ process_inotify_crontab(const char *uname, const char *fname, const char *tabnam
 		* users will be deleted from the old database when
 		* we finish with the crontab...
 		*/
+		permission;
 
 		Debug(DLOAD, (" [delete old data]"))
 		unlink_user(old_db, u);
 		free_user(u);
 		Debug(DSCH, ("RELOAD %s\n", tabname))
 	}
+	/* open again because in the first run, we haven't fd */
+	/* we handle fd here, because we wan't touch disk earlier without reason */
 	if ((crontab_fd = open(tabname, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0)) < OK) {
-		log_it("CRON", getpid(), "CAN'T OPEN", tabname);
-		goto next_crontab;
+			log_it("CRON", getpid(), "CAN'T OPEN", tabname);
+			goto next_crontab;
 	}
-
 	u = load_user(crontab_fd, pw, uname, fname, tabname);	/* touch the disk */
 	if (u != NULL)
 		link_user(new_db, u);

@@ -57,19 +57,19 @@ void
 set_cron_watched(int fd) {
     int ret1, ret2, ret3;
 
-    wd1 = inotify_add_watch(fd, CRONDIR, IN_MODIFY | IN_DELETE | IN_CREATE);
+    wd1 = inotify_add_watch(fd, CRONDIR, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
     if (wd1 < 0) 
         log_it("CRON",getpid(),"This directory can't be watched",strerror(errno));
 
-    wd2 = inotify_add_watch(fd, RH_CROND_DIR, IN_MODIFY | IN_DELETE | IN_CREATE);
+    wd2 = inotify_add_watch(fd, RH_CROND_DIR, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
     if (wd2 < 0) 
         log_it("CRON",getpid(),"This directory can't be watched",strerror(errno));
 
-    wd3 = inotify_add_watch(fd, SYSCRONTAB, IN_MODIFY | IN_DELETE | IN_CREATE);
+    wd3 = inotify_add_watch(fd, SYSCRONTAB, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
     if (wd3 < 0) 
         log_it("CRON",getpid(),"This file can't be watched ",strerror(errno));
 
-    wd4 = inotify_add_watch(fd, "/var/spool/cron/", IN_MODIFY | IN_DELETE | IN_CREATE);
+    wd4 = inotify_add_watch(fd, "/var/spool/cron/", IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
     if (wd4 < 0)
         log_it("CRON",getpid(),"This file can't be watched ",strerror(errno));
 
