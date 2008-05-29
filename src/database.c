@@ -53,38 +53,55 @@ static void max_mtime( char *dir_name, struct stat *max_st );
 /* record max mtime of any file under dir_name in max_st */
 
 #if defined WITH_INOTIFY
+int
+check_open(const char *tabname, const char *fname, const char *uname,
+		struct passwd *pw) {
+	struct stat statbuf;
+	int crontab_fd;
+
+	if ((crontab_fd = open(tabname, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0)) == -1) {
+		log_it("CRON", getpid(), "CAN'T OPEN", tabname);
+		return(-1);
+	}
+	if (PermitAnyCrontab == 0) {
+		if (fstat(crontab_fd, &statbuf) < OK) {
+			log_it("CRON", getpid(), "STAT FAILED", tabname);
+			close(crontab_fd);
+			return(-1);
+		}
+		if (!S_ISREG(statbuf.st_mode)) {
+			syslog(LOG_INFO, "NOT REGULAR %s", tabname);
+			close(crontab_fd);
+			return(-1);
+		}
+		if ((statbuf.st_mode & 07533) != 0400) {
+			log_it(fname, getpid(), "BAD FILE MODE", tabname);
+			close(crontab_fd);
+			return(-1);
+		}
+		if (statbuf.st_uid != ROOT_UID && (pw == NULL ||
+			statbuf.st_uid != pw->pw_uid || strcmp(uname, pw->pw_name) != 0)) {
+			log_it(fname, getpid(), "WRONG FILE OWNER", tabname);
+			close(crontab_fd);
+			return(-1);
+		}
+		if (pw && statbuf.st_nlink != 1) {
+			log_it(fname, getpid(), "BAD LINK COUNT", tabname);
+			close(crontab_fd);
+			return(-1);
+		}
+	}
+	return(crontab_fd);
+}
+
 void
 process_inotify_crontab(const char *uname, const char *fname, const char *tabname,
 	cron_db *new_db, cron_db *old_db, int fd, int state) {
 	struct passwd *pw = NULL;
-	int crontab_fd = OK - 1;
+	int crontab_fd = -1;
 	user *u;
 	struct stat statbuf;
 	int crond_crontab = (fname == NULL) && (strcmp(tabname, SYSCRONTAB) != 0);
-
-#define	permission if ( PermitAnyCrontab == 0 ) { \
-			if (stat(tabname, &statbuf) < OK) { \
-				log_it("CRON", getpid(), "STAT FAILED", tabname); \
-				goto next_crontab; \
-			} \
-			if (!S_ISREG(statbuf.st_mode)) { \
-				syslog(LOG_INFO, "NOT REGULAR %s", tabname); \
-				goto next_crontab; \
-			} \
-	    	if ((statbuf.st_mode & 07533) != 0400) { \
-		    	log_it(fname, getpid(), "BAD FILE MODE", tabname); \
-		    	goto next_crontab; \
-	    	} \
-	    	if (statbuf.st_uid != ROOT_UID && (pw == NULL || \
-			statbuf.st_uid != &(pw->pw_uid) || strcmp(uname, pw->pw_name) != 0)) { \
-		    	log_it(fname, getpid(), "WRONG FILE OWNER", tabname); \
-		    	goto next_crontab; \
-	    	} \
-	    	if (pw && statbuf.st_nlink != 1) { \
-		    	log_it(fname, getpid(), "BAD LINK COUNT", tabname); \
-		    	goto next_crontab; \
-	    	} \
-		}
 
 	if (fname == NULL) {
 		/* must be set to something for logging purposes.
@@ -101,8 +118,10 @@ process_inotify_crontab(const char *uname, const char *fname, const char *tabnam
 	u = find_user(old_db, fname, crond_crontab ? tabname : NULL );	/* goes only through database in memory */
 
 	/* in first run is database empty. Check permission when -p ISN'T used. */
-	if (u == NULL)
-		permission;
+	if (u == NULL) {
+		if ((crontab_fd = check_open(tabname, fname, uname, pw)) == -1)
+			goto next_crontab;
+	}
 	else {		/* second and other runs */
 		/* if crontab has not changed since we last read it
 		* in, then we can just use our existing entry.
@@ -121,25 +140,20 @@ process_inotify_crontab(const char *uname, const char *fname, const char *tabnam
 		* users will be deleted from the old database when
 		* we finish with the crontab...
 		*/
-		permission;
+		if ((crontab_fd = check_open(tabname, fname, uname, pw)) == -1)
+			goto next_crontab;
 
 		Debug(DLOAD, (" [delete old data]"))
 		unlink_user(old_db, u);
 		free_user(u);
 		Debug(DSCH, ("RELOAD %s\n", tabname))
 	}
-	/* open again because in the first run, we haven't fd */
-	/* we handle fd here, because we wan't touch disk earlier without reason */
-	if ((crontab_fd = open(tabname, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0)) < OK) {
-			log_it("CRON", getpid(), "CAN'T OPEN", tabname);
-			goto next_crontab;
-	}
 	u = load_user(crontab_fd, pw, uname, fname, tabname);	/* touch the disk */
 	if (u != NULL)
 		link_user(new_db, u);
 
   next_crontab:
-	if (crontab_fd >= OK) {
+	if (crontab_fd != -1) {
 		Debug(DLOAD, (" [done]\n"))
 		close(crontab_fd);
 	}
