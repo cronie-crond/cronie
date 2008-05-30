@@ -1,3 +1,87 @@
+2008-05-30  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* cronie.init: Init script die faster, if the sysconfig script is
+	missing. Patch from scop.
+
+2008-05-29  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/database.c: Function instead of macro. Code cleaning.
+
+2008-05-27  Marcela <marca@caladan.englab.brq.redhat.com>
+
+	* man/crontab.1: Man: crontab.1 TMP directory could be set in
+	eviroment instead of /tmp.
+
+2008-05-27  Marcela <marca@caladan.englab.brq.redhat.com>
+
+	* src/security.c: Keyring will be created after restart of computer
+	and services won't be dying on selinux denial. The reason for this
+	change was pam-devels update.
+
+2008-05-27  Marcela <marca@caladan.englab.brq.redhat.com>
+
+	* src/funcs.h, src/security.c: Remove unused function.
+
+2008-05-27  Marcela <marca@caladan.englab.brq.redhat.com>
+
+	* src/cron.c, src/database.c: Permission of crontabs are checked in
+	case we AREN'T using -p option.
+
+2008-03-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c: Better testing, when we are closing watches.
+
+2008-03-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac, src/cron.c, src/cron.h, src/crontab.c,
+	src/database.c, src/externs.h, src/funcs.h, src/structs.h: Rewrited
+	inotify support.
+
+2008-01-31  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/security.c, src/user.c: Using get_default_context() for name =
+	NULL instead of getseuserbyname because files created in
+	/var/spool/cron hadn't wrong context. rhbz#426704
+
+2008-01-31  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* .gitignore, Makefile.am, crond.pam, man/bitstring.3, man/cron.8,
+	man/crontab.1, man/crontab.5, pam/crond: Stepan Kasal: create pam's
+	own directory for pam configure. Create correct man pages in man
+	directory. Add .gitignore file.
+
+2008-01-30  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* Makefile.am, config.h, config.h.in, configure.ac,
+	man/Makefile.am, man/bitstring.3.in, man/cron.8.in, man/crond.8.in,
+	man/crontab.1.in, man/crontab.5.in, src/.deps/cron.Po,
+	src/.deps/crontab.Po, src/.deps/database.Po, src/.deps/debug.Po,
+	src/.deps/do_command.Po, src/.deps/entry.Po, src/.deps/env.Po,
+	src/.deps/job.Po, src/.deps/misc.Po, src/.deps/popen.Po,
+	src/.deps/pw_dup.Po, src/.deps/security.Po, src/.deps/user.Po,
+	src/Makefile.am, src/cron.c, src/crontab.c, src/database.c,
+	src/do_command.c, src/entry.c, src/env.c, src/job.c, src/misc.c,
+	src/popen.c, src/pw_dup.c, src/security.c, src/user.c, stamp-h1: 
+	Added patch from Stepan Kasal, which fixed all autotools issues.
+	Also the pam's configure file is now installed directly into correct
+	path, if it's configure runned with pam.
+
+2008-01-17  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* CHANGES, COPYING, ChangeLog, INSTALL, LICENSE, Makefile,
+	Makefile.am, Makefile.in, NEWS, README, aclocal.m4,
+	autom4te.cache/output.0, autom4te.cache/output.1,
+	autom4te.cache/requests, autom4te.cache/traces.0,
+	autom4te.cache/traces.1, config.guess, config.h, config.log,
+	config.status, config.sub, configure, configure.ac, cronie.init,
+	depcomp, install-sh, man/Makefile, man/Makefile.am,
+	man/Makefile.in, man/bitstring.3, man/cron.8, man/crond.8,
+	man/crontab.1, man/crontab.5, missing, src/Makefile,
+	src/Makefile.am, src/Makefile.in, vixie-cron.init: Cleaning git from
+	unnecessary files, which were generated from autotools. Add files or
+	rename according to autotools custom practice.  There were also
+	alternation of configure and makefiles.
+
 2008-01-09  Marcela Maslanova <marca@caladan.englab.brq.redhat.com>
 
 	* Makefile, config.h, config.log, config.status, man/Makefile,
