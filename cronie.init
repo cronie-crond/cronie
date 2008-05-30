@@ -11,6 +11,10 @@
 # config: /etc/crontab
 # pidfile: /var/run/crond.pid
 
+[ -f /etc/sysconfig/crond ] || { 
+    [ "$1" = "status" ] && exit 4 || exit 6 
+}
+
 RETVAL=0
 prog="crond"
 CROND=/usr/sbin/crond
@@ -21,8 +25,6 @@ LOCK_FILE=/var/lock/subsys/crond
 
 # set sysconfig settings
 [ -f /etc/sysconfig/crond ] && . /etc/sysconfig/crond
-
-[ -f /etc/sysconfig/crond ] || exit 6
 
 # validate mail
 t=${CRON_VALIDATE_MAILRCPTS:-UNSET}
