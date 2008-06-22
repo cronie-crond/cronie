@@ -80,7 +80,7 @@ FILE		*cron_popen(char *, const char *, struct passwd *);
 
 struct passwd	*pw_dup(const struct passwd *);
 
-#ifndef HAVE_TM_GMTOFF
+#ifndef HAVE_STRUCT_TM_TM_GMTOFF
 long		get_gmtoff(time_t *, struct tm *);
 #endif
 

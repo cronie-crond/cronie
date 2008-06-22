@@ -757,7 +757,7 @@ strlens(const char *last, ...) {
  *	clobbers the static storage space used by localtime() and gmtime().
  *	If the local pointer is non-NULL it *must* point to a local copy.
  */
-#ifndef HAVE_TM_GMTOFF
+#ifndef HAVE_STRUCT_TM_TM_GMTOFF
 long get_gmtoff(time_t *clock, struct tm *local)
 {
 	struct tm gmt;
@@ -783,4 +783,4 @@ long get_gmtoff(time_t *clock, struct tm *local)
 
 	return (offset);
 }
-#endif /* HAVE_TM_GMTOFF */
+#endif /* HAVE_STRUCT_TM_TM_GMTOFF */

@@ -49,7 +49,7 @@ AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_STRUCT_TM
-
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 
 dnl Checking for programs
 
@@ -203,8 +203,6 @@ AC_DEFINE(MAILFMT,"%s -FCronDaemon -i -odi -oem -oi -t",
 AC_DEFINE(SYSLOG,1,[Using syslog for log messages.])
 
 AC_DEFINE(CAPITALIZE_FOR_PS, 1, [if you have a tm_gmtoff member in struct tm])
-
-AC_DEFINE(HAVE_TM_GMTOFF, 1, [if your OS supports a BSD-style login.conf fil])
 
 ##AC_DEFINE(LOGIN_CAP, 1, [if your OS supports BSD authentication])
 

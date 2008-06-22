@@ -91,7 +91,7 @@
 			 LineNumber = ln; \
 			}
 
-#ifdef HAVE_TM_GMTOFF
+#ifdef HAVE_STRUCT_TM_TM_GMTOFF
 #define	get_gmtoff(c, t)	((t)->tm_gmtoff)
 #endif
 
