@@ -47,48 +47,56 @@ static	int			timeRunning, virtualTime, clockTime;
 static	long			GMToff;
 
 #if defined WITH_INOTIFY
-int wd1, wd2, wd3, wd4;
 
-void
-set_cron_watched(int fd) {
-    pid_t pid = getpid();
+#define NUM_WATCHES 3
 
-    wd1 = inotify_add_watch(fd, CRONDIR, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
-    if (wd1 < 0) 
-        log_it("CRON", pid, "This directory can't be watched", CRONDIR, errno);
-
-    wd2 = inotify_add_watch(fd, RH_CROND_DIR, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
-    if (wd2 < 0) 
-        log_it("CRON", pid, "This directory can't be watched", RH_CROND_DIR, errno);
-
-    wd3 = inotify_add_watch(fd, SYSCRONTAB, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
-    if (wd3 < 0) 
-        log_it("CRON", pid, "This file can't be watched", SYSCRONTAB, errno);
-
-    wd4 = inotify_add_watch(fd, "/var/spool/cron/", IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
-    if (wd4 < 0)
-        log_it("CRON", pid, "This directory can't be watched", "/var/spool/cron", errno);
-
-	if (wd1 <0 || wd2<0 || wd3<0 || wd4<0) {
-		inotify_enabled = 0;
-		log_it("CRON", pid, "INFO", "running without inotify support", 0);
-	}
-	else
-		inotify_enabled = 1;
-}
+int wd[NUM_WATCHES];
+const char *watchpaths[NUM_WATCHES] = { SPOOL_DIR, RH_CROND_DIR, SYSCRONTAB };
 
 void
 set_cron_unwatched(int fd) {
-    int ret1, ret2, ret3, ret4;
+	int i;
+	
+	for (i = 0; i < sizeof(wd)/sizeof(wd[0]); ++i) {
+		if (wd[i] < 0) {
+			inotify_rm_watch(fd, wd[i]);
+			wd[i] = -1;
+		}
+	}
+}
 
-	if (wd1 >= 0)
-		ret1 = inotify_rm_watch(fd, wd1);
-	if (wd2 >= 0)
-		ret2 = inotify_rm_watch(fd, wd2);
-	if (wd3 >= 0)
-		ret3 = inotify_rm_watch(fd, wd3);
-	if (wd4 >= 0)
-		ret4 = inotify_rm_watch(fd, wd4);
+void
+set_cron_watched(int fd) {
+	pid_t pid = getpid();
+	int i;
+
+	if (fd < 0) {
+		inotify_enabled = 0;
+		return;
+	}
+
+	for (i = 0; i < sizeof(wd)/sizeof(wd[0]); ++i) {
+		int w;
+
+		w = inotify_add_watch(fd, watchpaths[i],
+			IN_CLOSE_WRITE | IN_ATTRIB | IN_MOVED_TO | IN_MOVED_FROM | IN_MOVE_SELF | IN_DELETE);
+		if (w < 0) {
+			if (wd[i] != -1) {
+        			log_it("CRON", pid, "This directory or file can't be watched", watchpaths[i], errno);
+				log_it("CRON", pid, "INFO", "running without inotify support", 0);
+			}
+			inotify_enabled = 0;
+			set_cron_unwatched(fd);
+			return;
+		}
+		wd[i] = w;
+	}
+
+	if (!inotify_enabled) {
+		log_it("CRON", pid, "INFO", "running with inotify support", 0);
+	}
+
+	inotify_enabled = 1;
 }
 #endif
 
@@ -110,12 +118,8 @@ main(int argc, char *argv[]) {
 	int fd;
 	char *cs;
 	pid_t pid = getpid();
-
 #if defined WITH_INOTIFY
-	int fildes;
-	fildes = inotify_init();
-	if (fildes < 0)
-		log_it("CRON", pid, "INFO", "Inotify init failed", errno);
+	int i;
 #endif
 
 	ProgramName = argv[0];
@@ -146,9 +150,6 @@ main(int argc, char *argv[]) {
 
 	acquire_daemonlock(0);
 	set_cron_uid();
-#if defined WITH_INOTIFY
-	set_cron_watched(fildes);
-#endif
 	set_cron_cwd();
 
 	if (putenv("PATH="_PATH_DEFPATH) < 0) {
@@ -191,10 +192,7 @@ main(int argc, char *argv[]) {
 				if (fd != STDERR)
 					(void) close(fd);
 			}
-			if (inotify_enabled) 
-				log_it("CRON", getpid(), "STARTUP INOTIFY", PACKAGE_VERSION, 0);
-			else 
-				log_it("CRON", getpid(), "STARTUP", PACKAGE_VERSION, 0);
+			log_it("CRON", getpid(), "STARTUP", PACKAGE_VERSION, 0);
 			break;
 		default:
 			/* parent process should just die */
@@ -202,18 +200,28 @@ main(int argc, char *argv[]) {
 		}
 	}
 
+	pid = getpid();
 	acquire_daemonlock(0);
 	database.head = NULL;
 	database.tail = NULL;
-	if (inotify_enabled) {
+	database.mtime = (time_t) 0;
+
+	load_database(&database);
+
 #if defined WITH_INOTIFY
-		load_inotify_database(&database, fildes);
+	for (i = 0; i < sizeof(wd)/sizeof(wd[0]); ++i) {
+		/* initialize to negative number other than -1
+		 * so an eventual error is reported for the first time
+		 */
+		wd[i] = -2;
+	}
+
+	fd = inotify_init();
+	if (fd < 0)
+		log_it("CRON", pid, "INFO", "Inotify init failed", errno);
+	set_cron_watched(fd);
 #endif
-	}
-	else {
-		database.mtime = (time_t) 0;
-		load_database(&database);
-	}
+
 	set_time(TRUE);
 	run_reboot_jobs(&database);
 	timeRunning = virtualTime = clockTime;
@@ -246,12 +254,17 @@ main(int argc, char *argv[]) {
 		timeDiff = timeRunning - virtualTime;
 		if (inotify_enabled) {
 #if defined WITH_INOTIFY
-			check_inotify_database(&database, fildes);
+			check_inotify_database(&database, fd);
 #endif
 		}
-		else
+		else {
 			load_database(&database);
-
+#if defined WITH_INOTIFY
+			/* try reinstating the watches */
+			set_cron_watched(fd);
+#endif			
+		}
+		
 		/* shortcut for the most common case */
 		if (timeDiff == 1) {
 			virtualTime = timeRunning;
@@ -275,7 +288,7 @@ main(int argc, char *argv[]) {
 				 * minute until caught up.
 				 */
 				Debug(DSCH, ("[%ld], normal case %d minutes to go\n",
-				    (long)getpid(), timeDiff))
+				    (long)pid, timeDiff))
 				do {
 					if (job_runqueue())
 						sleep(10);
@@ -297,7 +310,7 @@ main(int argc, char *argv[]) {
 				 * housekeeping.
 				 */
 				Debug(DSCH, ("[%ld], DST begins %d minutes to go\n",
-				    (long)getpid(), timeDiff))
+				    (long)pid, timeDiff))
 				/* run wildcard jobs for current minute */
 				find_jobs(timeRunning, &database, TRUE, FALSE);
 	
@@ -323,7 +336,7 @@ main(int argc, char *argv[]) {
 				 * change until we are caught up.
 				 */
 				Debug(DSCH, ("[%ld], DST ends %d minutes to go\n",
-				    (long)getpid(), timeDiff))
+				    (long)pid, timeDiff))
 				find_jobs(timeRunning, &database, TRUE, FALSE);
 				break;
 			default:
@@ -332,7 +345,7 @@ main(int argc, char *argv[]) {
 				 * jump virtual time, and run everything
 				 */
 				Debug(DSCH, ("[%ld], clock jumped\n",
-				    (long)getpid()))
+				    (long)pid))
 				virtualTime = timeRunning;
 				find_jobs(timeRunning, &database, TRUE, TRUE);
 			}
@@ -353,14 +366,13 @@ main(int argc, char *argv[]) {
 			sigchld_reaper();
 		}
 	}
-	/* here stay ifdef, because some of the watches can be used even
- 	* if inotify is disabled 
- 	*/
-#if defined WITH_INOTIFY
-	set_cron_unwatched(fildes);
 
-	if (fildes >= 0 && close(fildes) < 0)
-		log_it("CRON", pid, "INFO", "Inotify can't remove watches", errno);
+#if defined WITH_INOTIFY
+	if (inotify_enabled)
+		set_cron_unwatched(fd);
+
+	if (fd >= 0 && close(fd) < 0)
+		log_it("CRON", pid, "INFO", "Inotify close failed", errno);
 #endif
 }
 

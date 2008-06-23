@@ -32,14 +32,10 @@
 /* reasonable guess as to size of 1024 events */
 #define BUF_LEN 	(1024 * (EVENT_SIZE + 16))
 
-#if defined WITH_INOTIFY
-/* state say if we change the crontable */
-#define RELOAD		1
-void unlink_inotify_database(cron_db *, cron_db , int);
-#endif
+static  void overwrite_database(cron_db *, cron_db *);
 
 static	void		process_crontab(const char *, const char *,
-					const char *, struct stat *,
+					const char *,
 					cron_db *, cron_db *);
 
 static int not_a_crontab( DIR_T *dp ); 
@@ -48,10 +44,9 @@ static int not_a_crontab( DIR_T *dp );
 static void max_mtime( char *dir_name, struct stat *max_st ); 
 /* record max mtime of any file under dir_name in max_st */
 
-#if defined WITH_INOTIFY
-int
+static int
 check_open(const char *tabname, const char *fname, const char *uname,
-		struct passwd *pw) {
+		struct passwd *pw, time_t *mtime) {
 	struct stat statbuf;
 	int crontab_fd;
 	pid_t pid = getpid();
@@ -60,12 +55,13 @@ check_open(const char *tabname, const char *fname, const char *uname,
 		log_it(uname, pid, "CAN'T OPEN", tabname, errno);
 		return(-1);
 	}
+	if (fstat(crontab_fd, &statbuf) < OK) {
+		log_it(uname, pid, "STAT FAILED", tabname, errno);
+		close(crontab_fd);
+		return(-1);
+	}
+	*mtime = statbuf.st_mtime;
 	if (PermitAnyCrontab == 0) {
-		if (fstat(crontab_fd, &statbuf) < OK) {
-			log_it(uname, pid, "STAT FAILED", tabname, errno);
-			close(crontab_fd);
-			return(-1);
-		}
 		if (!S_ISREG(statbuf.st_mode)) {
 			log_it(uname, pid, "NOT REGULAR", tabname, 0);
 			close(crontab_fd);
@@ -91,13 +87,13 @@ check_open(const char *tabname, const char *fname, const char *uname,
 	return(crontab_fd);
 }
 
-void
-process_inotify_crontab(const char *uname, const char *fname, const char *tabname,
-	cron_db *new_db, cron_db *old_db, int fd, int state) {
+static void
+process_crontab(const char *uname, const char *fname, const char *tabname,
+	cron_db *new_db, cron_db *old_db) {
 	struct passwd *pw = NULL;
 	int crontab_fd = -1;
 	user *u;
-	struct stat statbuf;
+	time_t mtime;
 	int crond_crontab = (fname == NULL) && (strcmp(tabname, SYSCRONTAB) != 0);
 
 	if (fname == NULL) {
@@ -111,43 +107,42 @@ process_inotify_crontab(const char *uname, const char *fname, const char *tabnam
 		goto next_crontab;
 	}
 	
-	Debug(DLOAD, ("\t%s:", fname))
-	u = find_user(old_db, fname, crond_crontab ? tabname : NULL );	/* goes only through database in memory */
+	if ((crontab_fd = check_open(tabname, fname, uname, pw, &mtime)) == -1)
+		goto next_crontab;
 
-	/* in first run is database empty. Check permission when -p ISN'T used. */
-	if (u == NULL) {
-		if ((crontab_fd = check_open(tabname, fname, uname, pw)) == -1)
-			goto next_crontab;
-	}
-	else {		/* second and other runs */
+	Debug(DLOAD, ("\t%s:", fname))
+
+	u = find_user(old_db, fname, crond_crontab ? tabname : NULL );	/* find user in old_db */
+
+	if (u != NULL) {
 		/* if crontab has not changed since we last read it
-		* in, then we can just use our existing entry.
-		*/
-		/* 6 because we want string reload or none */
-		if (state != RELOAD) {
+		 * in, then we can just use our existing entry.
+		 */
+		if (u->mtime == mtime) {
 			Debug(DLOAD, (" [no change, using old data]"))
 			unlink_user(old_db, u);
 			link_user(new_db, u);
 			goto next_crontab;
 		}
-		/* before we fall through to the code that will reload
-		* the user, let's deallocate and unlink the user in
-		* the old database.  This is more a point of memory
-		* efficiency than anything else, since all leftover
-		* users will be deleted from the old database when
-		* we finish with the crontab...
-		*/
-		if ((crontab_fd = check_open(tabname, fname, uname, pw)) == -1)
-			goto next_crontab;
 
+		/* before we fall through to the code that will reload
+		 * the user, let's deallocate and unlink the user in
+		 * the old database.  This is more a point of memory
+		 * efficiency than anything else, since all leftover
+		 * users will be deleted from the old database when
+		 * we finish with the crontab...
+		 */
 		Debug(DLOAD, (" [delete old data]"))
 		unlink_user(old_db, u);
 		free_user(u);
-		Debug(DSCH, ("RELOAD %s\n", tabname))
+		log_it(fname, getpid(), "RELOAD", tabname, 0);
 	}
-	u = load_user(crontab_fd, pw, uname, fname, tabname);	/* touch the disk */
-	if (u != NULL)
+
+	u = load_user(crontab_fd, pw, uname, fname, tabname);	/* read the file */
+	if (u != NULL) {
+		u->mtime = mtime;
 		link_user(new_db, u);
+	}
 
   next_crontab:
 	if (crontab_fd != -1) {
@@ -156,57 +151,7 @@ process_inotify_crontab(const char *uname, const char *fname, const char *tabnam
 	}
 }
 
-void
-load_inotify_database(cron_db *old_db, int fd) {
-	cron_db new_db;
-	DIR_T *dp;
-	DIR *dir;
-	pid_t pid = getpid();
-
-	new_db.head = new_db.tail = NULL;
-	process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, RELOAD);
-
-	/* RH_CROND_DIR /etc/cron.d */
-	if (!(dir = opendir(RH_CROND_DIR))) {
-		log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
-		(void) exit(ERROR_EXIT);
-	}
-	while (NULL != (dp = readdir(dir))) {
-		char tabname[MAXNAMLEN+1];
-
-		if (not_a_crontab(dp))
-			continue;
-
-		if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
-			continue;
-		
-		process_inotify_crontab("root", NULL, tabname, &new_db, old_db, fd, RELOAD);
-	}
-	closedir(dir);
-	/* SPOOL_DIR */
-	if (!(dir = opendir(SPOOL_DIR))) {
-		log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
-		(void) exit(ERROR_EXIT);
-	}
-
-	while (NULL != (dp = readdir(dir))) {
-		char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
-
-		if (not_a_crontab(dp))
-			continue;
-
-		strncpy(fname, dp->d_name, MAXNAMLEN);
-
-		if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
-			continue;
-
-		process_inotify_crontab(fname, fname, tabname, &new_db, old_db, fd, RELOAD);
-	}
-	closedir(dir);
-
-	unlink_inotify_database(old_db, new_db, fd);
-}
-
+#if defined WITH_INOTIFY
 void
 check_inotify_database(cron_db *old_db, int fd) {
 	cron_db new_db;
@@ -218,7 +163,7 @@ check_inotify_database(cron_db *old_db, int fd) {
 	char buf[BUF_LEN];
 	pid_t pid = getpid();
 
-	time.tv_sec = 1;
+	time.tv_sec = 0;
 	time.tv_usec = 0;
 
 	FD_ZERO(&rfds);
@@ -226,95 +171,87 @@ check_inotify_database(cron_db *old_db, int fd) {
 
 	retval = select(fd + 1, &rfds, NULL, NULL, &time);
 	if (retval == -1) {
-		log_it("CRON", pid, "INOTIFY", "select failed", errno);
+		if (errno != EINTR)
+			log_it("CRON", pid, "INOTIFY", "select failed", errno);
+		return;
 	}
 	else if (FD_ISSET(fd, &rfds)) {
 		new_db.head = new_db.tail = NULL;
-		if (read(fd, buf, sizeof(buf)) == -1)
+		while ((retval=read(fd, buf, sizeof(buf))) == -1 && errno == EINTR);
+
+		if (retval == 0) {
+			/* this should not happen as the buffer is large enough */
+			errno = ENOMEM;
+		}
+
+		if (retval <= 0) {
 			log_it("CRON", pid, "INOTIFY", "read failed", errno);
-		process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, RELOAD);
+			/* something fatal must have occured we have no other reasonable
+			 * way how to handle this failure than exit.
+			 */
+			(void) exit(ERROR_EXIT);
+		}
+		
+		/* we must reinstate the watches here - TODO reinstate only watches
+		 * which get IN_IGNORED event
+		 */
+		set_cron_watched(fd);
+
+		/* TODO: parse the events and read only affected files */
+
+		process_crontab("root", NULL, SYSCRONTAB, &new_db, old_db);
 
 		if (!(dir = opendir(RH_CROND_DIR))) {
 			log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
-			(void) exit(ERROR_EXIT);
-		}
-		while (NULL != (dp = readdir(dir))) {
-			char tabname[MAXNAMLEN+1];
+		} else {
+			while (NULL != (dp = readdir(dir))) {
+				char tabname[MAXNAMLEN+1];
 
-			if (not_a_crontab(dp))
-				continue;
+				if (not_a_crontab(dp))
+					continue;
 
-			if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
-				continue;
-			process_inotify_crontab("root", NULL, tabname, &new_db, old_db, fd, RELOAD);
+				if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
+					continue;
+				process_crontab("root", NULL, tabname, &new_db, old_db);
+			}
+			closedir(dir);
 		}
-		closedir(dir);
 
 		if (!(dir = opendir(SPOOL_DIR))) {
 			log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
-			(void) exit(ERROR_EXIT);
+		} else {
+			while (NULL != (dp = readdir(dir))) {
+				char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
+
+				if (not_a_crontab(dp))
+					continue;
+
+				strncpy(fname, dp->d_name, MAXNAMLEN);
+
+				if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, dp->d_name, '/'))
+					continue;
+				process_crontab(fname, fname, tabname, &new_db, old_db);
+			}
+			closedir(dir);
 		}
-		while (NULL != (dp = readdir(dir))) {
-			char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
 
-			if (not_a_crontab(dp))
-				continue;
-
-			strncpy(fname, dp->d_name, MAXNAMLEN);
-
-			if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, dp->d_name, '/'))
-				continue;
-			process_inotify_crontab(fname, fname, tabname, &new_db, old_db, fd, RELOAD);
-		}
-		closedir(dir);
+		/* if we don't do this, then when our children eventually call
+		 * getpwnam() in do_command.c's child_process to verify MAILTO=,
+		 * they will screw us up (and v-v).
+		 */
+		endpwent();
 	}
 	else {
-		new_db.head = new_db.tail = NULL;
-		process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, !RELOAD);
-		if (!(dir = opendir(RH_CROND_DIR))) {
-			log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
-			(void) exit(ERROR_EXIT);
-		}
-
-		while (NULL != (dp = readdir(dir))) {
-			char tabname[MAXNAMLEN+1];
-
-			if (not_a_crontab(dp))
-				continue;
-
-			if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
-				continue;
-			process_inotify_crontab("root", NULL, tabname, &new_db, old_db, fd, !RELOAD);
-		}
-		closedir(dir);
-
-		if (!(dir = opendir(SPOOL_DIR))) {
-			log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
-			(void) exit(ERROR_EXIT);
-		}
-
-		while (NULL != (dp = readdir(dir))) {
-			char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
-
-			if (not_a_crontab(dp))
-				continue;
-
-			strncpy(fname, dp->d_name, MAXNAMLEN);
-
-			if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
-				continue;
-
-			process_inotify_crontab(fname, fname, tabname, &new_db, old_db, fd, !RELOAD);
-		}
-		closedir(dir);
+		/* just return as no db reload is needed */
+		return;
 	}
-	FD_CLR(fd, &rfds);
 
-	unlink_inotify_database(old_db, new_db, fd);
+	overwrite_database(old_db, &new_db);
+	Debug(DLOAD, ("check_inotify_database is done\n"))
 }
 
-void
-unlink_inotify_database(cron_db *old_db, cron_db new_db, int fd) {
+static void
+overwrite_database(cron_db *old_db, cron_db *new_db) {
 	user *u, *nu;
 	/* whatever's left in the old database is now junk.
 	*/
@@ -328,34 +265,8 @@ unlink_inotify_database(cron_db *old_db, cron_db new_db, int fd) {
 
 	/* overwrite the database control block with the new one.
 	*/
-	*old_db = new_db;
-	Debug(DLOAD, ("load_database is done\n"))
+	*old_db = *new_db;
 }
-
-/*void
-read_dir(char *dir_name, cron_db *new_db, cron_db *old_db, int fd, int state) {
-	DIR *dir;
-	DIR_T *dp;
-
-	if (!(dir = opendir(dir_name))) {
-		syslog(LOG_INFO, "CRON: OPENDIR FAILED %s", dir_name);
-		(void) exit(ERROR_EXIT);
-	}
-
-	while (NULL != (dp = readdir(dir))) {
-		char tabname[MAXNAMLEN+1];
-
-	    if (not_a_crontab(dp))
-			continue;
-		
-		if (!glue_strings(tabname, sizeof tabname, dir_name, dp->d_name, '/'))
-			continue;
-		process_inotify_crontab("root", NULL, tabname, &new_db, old_db, fd, state);
-	}
-	closedir(dir);
-}
-*/
-#endif
 
 void
 load_database(cron_db *old_db) {
@@ -363,7 +274,6 @@ load_database(cron_db *old_db) {
 	cron_db new_db;
 	DIR_T *dp;
 	DIR *dir;
-	user *u, *nu;
 	pid_t pid = getpid();
 
 	Debug(DLOAD, ("[%ld] load_database()\n", (long)pid))
@@ -374,21 +284,21 @@ load_database(cron_db *old_db) {
 	 */
 	if (stat(SPOOL_DIR, &statbuf) < OK) {
 		log_it("CRON", pid, "STAT FAILED", SPOOL_DIR, errno);
-		(void) exit(ERROR_EXIT);
+		statbuf.st_mtime = 0;
+	} else {
+		/* As pointed out in Red Hat bugzilla 198019, with modern Linux it
+		 * is possible to modify a file without modifying the mtime of the
+		 * containing directory. Hence, we must check the mtime of each file:
+	         */
+		max_mtime(SPOOL_DIR, &statbuf);
 	}
-	
-	/* As pointed out in Red Hat bugzilla 198019, with modern Linux it
-	 * is possible to modify a file without modifying the mtime of the
-         * containing directory. Hence, we must check the mtime of each file:
-         */
-	max_mtime(SPOOL_DIR, &statbuf);
 
 	if (stat(RH_CROND_DIR, &crond_stat) < OK) {
 		log_it("CRON", pid, "STAT FAILED", RH_CROND_DIR, errno);
-		(void) exit(ERROR_EXIT);
+		crond_stat.st_mtime = 0;
+	} else {
+		max_mtime(RH_CROND_DIR, &crond_stat);
 	}
-
-	max_mtime(RH_CROND_DIR, &crond_stat);
 
 	/* track system crontab file
 	 */
@@ -420,27 +330,24 @@ load_database(cron_db *old_db) {
 	new_db.head = new_db.tail = NULL;
 
 	if (syscron_stat.st_mtime)
-		process_crontab("root", NULL, SYSCRONTAB, &syscron_stat,
-				&new_db, old_db);
+		process_crontab("root", NULL, SYSCRONTAB, &new_db, old_db);
 
 	if (!(dir = opendir(RH_CROND_DIR))) {
 		log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
-		(void) exit(ERROR_EXIT);
+	} else {
+		while (NULL != (dp = readdir(dir))) {
+			char   tabname[MAXNAMLEN+1];
+
+			if ( not_a_crontab( dp ) )
+				continue;
+
+			if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
+				continue;	/* XXX log? */
+
+			process_crontab("root", NULL, tabname, &new_db, old_db);
+		}
+		closedir(dir);
 	}
-
-	while (NULL != (dp = readdir(dir))) {
-		char   tabname[MAXNAMLEN+1];
-
-		if ( not_a_crontab( dp ) )
-			continue;
-
-		if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
-			continue;	/* XXX log? */
-
-		process_crontab("root", NULL, tabname,
-				&crond_stat, &new_db, old_db);
-	}
-	closedir(dir);
 
 	/* we used to keep this dir open all the time, for the sake of
 	 * efficiency.  however, we need to close it in every fork, and
@@ -449,24 +356,22 @@ load_database(cron_db *old_db) {
 
 	if (!(dir = opendir(SPOOL_DIR))) {
 		log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
-		(void) exit(ERROR_EXIT);
+	} else {
+		while (NULL != (dp = readdir(dir))) {
+			char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
+
+			if ( not_a_crontab( dp ) )
+				continue;
+
+			strncpy(fname, dp->d_name, MAXNAMLEN);
+
+			if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
+				continue;	/* XXX log? */
+
+			process_crontab(fname, fname, tabname, &new_db, old_db);
+		}
+		closedir(dir);
 	}
-
-	while (NULL != (dp = readdir(dir))) {
-		char fname[MAXNAMLEN+1], tabname[MAXNAMLEN+1];
-
-		if ( not_a_crontab( dp ) )
-			continue;
-
-		strncpy(fname, dp->d_name, MAXNAMLEN);
-
-		if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
-			continue;	/* XXX log? */
-
-		process_crontab(fname, fname, tabname,
-				&statbuf, &new_db, old_db);
-	}
-	closedir(dir);
 
 	/* if we don't do this, then when our children eventually call
 	 * getpwnam() in do_command.c's child_process to verify MAILTO=,
@@ -474,19 +379,7 @@ load_database(cron_db *old_db) {
 	 */
 	endpwent();
 
-	/* whatever's left in the old database is now junk.
-	 */
-	Debug(DLOAD, ("unlinking old database:\n"))
-	for (u = old_db->head;  u != NULL;  u = nu) {
-		Debug(DLOAD, ("\t%s\n", u->name))
-		nu = u->next;
-		unlink_user(old_db, u);
-		free_user(u);
-	}
-
-	/* overwrite the database control block with the new one.
-	 */
-	*old_db = new_db;
+	overwrite_database(old_db, &new_db);
 	Debug(DLOAD, ("load_database is done\n"))
 }
 
@@ -525,100 +418,6 @@ find_user(cron_db *db, const char *name, const char *tabname) {
 		  )
 	       ) break;
 	return (u);
-}
-
-static void
-process_crontab(const char *uname, const char *fname, const char *tabname,
-		struct stat *statbuf, cron_db *new_db, cron_db *old_db)
-{
-	struct passwd *pw = NULL;
-	int crontab_fd = OK - 1;
-	user *u;
-	int crond_crontab = (fname == NULL) && (strcmp(tabname, SYSCRONTAB) != 0);
-	pid_t pid = getpid();
-
-	if (fname == NULL) {
-		/* must be set to something for logging purposes.
-		 */
-		fname = "*system*";
-	} else if ((pw = getpwnam(uname)) == NULL) {
-		/* file doesn't have a user in passwd file.
-		 */
-		log_it(fname, pid, "ORPHAN", "no passwd entry", 0);
-		goto next_crontab;
-	}
-
-	if ((crontab_fd = open(tabname, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0)) < OK) {
-		/* crontab not accessible?
-		 */
-		log_it(fname, pid, "CAN'T OPEN", tabname, errno);
-		goto next_crontab;
-	}
-
-	if (fstat(crontab_fd, statbuf) < OK) {
-		log_it(fname, pid, "FSTAT FAILED", tabname, errno);
-		goto next_crontab;
-	}
-
-	if ( PermitAnyCrontab == 0 )
-	{
-	    if (!S_ISREG(statbuf->st_mode)) {
-		    log_it(fname, pid, "NOT REGULAR", tabname, 0);
-		    goto next_crontab;
-	    }
-	    if ((statbuf->st_mode & 07533) != 0400) {
-		    log_it(fname, pid, "BAD FILE MODE", tabname, 0);
-		    goto next_crontab;
-	    }
-	    if (statbuf->st_uid != ROOT_UID && (pw == NULL ||
-		statbuf->st_uid != pw->pw_uid || strcmp(uname, pw->pw_name) != 0)) {
-		    log_it(fname, pid, "WRONG FILE OWNER", tabname, 0);
-		    goto next_crontab;
-	    }
-	    if (pw && statbuf->st_nlink != 1) {
-		    log_it(fname, pid, "BAD LINK COUNT", tabname, 0);
-		    goto next_crontab;
-	    }
-	}
-
-	Debug(DLOAD, ("\t%s:", fname))
-
-	u = find_user(old_db, fname, crond_crontab ? tabname : NULL );
-
-	if (u != NULL) {
-		/* if crontab has not changed since we last read it
-		 * in, then we can just use our existing entry.
-		 */
-		if (u->mtime == statbuf->st_mtime) {
-			Debug(DLOAD, (" [no change, using old data]"))
-			unlink_user(old_db, u);
-			link_user(new_db, u);
-			goto next_crontab;
-		}
-
-		/* before we fall through to the code that will reload
-		 * the user, let's deallocate and unlink the user in
-		 * the old database.  This is more a point of memory
-		 * efficiency than anything else, since all leftover
-		 * users will be deleted from the old database when
-		 * we finish with the crontab...
-		 */
-		Debug(DLOAD, (" [delete old data]"))
-		unlink_user(old_db, u);
-		free_user(u);
-		log_it(fname, pid, "RELOAD", tabname, 0);
-	}
-	u = load_user(crontab_fd, pw, uname, fname, tabname);
-	if (u != NULL) {
-		u->mtime = statbuf->st_mtime;
-		link_user(new_db, u);
-	}
-
- next_crontab:
-	if (crontab_fd >= OK) {
-		Debug(DLOAD, (" [done]\n"))
-		close(crontab_fd);
-	}
 }
 
 static int not_a_crontab( DIR_T *dp )
@@ -660,11 +459,10 @@ static void max_mtime( char *dir_name, struct stat *max_st )
 	DIR * dir;
 	DIR_T *dp;
 	struct stat st;
-	pid_t pid = getpid();
 
 	if (!(dir = opendir(dir_name))) {
-		log_it("CRON", pid, "OPENDIR FAILED", dir_name, errno);
-		(void) exit(ERROR_EXIT);
+		max_st->st_mtime = 0;
+		return;
 	}
 
 	while (NULL != (dp = readdir(dir))) 
