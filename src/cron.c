@@ -19,10 +19,6 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if !defined(lint) && !defined(LINT)
-static char rcsid[] = "$Id: cron.c,v 1.12 2004/01/23 18:56:42 vixie Exp $";
-#endif
-
 #define	MAIN_PROGRAM
 
 #include <cron.h>
@@ -384,7 +380,7 @@ run_reboot_jobs(cron_db *db) {
 
 static void
 find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
-	char orig_tz, *job_tz;
+	char *orig_tz, *job_tz;
 	time_t virtualSecond  = vtime * SECONDS_PER_MINUTE;
 	struct tm *tm = gmtime(&virtualSecond);
 	int minute, hour, dom, month, dow;
