@@ -33,6 +33,25 @@
 #include <libaudit.h>
 #endif
 
+#ifdef WITH_PAM
+static pam_handle_t *pamh = NULL;
+static int pam_session_opened = 0;  //global for open session
+static const struct pam_conv conv = {
+    NULL
+};
+
+static int cron_open_pam_session(struct passwd *pw);
+
+#define PAM_FAIL_CHECK if (retcode != PAM_SUCCESS) { \
+    fprintf(stderr,"\n%s\n",pam_strerror(pamh, retcode)); \
+    if (pamh != NULL) { \
+        if (pam_session_opened != 0) \
+            pam_close_session(pamh, PAM_SILENT); \
+        pam_end(pamh, retcode); \
+    } \
+        return(retcode);    }
+#endif
+
 static char ** build_env(char **cronenv);
 
 #ifdef WITH_SELINUX
@@ -140,7 +159,7 @@ int cron_start_pam(struct passwd *pw) {
     return retcode;
 }
 
-int cron_open_pam_session(struct passwd *pw) {
+static int cron_open_pam_session(struct passwd *pw) {
     int	retcode = 0;
 
 #if defined(WITH_PAM)
