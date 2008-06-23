@@ -1,6 +1,6 @@
 AC_INIT([cronie],[1.1],[mmaslano@redhat.com])
 AC_CONFIG_HEADER([config.h])
-AC_PREREQ(2.59)
+AC_PREREQ(2.60)
 
 AM_INIT_AUTOMAKE
 
@@ -11,6 +11,9 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
+
+dnl Check for _GNU_SOURCE
+AC_USE_SYSTEM_EXTENSIONS
 
 AC_CHECK_HEADERS( \
         dirent.h \
