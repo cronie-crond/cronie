@@ -19,10 +19,6 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if !defined(lint) && !defined(LINT)
-static char rcsid[] = "$Id: misc.c,v 1.16 2004/01/23 18:56:43 vixie Exp $";
-#endif
-
 /* vix 26jan87 [RCS has the rest of the log]
  * vix 30dec86 [written]
  */

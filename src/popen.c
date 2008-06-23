@@ -31,14 +31,6 @@
  */
 
 #include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char rcsid[] = "Id: popen.c,v 1.5 1994/01/15 20:43:43 vixie Exp";
-static char sccsid[] = "@(#)popen.c	5.7 (Berkeley) 2/14/89";
-//#else
-//__RCSID("$NetBSD: popen.c,v 1.9 2005/03/16 02:53:55 xtraeme Exp $");
-#endif
-#endif /* not lint */
 
 #include <cron.h>
 #include <signal.h>

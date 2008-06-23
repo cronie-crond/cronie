@@ -19,10 +19,6 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if !defined(lint) && !defined(LINT)
-static char rcsid[] = "$Id: do_command.c,v 1.9 2004/01/23 18:56:42 vixie Exp $";
-#endif
-
 #include <cron.h>
 
 static void		child_process(entry *, user *);
