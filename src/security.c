@@ -356,7 +356,7 @@ static int cron_change_selinux_range(user *u,security_context_t ucontext) {
 #endif
 				syslog(LOG_ERR,
 				       "CRON (%s) ERROR:"
-				       "Unauthorized range %s in MLS_LEVEL for user %s ", 
+				       "Unauthorized range %s in MLS_LEVEL for user %s", 
 				       u->name, (char*)ucontext, u->scontext);
 				return -1;
 			}
@@ -370,18 +370,18 @@ static int cron_change_selinux_range(user *u,security_context_t ucontext) {
 		}
 	}
 
-	if ((setexeccon(ucontext) < 0) && (setkeycreatecon(ucontext))) {
+	if (setexeccon(ucontext) < 0 || setkeycreatecon(ucontext) < 0) {
 		if (security_getenforce() > 0) {
 			syslog(LOG_ERR,
 			       "CRON (%s) ERROR:"
-			       "Could not set exec context to %s for user", 
+			       "Could not set exec or keycreate context to %s for user", 
 			       u->name, (char*)ucontext);
 			return -1;
 		}
 		else {
 			syslog(LOG_ERR,
 			       "CRON (%s) ERROR:"
-			       "Could not set exec context to %s for user, "
+			       "Could not set exec or keycreate context to %s for user,"
                                " but SELinux in permissive mode, continuing", 
 			       u->name, (char*)ucontext);
 
