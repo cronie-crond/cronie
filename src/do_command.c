@@ -30,8 +30,10 @@ static int		safe_p(const char *, const char *);
 
 void
 do_command(entry *e, user *u) {
+	pid_t pid = getpid();
+
 	Debug(DPROC, ("[%ld] do_command(%s, (%s,%ld,%ld))\n",
-		      (long)getpid(), e->cmd, u->name,
+		      (long)pid, e->cmd, u->name,
 		      (long)e->pwd->pw_uid, (long)e->pwd->pw_gid))
 
 	/* fork to become asynchronous -- parent process is done immediately,
@@ -43,7 +45,7 @@ do_command(entry *e, user *u) {
 	 */
 	switch (fork()) {
 	case -1:
-		log_it("CRON", getpid(), "error", "can't fork");
+		log_it("CRON", pid, "can't fork", "do_command", errno);
 		break;
 	case 0:
 		/* child process */
@@ -57,7 +59,7 @@ do_command(entry *e, user *u) {
 		/* parent process */
 		break;
 	}
-	Debug(DPROC, ("[%ld] main process returning to work\n",(long)getpid()))
+	Debug(DPROC, ("[%ld] main process returning to work\n",(long)pid))
 }
 
 static void
@@ -66,6 +68,7 @@ child_process(entry *e, user *u) {
 	char *input_data, *usernm, *mailto;
 	int children = 0; 
         char **jobenv=0L;
+        pid_t pid = getpid();
 
 	/* Set up the Red Hat security context for both mail/minder and job processes:
          */
@@ -105,13 +108,13 @@ child_process(entry *e, user *u) {
 	 */
 	if( pipe(stdin_pipe) == -1 )	/* child's stdin */
 	{
-	    log_it("CRON", getpid(), "pipe() failed:", strerror(errno));
+	    log_it("CRON", pid, "pipe() failed", "stdin_pipe", errno);
 	    return;
 	}
 
 	if( pipe(stdout_pipe) == -1 )	/* child's stdout */
 	{
-	    log_it("CRON", getpid(), "pipe() failed:", strerror(errno));
+	    log_it("CRON", pid, "pipe() failed", "stdout_pipe", errno);
 	    return;
 	}	
 	
@@ -157,7 +160,7 @@ child_process(entry *e, user *u) {
 	 */
 	switch (fork()) {
 	case -1:
-		log_it("CRON", getpid(), "error", "can't fork");
+		log_it("CRON", pid, "can't fork", "child_process", errno);
 		cron_close_pam();
 		exit(ERROR_EXIT);
 		/*NOTREACHED*/
@@ -173,7 +176,7 @@ child_process(entry *e, user *u) {
 		if ((e->flags & DONT_LOG) == 0) {
 			char *x = mkprints((u_char *)e->cmd, strlen(e->cmd));
 
-			log_it(usernm, getpid(), "CMD", x);
+			log_it(usernm, getpid(), "CMD", x, 0);
 			free(x);
 		}
 
@@ -490,7 +493,7 @@ child_process(entry *e, user *u) {
 			"mailed %d byte%s of output but got status 0x%04x\n",
 					bytes, (bytes==1)?"":"s",
 					status);
-				log_it(usernm, getpid(), "MAIL", buf);
+				log_it(usernm, getpid(), "MAIL", buf, 0);
 			}
 
 		} /*if data from grandchild*/
@@ -537,7 +540,7 @@ safe_p(const char *usernm, const char *s) {
 		if (isascii(ch) && isprint(ch) &&
 		    (isalnum(ch) || (!first && strchr(safe_delim, ch))))
 			continue;
-		log_it(usernm, getpid(), "UNSAFE", s);
+		log_it(usernm, getpid(), "UNSAFE", s, 0);
 		return (FALSE);
 	}
 	return (TRUE);

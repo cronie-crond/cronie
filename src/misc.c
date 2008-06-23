@@ -287,6 +287,7 @@ acquire_daemonlock(int closeflag) {
 	char *ep;
 	long otherpid=-1;
 	ssize_t num, len;
+	pid_t pid = getpid();
 
 	if (closeflag) {
 		/* close stashed fd for child so we don't leak it. */
@@ -301,10 +302,11 @@ acquire_daemonlock(int closeflag) {
 		pidfile = _PATH_CRON_PID;
 		/* Initial mode is 0600 to prevent flock() race/DoS. */
 		if ((fd = open(pidfile, O_RDWR|O_CREAT, 0600)) == -1) {
-			sprintf(buf, "can't open or create %s: %s",
-				pidfile, strerror(errno));
-			fprintf(stderr, "%s: %s\n", ProgramName, buf);
-			log_it("CRON", getpid(), "DEATH", buf);
+			int save_errno = errno;
+			sprintf(buf, "can't open or create %s",
+				pidfile);
+			fprintf(stderr, "%s: %s: %s\n", ProgramName, buf, strerror(save_errno));
+			log_it("CRON", pid, "DEATH", buf, save_errno);
 			exit(ERROR_EXIT);
 		}
 
@@ -315,33 +317,31 @@ acquire_daemonlock(int closeflag) {
 			if ((num = read(fd, buf, sizeof(buf) - 1)) > 0 &&
 			    (otherpid = strtol(buf, &ep, 10)) > 0 &&
 			    ep != buf && *ep == '\n' && otherpid != LONG_MAX) {
-				sprintf(buf,
-				    "can't lock %s, otherpid may be %ld: %s",
-				    pidfile, otherpid, strerror(save_errno));
+				snprintf(buf, sizeof(buf),
+				    "can't lock %s, otherpid may be %ld",
+				    pidfile, otherpid);
 			} else {
-				sprintf(buf,
-				    "can't lock %s, otherpid unknown: %s",
-				    pidfile, strerror(save_errno));
+				snprintf(buf, sizeof(buf),
+				    "can't lock %s, otherpid unknown",
+				    pidfile);
 			}
-			sprintf(buf, "can't lock %s, otherpid may be %ld: %s",
-				pidfile, otherpid, strerror(save_errno));
-			fprintf(stderr, "%s: %s\n", ProgramName, buf);
-			log_it("CRON", getpid(), "DEATH", buf);
+			fprintf(stderr, "%s: %s: %s\n", ProgramName, buf, strerror(save_errno));
+			log_it("CRON", pid, "DEATH", buf, save_errno);
 			exit(ERROR_EXIT);
 		}
 		(void) fchmod(fd, 0644);
 		(void) fcntl(fd, F_SETFD, 1);
 	}
 
-	sprintf(buf, "%ld\n", (long)getpid());
+	sprintf(buf, "%ld\n", (long)pid);
 	(void) lseek(fd, (off_t)0, SEEK_SET);
 	len =  strlen(buf);
 	if( (num = write(fd, buf, len)) != len )
-	    log_it("CRON", getpid(), "write() failed:", strerror(errno));
+	    log_it("CRON", pid, "ERROR", "write() failed", errno);
 	else
 	{	    
 	    if( ftruncate(fd, num) == -1 )
-		log_it("CRON", getpid(), "ftruncate() failed:", strerror(errno));
+		log_it("CRON", pid, "ERROR", "ftruncate() failed", errno);
 	}
 
 	/* abandon fd even though the file is open. we need to keep
@@ -477,7 +477,7 @@ allowed(const char *username, const char *allow_file, const char *deny_file) {
 		if( ( getuid() == 0 ) && (!isallowed) )
 		{
 		    snprintf(buf,sizeof(buf),"root used -u for user %s not in cron.allow",username);
-		    log_it("crontab",getpid(),"warning",buf);
+		    log_it("crontab", getpid(), "warning", buf, 0);
 		    isallowed = TRUE;
 		}
 	} else if ((fp = fopen(deny_file, "r")) != NULL) {
@@ -486,7 +486,7 @@ allowed(const char *username, const char *allow_file, const char *deny_file) {
 		if( ( getuid() == 0 ) && (!isallowed) )
 		{
 		    snprintf(buf,sizeof(buf),"root used -u for user %s in cron.deny",username);
-		    log_it("crontab",getpid(),"warning",buf);
+		    log_it("crontab", getpid(), "warning", buf, 0);
 		    isallowed = TRUE;
 		}
 	}
@@ -502,7 +502,7 @@ allowed(const char *username, const char *allow_file, const char *deny_file) {
 }
 
 void
-log_it(const char *username, PID_T xpid, const char *event, const char *detail) {
+log_it(const char *username, PID_T xpid, const char *event, const char *detail, int err) {
 #if defined(LOG_FILE) || DEBUGGING
 	PID_T pid = xpid;
 #endif
@@ -542,10 +542,12 @@ log_it(const char *username, PID_T xpid, const char *event, const char *detail) 
 	 * everything out in one chunk and this has to be atomically appended
 	 * to the log file.
 	 */
-	snprintf(msg, msg_size, "%s (%02d/%02d-%02d:%02d:%02d-%d) %s (%s)\n",
+	snprintf(msg, msg_size, "%s (%02d/%02d-%02d:%02d:%02d-%d) %s (%s)%s%s\n",
 		username,
 		t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec, pid,
-		event, detail);
+		event, detail,
+		err != 0 ? ": " : "",
+		err != 0 ? strerror(err) : "");
 
 	/* we have to run strlen() because sprintf() returns (char*) on old BSD
 	 */
@@ -569,14 +571,20 @@ log_it(const char *username, PID_T xpid, const char *event, const char *detail) 
 		syslog_open = TRUE;		/* assume openlog success */
 	}
 
-	syslog(LOG_INFO, "(%s) %s (%s)", username, event, detail);
+	syslog(err != 0 ? LOG_ERR : LOG_INFO,
+		"(%s) %s (%s)%s%s", username, event, detail,
+		err != 0 ? ": " : "",
+		err != 0 ? strerror(err) : "");
+
 
 #endif /*SYSLOG*/
 
 #if DEBUGGING
 	if (DebugFlags) {
-		fprintf(stderr, "log_it: (%s %ld) %s (%s)\n",
-			username, (long)pid, event, detail);
+		fprintf(stderr, "log_it: (%s %ld) %s (%s)%s%s\n",
+			username, (long)pid, event, detail,
+			err != 0 ? ": " : "",
+			err != 0 ? strerror(err) : "");
 	}
 #endif
 }

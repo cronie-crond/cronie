@@ -110,7 +110,9 @@ cron_popen(char *program, const char *type, struct passwd *pw)
 		}
 
 		if (execvp(argv[0], argv) < 0) {
-			syslog(LOG_ERR, "CRON: Exec of (%s) failed: (%s)", program, strerror(errno));
+			int save_errno = errno;
+
+			log_it("CRON", getpid(), "EXEC FAILED", program, save_errno);
 			if (*type != 'r') {
 				while (0 != (out = read(STDIN, buf, PIPE_BUF))) {
 					if ((out == -1) && (errno != EINTR))

@@ -284,7 +284,7 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 			}
 			e->envp = tenvp;
 		} else
-			log_it("CRON", getpid(), "error", "can't set SHELL");
+			log_it("CRON", getpid(), "error", "can't set SHELL", 0);
 	}
 	if (!env_get("HOME", e->envp)) {
 		if (glue_strings(envstr, sizeof envstr, "HOME",
@@ -295,7 +295,7 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 			}
 			e->envp = tenvp;
 		} else
-			log_it("CRON", getpid(), "error", "can't set HOME");
+			log_it("CRON", getpid(), "error", "can't set HOME", 0);
 	}
 #ifndef LOGIN_CAP
 	/* If login.conf is in used we will get the default PATH later. */
@@ -308,7 +308,7 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 			}
 			e->envp = tenvp;
 		} else
-			log_it("CRON", getpid(), "error", "can't set PATH");
+			log_it("CRON", getpid(), "error", "can't set PATH", 0);
 	}
 #endif /* LOGIN_CAP */
 	if (glue_strings(envstr, sizeof envstr, "LOGNAME",
@@ -319,7 +319,7 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 		}
 		e->envp = tenvp;
 	} else
-		log_it("CRON", getpid(), "error", "can't set LOGNAME");
+		log_it("CRON", getpid(), "error", "can't set LOGNAME", 0);
 #if defined(BSD) || defined(__linux)
 	if (glue_strings(envstr, sizeof envstr, "USER",
 			 pw->pw_name, '=')) {
@@ -329,7 +329,7 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 		}
 		e->envp = tenvp;
 	} else
-		log_it("CRON", getpid(), "error", "can't set USER");
+		log_it("CRON", getpid(), "error", "can't set USER", 0);
 #endif
 
 	Debug(DPARS, ("load_entry()...about to parse command\n"))

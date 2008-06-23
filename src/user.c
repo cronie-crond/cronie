@@ -32,7 +32,7 @@ static const char *FileName;
 
 static void
 log_error(const char *msg) {
-        syslog(LOG_ERR,"CRON: error in (%s) problem is (%s)",FileName,msg);
+        log_it("CRON", getpid(), msg, FileName, 0);
 }
 
 void
@@ -59,7 +59,8 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 	char **envp, **tenvp;
 
 	if (!(file = fdopen(crontab_fd, "r"))) {
-		perror("fdopen on crontab_fd in load_user");
+		int save_errno = errno;
+		log_it(uname, getpid(), "FAILED", "fdopen on crontab_fd in load_user", save_errno);
 		return (NULL);
 	}
 

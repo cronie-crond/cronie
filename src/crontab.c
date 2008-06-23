@@ -115,7 +115,7 @@ main(int argc, char *argv[]) {
 			"You (%s) are not allowed to use this program (%s)\n",
 			User, ProgramName);
 		fprintf(stderr, "See crontab(1) for more information\n");
-		log_it(RealUser, Pid, "AUTH", "crontab command not allowed");
+		log_it(RealUser, Pid, "AUTH", "crontab command not allowed", 0);
 		exit(ERROR_EXIT);
 	}
 
@@ -293,7 +293,7 @@ list_cmd(void) {
 	FILE *f;
 	int ch;
 
-	log_it(RealUser, Pid, "LIST", User);
+	log_it(RealUser, Pid, "LIST", User, 0);
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, User, '/')) {
 		fprintf(stderr, "path too long\n");
 		exit(ERROR_EXIT);
@@ -326,7 +326,7 @@ delete_cmd(void) {
 	      )	exit(0);
 	}
 
-	log_it(RealUser, Pid, "DELETE", User);
+	log_it(RealUser, Pid, "DELETE", User, 0);
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, User, '/')) {
 		fprintf(stderr, "path too long\n");
 		exit(ERROR_EXIT);
@@ -366,7 +366,7 @@ edit_cmd(void) {
 	PID_T pid, xpid;
 	int uid;
 	
-	log_it(RealUser, Pid, "BEGIN EDIT", User);
+	log_it(RealUser, Pid, "BEGIN EDIT", User, 0);
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, User, '/')) {
 		fprintf(stderr, "path too long\n");
 		exit(ERROR_EXIT);
@@ -607,7 +607,7 @@ edit_cmd(void) {
  remove:
 	unlink(Filename);
  done:
-	log_it(RealUser, Pid, "END EDIT", User);
+	log_it(RealUser, Pid, "END EDIT", User, 0);
 }
 
 /* returns	0	on success
@@ -758,7 +758,7 @@ replace_cmd(void) {
 		goto done;
 	}
 	TempFilename[0] = '\0';
-	log_it(RealUser, Pid, "REPLACE", User);
+	log_it(RealUser, Pid, "REPLACE", User, 0);
 
 	poke_daemon();
 

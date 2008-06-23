@@ -55,27 +55,27 @@ int wd1, wd2, wd3, wd4;
 
 void
 set_cron_watched(int fd) {
-    int ret1, ret2, ret3;
+    pid_t pid = getpid();
 
     wd1 = inotify_add_watch(fd, CRONDIR, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
     if (wd1 < 0) 
-        log_it("CRON",getpid(),"This directory can't be watched",strerror(errno));
+        log_it("CRON", pid, "This directory can't be watched", CRONDIR, errno);
 
     wd2 = inotify_add_watch(fd, RH_CROND_DIR, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
     if (wd2 < 0) 
-        log_it("CRON",getpid(),"This directory can't be watched",strerror(errno));
+        log_it("CRON", pid, "This directory can't be watched", RH_CROND_DIR, errno);
 
     wd3 = inotify_add_watch(fd, SYSCRONTAB, IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
     if (wd3 < 0) 
-        log_it("CRON",getpid(),"This file can't be watched ",strerror(errno));
+        log_it("CRON", pid, "This file can't be watched", SYSCRONTAB, errno);
 
     wd4 = inotify_add_watch(fd, "/var/spool/cron/", IN_MODIFY | IN_DELETE | IN_CREATE | IN_ATTRIB);
     if (wd4 < 0)
-        log_it("CRON",getpid(),"This file can't be watched ",strerror(errno));
+        log_it("CRON", pid, "This directory can't be watched", "/var/spool/cron", errno);
 
 	if (wd1 <0 || wd2<0 || wd3<0 || wd4<0) {
 		inotify_enabled = 0;
-		syslog(LOG_INFO, "CRON (%s) ERROR: run without inotify support");
+		log_it("CRON", pid, "INFO", "running without inotify support", 0);
 	}
 	else
 		inotify_enabled = 1;
@@ -113,12 +113,13 @@ main(int argc, char *argv[]) {
 	cron_db	database;
 	int fd;
 	char *cs;
+	pid_t pid = getpid();
 
 #if defined WITH_INOTIFY
 	int fildes;
 	fildes = inotify_init();
 	if (fildes < 0)
-		syslog(LOG_ERR, "Inotify init failed %m");
+		log_it("CRON", pid, "INFO", "Inotify init failed", errno);
 #endif
 
 	ProgramName = argv[0];
@@ -155,7 +156,7 @@ main(int argc, char *argv[]) {
 	set_cron_cwd();
 
 	if (putenv("PATH="_PATH_DEFPATH) < 0) {
-		log_it("CRON", getpid(), "DEATH", "can't malloc");
+		log_it("CRON", pid, "DEATH", "can't putenv PATH", errno);
 		exit(1);
 	}
 	
@@ -181,7 +182,7 @@ main(int argc, char *argv[]) {
 	} else if (NoFork == 0) {
 		switch (fork()) {
 		case -1:
-			log_it("CRON",getpid(),"DEATH","can't fork");
+			log_it("CRON", pid, "DEATH", "can't fork", errno);
 			exit(0);
 			break;
 		case 0:
@@ -195,9 +196,9 @@ main(int argc, char *argv[]) {
 					(void) close(fd);
 			}
 			if (inotify_enabled) 
-				log_it("CRON",getpid(),"STARTUP INOTIFY",PACKAGE_VERSION);
+				log_it("CRON", getpid(), "STARTUP INOTIFY", PACKAGE_VERSION, 0);
 			else 
-				log_it("CRON",getpid(),"STARTUP",PACKAGE_VERSION);
+				log_it("CRON", getpid(), "STARTUP", PACKAGE_VERSION, 0);
 			break;
 		default:
 			/* parent process should just die */
@@ -362,10 +363,8 @@ main(int argc, char *argv[]) {
 #if defined WITH_INOTIFY
 	set_cron_unwatched(fildes);
 
-	int ret;
-	ret = close(fildes);
-	if (ret)
-		syslog(LOG_ERR, "Inotify can't remove watches %m");
+	if (fildes >= 0 && close(fildes) < 0)
+		log_it("CRON", pid, "INFO", "Inotify can't remove watches", errno);
 #endif
 }
 

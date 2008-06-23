@@ -58,35 +58,36 @@ check_open(const char *tabname, const char *fname, const char *uname,
 		struct passwd *pw) {
 	struct stat statbuf;
 	int crontab_fd;
+	pid_t pid = getpid();
 
 	if ((crontab_fd = open(tabname, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0)) == -1) {
-		log_it("CRON", getpid(), "CAN'T OPEN", tabname);
+		log_it(uname, pid, "CAN'T OPEN", tabname, errno);
 		return(-1);
 	}
 	if (PermitAnyCrontab == 0) {
 		if (fstat(crontab_fd, &statbuf) < OK) {
-			log_it("CRON", getpid(), "STAT FAILED", tabname);
+			log_it(uname, pid, "STAT FAILED", tabname, errno);
 			close(crontab_fd);
 			return(-1);
 		}
 		if (!S_ISREG(statbuf.st_mode)) {
-			syslog(LOG_INFO, "NOT REGULAR %s", tabname);
+			log_it(uname, pid, "NOT REGULAR", tabname, 0);
 			close(crontab_fd);
 			return(-1);
 		}
 		if ((statbuf.st_mode & 07533) != 0400) {
-			log_it(fname, getpid(), "BAD FILE MODE", tabname);
+			log_it(uname, pid, "BAD FILE MODE", tabname, 0);
 			close(crontab_fd);
 			return(-1);
 		}
 		if (statbuf.st_uid != ROOT_UID && (pw == NULL ||
 			statbuf.st_uid != pw->pw_uid || strcmp(uname, pw->pw_name) != 0)) {
-			log_it(fname, getpid(), "WRONG FILE OWNER", tabname);
+			log_it(uname, pid, "WRONG FILE OWNER", tabname, 0);
 			close(crontab_fd);
 			return(-1);
 		}
 		if (pw && statbuf.st_nlink != 1) {
-			log_it(fname, getpid(), "BAD LINK COUNT", tabname);
+			log_it(uname, pid, "BAD LINK COUNT", tabname, 0);
 			close(crontab_fd);
 			return(-1);
 		}
@@ -110,7 +111,7 @@ process_inotify_crontab(const char *uname, const char *fname, const char *tabnam
 	} else if ((pw = getpwnam(uname)) == NULL) {
 		/* file doesn't have a user in passwd file.
 		*/
-		log_it("CRON", getpid(), "ORPHAN", "no passwd entry");
+		log_it(uname, getpid(), "ORPHAN", "no passwd entry", 0);
 		goto next_crontab;
 	}
 	
@@ -164,13 +165,14 @@ load_inotify_database(cron_db *old_db, int fd) {
 	cron_db new_db;
 	DIR_T *dp;
 	DIR *dir;
+	pid_t pid = getpid();
 
 	new_db.head = new_db.tail = NULL;
 	process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, RELOAD);
 
 	/* RH_CROND_DIR /etc/cron.d */
 	if (!(dir = opendir(RH_CROND_DIR))) {
-		log_it("CRON", getpid(), "OPENDIR FAILED", RH_CROND_DIR);
+		log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
 		(void) exit(ERROR_EXIT);
 	}
 	while (NULL != (dp = readdir(dir))) {
@@ -187,7 +189,7 @@ load_inotify_database(cron_db *old_db, int fd) {
 	closedir(dir);
 	/* SPOOL_DIR */
 	if (!(dir = opendir(SPOOL_DIR))) {
-		syslog(LOG_INFO, "CRON: OPENDIR FAILED %s", SPOOL_DIR);
+		log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
 		(void) exit(ERROR_EXIT);
 	}
 
@@ -218,6 +220,7 @@ check_inotify_database(cron_db *old_db, int fd) {
 	fd_set rfds;
 	int retval = 0;
 	char buf[BUF_LEN];
+	pid_t pid = getpid();
 
 	time.tv_sec = 1;
 	time.tv_usec = 0;
@@ -227,17 +230,16 @@ check_inotify_database(cron_db *old_db, int fd) {
 
 	retval = select(fd + 1, &rfds, NULL, NULL, &time);
 	if (retval == -1) {
-		perror("select()");
-		syslog(LOG_INFO, "CRON: select failed: %s", strerror(errno));
+		log_it("CRON", pid, "INOTIFY", "select failed", errno);
 	}
 	else if (FD_ISSET(fd, &rfds)) {
 		new_db.head = new_db.tail = NULL;
 		if (read(fd, buf, sizeof(buf)) == -1)
-			log_it("CRON", getpid(), "reading problem",buf);
+			log_it("CRON", pid, "INOTIFY", "read failed", errno);
 		process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, RELOAD);
 
 		if (!(dir = opendir(RH_CROND_DIR))) {
-			log_it("CRON", getpid(), "OPENDIR FAILED", RH_CROND_DIR);
+			log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
 			(void) exit(ERROR_EXIT);
 		}
 		while (NULL != (dp = readdir(dir))) {
@@ -253,7 +255,7 @@ check_inotify_database(cron_db *old_db, int fd) {
 		closedir(dir);
 
 		if (!(dir = opendir(SPOOL_DIR))) {
-			syslog(LOG_INFO, "CRON: OPENDIR FAILED %s", SPOOL_DIR);
+			log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
 			(void) exit(ERROR_EXIT);
 		}
 		while (NULL != (dp = readdir(dir))) {
@@ -274,7 +276,7 @@ check_inotify_database(cron_db *old_db, int fd) {
 		new_db.head = new_db.tail = NULL;
 		process_inotify_crontab("root", NULL, SYSCRONTAB, &new_db, old_db, fd, !RELOAD);
 		if (!(dir = opendir(RH_CROND_DIR))) {
-			log_it("CRON", getpid(), "OPENDIR FAILED", RH_CROND_DIR);
+			log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
 			(void) exit(ERROR_EXIT);
 		}
 
@@ -291,7 +293,7 @@ check_inotify_database(cron_db *old_db, int fd) {
 		closedir(dir);
 
 		if (!(dir = opendir(SPOOL_DIR))) {
-			syslog(LOG_INFO, "CRON: OPENDIR FAILED %s", SPOOL_DIR);
+			log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
 			(void) exit(ERROR_EXIT);
 		}
 
@@ -366,15 +368,16 @@ load_database(cron_db *old_db) {
 	DIR_T *dp;
 	DIR *dir;
 	user *u, *nu;
+	pid_t pid = getpid();
 
-	Debug(DLOAD, ("[%ld] load_database()\n", (long)getpid()))
+	Debug(DLOAD, ("[%ld] load_database()\n", (long)pid))
 
 	/* before we start loading any data, do a stat on SPOOL_DIR
 	 * so that if anything changes as of this moment (i.e., before we've
 	 * cached any of the database), we'll see the changes next time.
 	 */
 	if (stat(SPOOL_DIR, &statbuf) < OK) {
-		log_it("CRON", getpid(), "STAT FAILED", SPOOL_DIR);
+		log_it("CRON", pid, "STAT FAILED", SPOOL_DIR, errno);
 		(void) exit(ERROR_EXIT);
 	}
 	
@@ -385,7 +388,7 @@ load_database(cron_db *old_db) {
 	max_mtime(SPOOL_DIR, &statbuf);
 
 	if (stat(RH_CROND_DIR, &crond_stat) < OK) {
-		log_it("CRON", getpid(), "STAT FAILED", RH_CROND_DIR);
+		log_it("CRON", pid, "STAT FAILED", RH_CROND_DIR, errno);
 		(void) exit(ERROR_EXIT);
 	}
 
@@ -407,7 +410,7 @@ load_database(cron_db *old_db) {
 				  TMAX(statbuf.st_mtime, syscron_stat.st_mtime))
 	   ){
 		Debug(DLOAD, ("[%ld] spool dir mtime unch, no load needed.\n",
-			      (long)getpid()))
+			      (long)pid))
 		return;
 	}
 
@@ -425,7 +428,7 @@ load_database(cron_db *old_db) {
 				&new_db, old_db);
 
 	if (!(dir = opendir(RH_CROND_DIR))) {
-		log_it("CRON", getpid(), "OPENDIR FAILED", RH_CROND_DIR);
+		log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
 		(void) exit(ERROR_EXIT);
 	}
 
@@ -449,7 +452,7 @@ load_database(cron_db *old_db) {
 	 */
 
 	if (!(dir = opendir(SPOOL_DIR))) {
-		log_it("CRON", getpid(), "OPENDIR FAILED", SPOOL_DIR);
+		log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
 		(void) exit(ERROR_EXIT);
 	}
 
@@ -536,6 +539,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	int crontab_fd = OK - 1;
 	user *u;
 	int crond_crontab = (fname == NULL) && (strcmp(tabname, SYSCRONTAB) != 0);
+	pid_t pid = getpid();
 
 	if (fname == NULL) {
 		/* must be set to something for logging purposes.
@@ -544,39 +548,39 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	} else if ((pw = getpwnam(uname)) == NULL) {
 		/* file doesn't have a user in passwd file.
 		 */
-		log_it(fname, getpid(), "ORPHAN", "no passwd entry");
+		log_it(fname, pid, "ORPHAN", "no passwd entry", 0);
 		goto next_crontab;
 	}
 
 	if ((crontab_fd = open(tabname, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0)) < OK) {
 		/* crontab not accessible?
 		 */
-		log_it(fname, getpid(), "CAN'T OPEN", tabname);
+		log_it(fname, pid, "CAN'T OPEN", tabname, errno);
 		goto next_crontab;
 	}
 
 	if (fstat(crontab_fd, statbuf) < OK) {
-		log_it(fname, getpid(), "FSTAT FAILED", tabname);
+		log_it(fname, pid, "FSTAT FAILED", tabname, errno);
 		goto next_crontab;
 	}
 
 	if ( PermitAnyCrontab == 0 )
 	{
 	    if (!S_ISREG(statbuf->st_mode)) {
-		    log_it(fname, getpid(), "NOT REGULAR", tabname);
+		    log_it(fname, pid, "NOT REGULAR", tabname, 0);
 		    goto next_crontab;
 	    }
 	    if ((statbuf->st_mode & 07533) != 0400) {
-		    log_it(fname, getpid(), "BAD FILE MODE", tabname);
+		    log_it(fname, pid, "BAD FILE MODE", tabname, 0);
 		    goto next_crontab;
 	    }
 	    if (statbuf->st_uid != ROOT_UID && (pw == NULL ||
 		statbuf->st_uid != pw->pw_uid || strcmp(uname, pw->pw_name) != 0)) {
-		    log_it(fname, getpid(), "WRONG FILE OWNER", tabname);
+		    log_it(fname, pid, "WRONG FILE OWNER", tabname, 0);
 		    goto next_crontab;
 	    }
 	    if (pw && statbuf->st_nlink != 1) {
-		    log_it(fname, getpid(), "BAD LINK COUNT", tabname);
+		    log_it(fname, pid, "BAD LINK COUNT", tabname, 0);
 		    goto next_crontab;
 	    }
 	}
@@ -606,7 +610,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		Debug(DLOAD, (" [delete old data]"))
 		unlink_user(old_db, u);
 		free_user(u);
-		log_it(fname, getpid(), "RELOAD", tabname);
+		log_it(fname, pid, "RELOAD", tabname, 0);
 	}
 	u = load_user(crontab_fd, pw, uname, fname, tabname);
 	if (u != NULL) {
@@ -660,9 +664,10 @@ static void max_mtime( char *dir_name, struct stat *max_st )
 	DIR * dir;
 	DIR_T *dp;
 	struct stat st;
+	pid_t pid = getpid();
 
 	if (!(dir = opendir(dir_name))) {
-		log_it("CRON", getpid(), "OPENDIR FAILED", dir_name);
+		log_it("CRON", pid, "OPENDIR FAILED", dir_name, errno);
 		(void) exit(ERROR_EXIT);
 	}
 
