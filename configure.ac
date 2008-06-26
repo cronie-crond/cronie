@@ -31,9 +31,10 @@ AC_CHECK_HEADERS( \
         sys/stat.h \
         sys/stream.h \
         sys/stropts.h \
-		sys/time.h \
+        sys/time.h \
         sys/timers.h \
         sys/types.h \
+        sys/cdefs.h \
         time.h \
         unistd.h \
         util.h \

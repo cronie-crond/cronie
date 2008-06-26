@@ -30,7 +30,9 @@
  *
  */
 
+#ifdef HAVE_SYS_CDEFS_H
 #include <sys/cdefs.h>
+#endif
 
 #include <cron.h>
 #include <signal.h>
