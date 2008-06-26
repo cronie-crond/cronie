@@ -249,6 +249,7 @@ check_inotify_database(cron_db *old_db, int fd) {
 	overwrite_database(old_db, &new_db);
 	Debug(DLOAD, ("check_inotify_database is done\n"))
 }
+#endif
 
 static void
 overwrite_database(cron_db *old_db, cron_db *new_db) {
