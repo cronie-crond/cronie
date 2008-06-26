@@ -41,6 +41,12 @@ AC_CHECK_HEADERS( \
         utime.h \
 )
 
+AC_CHECK_FUNCS( \
+       fcntl \
+       lockf \
+       flock \
+)
+
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIGNAL

@@ -28,6 +28,17 @@
 #include <libaudit.h>
 #endif
 
+#ifdef HAVE_FCNTL_H    /* fcntl(2) */
+# include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H   /* lockf(3) */
+# include <unistd.h>
+#endif
+#ifdef HAVE_FLOCK      /* flock(2) */
+# include <sys/file.h>
+#endif
+#include <stdio.h>
+
 #if defined(SYSLOG) && defined(LOG_FILE)
 # undef LOG_FILE
 #endif
@@ -44,6 +55,25 @@ static int LogFD = ERR;
 
 #if defined(SYSLOG)
 static int syslog_open = FALSE;
+#endif
+
+#if defined(HAVE_FCNTL) && defined(F_SETLK)
+static int trylock_file(int fd)
+{
+       struct flock fl;
+
+       memset(&fl, '\0', sizeof(fl));
+       fl.l_type = F_WRLCK;
+       fl.l_whence = SEEK_SET;
+       fl.l_start = 0;
+       fl.l_len = 0;
+
+       return fcntl(fd, F_SETLK, &fl);
+}
+#elif defined(HAVE_LOCKF)
+# define trylock_file(fd)      lockf((fd), F_TLOCK, 0)
+#elif defined(HAVE_FLOCK)
+# define trylock_file(fd)      flock((fd), LOCK_EX|LOCK_NB)
 #endif
 
 /*
@@ -305,7 +335,7 @@ acquire_daemonlock(int closeflag) {
 			exit(ERROR_EXIT);
 		}
 
-		if (flock(fd, LOCK_EX|LOCK_NB) < OK) {
+		if (trylock_file(fd) < OK) {
 			int save_errno = errno;
 
 			bzero(buf, sizeof(buf));
