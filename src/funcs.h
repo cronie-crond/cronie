@@ -38,7 +38,7 @@ void		set_cron_uid(void),
 		free_entry(entry *),
 		acquire_daemonlock(int),
 		skip_comments(FILE *),
-		log_it(const char *, int, const char *, const char *, int),
+		log_it(const char *, PID_T, const char *, const char *, int),
 		log_close(void);
 #if defined WITH_INOTIFY
 void 	load_inotify_database(cron_db *, int ),
