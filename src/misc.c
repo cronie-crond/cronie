@@ -24,7 +24,6 @@
  */
 
 #include <cron.h>
-#include <limits.h>
 #ifdef WITH_AUDIT
 #include <libaudit.h>
 #endif
