@@ -1,3 +1,81 @@
+2008-06-26  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8, man/crontab.1: Updated manuals - diffent typos and
+	inotify support mentioned.
+
+2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* configure.ac, src/misc.c: Portability: File locking by fcntl,
+	lockf or flock  Signed-off-by: Marcela Mašláňová
+	<mmaslano@redhat.com>
+
+2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* src/macros.h, src/misc.c: Bugfix: PATH_MAX is defined in limits.h
+	Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* configure.ac, src/popen.c: Portability: Check if sys/cdefs.h is
+	there on the platform  Signed-off-by: Marcela Mašláňová
+	<mmaslano@redhat.com>
+
+2008-06-23  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* configure.ac, src/funcs.h, src/macros.h, src/misc.c: Portability:
+	Check for struct tm.tm_gmtoff by AC_CHECK_MEMBERS  Signed-off-by:
+	Marcela Mašláňová <mmaslano@redhat.com>
+
+2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* src/funcs.h: Bugfix: Correct log_it() prototype  Signed-off-by:
+	Marcela Mašláňová <mmaslano@redhat.com>
+
+2008-06-26  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/database.c: Add missing endif.
+
+2008-06-23  Tomas Mraz <t8m@centrum.cz>
+
+	* src/cron.c, src/database.c: Fix the inotify support.
+
+2008-06-23  Tomas Mraz <t8m@centrum.cz>
+
+	* src/crontab.c, src/database.c, src/do_command.c, src/entry.c,
+	src/env.c, src/job.c, src/misc.c, src/popen.c, src/pw_dup.c,
+	src/user.c: Remove rcsid tags.
+
+2008-06-23  Tomas Mraz <t8m@centrum.cz>
+
+	* src/cron.h, src/security.c: Move macros and static declarations
+	where they are needed.
+
+2008-06-23  Tomas Mraz <t8m@centrum.cz>
+
+	* configure.ac: Add check for _GNU_SOURCE.
+
+2008-06-23  Tomas Mraz <t8m@centrum.cz>
+
+	* src/cron.c: Fix wrong declaration of orig_tz.
+
+2008-06-23  Tomas Mraz <t8m@centrum.cz>
+
+	* src/cron.c, src/crontab.c, src/database.c, src/do_command.c,
+	src/entry.c, src/funcs.h, src/misc.c, src/popen.c, src/security.c,
+	src/user.c: Unification of logging (syslog->log_it).
+
+2008-06-23  Tomas Mraz <t8m@centrum.cz>
+
+	* src/security.c: Fixed call to setkeycreatecon.
+
+2008-05-30  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac: Update version also in configure.
+
+2008-05-30  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog: cronie-1.1 released. Updated Changelog.
+
 2008-05-30  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* cronie.init: Init script die faster, if the sysconfig script is
