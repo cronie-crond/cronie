@@ -19,10 +19,10 @@
 .\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
 .\" 
-.TH CRON "8" "10 January 2007" "Linux Programmer's Manual"
+.TH CRON "8" "26 June 2008" "Linux Programmer's Manual"
 .UC 4
 .SH NAME
-cron \- daemon to execute scheduled commands (ISC Cron V4.1)
+cron \- daemon to execute scheduled commands (cronie V1.2)
 .SH SYNOPSIS
 .B cron
 .RB [ -n " | " -p " | " -m \fP\fI<mail command>\fP\fB ]
@@ -59,17 +59,32 @@ command to see if it should be run in the current minute.  When executing
 commands, any output is mailed to the owner of the crontab (or to the user
 named in the MAILTO environment variable in the crontab, if such exists).
 .PP
-Additionally,
+There are two ways, how the changes are checked in crontables. The first
+is checking the modtime of file and the other is using inotify support.
+You can find out which of them are you using, if you check 
+.I /var/log/cron
+where is (or isn't) inotify mentioned after start of daemon. The inotify support
+is watching for changes in all crontables and touch the disk only in case
+that something was changed.
+.PP
+In other case
 .I cron
-checks each minute to see if its spool directory's modtime (or the modtime
-on
-.IR /etc/crontab )
-has changed, and if it has,
-.I cron
-will then examine the modtime on all crontabs and reload those which have
-changed.  Thus
-.I cron
-need not be restarted whenever a crontab file is modified.  Note that the
+checks each minute to see if its crontables modtime have changes and reload
+those which have changes. There is no need to restart cron after some of the
+crontable is modified. This option is used also when inotify couldn't be initialized.
+.PP
+.I Cron
+is checking those files or directories:
+.IR /etc/crontab
+system crontab is usually for running daily, weekly, monthly jobs.
+.BR
+.IR /etc/cron.d/
+where are system cronjobs stored for different users.
+.BR
+.IR /var/spool/cron
+that's mean spool directory for user crontables.
+
+Note that the
 .BR crontab (1)
 command updates the modtime of the spool directory whenever it changes a
 crontab.
@@ -133,7 +148,8 @@ user other than their owner.
 .SH "SEE ALSO"
 .IR crontab (1),
 .IR crontab (5),
+.IR inotify (7),
 .IR pam (8)
 .SH AUTHOR
 .nf
-Paul Vixie <vixie@isc.org>
+Marcela Mašláňová <mmaslano@redhat.com>
