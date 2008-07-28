@@ -30,6 +30,8 @@
 # include <paths.h>
 #endif /*BSD*/
 
+#define REBOOT_LOCK		"/var/run/cron.reboot"
+
 #ifndef CRONDIR
 			/* CRONDIR is where cron(8) and crontab(1) both chdir
 			 * to; SPOOL_DIR, CRON_ALLOW, CRON_DENY, and LOG_FILE
