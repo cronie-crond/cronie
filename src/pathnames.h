@@ -56,14 +56,6 @@
 #define	CRON_ALLOW	"/etc/cron.allow"
 #define	CRON_DENY	"/etc/cron.deny"
 
-			/* undefining this turns off logging to a file.  If
-			 * neither LOG_FILE or SYSLOG is defined, we don't log.
-			 * If both are defined, we log both ways.  Note that if
-			 * LOG_CRON is defined by <syslog.h>, LOG_FILE will not
-			 * be used.
-			 */
-/*#define LOG_FILE	"/var/log/cron"*/
-/*#define SYSLOG*/
 			/* where should the daemon stick its PID?
 			 * PIDDIR must end in '/'.
 			 */
@@ -88,10 +80,6 @@
 # define EDITOR _PATH_VI
 #else
 # define EDITOR "/usr/ucb/vi"
-#endif
-
-#ifndef _PATH_SENDMAIL
-# define _PATH_SENDMAIL "/usr/lib/sendmail"
 #endif
 
 #ifndef _PATH_BSHELL
