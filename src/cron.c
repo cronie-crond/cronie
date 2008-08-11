@@ -411,6 +411,8 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 	int minute, hour, dom, month, dow;
 	user *u;
 	entry *e;
+    const char *uname;
+    struct passwd *pw = NULL;
 
 	/* make 0-based values out of these so we can use them as indicies
 	 */
@@ -447,21 +449,25 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 			Debug(DSCH|DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
 			    e->pwd->pw_name, (long)e->pwd->pw_uid,
 			    (long)e->pwd->pw_gid, e->cmd))
-			job_tz = env_get("CRON_TZ", e->envp);
-			maketime(job_tz, orig_tz);
-			/* here we test whether time is NOW */
-			if (bit_test(e->minute, minute) &&
-			    bit_test(e->hour, hour) &&
-			    bit_test(e->month, month) &&
-			    ( ((e->flags & DOM_STAR) || (e->flags & DOW_STAR))
-			      ? (bit_test(e->dow,dow) && bit_test(e->dom,dom))
-			      : (bit_test(e->dow,dow) || bit_test(e->dom,dom))
-			    )
-			   ) {
-				if ((doNonWild &&
-				    !(e->flags & (MIN_STAR|HR_STAR))) || 
-				    (doWild && (e->flags & (MIN_STAR|HR_STAR))))
-					job_add(e, u);	/*will add job, if it isn't in queue already for NOW.*/
+            uname = e->pwd->pw_name;
+			/* check if user exists in time of job is being run f.e. ldap */
+			if ((pw = getpwnam(uname)) != NULL) {
+				job_tz = env_get("CRON_TZ", e->envp);
+				maketime(job_tz, orig_tz);
+				/* here we test whether time is NOW */
+				if (bit_test(e->minute, minute) &&
+			    	bit_test(e->hour, hour) &&
+				    bit_test(e->month, month) &&
+				    ( ((e->flags & DOM_STAR) || (e->flags & DOW_STAR))
+				      ? (bit_test(e->dow,dow) && bit_test(e->dom,dom))
+				      : (bit_test(e->dow,dow) || bit_test(e->dom,dom))
+			    	)
+				   ) {
+					if ((doNonWild &&
+					    !(e->flags & (MIN_STAR|HR_STAR))) || 
+					    (doWild && (e->flags & (MIN_STAR|HR_STAR))))
+							job_add(e, u);	/*will add job, if it isn't in queue already for NOW.*/
+					}
 			}
 		}
 	}
