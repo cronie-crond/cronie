@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 #
 # crond          Start/Stop the cron clock daemon.
 #
@@ -7,9 +7,19 @@
 #              programs at periodic scheduled times. vixie cron adds a \
 #              number of features to the basic UNIX cron, including better \
 #              security and more powerful configuration options.
-# processname: crond
-# config: /etc/crontab
-# pidfile: /var/run/crond.pid
+
+### BEGIN INIT INFO
+# Provides: crond crontab
+# Required-Start: $local_fs $syslog
+# Required-Stop: $local_fs $syslog
+# Default-Start:  2345
+# Default-Stop: 90
+# Short-Description: run cron daemon
+# Description: cron is a standard UNIX program that runs user-specified 
+#              programs at periodic scheduled times. vixie cron adds a 
+#              number of features to the basic UNIX cron, including better 
+#              security and more powerful configuration options.
+### END INIT INFO
 
 [ -f /etc/sysconfig/crond ] || { 
     [ "$1" = "status" ] && exit 4 || exit 6 
@@ -17,82 +27,104 @@
 
 RETVAL=0
 prog="crond"
-CROND=/usr/sbin/crond
-LOCK_FILE=/var/lock/subsys/crond
+exec=/usr/sbin/crond
+lockfile=/var/lock/subsys/crond
+config=/etc/sysconfig/crond
 
 # Source function library.
-. /etc/init.d/functions
+. /etc/rc.d/init.d/functions
 
-# set sysconfig settings
-[ -f /etc/sysconfig/crond ] && . /etc/sysconfig/crond
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
 # validate mail
 t=${CRON_VALIDATE_MAILRCPTS:-UNSET}
 [ "$t" != "UNSET" ] && export CRON_VALIDATE_MAILRCPTS="$t"
- 
-prog="crond"
 
 start() {
-	echo -n $"Starting $prog: "
-	daemon $prog $CRONDARGS && success || failure
-	RETVAL=$?
-	[ "$RETVAL" = 0 ] && touch $LOCK_FILE
-	echo
+    [ -x $exec ] || exit 5
+    [ -f $config ] || exit 6
+    echo -n $"Starting $prog: "
+    daemon $prog $CRONDARGS && success || failure
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
 }
 
 stop() {
-	echo -n $"Stopping $prog: "
-	if [ -n "`pidfileofproc $CROND`" ]; then
-		killproc $CROND
+    echo -n $"Stopping $prog: "
+	if [ -n "`pidfileofproc $exec`" ]; then
+		killproc $exec
 		RETVAL=3
 	else
 		failure $"Stopping $prog"
 	fi
-	RETVAL=$?
-	[ "$RETVAL" = 0 ] && rm -f $LOCK_FILE
-	echo
-}	
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+restart() {
+    stop
+    start
+}
 
 reload() {
 	echo -n $"Reloading $prog: "
-	if [ -n "`pidfileofproc $CROND`" ]; then
-		killproc $CROND -HUP
+	if [ -n "`pidfileofproc $exec`" ]; then
+		killproc $exec -HUP
 	else
 		failure $"Reloading $prog"
 	fi
-	RETVAL=$?
+	retval=$?
 	echo
-}	
+}
+
+force_reload() {
+	# new configuration takes effect after restart
+    restart
+}
+
+rh_status() {
+    # run checks to determine if the service is running or use generic status
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
 
 case "$1" in
-  start)
-  	start
-	;;
-  stop)
-  	stop
-	;;
-  restart)
-	stop
-  	start
-	;;
-  reload)
-  	reload
-	;;
-  status)
-	status $CROND
-	;;
-  condrestart)
-    if [ -f  $LOCK_FILE ]; then
-        if [ "$RETVAL" = 0 ]; then
-            stop
-            sleep 3
-            start
-        fi
-    fi
-    ;;
-  *)
-	echo $"Usage: $0 {start|stop|status|reload|restart|condrestart}"
-	RETVAL=3
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
 esac
-exit $RETVAL
+exit $?
 
