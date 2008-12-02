@@ -169,8 +169,8 @@ AC_ARG_WITH(selinux,
                 AC_SUBST(LIBSELINUX)
         fi ]
 )
-        
-AC_ARG_WITH(pam, [AS_HELP_STRING([--with-pam], [Enable PAM support])])
+
+AC_ARG_WITH(pam, [AS_HELP_STRING([--with-pam], [Enable PAM support])], [], [enable_pam=no])
 AM_CONDITIONAL([PAM], [test "$enable_pam" != no])
 
 if test "$enable_pam" != no; then
