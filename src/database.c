@@ -153,7 +153,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 
 #if defined WITH_INOTIFY
 void
-check_inotify_database(cron_db *old_db, int fd) {
+check_inotify_database(cron_db *old_db) {
 	cron_db new_db;
 	DIR_T *dp;
 	DIR *dir;
@@ -167,17 +167,18 @@ check_inotify_database(cron_db *old_db, int fd) {
 	time.tv_usec = 0;
 
 	FD_ZERO(&rfds);
-	FD_SET(fd, &rfds);
+	FD_SET(old_db->ifd, &rfds);
 
-	retval = select(fd + 1, &rfds, NULL, NULL, &time);
+	retval = select(old_db->ifd + 1, &rfds, NULL, NULL, &time);
 	if (retval == -1) {
 		if (errno != EINTR)
 			log_it("CRON", pid, "INOTIFY", "select failed", errno);
 		return;
 	}
-	else if (FD_ISSET(fd, &rfds)) {
+	else if (FD_ISSET(old_db->ifd, &rfds)) {
 		new_db.head = new_db.tail = NULL;
-		while ((retval=read(fd, buf, sizeof(buf))) == -1 && errno == EINTR);
+		new_db.ifd = old_db->ifd;
+		while ((retval=read(old_db->ifd, buf, sizeof(buf))) == -1 && errno == EINTR);
 
 		if (retval == 0) {
 			/* this should not happen as the buffer is large enough */
@@ -195,7 +196,7 @@ check_inotify_database(cron_db *old_db, int fd) {
 		/* we must reinstate the watches here - TODO reinstate only watches
 		 * which get IN_IGNORED event
 		 */
-		set_cron_watched(fd);
+		set_cron_watched(old_db->ifd);
 
 		/* TODO: parse the events and read only affected files */
 
@@ -269,7 +270,7 @@ overwrite_database(cron_db *old_db, cron_db *new_db) {
 	*old_db = *new_db;
 }
 
-void
+int
 load_database(cron_db *old_db) {
 	struct stat statbuf, syscron_stat, crond_stat;
 	cron_db new_db;
@@ -318,7 +319,7 @@ load_database(cron_db *old_db) {
 	   ){
 		Debug(DLOAD, ("[%ld] spool dir mtime unch, no load needed.\n",
 			      (long)pid))
-		return;
+		return 0;
 	}
 
 	/* something's different.  make a new database, moving unchanged
@@ -329,6 +330,9 @@ load_database(cron_db *old_db) {
 	new_db.mtime = TMAX(crond_stat.st_mtime,
 			    TMAX(statbuf.st_mtime, syscron_stat.st_mtime));
 	new_db.head = new_db.tail = NULL;
+#if defined WITH_INOTIFY
+	new_db.ifd = old_db->ifd;
+#endif
 
 	if (syscron_stat.st_mtime)
 		process_crontab("root", NULL, SYSCRONTAB, &new_db, old_db);
@@ -382,6 +386,7 @@ load_database(cron_db *old_db) {
 
 	overwrite_database(old_db, &new_db);
 	Debug(DLOAD, ("load_database is done\n"))
+	return 1;
 }
 
 void

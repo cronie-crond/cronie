@@ -41,14 +41,13 @@ void		set_cron_uid(void),
 		log_it(const char *, PID_T, const char *, const char *, int),
 		log_close(void);
 #if defined WITH_INOTIFY
-void 	load_inotify_database(cron_db *, int ),
-		set_cron_watched(int ),
+void 		set_cron_watched(int ),
 		set_cron_unwatched(int ),
-		check_inotify_database(cron_db *, int );
+		check_inotify_database(cron_db *);
 #endif
-void 	load_database(cron_db *);
 
-int		job_runqueue(void),
+int		load_database(cron_db *),
+		job_runqueue(void),
 		set_debug_flags(const char *),
 		get_char(FILE *),
 		get_string(char *, int, FILE *, char *),

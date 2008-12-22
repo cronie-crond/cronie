@@ -60,6 +60,9 @@ typedef	struct _user {
 typedef	struct _cron_db {
 	user		*head, *tail;	/* links */
 	time_t		mtime;		/* last modtime on spooldir */
+#ifdef WITH_INOTIFY
+	int		ifd;
+#endif
 } cron_db;
 				/* in the C tradition, we only create
 				 * variables for the main program, just

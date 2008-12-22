@@ -79,7 +79,8 @@ set_cron_watched(int fd) {
 		int w;
 
 		w = inotify_add_watch(fd, watchpaths[i],
-			IN_CLOSE_WRITE | IN_ATTRIB | IN_MOVED_TO | IN_MOVED_FROM | IN_MOVE_SELF | IN_DELETE);
+			IN_CREATE | IN_CLOSE_WRITE | IN_ATTRIB | IN_MODIFY | IN_MOVED_TO |
+			IN_MOVED_FROM | IN_MOVE_SELF | IN_DELETE | IN_DELETE_SELF);
 		if (w < 0) {
 			if (wd[i] != -1) {
         			log_it("CRON", pid, "This directory or file can't be watched", watchpaths[i], errno);
@@ -99,6 +100,27 @@ set_cron_watched(int fd) {
 	inotify_enabled = 1;
 }
 #endif
+
+static void
+handle_signals(cron_db *database) {
+	if (got_sighup) {
+		got_sighup = 0;
+#if defined WITH_INOTIFY
+		/* watches must be reinstated on reload */
+		if (inotify_enabled) {
+			set_cron_unwatched(database->ifd);
+			inotify_enabled = 0;
+		}
+#endif
+		database->mtime = (time_t) 0;
+		log_close();
+	}
+
+	if (got_sigchld) {
+		got_sigchld = 0;
+		sigchld_reaper();
+	}
+}
 
 static void
 usage(void) {
@@ -216,7 +238,7 @@ main(int argc, char *argv[]) {
 		wd[i] = -2;
 	}
 
-	fd = inotify_init();
+	database.ifd = fd = inotify_init();
 	if (fd < 0)
 		log_it("CRON", pid, "INFO", "Inotify init failed", errno);
 	set_cron_watched(fd);
@@ -252,19 +274,19 @@ main(int argc, char *argv[]) {
 		 * clock.  Classify the change into one of 4 cases.
 		 */
 		timeDiff = timeRunning - virtualTime;
-		if (inotify_enabled) {
 #if defined WITH_INOTIFY
-			check_inotify_database(&database, fd);
-#endif
+		if (inotify_enabled) {
+			check_inotify_database(&database);
 		}
 		else {
-			load_database(&database);
-#if defined WITH_INOTIFY
-			/* try reinstating the watches */
-			set_cron_watched(fd);
-#endif			
+			if(load_database(&database))
+				/* try reinstating the watches */
+				set_cron_watched(fd);
 		}
-		
+#else
+		load_database(&database);
+#endif
+
 		/* shortcut for the most common case */
 		if (timeDiff == 1) {
 			virtualTime = timeRunning;
@@ -354,17 +376,7 @@ main(int argc, char *argv[]) {
 		/* Jobs to be run (if any) are loaded; clear the queue. */
 		job_runqueue();
 
-		/* Check to see if we received a signal while running jobs. */
-		if (got_sighup) {
-			got_sighup = 0;
-		if (!inotify_enabled)
-			database.mtime = (time_t) 0;
-			log_close();
-		}
-		if (got_sigchld) {
-			got_sigchld = 0;
-			sigchld_reaper();
-		}
+		handle_signals(&database);
 	}
 
 #if defined WITH_INOTIFY
@@ -521,16 +533,8 @@ cron_sleep(int target, cron_db *db) {
 		 * If so, service the signal(s) then continue sleeping
 		 * where we left off.
 		 */
-		if (got_sighup) {
-			got_sighup = 0;
-			if (!inotify_enabled)
-				db->mtime = (time_t) 0;
-			log_close();
-		}
-		if (got_sigchld) {
-			got_sigchld = 0;
-			sigchld_reaper();
-		}
+		handle_signals(db);
+
 		t2 = time(NULL) + GMToff;
 		seconds_to_wait -= (int)(t2 - t1);
 		t1 = t2;
