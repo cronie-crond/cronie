@@ -272,14 +272,15 @@ the 5 initial time and date fields, and are prefixed by the '@' character:
 @hourly    :    Run once an hour, ie. "0 * * * *".
 .fi
 .SH CAVEATS
-In this version of
-.I cron
-,
-.I /etc/crontab 
-must not be writable by any user other than root.
-No crontab files may be links, or linked to by any other file.
-No crontab files may be executable, or be writable by any user
-other than their owner.
+The
+.BR crontab
+files have to be regular files or symlinks to regular files, they must not be executable
+or writable by anyone else than the owner.
+This requirement can be overridden by using the \fB-p\fP option on the crond command line.
+If inotify support is in use changes in the symlinked crontabs are not automatically
+noticed by the cron daemon. The cron daemon must receive a SIGHUP to reload the crontabs.
+This is a limitation of inotify API.
+
 .SH AUTHOR
 .nf
 Paul Vixie <vixie@isc.org>
