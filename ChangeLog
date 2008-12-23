@@ -1,3 +1,41 @@
+2008-12-23  Tomas Mraz <t8m@centrum.cz>
+
+	* man/cron.8, man/crontab.5: Update man pages to reflect the
+	reality.
+
+2008-12-22  Tomas Mraz <t8m@centrum.cz>
+
+	* src/cron.c, src/database.c, src/funcs.h, src/structs.h: Fix
+	handling of HUP signal with inotify enabled.
+
+2008-12-02  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac: Configure can't be run without pam-devel libraries.
+	(rhbz#473893)
+
+2008-10-24  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* cronie.init: Init script is according to SysVInitScript
+	guidelines.
+
+2008-08-11  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c: Check user before job is run.
+
+2008-07-28  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/pathnames.h: Clean hardwired pathnames.
+
+2008-07-28  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/crontab.5, src/cron.c, src/pathnames.h: @reboot jobs should be
+	run only after reboot instead of every daemon's restart. Patch
+	inspired by debian.
+
+2008-06-26  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: Release 1.2
+
 2008-06-26  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* man/cron.8, man/crontab.1: Updated manuals - diffent typos and
