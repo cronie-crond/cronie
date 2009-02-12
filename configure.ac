@@ -123,24 +123,6 @@ AC_ARG_WITH(daemon_groupname,
 )
 AC_SUBST(DAEMON_GROUPNAME)
 
-# Check whether user wants sysconfig file
-#AC_ARG_WITH(config,
-#	[AS_HELP_STRING([--with-sysconf], [Enable sysconfig file])],
-#	[ if test "x$withval" != "xno" ; then
-#		configdir=${sysconfdir}/sysconfig/
-#		AC_SUBST(configdir)
-#	fi ]
-#)
-
-# Check whether user wants init file
-#AC_ARG_WITH(init,
-#        [AS_HELP_STRING([--with-initfile], [Enable init file])],
-#        [ if test "x$withval" != "xno" ; then
-#		initdir=${initrddir}
-#    		AC_SUBST(initdir)
-#	fi ]
-#)
-
 # Check whether inotify is accepted
 AC_ARG_WITH(inotify,
    [AS_HELP_STRING([--with-inotify], [ Enable inotify support])],
@@ -151,6 +133,21 @@ AC_ARG_WITH(inotify,
      fi
    ]
 )
+
+AC_ARG_ENABLE(pie,CRONIE_HELP_STRING(--enable-pie,Build cronie as a Position Independent Executable))
+if test "x$enable_pie" = xyes; then
+    save_CFLAGS="$CFLAGS"
+    save_LDFLAGS="$LDFLAGS"
+    CFLAGS="$CFLAGS -fpie"
+    LDFLAGS="$LDFLAGS -pie -fpie"
+    AC_CACHE_CHECK([whether compiler accepts -pie -fpie], ac_cv_pie_fpie,
+    [AC_TRY_LINK([], [],
+    ac_cv_pie_fpie=yes, ac_cv_pie_fpie=no)])
+    if test $ac_cv_pie_fpie = no; then
+        CFLAGS="$save_CFLAGS"
+        LDFLAGS="$save_LDFLAGS"
+    fi
+fi
                                                     
 # Check whether user wants SELinux support
 SELINUX_MSG="no"
@@ -211,10 +208,6 @@ AC_DEFINE(SYSLOG,1,[Using syslog for log messages.])
 
 AC_DEFINE(CAPITALIZE_FOR_PS, 1, [if you have a tm_gmtoff member in struct tm])
 
-##AC_DEFINE(LOGIN_CAP, 1, [if your OS supports BSD authentication])
-
-##AC_DEFINE(CRON_GROUP,"crontab",[crontab])
-
 # Check whether user wants Linux audit support
 AC_ARG_WITH(audit,
         [AS_HELP_STRING([--with-audit], [Enable audit trails])],
@@ -227,9 +220,6 @@ AC_ARG_WITH(audit,
                 AC_SUBST(LIBAUDIT)
         fi ]
 )
-
-dnl AC_ARG_ENABLE(debug, [AS_HELP_STRING([--enable-debug], [Turn on debugging])])
-dnl AM_CONDITIONAL(DEBUG, test "$enable_debug" = true)
 
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
 AC_OUTPUT
