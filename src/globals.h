@@ -59,14 +59,14 @@ XTRN const char *DowNames[]
 #endif
 	;
 
-XTRN char	*ProgramName INIT("amnesia");
+XTRN char	*ProgramName;
 XTRN int	LineNumber INIT(0);
 XTRN time_t	StartTime INIT(0);
 XTRN int	NoFork INIT(0);
 XTRN int        PermitAnyCrontab INIT(0);
 XTRN int        ValidateMailRcpts INIT(0);
-XTRN char       MailCmd[MAX_COMMAND] INIT("");
-XTRN char       cron_default_mail_charset[MAX_ENVSTR] INIT("");
+XTRN char       MailCmd[MAX_COMMAND];
+XTRN char       cron_default_mail_charset[MAX_ENVSTR];
  
 #if DEBUGGING
 XTRN int	DebugFlags INIT(0);

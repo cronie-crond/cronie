@@ -145,6 +145,8 @@ main(int argc, char *argv[]) {
 #endif
 
 	ProgramName = argv[0];
+	MailCmd[0] = '\0';
+	cron_default_mail_charset[0] = '\0';
 
 	setlocale(LC_ALL, "");
 
