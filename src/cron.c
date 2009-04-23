@@ -241,6 +241,7 @@ main(int argc, char *argv[]) {
 	}
 
 	database.ifd = fd = inotify_init();
+	fcntl(fd, F_SETFD, FD_CLOEXEC);
 	if (fd < 0)
 		log_it("CRON", pid, "INFO", "Inotify init failed", errno);
 	set_cron_watched(fd);
