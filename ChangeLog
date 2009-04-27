@@ -1,3 +1,34 @@
+2009-04-23  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c: Inotify initialization left open file descriptors
+	which are leaking and annoying SElinux. This could be once fixed by
+	inotify_init1, but that's supported from kernel 2.6.27.
+
+2009-04-15  Willy Tarreua <wtarreau AT exosec DOT fr>
+
+	* src/cron.c, src/crontab.c, src/globals.h: I have noticed that with
+	cronie-1.2, my binaries have seen their \ size grow by 10x (from
+	28kB to 290kB). After searching a bit, I found that the responsible
+	was the INIT() macro in globals.h \ which initializes huge strings
+	MailCmd and cron_default_mail_charset both of which are 128 kB. Due
+	to this initialization, the memory \ areas are stored for real in
+	the binary, resulting in larger sizes  Signed-off-by: Marcela
+	Mašláňová <mmaslano@redhat.com>
+
+2009-02-12  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac: Cronie could be build as Position Independent
+	Executable when the configure is executed with --enable-pie. Erased
+	commented unused stuff from configure.
+
+2009-02-12  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* crond.sysconfig: Fix typo in sysconfig.
+
+2008-12-23  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog: After long time update ChangeLog file.
+
 2008-12-23  Tomas Mraz <t8m@centrum.cz>
 
 	* man/cron.8, man/crontab.5: Update man pages to reflect the
