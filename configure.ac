@@ -167,10 +167,21 @@ AC_ARG_WITH(selinux,
         fi ]
 )
 
-AC_ARG_WITH(pam, [AS_HELP_STRING([--with-pam], [Enable PAM support])], [], [enable_pam=no])
-AM_CONDITIONAL([PAM], [test "$enable_pam" != no])
+AC_ARG_WITH(pam, [AS_HELP_STRING([--with-pam], [Build with PAM support])])
+AC_ARG_ENABLE(pam, [AS_HELP_STRING([--enable-pam], [Alias for --with-pam])])
 
-if test "$enable_pam" != no; then
+# Check that with_pam and enable_pam are consistent.
+# If neither one is set, the default is "no."
+if test -z "$with_pam"; then
+	with_pam=${enable_pam:-no}
+elif test -n "$enable_pam" && test "$with_pam" != "$enable_pam"; then
+	AC_MSG_ERROR(
+	  [Contradicting --with/without-pam and --enable/disable-pam options.])
+fi
+
+AM_CONDITIONAL([PAM], [test "$with_pam" != no])
+
+if test "$with_pam" != no; then
 	AC_DEFINE(WITH_PAM, 1, [Define if you want to enable PAM support])
 	pam_appl_h_found=no
 	AC_CHECK_HEADERS([pam/pam_appl.h security/pam_appl.h],
