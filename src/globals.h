@@ -60,11 +60,11 @@ XTRN const char *DowNames[]
 	;
 
 XTRN char	*ProgramName;
-XTRN int	LineNumber INIT(0);
-XTRN time_t	StartTime INIT(0);
-XTRN int	NoFork INIT(0);
-XTRN int        PermitAnyCrontab INIT(0);
-XTRN int        ValidateMailRcpts INIT(0);
+XTRN int	LineNumber;
+XTRN time_t	StartTime;
+XTRN int	NoFork;
+XTRN int        PermitAnyCrontab;
+XTRN int        ValidateMailRcpts;
 XTRN char       MailCmd[MAX_COMMAND];
 XTRN char       cron_default_mail_charset[MAX_ENVSTR];
  
