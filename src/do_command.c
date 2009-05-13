@@ -61,7 +61,7 @@ do_command(entry *e, user *u) {
 static void
 child_process(entry *e, user *u) {
 	int stdin_pipe[2], stdout_pipe[2];
-	char *input_data, *usernm, *mailto;
+	char *input_data, *usernm, *mailto, *mailfrom;
 	int children = 0; 
         char **jobenv=0L;
         pid_t pid = getpid();
@@ -92,6 +92,7 @@ child_process(entry *e, user *u) {
 	 */
 	usernm = e->pwd->pw_name;
 	mailto = env_get("MAILTO", jobenv);
+	mailfrom = env_get("MAILFROM", e->envp);
 
 	/* our parent is watching for our death by catching SIGCHLD.  we
 	 * do not care to watch for our children's deaths this way -- we
@@ -361,7 +362,15 @@ child_process(entry *e, user *u) {
 				 */
 				mailto = usernm;
 			}
-		
+
+			/* get sender address.  this is MAILFROM if set (and safe),
+			 * root otherwise.
+			 */
+			if (!mailfrom || !*mailfrom || !safe_p(usernm, mailfrom)) {
+				mailfrom = calloc(5, sizeof(char));
+				strcpy(mailfrom, "root");
+			}
+
 			/* if we are supposed to be mailing, MAILTO will
 			 * be non-NULL.  only in this case should we set
 			 * up the mail command and subjects and stuff...
@@ -382,12 +391,12 @@ child_process(entry *e, user *u) {
 				
 				if ( MailCmd[0] == '\0' )
 				{
-					if (strlens(MAILFMT, MAILARG, NULL) + 1
+					if (strlens(MAILFMT, MAILARG, mailfrom, NULL) + 1
 					    >= sizeof mailcmd) {
 						fprintf(stderr, "mailcmd too long\n");
 						(void) _exit(ERROR_EXIT);
 					}
-					(void)sprintf(mailcmd, MAILFMT, MAILARG);
+					(void)sprintf(mailcmd, MAILFMT, MAILARG, mailfrom);
 				}else
 				{
 					strncpy( mailcmd, MailCmd, MAX_COMMAND );
@@ -397,7 +406,7 @@ child_process(entry *e, user *u) {
 					(void) _exit(ERROR_EXIT);
 				}
 				
-				fprintf(mail, "From: root (Cron Daemon)\n");
+				fprintf(mail, "From: %s (Cron Daemon)\n", mailfrom);
 				fprintf(mail, "To: %s\n", mailto);
 				fprintf(mail, "Subject: Cron <%s@%s> %s\n",
 					usernm, first_word(hostname, "."),

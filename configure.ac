@@ -206,13 +206,14 @@ AC_DEFINE(DEBUGGING,1,[Code will be built with debug info.])
 
 AC_DEFINE(MAILARG,"/usr/sbin/sendmail",[There will be path to sendmail.])
 
-AC_DEFINE(MAILFMT,"%s -FCronDaemon -i -odi -oem -oi -t",
+AC_DEFINE(MAILFMT,"%s -FCronDaemon -i -odi -oem -oi -t -f %s",
 [-i    = don't terminate on "." by itself
 -Fx   = Set full-name of sender
 -odi  = Option Deliverymode Interactive
 -oem  = Option Errors Mailedtosender
 -oi   = Ignore "." alone on a line
 -t    = Get recipient from headers
+-f %s = Envelope sender address
 -d = undocumented but common flag.])
 
 AC_DEFINE(SYSLOG,1,[Using syslog for log messages.])
