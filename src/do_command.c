@@ -537,7 +537,7 @@ child_process(entry *e, user *u) {
 
 static int
 safe_p(const char *usernm, const char *s) {
-	static const char safe_delim[] = "@!:%-.,";     /* conservative! */
+	static const char safe_delim[] = "@!:%-.,_+";     /* conservative! */
 	const char *t;
 	int ch, first;
 
