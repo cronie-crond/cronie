@@ -95,6 +95,8 @@ void cron_close_security_session( void );
 
 int cron_change_user( struct passwd *pw, char *homedir );
 
+int cron_change_user_permanently( struct passwd *pw );
+
 int cron_get_job_context( user *u, void *scontextp, void *file_contextp, char **envp );
 
 int get_security_context(const char *name, 

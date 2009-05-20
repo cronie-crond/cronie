@@ -199,8 +199,8 @@ int cron_change_user(struct passwd *pw, char *homedir) {
 		return -1;	
     }
 
-    if (setuid( pw->pw_uid ) != 0) {
-		log_it("CRON", pid, "ERROR", "setuid failed", errno);
+    if (setreuid( pw->pw_uid, -1 ) != 0) {
+		log_it("CRON", pid, "ERROR", "setreuid failed", errno);
 		return -1;
     }
 
@@ -210,6 +210,15 @@ int cron_change_user(struct passwd *pw, char *homedir) {
     }
     return 0;
 }
+
+int cron_change_user_permanently(struct passwd *pw) {
+    if (setreuid( pw->pw_uid, pw->pw_uid ) != 0) {
+        log_it("CRON", getpid(), "ERROR", "setreuid failed", errno);
+        return -1;
+    }
+    return 0;
+}
+
 
 static int cron_authorize_context
 (security_context_t scontext,security_context_t file_context) {
