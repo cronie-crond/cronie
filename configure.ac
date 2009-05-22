@@ -211,6 +211,19 @@ AC_ARG_WITH(audit,
         fi ]
 )
 
+dnl CRON_VAR_DEFAULT (VAR, DESCRIPTION, DEFAULT)
+dnl --------------------------------------------
+AC_DEFUN([CRONIE_CONF_VAR],
+[AC_ARG_VAR([$1], [$2 @<:@$3@:>@])
+if test "$$1" = ""; then
+	$1='$3'
+fi
+])
+CRONIE_CONF_VAR([SYSCRONTAB], [the current working directory of the running daemon], [${sysconfdir}/crontab])
+CRONIE_CONF_VAR([SYS_CROND_DIR], [the current working directory of the running daemon], [${sysconfdir}/cron.d])
+CRONIE_CONF_VAR([CRONDIR], [the current working directory of the running daemon], [${localstatedir}/spool])
+CRONIE_CONF_VAR([SPOOL_DIR], [the directory where all the user cron tabs reside], [${CRONDIR}/cron])
+
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
 AC_OUTPUT
 

@@ -17,5 +17,6 @@ stamp-h1
 *.o
 src/crond
 src/crontab
+src/cron-paths.h
 *~
 *.tar.*

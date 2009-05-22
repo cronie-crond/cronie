@@ -30,48 +30,20 @@
 # include <paths.h>
 #endif /*BSD*/
 
-#define REBOOT_LOCK		"/var/run/cron.reboot"
-
-#ifndef CRONDIR
-			/* CRONDIR is where cron(8) and crontab(1) both chdir
-			 * to; SPOOL_DIR, CRON_ALLOW, CRON_DENY, and LOG_FILE
-			 * are all relative to this directory.
-			 */
-#define CRONDIR		"/var/spool"
-#endif
-
-			/* SPOOLDIR is where the crontabs live.
-			 * This directory will have its modtime updated
-			 * whenever crontab(1) changes a crontab; this is
-			 * the signal for cron(8) to look at each individual
-			 * crontab file and reload those whose modtimes are
-			 * newer than they were last time around (or which
-			 * didn't exist last time around...)
-			 */
-#define SPOOL_DIR	"cron"
-
-			/* cron allow/deny file.  At least cron.deny must
-			 * exist for ordinary users to run crontab.
-			 */
-#define	CRON_ALLOW	"/etc/cron.allow"
-#define	CRON_DENY	"/etc/cron.deny"
+#include "cron-paths.h"
 
 			/* where should the daemon stick its PID?
 			 * PIDDIR must end in '/'.
+			 * (Don't ask why the default is "/etc/".)
 			 */
 #ifdef _PATH_VARRUN
 # define PIDDIR	_PATH_VARRUN
 #else
-# define PIDDIR "/etc/"
+# define PIDDIR SYSCONFDIR "/"
 #endif
 #define PIDFILE		"crond.pid"
 #define _PATH_CRON_PID	PIDDIR PIDFILE
-
-			/* 4.3BSD-style crontab */
-#define SYSCRONTAB	"/etc/crontab"
-
-                        /* system crontab dir */ 
-#define SYS_CROND_DIR    "/etc/cron.d"
+#define REBOOT_LOCK     PIDDIR "cron.reboot"
 
 			/* what editor to use if no EDITOR or VISUAL
 			 * environment variable specified.
