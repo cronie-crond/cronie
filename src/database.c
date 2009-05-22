@@ -202,8 +202,8 @@ check_inotify_database(cron_db *old_db) {
 
 		process_crontab("root", NULL, SYSCRONTAB, &new_db, old_db);
 
-		if (!(dir = opendir(RH_CROND_DIR))) {
-			log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
+		if (!(dir = opendir(SYS_CROND_DIR))) {
+			log_it("CRON", pid, "OPENDIR FAILED", SYS_CROND_DIR, errno);
 		} else {
 			while (NULL != (dp = readdir(dir))) {
 				char tabname[MAXNAMLEN+1];
@@ -211,7 +211,7 @@ check_inotify_database(cron_db *old_db) {
 				if (not_a_crontab(dp))
 					continue;
 
-				if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
+				if (!glue_strings(tabname, sizeof tabname, SYS_CROND_DIR, dp->d_name, '/'))
 					continue;
 				process_crontab("root", NULL, tabname, &new_db, old_db);
 			}
@@ -295,11 +295,11 @@ load_database(cron_db *old_db) {
 		max_mtime(SPOOL_DIR, &statbuf);
 	}
 
-	if (stat(RH_CROND_DIR, &crond_stat) < OK) {
-		log_it("CRON", pid, "STAT FAILED", RH_CROND_DIR, errno);
+	if (stat(SYS_CROND_DIR, &crond_stat) < OK) {
+		log_it("CRON", pid, "STAT FAILED", SYS_CROND_DIR, errno);
 		crond_stat.st_mtime = 0;
 	} else {
-		max_mtime(RH_CROND_DIR, &crond_stat);
+		max_mtime(SYS_CROND_DIR, &crond_stat);
 	}
 
 	/* track system crontab file
@@ -337,8 +337,8 @@ load_database(cron_db *old_db) {
 	if (syscron_stat.st_mtime)
 		process_crontab("root", NULL, SYSCRONTAB, &new_db, old_db);
 
-	if (!(dir = opendir(RH_CROND_DIR))) {
-		log_it("CRON", pid, "OPENDIR FAILED", RH_CROND_DIR, errno);
+	if (!(dir = opendir(SYS_CROND_DIR))) {
+		log_it("CRON", pid, "OPENDIR FAILED", SYS_CROND_DIR, errno);
 	} else {
 		while (NULL != (dp = readdir(dir))) {
 			char   tabname[MAXNAMLEN+1];
@@ -346,7 +346,7 @@ load_database(cron_db *old_db) {
 			if ( not_a_crontab( dp ) )
 				continue;
 
-			if (!glue_strings(tabname, sizeof tabname, RH_CROND_DIR, dp->d_name, '/'))
+			if (!glue_strings(tabname, sizeof tabname, SYS_CROND_DIR, dp->d_name, '/'))
 				continue;	/* XXX log? */
 
 			process_crontab("root", NULL, tabname, &new_db, old_db);

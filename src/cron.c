@@ -51,7 +51,7 @@ static	long			GMToff;
 #define NUM_WATCHES 3
 
 int wd[NUM_WATCHES];
-const char *watchpaths[NUM_WATCHES] = { SPOOL_DIR, RH_CROND_DIR, SYSCRONTAB };
+const char *watchpaths[NUM_WATCHES] = { SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB };
 
 void
 set_cron_unwatched(int fd) {
