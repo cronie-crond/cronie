@@ -60,27 +60,6 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 
 dnl Checking for programs
 
-AC_MSG_CHECKING(sysconfdir)
-AC_ARG_WITH(sysconfdir,
-[AS_HELP_STRING([--with-sysconfdir=PATH], [Directory containing permission files (default /etc).])],
-[ case "$withval" in
-  no)
-    AC_MSG_ERROR(Need SYSCONFDIR.)
-    ;;
-  yes)
-    SYSCONFDIR=/etc
-    AC_MSG_RESULT(/etc)
-    ;;
-  *)
-    SYSCONFDIR="$withval"
-    AC_MSG_RESULT($withval)
-    ;;
-  esac ],
-  SYSCONFDIR="/etc"
-  AC_MSG_RESULT(/etc)
-)
-AC_SUBST(SYSCONFDIR)
-
 AC_MSG_CHECKING(username to run under)
 AC_ARG_WITH(daemon_username,
 [AS_HELP_STRING([--with-daemon_username=DAEMON_USERNAME], [Username to run under (default daemon) ])],
