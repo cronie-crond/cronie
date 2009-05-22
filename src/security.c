@@ -261,42 +261,6 @@ static int cron_authorize_range
 	return 1;
 }
 
-int cron_get_job_context(user *u, void *scontextp, void *file_contextp, char **jobenv) {
-#if WITH_SELINUX
-	char *sroletype;
-
-	if (is_selinux_enabled() <= 0)
-		return 0;
-	if ((file_contextp == 0) || (scontextp == 0L))
-		return -1;
-
-	*((security_context_t*)scontextp) = u->scontext;
-	*((void **)file_contextp) = 0L;
-
-	if ((sroletype = env_get("SELINUX_ROLE_TYPE",jobenv)) != 0L) {
-		*((security_context_t*)scontextp) = (security_context_t) sroletype;
-		
-		char crontab[MAX_FNAME];
-		if (strcmp(u->name,"*system*") == 0)
-			strncpy(crontab, u->tabname, MAX_FNAME);
-		else
-			snprintf(crontab, MAX_FNAME, "%s/%s", CRONDIR, u->tabname);
-
-		if (getfilecon( crontab, file_contextp ) == -1) {
-			if (security_getenforce() > 0) { 
-				log_it(u->name, getpid(), "getfilecon FAILED for SELINUX_ROLE_TYPE", 
-				       sroletype, 0);
-				return -1;
-			} else if (access( crontab, F_OK ) == 0)
-				log_it(u->name, getpid(), 
-					"getfilecon FAILED but SELinux in permissive mode, continuing "
-				    "- SELINUX_ROLE_TYPE", sroletype, 0);
-		}
-	}
-#endif
-	return 0;
-}
-
 #if WITH_SELINUX
 /* always uses u->scontext as the default process context, then changes the
    level, and retuns it in ucontextp (or NULL otherwise) */
