@@ -399,7 +399,7 @@ run_reboot_jobs(cron_db *db) {
 	pid_t pid = getpid();
 
 	/* lock exist - skip reboot jobs */
-	if (access(REBOOT_LOCK, F_OK)) {
+	if (access(REBOOT_LOCK, F_OK) == 0) {
 		log_it("CRON", pid, "INFO", "@reboot jobs will be run at computer's startup.", 0);
 		return;
 	}

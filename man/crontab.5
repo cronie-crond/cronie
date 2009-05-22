@@ -75,7 +75,8 @@ sent to the user so named.  If MAILTO is defined but empty (MAILTO=""), no
 mail will be sent.  Otherwise mail is sent to the owner of the crontab.  This
 option is useful if you decide on /bin/mail instead of /usr/lib/sendmail as
 your mailer when you install cron -- /bin/mail doesn\'t do aliasing, and UUCP
-usually doesn\'t read its mail.
+usually doesn\'t read its mail. If MAILFROM is defined (and non-empty), it
+will be used as the envelope sender address, otherwise, ``root'' will be used.
 .PP
 By default, cron will send mail using the mail 'Content-Type:' header of 'text/plain' 
 with the 'charset=' parameter set to the charmap / codeset of the locale in which 
