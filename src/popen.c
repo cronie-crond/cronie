@@ -31,7 +31,7 @@
  */
 
 #ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
+# include <sys/cdefs.h>
 #endif
 
 #include <cron.h>
@@ -47,9 +47,7 @@ static int fds;
 
 #define MAX_ARGS 1024
 
-FILE *
-cron_popen(char *program, const char *type, struct passwd *pw)
-{
+FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 	char *cp;
 	FILE *iop;
 	int argc, pdes[2];
@@ -63,17 +61,17 @@ cron_popen(char *program, const char *type, struct passwd *pw)
 #endif
 
 	if ((*type != 'r' && *type != 'w') || type[1])
-		return(NULL);
+		return (NULL);
 
 	if (!pids) {
 		if ((fds = getdtablesize()) <= 0)
-			return(NULL);
-		if (!(pids = (PID_T *)malloc((u_int)(fds * sizeof(PID_T)))))
-			return(NULL);
-		bzero((char *)pids, fds * sizeof(PID_T));
+			return (NULL);
+		if (!(pids = (PID_T *) malloc((u_int) (fds * sizeof (PID_T)))))
+			return (NULL);
+		bzero((char *) pids, fds * sizeof (PID_T));
 	}
 	if (pipe(pdes) < 0)
-		return(NULL);
+		return (NULL);
 
 	/* break up string into pieces */
 	for (argc = 0, cp = program; argc < MAX_ARGS; cp = NULL)
@@ -81,26 +79,27 @@ cron_popen(char *program, const char *type, struct passwd *pw)
 			break;
 
 	iop = NULL;
-	switch(pid = fork()) {
-	case -1:			/* error */
-		(void)close(pdes[0]);
-		(void)close(pdes[1]);
+	switch (pid = fork()) {
+	case -1:	/* error */
+		(void) close(pdes[0]);
+		(void) close(pdes[1]);
 		goto pfree;
 		/* NOTREACHED */
-	case 0:				/* child */
+	case 0:	/* child */
 		if (*type == 'r') {
 			if (pdes[1] != STDOUT) {
 				dup2(pdes[1], STDOUT);
 				dup2(pdes[1], STDERR);	/* stderr, too! */
-				(void)close(pdes[1]);
+				(void) close(pdes[1]);
 			}
-			(void)close(pdes[0]);
-		} else {
+			(void) close(pdes[0]);
+		}
+		else {
 			if (pdes[0] != STDIN) {
 				dup2(pdes[0], STDIN);
-				(void)close(pdes[0]);
+				(void) close(pdes[0]);
 			}
-			(void)close(pdes[1]);
+			(void) close(pdes[1]);
 		}
 
 		if (execvp(argv[0], argv) < 0) {
@@ -119,20 +118,19 @@ cron_popen(char *program, const char *type, struct passwd *pw)
 	/* parent; assume fdopen can't fail...  */
 	if (*type == 'r') {
 		iop = fdopen(pdes[0], type);
-		(void)close(pdes[1]);
-	} else {
+		(void) close(pdes[1]);
+	}
+	else {
 		iop = fdopen(pdes[1], type);
-		(void)close(pdes[0]);
+		(void) close(pdes[0]);
 	}
 	pids[fileno(iop)] = pid;
 
-pfree:
-	return(iop);
+  pfree:
+	return (iop);
 }
 
-int
-cron_pclose(FILE *iop)
-{
+int cron_pclose(FILE * iop) {
 	int fdes;
 	sigset_t oset, nset;
 	WAIT_T stat_loc;
@@ -143,17 +141,16 @@ cron_pclose(FILE *iop)
 	 * `popened' command, or, if already `pclosed'.
 	 */
 	if (pids == 0 || pids[fdes = fileno(iop)] == 0)
-		return(-1);
-	(void)fclose(iop);
-	
+		return (-1);
+	(void) fclose(iop);
+
 	sigemptyset(&nset);
 	sigaddset(&nset, SIGINT);
 	sigaddset(&nset, SIGQUIT);
 	sigaddset(&nset, SIGHUP);
-	(void)sigprocmask(SIG_BLOCK, &nset, &oset);
-	while ((pid = wait(&stat_loc)) != pids[fdes] && pid != -1)
-		;
-	(void)sigprocmask(SIG_SETMASK, &oset, NULL);
+	(void) sigprocmask(SIG_BLOCK, &nset, &oset);
+	while ((pid = wait(&stat_loc)) != pids[fdes] && pid != -1) ;
+	(void) sigprocmask(SIG_SETMASK, &oset, NULL);
 	pids[fdes] = 0;
 	return (pid == -1 ? -1 : WEXITSTATUS(stat_loc));
 }

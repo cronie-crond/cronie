@@ -27,17 +27,18 @@
 static const char *FileName;
 
 static void
-log_error(const char *msg) {
-        log_it("CRON", getpid(), msg, FileName, 0);
+log_error (const char *msg)
+{
+	log_it ("CRON", getpid (), msg, FileName, 0);
 }
 
 void
-free_user(user *u) {
+free_user (user * u) {
 	entry *e, *ne;
 
 	free(u->name);
 	free(u->tabname);
-	for (e = u->crontab;  e != NULL;  e = ne) {
+	for (e = u->crontab; e != NULL; e = ne)	{
 		ne = e->next;
 		free_entry(e);
 	}
@@ -46,7 +47,8 @@ free_user(user *u) {
 }
 
 user *
-load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fname, const char *tabname) {
+load_user (int crontab_fd, struct passwd *pw, const char *uname,
+		   const char *fname, const char *tabname) {
 	char envstr[MAX_ENVSTR];
 	FILE *file;
 	user *u;
@@ -54,32 +56,31 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 	int status, save_errno;
 	char **envp, **tenvp;
 
-	if (!(file = fdopen(crontab_fd, "r"))) {
+	if (!(file = fdopen(crontab_fd, "r")))	{
 		int save_errno = errno;
-		log_it(uname, getpid(), "FAILED", "fdopen on crontab_fd in load_user", save_errno);
+		log_it(uname, getpid (), "FAILED", "fdopen on crontab_fd in load_user",
+			save_errno);
 		return (NULL);
 	}
 
 	Debug(DPARS, ("load_user()\n"))
-
 	/* file is open.  build user entry, then read the crontab file.
 	 */
-	if ((u = (user *) malloc(sizeof(user))) == NULL)
+	if ((u = (user *) malloc (sizeof (user))) == NULL)
 		return (NULL);
 
-	if ( ((u->name = strdup(fname)) == NULL) 
-           ||((u->tabname = strdup(tabname)) == NULL)
-           ){
+	if (((u->name = strdup(fname)) == NULL)
+		|| ((u->tabname = strdup(tabname)) == NULL)) {
 		save_errno = errno;
 		free(u);
 		errno = save_errno;
 		return (NULL);
 	}
-	
+
 	u->crontab = NULL;
 
 	/* init environment.  this will be copied/augmented for each entry.
-	 */
+	*/
 	if ((envp = env_init()) == NULL) {
 		save_errno = errno;
 		free(u->name);
@@ -88,46 +89,44 @@ load_user(int crontab_fd, struct passwd	*pw, const char *uname, const char *fnam
 		return (NULL);
 	}
 
-	if (get_security_context(pw == NULL ? NULL : uname, 
-				 crontab_fd, 
-				 &u->scontext, tabname) != 0) {
-	    free_user(u);
-	    u = NULL;
-	    goto done;
+	if (get_security_context(pw == NULL ? NULL : uname,
+		crontab_fd, &u->scontext, tabname) != 0) {
+		free_user (u);
+		u = NULL;
+		goto done;
 	}
-	
+
 	/* load the crontab
-	 */
-	while ((status = load_env(envstr, file)) >= OK) {
+	*/
+	while ((status = load_env (envstr, file)) >= OK) {
 		switch (status) {
-		case ERR:
-			free_user(u);
-			u = NULL;
-			goto done;
-		case FALSE:
-			FileName = tabname;
-			e = load_entry(file, log_error, pw, envp);
-			if (e) {
-				e->next = u->crontab;
-				u->crontab = e;
-			}
-			break;
-		case TRUE:
-			if ((tenvp = env_set(envp, envstr)) == NULL) {
-				save_errno = errno;
+			case ERR:
 				free_user(u);
 				u = NULL;
-				errno = save_errno;
 				goto done;
-			}
+			case FALSE:
+				FileName = tabname;
+				e = load_entry(file, log_error, pw, envp);
+		  		if (e) {
+					e->next = u->crontab;
+					u->crontab = e;
+				}
+				break;
+			case TRUE:
+				if ((tenvp = env_set (envp, envstr)) == NULL) {
+					save_errno = errno;
+					free_user(u);
+					u = NULL;
+					errno = save_errno;
+					goto done;
+				}
 			envp = tenvp;
 			break;
 		}
 	}
 
- done:
+done:
 	env_free(envp);
 	fclose(file);
-	Debug(DPARS, ("...load_user() done\n"))
-	return (u);
+	Debug(DPARS, ("...load_user() done\n")) return (u);
 }

@@ -26,38 +26,35 @@
 #if defined WITH_INOTIFY
 int inotify_enabled;
 #else
-#define inotify_enabled 0
+# define inotify_enabled 0
 #endif
 
 enum timejump { negative, small, medium, large };
 
-static	void	usage(void),
-		run_reboot_jobs(cron_db *),
-		find_jobs(int, cron_db *, int, int),
-		set_time(int),
-		cron_sleep(int, cron_db *),
-		sigchld_handler(int),
-		sighup_handler(int),
-		sigchld_reaper(void),
-		quit(int),
-		parse_args(int c, char *v[]);
+static void usage(void),
+run_reboot_jobs(cron_db *),
+find_jobs(int, cron_db *, int, int),
+set_time(int),
+cron_sleep(int, cron_db *),
+sigchld_handler(int),
+sighup_handler(int),
+sigchld_reaper(void), quit(int), parse_args(int c, char *v[]);
 
-static	volatile sig_atomic_t	got_sighup, got_sigchld;
-static	int			timeRunning, virtualTime, clockTime;
-static	long			GMToff;
+static volatile sig_atomic_t got_sighup, got_sigchld;
+static int timeRunning, virtualTime, clockTime;
+static long GMToff;
 
 #if defined WITH_INOTIFY
 
-#define NUM_WATCHES 3
+# define NUM_WATCHES 3
 
 int wd[NUM_WATCHES];
-const char *watchpaths[NUM_WATCHES] = { SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB };
+const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB};
 
-void
-set_cron_unwatched(int fd) {
+void set_cron_unwatched(int fd) {
 	int i;
-	
-	for (i = 0; i < sizeof(wd)/sizeof(wd[0]); ++i) {
+
+	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
 		if (wd[i] < 0) {
 			inotify_rm_watch(fd, wd[i]);
 			wd[i] = -1;
@@ -65,8 +62,7 @@ set_cron_unwatched(int fd) {
 	}
 }
 
-void
-set_cron_watched(int fd) {
+void set_cron_watched(int fd) {
 	pid_t pid = getpid();
 	int i;
 
@@ -75,7 +71,7 @@ set_cron_watched(int fd) {
 		return;
 	}
 
-	for (i = 0; i < sizeof(wd)/sizeof(wd[0]); ++i) {
+	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
 		int w;
 
 		w = inotify_add_watch(fd, watchpaths[i],
@@ -83,8 +79,10 @@ set_cron_watched(int fd) {
 			IN_MOVED_FROM | IN_MOVE_SELF | IN_DELETE | IN_DELETE_SELF);
 		if (w < 0) {
 			if (wd[i] != -1) {
-        			log_it("CRON", pid, "This directory or file can't be watched", watchpaths[i], errno);
-				log_it("CRON", pid, "INFO", "running without inotify support", 0);
+				log_it("CRON", pid, "This directory or file can't be watched",
+					watchpaths[i], errno);
+				log_it("CRON", pid, "INFO", "running without inotify support",
+					0);
 			}
 			inotify_enabled = 0;
 			set_cron_unwatched(fd);
@@ -101,8 +99,7 @@ set_cron_watched(int fd) {
 }
 #endif
 
-static void
-handle_signals(cron_db *database) {
+static void handle_signals(cron_db * database) {
 	if (got_sighup) {
 		got_sighup = 0;
 #if defined WITH_INOTIFY
@@ -122,21 +119,20 @@ handle_signals(cron_db *database) {
 	}
 }
 
-static void
-usage(void) {
+static void usage(void) {
 	const char **dflags;
 
-	fprintf(stderr, "usage:  %s [-n] [-p] [-m <mail command>] [-x [", ProgramName);
+	fprintf(stderr, "usage:  %s [-n] [-p] [-m <mail command>] [-x [",
+		ProgramName);
 	for (dflags = DebugFlagNames; *dflags; dflags++)
 		fprintf(stderr, "%s%s", *dflags, dflags[1] ? "," : "]");
 	fprintf(stderr, "]\n");
 	exit(ERROR_EXIT);
 }
 
-int
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	struct sigaction sact;
-	cron_db	database;
+	cron_db database;
 	int fd;
 	char *cs;
 	pid_t pid = getpid();
@@ -158,7 +154,7 @@ main(int argc, char *argv[]) {
 	NoFork = 0;
 	parse_args(argc, argv);
 
-	bzero((char *)&sact, sizeof sact);
+	bzero((char *) &sact, sizeof sact);
 	sigemptyset(&sact.sa_mask);
 	sact.sa_flags = 0;
 #ifdef SA_RESTART
@@ -176,31 +172,32 @@ main(int argc, char *argv[]) {
 	set_cron_uid();
 	set_cron_cwd();
 
-	if (putenv("PATH="_PATH_DEFPATH) < 0) {
+	if (putenv("PATH=" _PATH_DEFPATH) < 0) {
 		log_it("CRON", pid, "DEATH", "can't putenv PATH", errno);
 		exit(1);
 	}
-	
-	if ( getenv("CRON_VALIDATE_MAILRCPTS") != 0L )
-	    ValidateMailRcpts=1;
+
+	if (getenv("CRON_VALIDATE_MAILRCPTS") != 0L)
+		ValidateMailRcpts = 1;
 
 	/* Get the default locale character set for the mail 
 	 * "Content-Type: ...; charset=" header
 	 */
-	setlocale(LC_ALL,""); /* set locale to system defaults or to
-				 that specified by any  LC_* env vars */
-	if ( ( cs = nl_langinfo( CODESET ) ) != 0L )
-	    strncpy( cron_default_mail_charset, cs, MAX_ENVSTR );
+	setlocale(LC_ALL, "");	/* set locale to system defaults or to
+							 * that specified by any  LC_* env vars */
+	if ((cs = nl_langinfo(CODESET)) != 0L)
+		strncpy(cron_default_mail_charset, cs, MAX_ENVSTR);
 	else
-	    strcpy( cron_default_mail_charset, "US-ASCII" );
-	
+		strcpy(cron_default_mail_charset, "US-ASCII");
+
 	/* if there are no debug flags turned on, fork as a daemon should.
 	 */
 	if (DebugFlags) {
 #if DEBUGGING
-		(void) fprintf(stderr, "[%ld] cron started\n", (long)getpid());
+		(void) fprintf(stderr, "[%ld] cron started\n", (long) getpid());
 #endif
-	} else if (NoFork == 0) {
+	}
+	else if (NoFork == 0) {
 		switch (fork()) {
 		case -1:
 			log_it("CRON", pid, "DEATH", "can't fork", errno);
@@ -233,7 +230,7 @@ main(int argc, char *argv[]) {
 	load_database(&database);
 
 #if defined WITH_INOTIFY
-	for (i = 0; i < sizeof(wd)/sizeof(wd[0]); ++i) {
+	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
 		/* initialize to negative number other than -1
 		 * so an eventual error is reported for the first time
 		 */
@@ -282,7 +279,7 @@ main(int argc, char *argv[]) {
 			check_inotify_database(&database);
 		}
 		else {
-			if(load_database(&database))
+			if (load_database(&database))
 				/* try reinstating the watches */
 				set_cron_watched(fd);
 		}
@@ -294,9 +291,9 @@ main(int argc, char *argv[]) {
 		if (timeDiff == 1) {
 			virtualTime = timeRunning;
 			find_jobs(virtualTime, &database, TRUE, TRUE);
-		} else {
-			if (timeDiff > (3*MINUTE_COUNT) ||
-			    timeDiff < -(3*MINUTE_COUNT))
+		}
+		else {
+			if (timeDiff > (3 * MINUTE_COUNT) || timeDiff < -(3 * MINUTE_COUNT))
 				wakeupKind = large;
 			else if (timeDiff > 5)
 				wakeupKind = medium;
@@ -313,8 +310,8 @@ main(int argc, char *argv[]) {
 				 * minute until caught up.
 				 */
 				Debug(DSCH, ("[%ld], normal case %d minutes to go\n",
-				    (long)pid, timeDiff))
-				do {
+						(long) pid, timeDiff))
+					do {
 					if (job_runqueue())
 						sleep(10);
 					virtualTime++;
@@ -335,22 +332,20 @@ main(int argc, char *argv[]) {
 				 * housekeeping.
 				 */
 				Debug(DSCH, ("[%ld], DST begins %d minutes to go\n",
-				    (long)pid, timeDiff))
-				/* run wildcard jobs for current minute */
-				find_jobs(timeRunning, &database, TRUE, FALSE);
-	
+						(long) pid, timeDiff))
+					/* run wildcard jobs for current minute */
+					find_jobs(timeRunning, &database, TRUE, FALSE);
+
 				/* run fixed-time jobs for each minute missed */
 				do {
 					if (job_runqueue())
 						sleep(10);
 					virtualTime++;
-					find_jobs(virtualTime, &database,
-					    FALSE, TRUE);
+					find_jobs(virtualTime, &database, FALSE, TRUE);
 					set_time(FALSE);
-				} while (virtualTime< timeRunning &&
-				    clockTime == timeRunning);
+				} while (virtualTime < timeRunning && clockTime == timeRunning);
 				break;
-	
+
 			case negative:
 				/*
 				 * case 3: timeDiff is a small or medium-sized
@@ -361,17 +356,16 @@ main(int argc, char *argv[]) {
 				 * change until we are caught up.
 				 */
 				Debug(DSCH, ("[%ld], DST ends %d minutes to go\n",
-				    (long)pid, timeDiff))
-				find_jobs(timeRunning, &database, TRUE, FALSE);
+						(long) pid, timeDiff))
+					find_jobs(timeRunning, &database, TRUE, FALSE);
 				break;
 			default:
 				/*
 				 * other: time has changed a *lot*,
 				 * jump virtual time, and run everything
 				 */
-				Debug(DSCH, ("[%ld], clock jumped\n",
-				    (long)pid))
-				virtualTime = timeRunning;
+				Debug(DSCH, ("[%ld], clock jumped\n", (long) pid))
+					virtualTime = timeRunning;
 				find_jobs(timeRunning, &database, TRUE, TRUE);
 			}
 		}
@@ -391,8 +385,7 @@ main(int argc, char *argv[]) {
 #endif
 }
 
-static void
-run_reboot_jobs(cron_db *db) {
+static void run_reboot_jobs(cron_db * db) {
 	user *u;
 	entry *e;
 	int reboot;
@@ -400,12 +393,14 @@ run_reboot_jobs(cron_db *db) {
 
 	/* lock exist - skip reboot jobs */
 	if (access(REBOOT_LOCK, F_OK) == 0) {
-		log_it("CRON", pid, "INFO", "@reboot jobs will be run at computer's startup.", 0);
+		log_it("CRON", pid, "INFO",
+			"@reboot jobs will be run at computer's startup.", 0);
 		return;
 	}
 	/* lock doesn't exist - create lock, run reboot jobs */
-	if ((reboot = creat(REBOOT_LOCK, S_IRUSR&S_IWUSR)) < 0)
-		log_it("CRON", pid, "INFO", "Can't create lock for reboot jobs.", errno);
+	if ((reboot = creat(REBOOT_LOCK, S_IRUSR & S_IWUSR)) < 0)
+		log_it("CRON", pid, "INFO", "Can't create lock for reboot jobs.",
+			errno);
 	else
 		close(reboot);
 
@@ -418,16 +413,15 @@ run_reboot_jobs(cron_db *db) {
 	(void) job_runqueue();
 }
 
-static void
-find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
+static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild) {
 	char *orig_tz, *job_tz;
-	time_t virtualSecond  = vtime * SECONDS_PER_MINUTE;
+	time_t virtualSecond = vtime * SECONDS_PER_MINUTE;
 	struct tm *tm = gmtime(&virtualSecond);
 	int minute, hour, dom, month, dow;
 	user *u;
 	entry *e;
-    const char *uname;
-    struct passwd *pw = NULL;
+	const char *uname;
+	struct passwd *pw = NULL;
 
 	/* make 0-based values out of these so we can use them as indicies
 	 */
@@ -451,38 +445,38 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
 	maketime(NULL, orig_tz);
 
 	Debug(DSCH, ("[%ld] tick(%d,%d,%d,%d,%d) %s %s\n",
-		     (long)getpid(), minute, hour, dom, month, dow,
-		     doWild?" ":"No wildcard",doNonWild?" ":"Wildcard only"))
-	/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
-	 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
-	 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
-	 * is why we keep 'e->dow_star' and 'e->dom_star'.  yes, it's bizarre.
-	 * like many bizarre things, it's the standard.
-	 */
-	for (u = db->head; u != NULL; u = u->next) {
+			(long) getpid(), minute, hour, dom, month, dow,
+			doWild ? " " : "No wildcard", doNonWild ? " " : "Wildcard only"))
+		/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
+		 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
+		 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
+		 * is why we keep 'e->dow_star' and 'e->dom_star'.  yes, it's bizarre.
+		 * like many bizarre things, it's the standard.
+		 */
+		for (u = db->head; u != NULL; u = u->next) {
 		for (e = u->crontab; e != NULL; e = e->next) {
-			Debug(DSCH|DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
-			    e->pwd->pw_name, (long)e->pwd->pw_uid,
-			    (long)e->pwd->pw_gid, e->cmd))
-            uname = e->pwd->pw_name;
+			Debug(DSCH | DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
+					e->pwd->pw_name, (long) e->pwd->pw_uid,
+					(long) e->pwd->pw_gid, e->cmd))
+				uname = e->pwd->pw_name;
 			/* check if user exists in time of job is being run f.e. ldap */
 			if ((pw = getpwnam(uname)) != NULL) {
 				job_tz = env_get("CRON_TZ", e->envp);
 				maketime(job_tz, orig_tz);
 				/* here we test whether time is NOW */
 				if (bit_test(e->minute, minute) &&
-			    	bit_test(e->hour, hour) &&
-				    bit_test(e->month, month) &&
-				    ( ((e->flags & DOM_STAR) || (e->flags & DOW_STAR))
-				      ? (bit_test(e->dow,dow) && bit_test(e->dom,dom))
-				      : (bit_test(e->dow,dow) || bit_test(e->dom,dom))
-			    	)
-				   ) {
+					bit_test(e->hour, hour) &&
+					bit_test(e->month, month) &&
+					(((e->flags & DOM_STAR) || (e->flags & DOW_STAR))
+						? (bit_test(e->dow, dow) && bit_test(e->dom, dom))
+						: (bit_test(e->dow, dow) || bit_test(e->dom, dom))
+					)
+					) {
 					if ((doNonWild &&
-					    !(e->flags & (MIN_STAR|HR_STAR))) || 
-					    (doWild && (e->flags & (MIN_STAR|HR_STAR))))
-							job_add(e, u);	/*will add job, if it isn't in queue already for NOW.*/
-					}
+							!(e->flags & (MIN_STAR | HR_STAR))) ||
+						(doWild && (e->flags & (MIN_STAR | HR_STAR))))
+						job_add(e, u);	/*will add job, if it isn't in queue already for NOW. */
+				}
 			}
 		}
 	}
@@ -497,8 +491,7 @@ find_jobs(int vtime, cron_db *db, int doWild, int doNonWild) {
  * These are used for computing what time it really is right now.
  * Note that clockTime is a unix wallclock time converted to minutes.
  */
-static void
-set_time(int initialize) {
+static void set_time(int initialize) {
 	struct tm tm;
 	static int isdst;
 
@@ -509,26 +502,25 @@ set_time(int initialize) {
 	if (initialize || tm.tm_isdst != isdst) {
 		isdst = tm.tm_isdst;
 		GMToff = get_gmtoff(&StartTime, &tm);
-		Debug(DSCH, ("[%ld] GMToff=%ld\n",
-		    (long)getpid(), (long)GMToff))
+		Debug(DSCH, ("[%ld] GMToff=%ld\n", (long) getpid(), (long) GMToff))
 	}
-	clockTime = (StartTime + GMToff) / (time_t)SECONDS_PER_MINUTE;
+	clockTime = (StartTime + GMToff) / (time_t) SECONDS_PER_MINUTE;
 }
 
 /*
  * Try to just hit the next minute.
  */
-static void
-cron_sleep(int target, cron_db *db) {
+static void cron_sleep(int target, cron_db * db) {
 	time_t t1, t2;
 	int seconds_to_wait;
 
 	t1 = time(NULL) + GMToff;
-	seconds_to_wait = (int)(target * SECONDS_PER_MINUTE - t1) + 1;
+	seconds_to_wait = (int) (target * SECONDS_PER_MINUTE - t1) + 1;
 	Debug(DSCH, ("[%ld] Target time=%ld, sec-to-wait=%d\n",
-	    (long)getpid(), (long)target*SECONDS_PER_MINUTE, seconds_to_wait))
+			(long) getpid(), (long) target * SECONDS_PER_MINUTE,
+			seconds_to_wait))
 
-	while (seconds_to_wait > 0 && seconds_to_wait < 65) {
+		while (seconds_to_wait > 0 && seconds_to_wait < 65) {
 		sleep((unsigned int) seconds_to_wait);
 
 		/*
@@ -539,29 +531,25 @@ cron_sleep(int target, cron_db *db) {
 		handle_signals(db);
 
 		t2 = time(NULL) + GMToff;
-		seconds_to_wait -= (int)(t2 - t1);
+		seconds_to_wait -= (int) (t2 - t1);
 		t1 = t2;
 	}
 }
 
-static void
-sighup_handler(int x) {
+static void sighup_handler(int x) {
 	got_sighup = 1;
 }
 
-static void
-sigchld_handler(int x) {
+static void sigchld_handler(int x) {
 	got_sigchld = 1;
 }
 
-static void
-quit(int x) {
+static void quit(int x) {
 	(void) unlink(_PATH_CRON_PID);
 	_exit(0);
 }
 
-static void
-sigchld_reaper(void) {
+static void sigchld_reaper(void) {
 	WAIT_T waiter;
 	PID_T pid;
 
@@ -571,26 +559,21 @@ sigchld_reaper(void) {
 		case -1:
 			if (errno == EINTR)
 				continue;
-			Debug(DPROC,
-			      ("[%ld] sigchld...no children\n",
-			       (long)getpid()))
-			break;
+			Debug(DPROC, ("[%ld] sigchld...no children\n", (long) getpid()))
+				break;
 		case 0:
-			Debug(DPROC,
-			      ("[%ld] sigchld...no dead kids\n",
-			       (long)getpid()))
-			break;
+			Debug(DPROC, ("[%ld] sigchld...no dead kids\n", (long) getpid()))
+				break;
 		default:
 			Debug(DPROC,
-			      ("[%ld] sigchld...pid #%ld died, stat=%d\n",
-			       (long)getpid(), (long)pid, WEXITSTATUS(waiter)))
-			break;
+				("[%ld] sigchld...pid #%ld died, stat=%d\n",
+					(long) getpid(), (long) pid, WEXITSTATUS(waiter)))
+				break;
 		}
 	} while (pid > 0);
 }
 
-static void
-parse_args(int argc, char *argv[]) {
+static void parse_args(int argc, char *argv[]) {
 	int argch;
 
 	while (-1 != (argch = getopt(argc, argv, "npx:m:"))) {
@@ -605,7 +588,7 @@ parse_args(int argc, char *argv[]) {
 			NoFork = 1;
 			break;
 		case 'p':
-		        PermitAnyCrontab=1;
+			PermitAnyCrontab = 1;
 			break;
 		case 'm':
 			strncpy(MailCmd, optarg, MAX_COMMAND);

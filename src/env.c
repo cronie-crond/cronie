@@ -21,17 +21,15 @@
 
 #include <cron.h>
 
-char **
-env_init(void) {
-	char **p = (char **) malloc(sizeof(char **));
+char **env_init(void) {
+	char **p = (char **) malloc(sizeof (char **));
 
 	if (p != NULL)
 		p[0] = NULL;
 	return (p);
 }
 
-void
-env_free(char **envp) {
+void env_free(char **envp) {
 	char **p;
 
 	for (p = envp; *p != NULL; p++)
@@ -39,14 +37,13 @@ env_free(char **envp) {
 	free(envp);
 }
 
-char **
-env_copy(char **envp) {
+char **env_copy(char **envp) {
 	int count, i, save_errno;
 	char **p;
 
-	for (count = 0; envp[count] != NULL; count++);
+	for (count = 0; envp[count] != NULL; count++) ;
 
-	p = (char **) malloc((count+1) * sizeof(char *));  /* 1 for the NULL */
+	p = (char **) malloc((count + 1) * sizeof (char *));	/* 1 for the NULL */
 	if (p != NULL) {
 		for (i = 0; i < count; i++)
 			if ((p[i] = strdup(envp[i])) == NULL) {
@@ -62,8 +59,7 @@ env_copy(char **envp) {
 	return (p);
 }
 
-char **
-env_set(char **envp, char *envstr) {
+char **env_set(char **envp, char *envstr) {
 	int count, found;
 	char **p, *envtmp;
 
@@ -98,34 +94,33 @@ env_set(char **envp, char *envstr) {
 	if ((envtmp = strdup(envstr)) == NULL)
 		return (NULL);
 	p = (char **) realloc((void *) envp,
-			      (size_t) ((count+1) * sizeof(char **)));
+		(size_t) ((count + 1) * sizeof (char **)));
 	if (p == NULL) {
 		free(envtmp);
 		return (NULL);
 	}
-	p[count] = p[count-1];
-	p[count-1] = envtmp;
+	p[count] = p[count - 1];
+	p[count - 1] = envtmp;
 	return (p);
 }
 
 /* The following states are used by load_env(), traversed in order: */
 enum env_state {
-	NAMEI,		/* First char of NAME, may be quote */
-	NAME,		/* Subsequent chars of NAME */
-	EQ1,		/* After end of name, looking for '=' sign */
-	EQ2,		/* After '=', skipping whitespace */
-	VALUEI,		/* First char of VALUE, may be quote */
-	VALUE,		/* Subsequent chars of VALUE */
-	FINI,		/* All done, skipping trailing whitespace */
-	ERROR,		/* Error */
+	NAMEI,	/* First char of NAME, may be quote */
+	NAME,	/* Subsequent chars of NAME */
+	EQ1,	/* After end of name, looking for '=' sign */
+	EQ2,	/* After '=', skipping whitespace */
+	VALUEI,	/* First char of VALUE, may be quote */
+	VALUE,	/* Subsequent chars of VALUE */
+	FINI,	/* All done, skipping trailing whitespace */
+	ERROR,	/* Error */
 };
 
 /* return	ERR = end of file
  *		FALSE = not an env setting (file was repositioned)
  *		TRUE = was an env setting
  */
-int
-load_env(char *envstr, FILE *f) {
+int load_env(char *envstr, FILE * f) {
 	long filepos;
 	int fileline;
 	enum env_state state;
@@ -140,7 +135,7 @@ load_env(char *envstr, FILE *f) {
 
 	Debug(DPARS, ("load_env, read <%s>\n", envstr))
 
-	bzero(name, sizeof name);
+		bzero(name, sizeof name);
 	bzero(val, sizeof val);
 	str = name;
 	state = NAMEI;
@@ -166,9 +161,10 @@ load_env(char *envstr, FILE *f) {
 					state = ERROR;
 					break;
 				}
-			} else {
+			}
+			else {
 				if (state == NAME) {
-					if (isspace((unsigned char)*c)) {
+					if (isspace((unsigned char) *c)) {
 						c++;
 						state++;
 						break;
@@ -187,8 +183,9 @@ load_env(char *envstr, FILE *f) {
 				state++;
 				str = val;
 				quotechar = '\0';
-			} else {
-				if (!isspace((unsigned char)*c))
+			}
+			else {
+				if (!isspace((unsigned char) *c))
 					state = ERROR;
 			}
 			c++;
@@ -196,7 +193,7 @@ load_env(char *envstr, FILE *f) {
 
 		case EQ2:
 		case FINI:
-			if (isspace((unsigned char)*c))
+			if (isspace((unsigned char) *c))
 				c++;
 			else
 				state++;
@@ -208,14 +205,14 @@ load_env(char *envstr, FILE *f) {
 	}
 	if (state != FINI && !(state == VALUE && !quotechar)) {
 		Debug(DPARS, ("load_env, not an env var, state = %d\n", state))
-		fseek(f, filepos, 0);
+			fseek(f, filepos, 0);
 		Set_LineNum(fileline);
 		return (FALSE);
 	}
 	if (state == VALUE) {
 		/* End of unquoted value: trim trailing whitespace */
 		c = val + strlen(val);
-		while (c > val && isspace((unsigned char)c[-1]))
+		while (c > val && isspace((unsigned char) c[-1]))
 			*(--c) = '\0';
 	}
 
@@ -228,11 +225,10 @@ load_env(char *envstr, FILE *f) {
 	if (!glue_strings(envstr, MAX_ENVSTR, name, val, '='))
 		return (FALSE);
 	Debug(DPARS, ("load_env, <%s> <%s> -> <%s>\n", name, val, envstr))
-	return (TRUE);
+		return (TRUE);
 }
 
-char *
-env_get(char *name, char **envp) {
+char *env_get(char *name, char **envp) {
 	int len = strlen(name);
 	char *p, *q;
 
@@ -240,7 +236,7 @@ env_get(char *name, char **envp) {
 		if (!(q = strchr(p, '=')))
 			continue;
 		if ((q - p) == len && !strncmp(p, name, len))
-			return (q+1);
+			return (q + 1);
 	}
 	return (NULL);
 }

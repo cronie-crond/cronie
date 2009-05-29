@@ -21,16 +21,15 @@
 
 #include <cron.h>
 
-typedef	struct _job {
-	struct _job	*next;
-	entry		*e;
-	user		*u;
+typedef struct _job {
+	struct _job *next;
+	entry *e;
+	user *u;
 } job;
 
-static job	*jhead = NULL, *jtail = NULL;
+static job *jhead = NULL, *jtail = NULL;
 
-void
-job_add(entry *e, user *u) {
+void job_add(entry * e, user * u) {
 	job *j;
 
 	/* if already on queue, keep going */
@@ -39,7 +38,7 @@ job_add(entry *e, user *u) {
 			return;
 
 	/* build a job queue element */
-	if ((j = (job *)malloc(sizeof(job))) == NULL)
+	if ((j = (job *) malloc(sizeof (job))) == NULL)
 		return;
 	j->next = NULL;
 	j->e = e;
@@ -53,8 +52,7 @@ job_add(entry *e, user *u) {
 	jtail = j;
 }
 
-int
-job_runqueue(void) {
+int job_runqueue(void) {
 	job *j, *jn;
 	int run = 0;
 

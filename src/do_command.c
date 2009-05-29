@@ -21,25 +21,24 @@
 
 #include <cron.h>
 
-static void		child_process(entry *, user *);
-static int		safe_p(const char *, const char *);
+static void child_process(entry *, user *);
+static int safe_p(const char *, const char *);
 
-void
-do_command(entry *e, user *u) {
+void do_command(entry * e, user * u) {
 	pid_t pid = getpid();
 
 	Debug(DPROC, ("[%ld] do_command(%s, (%s,%ld,%ld))\n",
-		      (long)pid, e->cmd, u->name,
-		      (long)e->pwd->pw_uid, (long)e->pwd->pw_gid))
+			(long) pid, e->cmd, u->name,
+			(long) e->pwd->pw_uid, (long) e->pwd->pw_gid))
 
-	/* fork to become asynchronous -- parent process is done immediately,
-	 * and continues to run the normal cron code, which means return to
-	 * tick().  the child and grandchild don't leave this function, alive.
-	 *
-	 * vfork() is unsuitable, since we have much to do, and the parent
-	 * needs to be able to run off and fork other processes.
-	 */
-	switch (fork()) {
+		/* fork to become asynchronous -- parent process is done immediately,
+		 * and continues to run the normal cron code, which means return to
+		 * tick().  the child and grandchild don't leave this function, alive.
+		 *
+		 * vfork() is unsuitable, since we have much to do, and the parent
+		 * needs to be able to run off and fork other processes.
+		 */
+		switch (fork()) {
 	case -1:
 		log_it("CRON", pid, "can't fork", "do_command", errno);
 		break;
@@ -47,43 +46,39 @@ do_command(entry *e, user *u) {
 		/* child process */
 		acquire_daemonlock(1);
 		child_process(e, u);
-		Debug(DPROC, ("[%ld] child process done, exiting\n",
-			      (long)getpid()))
-		_exit(OK_EXIT);
+		Debug(DPROC, ("[%ld] child process done, exiting\n", (long) getpid()))
+			_exit(OK_EXIT);
 		break;
 	default:
 		/* parent process */
 		break;
 	}
-	Debug(DPROC, ("[%ld] main process returning to work\n",(long)pid))
+	Debug(DPROC, ("[%ld] main process returning to work\n", (long) pid))
 }
 
-static void
-child_process(entry *e, user *u) {
+static void child_process(entry * e, user * u) {
 	int stdin_pipe[2], stdout_pipe[2];
 	char *input_data, *usernm, *mailto, *mailfrom;
-	int children = 0; 
-        char **jobenv=0L;
-        pid_t pid = getpid();
+	int children = 0;
+	char **jobenv = 0L;
+	pid_t pid = getpid();
 
 	/* Set up the Red Hat security context for both mail/minder and job processes:
-         */
-	if ( cron_set_job_security_context( e, u, &jobenv ) != 0 )
-	{
-	    //syslog(LOG_INFO, "CRON (%s) ERROR: cannot set security context", e->pwd->pw_name);
-	    exit(ERROR_EXIT);
+	 */
+	if (cron_set_job_security_context(e, u, &jobenv) != 0) {
+		//syslog(LOG_INFO, "CRON (%s) ERROR: cannot set security context", e->pwd->pw_name);
+		exit(ERROR_EXIT);
 	}
 
-	Debug(DPROC, ("[%ld] child_process('%s')\n", (long)getpid(), e->cmd))
-
+	Debug(DPROC, ("[%ld] child_process('%s')\n", (long) getpid(), e->cmd))
 #ifdef CAPITALIZE_FOR_PS
-	/* mark ourselves as different to PS command watchers by upshifting
-	 * our program name.  This has no effect on some kernels.
-	 */
-	/*local*/{
-		char	*pch;
+		/* mark ourselves as different to PS command watchers by upshifting
+		 * our program name.  This has no effect on some kernels.
+		 */
+		/*local */  {
+		char *pch;
 
-		for (pch = ProgramName;  *pch;  pch++)
+		for (pch = ProgramName; *pch; pch++)
 			*pch = MkUpper(*pch);
 	}
 #endif /* CAPITALIZE_FOR_PS */
@@ -103,18 +98,16 @@ child_process(entry *e, user *u) {
 
 	/* create some pipes to talk to our future child
 	 */
-	if( pipe(stdin_pipe) == -1 )	/* child's stdin */
-	{
-	    log_it("CRON", pid, "pipe() failed", "stdin_pipe", errno);
-	    return;
+	if (pipe(stdin_pipe) == -1) {	/* child's stdin */
+		log_it("CRON", pid, "pipe() failed", "stdin_pipe", errno);
+		return;
 	}
 
-	if( pipe(stdout_pipe) == -1 )	/* child's stdout */
-	{
-	    log_it("CRON", pid, "pipe() failed", "stdout_pipe", errno);
-	    return;
-	}	
-	
+	if (pipe(stdout_pipe) == -1) {	/* child's stdout */
+		log_it("CRON", pid, "pipe() failed", "stdout_pipe", errno);
+		return;
+	}
+
 	/* since we are a forked process, we can diddle the command string
 	 * we were passed -- nobody else is going to use it again, right?
 	 *
@@ -124,14 +117,13 @@ child_process(entry *e, user *u) {
 	 * from it.  Subsequent %'s will be transformed into newlines,
 	 * but that happens later.
 	 */
-	/*local*/{
+	/*local */  {
 		int escaped = FALSE;
 		int ch;
 		char *p;
 
 		for (input_data = p = e->cmd;
-		     (ch = *input_data) != '\0';
-		     input_data++, p++) {
+			(ch = *input_data) != '\0'; input_data++, p++) {
 			if (p != input_data)
 				*p = ch;
 			if (escaped) {
@@ -160,12 +152,10 @@ child_process(entry *e, user *u) {
 		log_it("CRON", pid, "can't fork", "child_process", errno);
 		cron_close_pam();
 		exit(ERROR_EXIT);
-		/*NOTREACHED*/
-	case 0:
-		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n",
-			      (long)getpid()))
+	 /*NOTREACHED*/ case 0:
+		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n", (long) getpid()))
 
-		if (cron_change_user_permanently(e->pwd) < 0)
+			if (cron_change_user_permanently(e->pwd) < 0)
 			_exit(ERROR_EXIT);
 
 		/* write a log message.  we've waited this long to do it
@@ -174,7 +164,7 @@ child_process(entry *e, user *u) {
 		 * PID is part of the log message.
 		 */
 		if ((e->flags & DONT_LOG) == 0) {
-			char *x = mkprints((u_char *)e->cmd, strlen(e->cmd));
+			char *x = mkprints((u_char *) e->cmd, strlen(e->cmd));
 
 			log_it(usernm, getpid(), "CMD", x, 0);
 			free(x);
@@ -222,19 +212,16 @@ child_process(entry *e, user *u) {
 		 * Exec the command.
 		 */
 		{
-			char	*shell = env_get("SHELL", jobenv);
+			char *shell = env_get("SHELL", jobenv);
 
-# if DEBUGGING
+#if DEBUGGING
 			if (DebugFlags & DTEST) {
-				fprintf(stderr,
-				"debug DTEST is on, not exec'ing command.\n");
-				fprintf(stderr,
-				"\tcmd='%s' shell='%s'\n", e->cmd, shell);
+				fprintf(stderr, "debug DTEST is on, not exec'ing command.\n");
+				fprintf(stderr, "\tcmd='%s' shell='%s'\n", e->cmd, shell);
 				_exit(OK_EXIT);
 			}
-# endif /*DEBUGGING*/
-
-			execle(shell, shell, "-c", e->cmd, (char *)0, jobenv);
+#endif		 /*DEBUGGING*/
+				execle(shell, shell, "-c", e->cmd, (char *) 0, jobenv);
 			fprintf(stderr, "execl: couldn't exec `%s'\n", shell);
 			perror("execl");
 			_exit(ERROR_EXIT);
@@ -252,12 +239,12 @@ child_process(entry *e, user *u) {
 	 * the user's command.
 	 */
 
-	Debug(DPROC, ("[%ld] child continues, closing pipes\n",(long)getpid()))
+	Debug(DPROC, ("[%ld] child continues, closing pipes\n", (long) getpid()))
 
-	/* close the ends of the pipe that will only be referenced in the
-	 * grandchild process...
-	 */
-	close(stdin_pipe[READ_PIPE]);
+		/* close the ends of the pipe that will only be referenced in the
+		 * grandchild process...
+		 */
+		close(stdin_pipe[READ_PIPE]);
 	close(stdout_pipe[WRITE_PIPE]);
 
 	/*
@@ -278,24 +265,25 @@ child_process(entry *e, user *u) {
 		int ch;
 
 		Debug(DPROC, ("[%ld] child2 sending data to grandchild\n",
-			      (long)getpid()))
+				(long) getpid()))
 
-		/* close the pipe we don't use, since we inherited it and
-		 * are part of its reference count now.
-		 */
-		close(stdout_pipe[READ_PIPE]);
+			/* close the pipe we don't use, since we inherited it and
+			 * are part of its reference count now.
+			 */
+			close(stdout_pipe[READ_PIPE]);
 		if (cron_change_user_permanently(e->pwd) < 0)
 			_exit(ERROR_EXIT);
 		/* translation:
-		 *	\% -> %
-		 *	%  -> \n
-		 *	\x -> \x	for all x != %
+		 *  \% -> %
+		 *  %  -> \n
+		 *  \x -> \x    for all x != %
 		 */
 		while ((ch = *input_data++) != '\0') {
 			if (escaped) {
 				if (ch != '%')
 					putc('\\', out);
-			} else {
+			}
+			else {
 				if (ch == '%')
 					ch = '\n';
 			}
@@ -316,8 +304,8 @@ child_process(entry *e, user *u) {
 		fclose(out);
 
 		Debug(DPROC, ("[%ld] child2 done sending to grandchild\n",
-			      (long)getpid()))
-		exit(0);
+				(long) getpid()))
+			exit(0);
 	}
 
 	/* close the pipe to the grandkiddie's stdin, since its wicked uncle
@@ -335,25 +323,25 @@ child_process(entry *e, user *u) {
 	 */
 
 	Debug(DPROC, ("[%ld] child reading output from grandchild\n",
-		      (long)getpid()))
+			(long) getpid()))
 
-	/*local*/{
-		FILE	*in = fdopen(stdout_pipe[READ_PIPE], "r");
-		int	ch = getc(in);
+		/*local */  {
+		FILE *in = fdopen(stdout_pipe[READ_PIPE], "r");
+		int ch = getc(in);
 
 		if (ch != EOF) {
-			FILE	*mail=0L;
-			int	bytes = 1;
-			int	status = 0;
+			FILE *mail = 0L;
+			int bytes = 1;
+			int status = 0;
 
-			Debug(DPROC|DEXT,
-			      ("[%ld] got data (%x:%c) from grandchild\n",
-			       (long)getpid(), ch, ch))
+			Debug(DPROC | DEXT,
+				("[%ld] got data (%x:%c) from grandchild\n",
+					(long) getpid(), ch, ch))
 
-			/* get name of recipient.  this is MAILTO if set to a
-			 * valid local username; USER otherwise.
-			 */
-			if (mailto) {
+				/* get name of recipient.  this is MAILTO if set to a
+				 * valid local username; USER otherwise.
+				 */
+				if (mailto) {
 				/* MAILTO was present in the environment
 				 */
 				if (!*mailto) {
@@ -361,7 +349,8 @@ child_process(entry *e, user *u) {
 					 */
 					mailto = NULL;
 				}
-			} else {
+			}
+			else {
 				/* MAILTO not present, set to USER.
 				 */
 				mailto = usernm;
@@ -371,7 +360,7 @@ child_process(entry *e, user *u) {
 			 * root otherwise.
 			 */
 			if (!mailfrom || !*mailfrom || !safe_p(usernm, mailfrom)) {
-				mailfrom = calloc(5, sizeof(char));
+				mailfrom = calloc(5, sizeof (char));
 				strcpy(mailfrom, "root");
 			}
 
@@ -380,73 +369,69 @@ child_process(entry *e, user *u) {
 			 * up the mail command and subjects and stuff...
 			 */
 
-			if (mailto 
-			    &&( (ValidateMailRcpts==0) || safe_p(usernm, mailto) )
-                            /* Why validate the mail recipient name ? All mailers do this anyway... JVD */
-			   )
-			{ 
-				char	**env;
-				char	mailcmd[MAX_COMMAND];
-				char	hostname[MAXHOSTNAMELEN];
-				char    *content_type = env_get("CONTENT_TYPE",jobenv),
-				        *content_transfer_encoding = env_get("CONTENT_TRANSFER_ENCODING",jobenv);
+			if (mailto && ((ValidateMailRcpts == 0) || safe_p(usernm, mailto))
+				/* Why validate the mail recipient name ? All mailers do this anyway... JVD */
+				) {
+				char **env;
+				char mailcmd[MAX_COMMAND];
+				char hostname[MAXHOSTNAMELEN];
+				char *content_type = env_get("CONTENT_TYPE", jobenv),
+					*content_transfer_encoding =
+					env_get("CONTENT_TRANSFER_ENCODING", jobenv);
 
 				gethostname(hostname, MAXHOSTNAMELEN);
-				
-				if ( MailCmd[0] == '\0' )
-				{
+
+				if (MailCmd[0] == '\0') {
 					if (strlens(MAILFMT, MAILARG, mailfrom, NULL) + 1
-					    >= sizeof mailcmd) {
+						>= sizeof mailcmd) {
 						fprintf(stderr, "mailcmd too long\n");
 						(void) _exit(ERROR_EXIT);
 					}
-					(void)sprintf(mailcmd, MAILFMT, MAILARG, mailfrom);
-				}else
-				{
-					strncpy( mailcmd, MailCmd, MAX_COMMAND );
+					(void) sprintf(mailcmd, MAILFMT, MAILARG, mailfrom);
+				}
+				else {
+					strncpy(mailcmd, MailCmd, MAX_COMMAND);
 				}
 				if (!(mail = cron_popen(mailcmd, "w", e->pwd))) {
 					perror(mailcmd);
 					(void) _exit(ERROR_EXIT);
 				}
-				
+
 				fprintf(mail, "From: %s (Cron Daemon)\n", mailfrom);
 				fprintf(mail, "To: %s\n", mailto);
 				fprintf(mail, "Subject: Cron <%s@%s> %s\n",
-					usernm, first_word(hostname, "."),
-					e->cmd);
+					usernm, first_word(hostname, "."), e->cmd);
 
 #ifdef MAIL_DATE
-				fprintf(mail, "Date: %s\n",
-					arpadate(&StartTime));
-#endif /*MAIL_DATE*/
-				if ( content_type == 0L )
-				{   
+				fprintf(mail, "Date: %s\n", arpadate(&StartTime));
+#endif /*MAIL_DATE */
+				if (content_type == 0L) {
 					fprintf(mail, "Content-Type: text/plain; charset=%s\n",
-						cron_default_mail_charset
-					       );
-				}else
-				{       /* user specified Content-Type header. 
-					 * disallow new-lines for security reasons 
-					 * (else users could specify arbitrary mail headers!)
-					 */
-					char *nl=content_type;
-					size_t ctlen = strlen(content_type);				    
-					while(  (*nl != '\0') 
-					     && ((nl=strchr(nl,'\n')) != 0L)
-					     && (nl < (content_type+ctlen)) 
-					     ) *nl = ' ';
-					fprintf(mail,"Content-Type: %s\n", content_type);
+						cron_default_mail_charset);
 				}
-				if ( content_transfer_encoding != 0L )
-				{
-					char *nl=content_transfer_encoding;
+				else {	/* user specified Content-Type header. 
+						 * disallow new-lines for security reasons 
+						 * (else users could specify arbitrary mail headers!)
+						 */
+					char *nl = content_type;
+					size_t ctlen = strlen(content_type);
+					while ((*nl != '\0')
+						&& ((nl = strchr(nl, '\n')) != 0L)
+						&& (nl < (content_type + ctlen))
+						)
+						*nl = ' ';
+					fprintf(mail, "Content-Type: %s\n", content_type);
+				}
+				if (content_transfer_encoding != 0L) {
+					char *nl = content_transfer_encoding;
 					size_t ctlen = strlen(content_transfer_encoding);
-					while(  (*nl != '\0') 
-					     && ((nl=strchr(nl,'\n')) != 0L)
-					     && (nl < (content_transfer_encoding+ctlen))
-					     ) *nl = ' ';				
-					fprintf(mail,"Content-Transfer-Encoding: %s\n", content_transfer_encoding);
+					while ((*nl != '\0')
+						&& ((nl = strchr(nl, '\n')) != 0L)
+						&& (nl < (content_transfer_encoding + ctlen))
+						)
+						*nl = ' ';
+					fprintf(mail, "Content-Transfer-Encoding: %s\n",
+						content_transfer_encoding);
 				}
 
 				/* The Auto-Submitted header is
@@ -454,9 +439,8 @@ child_process(entry *e, user *u) {
 				 */
 				fprintf(mail, "Auto-Submitted: auto-generated\n");
 
-				for (env = jobenv;  *env;  env++)
-					fprintf(mail, "X-Cron-Env: <%s>\n",
-						*env);
+				for (env = jobenv; *env; env++)
+					fprintf(mail, "X-Cron-Env: <%s>\n", *env);
 				fprintf(mail, "\n");
 
 				/* this was the first char from the pipe
@@ -480,15 +464,14 @@ child_process(entry *e, user *u) {
 			 */
 
 			if (mailto) {
-				Debug(DPROC, ("[%ld] closing pipe to mail\n",
-					      (long)getpid()))
-				/* Note: the pclose will probably see
-				 * the termination of the grandchild
-				 * in addition to the mail process, since
-				 * it (the grandchild) is likely to exit
-				 * after closing its stdout.
-				 */
-				status = cron_pclose(mail);
+				Debug(DPROC, ("[%ld] closing pipe to mail\n", (long) getpid()))
+					/* Note: the pclose will probably see
+					 * the termination of the grandchild
+					 * in addition to the mail process, since
+					 * it (the grandchild) is likely to exit
+					 * after closing its stdout.
+					 */
+					status = cron_pclose(mail);
 			}
 
 			/* if there was output and we could not mail it,
@@ -499,18 +482,16 @@ child_process(entry *e, user *u) {
 				char buf[MAX_TEMPSTR];
 
 				sprintf(buf,
-			"mailed %d byte%s of output but got status 0x%04x\n",
-					bytes, (bytes==1)?"":"s",
-					status);
+					"mailed %d byte%s of output but got status 0x%04x\n",
+					bytes, (bytes == 1) ? "" : "s", status);
 				log_it(usernm, getpid(), "MAIL", buf, 0);
 			}
 
-		} /*if data from grandchild*/
+		}	/*if data from grandchild */
 
-		Debug(DPROC, ("[%ld] got EOF from grandchild\n",
-			      (long)getpid()))
+		Debug(DPROC, ("[%ld] got EOF from grandchild\n", (long) getpid()))
 
-		fclose(in);	/* also closes stdout_pipe[READ_PIPE] */
+			fclose(in);	/* also closes stdout_pipe[READ_PIPE] */
 	}
 
 	/* wait for children to die.
@@ -520,34 +501,32 @@ child_process(entry *e, user *u) {
 		PID_T pid;
 
 		Debug(DPROC, ("[%ld] waiting for grandchild #%d to finish\n",
-			      (long)getpid(), children))
-		while ((pid = wait(&waiter)) < OK && errno == EINTR)
-			;
+				(long) getpid(), children))
+			while ((pid = wait(&waiter)) < OK && errno == EINTR) ;
 		if (pid < OK) {
 			Debug(DPROC,
-			      ("[%ld] no more grandchildren--mail written?\n",
-			       (long)getpid()))
-			break;
+				("[%ld] no more grandchildren--mail written?\n",
+					(long) getpid()))
+				break;
 		}
 		Debug(DPROC, ("[%ld] grandchild #%ld finished, status=%04x",
-			      (long)getpid(), (long)pid, WEXITSTATUS(waiter)))
-		if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
+				(long) getpid(), (long) pid, WEXITSTATUS(waiter)))
+			if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
 			Debug(DPROC, (", dumped core"))
-		Debug(DPROC, ("\n"))
+				Debug(DPROC, ("\n"))
+			}
+			cron_close_pam();
+		env_free(jobenv);
 	}
-	cron_close_pam();
-	env_free(jobenv);
-}
 
-static int
-safe_p(const char *usernm, const char *s) {
-	static const char safe_delim[] = "@!:%-.,_+";     /* conservative! */
+static int safe_p(const char *usernm, const char *s) {
+	static const char safe_delim[] = "@!:%-.,_+";	/* conservative! */
 	const char *t;
 	int ch, first;
 
 	for (t = s, first = 1; (ch = *t++) != '\0'; first = 0) {
 		if (isascii(ch) && isprint(ch) &&
-		    (isalnum(ch) || (!first && strchr(safe_delim, ch))))
+			(isalnum(ch) || (!first && strchr(safe_delim, ch))))
 			continue;
 		log_it(usernm, getpid(), "UNSAFE", s, 0);
 		return (FALSE);
