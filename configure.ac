@@ -127,7 +127,7 @@ if test "x$enable_pie" = xyes; then
         LDFLAGS="$save_LDFLAGS"
     fi
 fi
-                                                    
+
 # Check whether user wants SELinux support
 SELINUX_MSG="no"
 LIBSELINUX=""
@@ -222,8 +222,7 @@ fi
 ])
 CRONIE_CONF_VAR([SYSCRONTAB], [the current working directory of the running daemon], [${sysconfdir}/crontab])
 CRONIE_CONF_VAR([SYS_CROND_DIR], [the current working directory of the running daemon], [${sysconfdir}/cron.d])
-CRONIE_CONF_VAR([CRONDIR], [the current working directory of the running daemon], [${localstatedir}/spool])
-CRONIE_CONF_VAR([SPOOL_DIR], [the directory where all the user cron tabs reside], [${CRONDIR}/cron])
+CRONIE_CONF_VAR([SPOOL_DIR], [the directory where all the user cron tabs reside], [${localstatedir}/spool/cron])
 
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
 AC_OUTPUT

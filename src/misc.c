@@ -239,31 +239,7 @@ set_cron_cwd(void) {
 #ifdef CRON_GROUP
 	grp = getgrnam(CRON_GROUP);
 #endif
-	/* first check for CRONDIR ("/var/spool" or some such)
-	 */
-	if (stat(CRONDIR, &sb) < OK && errno == ENOENT) {
-		perror(CRONDIR);
-		if (OK == mkdir(CRONDIR, 0710)) {
-			fprintf(stderr, "%s: created\n", CRONDIR);
-			stat(CRONDIR, &sb);
-		} else {
-			fprintf(stderr, "%s: ", CRONDIR);
-			perror("mkdir");
-			exit(ERROR_EXIT);
-		}
-	}
-	if (!S_ISDIR(sb.st_mode)) {
-		fprintf(stderr, "'%s' is not a directory, bailing out.\n",
-			CRONDIR);
-		exit(ERROR_EXIT);
-	}
-	if (chdir(CRONDIR) < OK) {
-		fprintf(stderr, "cannot chdir(%s), bailing out.\n", CRONDIR);
-		perror(CRONDIR);
-		exit(ERROR_EXIT);
-	}
-
-	/* CRONDIR okay (now==CWD), now look at SPOOL_DIR ("tabs" or some such)
+	/* check SPOOL_DIR existence
 	 */
 	if (stat(SPOOL_DIR, &sb) < OK && errno == ENOENT) {
 		perror(SPOOL_DIR);

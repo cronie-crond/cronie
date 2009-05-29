@@ -33,13 +33,6 @@ cron-paths.h: Makefile
 	#ifndef _CRON_PATHS_H_ \
 	#define _CRON_PATHS_H_ \
 	\
-			/* CRONDIR is where cron(8) and crontab(1) both chdir \
-			 * to; SPOOL_DIR, CRON_ALLOW, CRON_DENY, and LOG_FILE \
-			 * are all relative to this directory. \
-			 * FIXME: Hey, but do we need this at all? --kasal \
-			 */ \
-	#define CRONDIR		"$(CRONDIR)" \
-	\
 			/* SPOOLDIR is where the crontabs live. \
 			 * This directory will have its modtime updated \
 			 * whenever crontab(1) changes a crontab; this is \
@@ -47,6 +40,7 @@ cron-paths.h: Makefile
 			 * crontab file and reload those whose modtimes are \
 			 * newer than they were last time around (or which \
 			 * didn't exist last time around...) \
+			 * or it will be checked by inotify \
 			 */ \
 	#define SPOOL_DIR	"$(SPOOL_DIR)" \
 	\
@@ -56,10 +50,10 @@ cron-paths.h: Makefile
 	#define	CRON_ALLOW	"$(sysconfdir)/cron.allow" \
 	#define	CRON_DENY	"$(sysconfdir)/cron.deny" \
 	\
-			/* 4.3BSD-style crontab */ \
+			/* 4.3BSD-style crontab f.e. /etc/crontab */ \
 	#define SYSCRONTAB	"$(SYSCRONTAB)" \
 	\
-			/* system crontab dir */  \
+			/* system crontab dir f.e. /etc/cron.d/ */  \
 	#define SYS_CROND_DIR	"$(SYS_CROND_DIR)" \
 	\
 	#define SYSCONFDIR	"$(sysconfdir)" \
