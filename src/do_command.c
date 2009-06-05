@@ -369,9 +369,7 @@ static void child_process(entry * e, user * u) {
 			 * up the mail command and subjects and stuff...
 			 */
 
-			if (mailto && ((ValidateMailRcpts == 0) || safe_p(usernm, mailto))
-				/* Why validate the mail recipient name ? All mailers do this anyway... JVD */
-				) {
+			if (mailto && safe_p(usernm, mailto)) {
 				char **env;
 				char mailcmd[MAX_COMMAND];
 				char hostname[MAXHOSTNAMELEN];

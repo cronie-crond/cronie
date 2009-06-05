@@ -64,7 +64,6 @@ XTRN int	LineNumber;
 XTRN time_t	StartTime;
 XTRN int	NoFork;
 XTRN int        PermitAnyCrontab;
-XTRN int        ValidateMailRcpts;
 XTRN char       MailCmd[MAX_COMMAND];
 XTRN char       cron_default_mail_charset[MAX_ENVSTR];
  

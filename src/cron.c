@@ -177,9 +177,6 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	if (getenv("CRON_VALIDATE_MAILRCPTS") != 0L)
-		ValidateMailRcpts = 1;
-
 	/* Get the default locale character set for the mail 
 	 * "Content-Type: ...; charset=" header
 	 */
