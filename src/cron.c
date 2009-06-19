@@ -43,7 +43,7 @@ sigchld_reaper(void), quit(int), parse_args(int c, char *v[]);
 static volatile sig_atomic_t got_sighup, got_sigchld;
 static int timeRunning, virtualTime, clockTime;
 static long GMToff;
-static int DisableInotify = 0;
+static int DisableInotify;
 
 #if defined WITH_INOTIFY
 
@@ -103,7 +103,6 @@ void set_cron_watched(int fd) {
 static void handle_signals(cron_db * database) {
 	if (got_sighup) {
 		got_sighup = 0;
-	if (DisableInotify)
 #if defined WITH_INOTIFY
 		/* watches must be reinstated on reload */
 		if (inotify_enabled) {
@@ -213,9 +212,6 @@ int main(int argc, char *argv[]) {
 					(void) close(fd);
 			}
 			log_it("CRON", getpid(), "STARTUP", PACKAGE_VERSION, 0);
-			if (DisableInotify)
-				log_it("CRON", getpid(), "Switch off inotify - daemon runs with -i option", 
-					"", 0);
 			break;
 		default:
 			/* parent process should just die */
@@ -231,21 +227,26 @@ int main(int argc, char *argv[]) {
 
 	load_database(&database);
 
-	
-	if (DisableInotify)
+	fd = -1;
 #if defined WITH_INOTIFY
-	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
-		/* initialize to negative number other than -1
-		 * so an eventual error is reported for the first time
-		 */
-		wd[i] = -2;
+	if (DisableInotify) {
+		log_it("CRON", getpid(), "No inotify - daemon runs with -i option", 
+			"", 0);
 	}
+	else {
+		for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
+			/* initialize to negative number other than -1
+			 * so an eventual error is reported for the first time
+			 */
+			wd[i] = -2;
+		}
 
-	database.ifd = fd = inotify_init();
-	fcntl(fd, F_SETFD, FD_CLOEXEC);
-	if (fd < 0)
-		log_it("CRON", pid, "INFO", "Inotify init failed", errno);
-	set_cron_watched(fd);
+		database.ifd = fd = inotify_init();
+		fcntl(fd, F_SETFD, FD_CLOEXEC);
+		if (fd < 0)
+			log_it("CRON", pid, "INFO", "Inotify init failed", errno);
+		set_cron_watched(fd);
+	}
 #endif
 
 	set_time(TRUE);
@@ -278,7 +279,6 @@ int main(int argc, char *argv[]) {
 		 * clock.  Classify the change into one of 4 cases.
 		 */
 		timeDiff = timeRunning - virtualTime;
-		if (DisableInotify)
 #if defined WITH_INOTIFY
 		if (inotify_enabled) {
 			check_inotify_database(&database);
@@ -381,7 +381,6 @@ int main(int argc, char *argv[]) {
 		handle_signals(&database);
 	}
 
-	if (DisableInotify)
 #if defined WITH_INOTIFY
 	if (inotify_enabled)
 		set_cron_unwatched(fd);
@@ -597,7 +596,6 @@ static void parse_args(int argc, char *argv[]) {
 			PermitAnyCrontab = 1;
 			break;
 		case 'i':
-			inotify_enabled = 0;
 			DisableInotify = 1;
 			break;
 		case 'm':
