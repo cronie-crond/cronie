@@ -27,7 +27,7 @@
 #include <time.h>
 #include "gregor.h"
 
-const static int
+static const int
 days_in_month[] = {
     31,  /* Jan */
     28,  /* Feb (non-leap) */

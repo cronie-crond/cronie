@@ -64,8 +64,8 @@ temp_file(job_rec *jr)
     if (fdin == -1) die_e("Can't open temporary file for reading");
     if (unlink(name)) die_e("Can't unlink temporary file");
     free(name);
-    fcntl(fdout, F_SETFD, 1);    /* set close-on-exec flag */
-    fcntl(fdin, F_SETFD, 1);    /* set close-on-exec flag */
+    fcntl(fdout, F_SETFD, FD_CLOEXEC);    /* set close-on-exec flag */
+    fcntl(fdin, F_SETFD, FD_CLOEXEC);    /* set close-on-exec flag */
 
     jr->input_fd = fdin;
     jr->output_fd = fdout;
@@ -175,8 +175,6 @@ launch_mailer(job_rec *jr)
     pid = xfork();
     if (pid == 0)
     {
-	long fdflags;
-
 	/* child */
 	in_background = 1;
 	/* set stdin to the job's output */

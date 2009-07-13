@@ -105,18 +105,25 @@ extern int complaints;
 /* main.c */
 int xopen(int fd, const char *file_name, int flags);
 void xclose(int fd);
-pid_t xfork();
+pid_t xfork(void);
+
+#ifdef __GNUC__
+#define PRINTF_FORMAT(n, m) \
+   __attribute__ ((format (printf, n, m)))
+#else
+#define PRINTF_FORMAT(n, m)
+#endif
 
 /* log.c */
-void explain(const char *fmt, ...);
-void explain_e(const char *fmt, ...);
-void complain(const char *fmt, ...);
-void complain_e(const char *fmt, ...);
-void die(const char *fmt, ...);
-void die_e(const char *fmt, ...);
-void xdebug(const char *fmt, ...);
-void xdebug_e(const char *fmt, ...);
-void xcloselog();
+void explain(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void explain_e(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void complain(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void complain_e(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void die(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void die_e(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void xdebug(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void xdebug_e(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void xcloselog(void);
 
 #ifdef DEBUG
 #define Debug(args) xdebug args
@@ -128,7 +135,7 @@ void xcloselog();
 
 /* readtab.c */
 void read_tab(int cwd);
-void arrange_jobs();
+void arrange_jobs(void);
 
 /* lock.c */
 int consider_job(job_rec *jr);

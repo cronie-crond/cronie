@@ -26,6 +26,7 @@
 #include <regex.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include "matchrx.h"
 
 int
@@ -49,11 +50,20 @@ match_rx(const char *rx, char *string, int n_sub,  /* char **substrings */...)
 	sub_offsets = malloc(sizeof(regmatch_t) * (n_sub + 1));
 	memset(sub_offsets, 0, sizeof(regmatch_t) * (n_sub + 1));
 
-	if (regcomp(&crx, rx, REG_EXTENDED)) return - 1;
+	if (regcomp(&crx, rx, REG_EXTENDED)) {
+	    free(sub_offsets);
+	    return - 1;
+	}
 	r = regexec(&crx, string, n_sub + 1, sub_offsets, 0);
-	if (r != 0 && r != REG_NOMATCH) return - 1;
+	if (r != 0 && r != REG_NOMATCH) {
+	   free(sub_offsets);
+	   return - 1;
+	}
 	regfree(&crx);
-	if (r == REG_NOMATCH) return 0;
+	if (r == REG_NOMATCH) {
+	    free(sub_offsets);
+	    return 0;
+	}
 
 	va_start(va, n_sub);
 	n = 1;
@@ -62,7 +72,10 @@ match_rx(const char *rx, char *string, int n_sub,  /* char **substrings */...)
 		substring = va_arg(va, char**);
 		if (substring != NULL)
 		{
-			if (sub_offsets[n].rm_so == -1) return - 1;
+			if (sub_offsets[n].rm_so == -1) {
+			    free(sub_offsets);
+			    return - 1;
+			}
 			*substring = string + sub_offsets[n].rm_so;
 			*(string + sub_offsets[n].rm_eo) = 0;
 		}

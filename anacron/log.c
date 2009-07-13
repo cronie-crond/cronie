@@ -83,7 +83,7 @@ make_msg(const char *fmt, va_list args)
 }
 
 static void
-log(int priority, const char *fmt, va_list args)
+slog(int priority, const char *fmt, va_list args)
 /* Log a message, described by "fmt" and "args", with the specified
  * "priority". */
 {
@@ -101,7 +101,7 @@ log(int priority, const char *fmt, va_list args)
 
 static void
 log_e(int priority, const char *fmt, va_list args)
-/* Same as log(), but also appends an error description corresponding
+/* Same as slog(), but also appends an error description corresponding
  * to "errno". */
 {
     int saved_errno;
@@ -127,7 +127,7 @@ explain(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    log(EXPLAIN_LEVEL, fmt, args);
+    slog(EXPLAIN_LEVEL, fmt, args);
     va_end(args);
 }
 
@@ -149,7 +149,7 @@ complain(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    log(COMPLAIN_LEVEL, fmt, args);
+    slog(COMPLAIN_LEVEL, fmt, args);
     va_end(args);
 
     complaints += 1;
@@ -175,7 +175,7 @@ die(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    log(COMPLAIN_LEVEL, fmt, args);
+    slog(COMPLAIN_LEVEL, fmt, args);
     va_end(args);
     if (getpid() == primary_pid) complain("Aborted");
 
@@ -207,7 +207,7 @@ xdebug(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    log(DEBUG_LEVEL, fmt, args);
+    slog(DEBUG_LEVEL, fmt, args);
     va_end(args);
 }
 
