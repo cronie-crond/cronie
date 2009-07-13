@@ -305,7 +305,7 @@ read_tab(int cwd)
     /* Open the anacrontab file */
     fchdir (cwd);
     tab = fopen(anacrontab, "r");
-    if (chdir(spooldir)) die_e("Can't chdir to %s", SPOOLDIR);
+    if (chdir(spooldir)) die_e("Can't chdir to %s", spooldir);
 
     if (tab == NULL) die_e("Error opening %s", anacrontab);
     /* Initialize the obstacks */
