@@ -1,0 +1,48 @@
+.TH ANACRONTAB 5 1998-02-02 "Itai Tzur" "Anacron Users' Manual"
+.SH NAME
+/etc/anacrontab \- configuration file for anacron
+.SH DESCRIPTION
+The file
+.I /etc/anacrontab
+describes the jobs controlled by \fBanacron(8)\fR.  Its lines can be of
+three kinds:  job-description lines, environment
+assignments, or empty lines.
+.PP
+Job-description lines are of the form:
+.PP
+   period  delay  job-identifier  command
+.PP
+The
+.I period
+is specified in days, the
+.I delay
+in minutes.  The
+.I job-identifier
+can contain any non-blank character, except slashes.  It is used to identify
+the job in Anacron messages,
+and as the name for the job's timestamp file.  The
+.I command
+can be any shell command.
+.PP
+Environment assignment lines are of the form:
+.PP
+   VAR = VALUE
+.PP
+Spaces around
+.I VAR
+are removed.  No spaces around
+.I VALUE
+are allowed (unless you want them to be part of the value).  The assignment
+takes effect from the next line to the end of the file, or to the next
+assignment of the same variable.
+.PP
+Empty lines are either blank lines, line containing white-space only, or
+lines with white-space followed by a '#' followed by an arbitrary comment.
+.SH "SEE ALSO"
+.B anacron(8)
+.PP
+The Anacron
+.I README
+file.
+.SH AUTHOR
+Itai Tzur <itzur@actcom.co.il>

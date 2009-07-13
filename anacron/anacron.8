@@ -1,0 +1,147 @@
+.TH ANACRON 8 2000-06-22 "Sean 'Shaleh' Perry" "Anacron Users' Manual"
+.SH NAME
+anacron \- runs commands periodically
+.SH SYNOPSIS
+.B anacron \fR[\fB-s\fR] [\fB-f\fR] [\fB-n\fR] [\fB-d\fR] [\fB-q\fR]
+[\fB-t anacrontab\fR] [\fIjob\fR] ...
+.br
+.B anacron -u [\fB-t anacrontab\fR] \fR[\fIjob\fR] ...
+.br
+.B anacron \fR[\fB-V\fR|\fB-h\fR]
+.SH DESCRIPTION
+Anacron
+can be used to execute commands periodically, with a
+frequency specified in days.  Unlike \fBcron(8)\fR,
+it does not assume that the machine is running continuously.  Hence,
+it can be used on machines that aren't running 24 hours a day,
+to control daily, weekly, and monthly jobs that are
+usually controlled by \fBcron\fR.
+.PP
+When executed, Anacron reads a list of jobs from a configuration file, normally
+.I /etc/anacrontab
+(see \fBanacrontab(5)\fR).  This file
+contains the list of jobs that Anacron controls.  Each
+job entry specifies a period in days, 
+a delay in minutes, a unique
+job identifier, and a shell command.
+.PP
+For each job, Anacron checks whether
+this job has been executed in the last n days, where n is the period specified
+for that job.  If not, Anacron runs the job's shell command, after waiting
+for the number of minutes specified as the delay parameter.
+.PP
+After the command exits, Anacron records the date in a special
+timestamp file for that job, so it can know when to execute it again.  Only
+the date is used for the time
+calculations.  The hour is not used.
+.PP
+When there are no more jobs to be run, Anacron exits.
+.PP
+Anacron only considers jobs whose identifier, as
+specified in the \fIanacrontab\fR matches any of
+the
+.I job
+command-line arguments.  The
+.I job
+arguments can be shell wildcard patterns (be sure to protect them from
+your shell with adequate quoting).  Specifying no
+.I job
+arguments, is equivalent to specifying "*"  (That is, all jobs will be
+considered).
+.PP
+Unless the \fB-d\fR option is given (see below), Anacron forks to the
+background when it starts, and the parent process exits
+immediately.
+.PP
+Unless the \fB-s\fR or \fB-n\fR options are given, Anacron starts jobs
+immediately when their delay is over.  The execution of different jobs is
+completely independent.
+.PP
+If a job generates any output on its standard output or standard error,
+the output is mailed to the user running Anacron (usually root).
+.PP
+Informative messages about what Anacron is doing are sent to \fBsyslogd(8)\fR
+under facility \fBcron\fR, priority \fBnotice\fR.  Error messages are sent at
+priority \fBerror\fR.
+.PP
+"Active" jobs (i.e. jobs that Anacron already decided
+to run and now wait for their delay to pass, and jobs that are currently
+being executed by
+Anacron), are "locked", so that other copies of Anacron won't run them
+at the same time.
+.SH OPTIONS
+.TP
+.B -f
+Force execution of the jobs, ignoring the timestamps.
+.TP
+.B -u
+Only update the timestamps of the jobs, to the current date, but
+don't run anything.
+.TP
+.B -s
+Serialize execution of jobs.  Anacron will not start a new job before the
+previous one finished.
+.TP
+.B -n
+Run jobs now.  Ignore the delay specifications in the
+.I /etc/anacrontab
+file.  This options implies \fB-s\fR.
+.TP
+.B -d
+Don't fork to the background.  In this mode, Anacron will output informational
+messages to standard error, as well as to syslog.  The output of jobs
+is mailed as usual.
+.TP
+.B -q
+Suppress messages to standard error.  Only applicable with \fB-d\fR.
+.TP
+.B -t anacrontab
+Use specified anacrontab, rather than the default
+.TP
+.B -V
+Print version information, and exit.
+.TP
+.B -h
+Print short usage message, and exit.
+.SH SIGNALS
+After receiving a \fBSIGUSR1\fR signal, Anacron waits for running
+jobs, if any, to finish and then exits.  This can be used to stop
+Anacron cleanly.
+.SH NOTES
+Make sure that the time-zone is set correctly before Anacron is
+started.  (The time-zone affects the date).  This is usually accomplished
+by setting the TZ environment variable, or by installing a
+.I /usr/lib/zoneinfo/localtime
+file.  See
+.B tzset(3)
+for more information.
+.SH FILES
+.TP
+.I /etc/anacrontab
+Contains specifications of jobs.  See \fBanacrontab(5)\fR for a complete
+description.
+.TP
+.I /var/spool/anacron
+This directory is used by Anacron for storing timestamp files.
+.SH "SEE ALSO"
+.B anacrontab(5), cron(8), tzset(3)
+.PP
+The Anacron
+.I README
+file.
+.SH BUGS
+Anacron never removes timestamp files.  Remove unused files manually.
+.PP
+Anacron
+uses up to two file descriptors for each active job.  It may run out of
+descriptors if there are more than about 125 active jobs (on normal kernels).
+.PP
+Mail comments, suggestions and bug reports to Sean 'Shaleh' Perry <shaleh@(debian.org|valinux.com)>.
+.SH AUTHOR
+Anacron was originally conceived and implemented by Christian Schwarz
+<schwarz@monet.m.isar.de>.
+.PP
+The current implementation is a complete rewrite by Itai Tzur
+<itzur@actcom.co.il>.
+.PP
+The code base is currently maintained by Sean 'Shaleh' Perry <shaleh@(debian.org|valinux.com)>.

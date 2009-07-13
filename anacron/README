@@ -1,0 +1,142 @@
+
+     What is Anacron ?
+     -----------------
+
+   Anacron is a periodic command scheduler.  It executes commands at
+intervals specified in days.  Unlike cron, it does not assume that the
+system is running continuously.  It can therefore be used to control
+the execution of daily, weekly and monthly jobs (or anything with a
+period of n days), on systems that don't run 24 hours a day.  When
+installed and configured properly, Anacron will make sure that the
+commands are run at the specified intervals as closely as
+machine-uptime permits.
+
+   Every time Anacron is run, it reads a configuration file that
+specifies the jobs Anacron controls, and their periods in days.  If a
+job wasn't executed in the last n days, where n is the period of that
+job, Anacron executes it.  Anacron then records the date in a special
+timestamp file that it keeps for each job, so it can know when to run
+it again.  When all the executed commands terminate, Anacron exits.
+
+   It is recommended to run Anacron from the system boot-scripts.
+This way the jobs "whose time has come" will be run shortly after the
+machine boots.  A delay can be specified for each job so that the
+machine isn't overloaded at boot time.
+
+   In addition to running Anacron from the boot-scripts, it is also
+recommended to schedule it as a daily cron-job (usually at an early
+morning hour), so that if the machine is kept running for a night,
+jobs for the next day will still be executed.
+
+
+     Why this may be useful ?
+     ------------------------
+
+   Most Unix-like systems have daily, weekly and monthly scripts that
+take care of various "housekeeping chores" such as log-rotation,
+updating the "locate" and "man" databases, etc.  Daily scripts are
+usually scheduled as cron-jobs to execute around 1-7 AM.  Weekly
+scripts are scheduled to run on Sundays.  On machines that are turned
+off for the night or for the weekend, these scripts rarely get run.
+
+   Anacron solves this problem.  These jobs can simply be scheduled as
+Anacron-jobs with periods of 1, 7 and 30 days.
+
+
+     What Anacron is not ?
+     ---------------------
+
+   Anacron is not an attempt to make cron redundant.  It cannot
+currently be used to schedule commands at intervals smaller than days.
+It also does not guarantee that the commands will be executed at any
+specific day or hour.
+
+   It isn't a full-time daemon.  It has to be executed from boot
+scripts, from cron-jobs, or explicitly.
+
+
+   For more details, see the anacron(8) manpage.
+
+
+     Requirements
+     ------------
+
+ - A Linux system. (maybe other *NIX systems)
+ - A functioning syslog daemon.
+ - A functioning /usr/lib/sendmail command.  (all MTAs should have
+   that).
+
+
+     Compilation and Installation
+     ----------------------------
+
+ - Untar the source package.
+
+ - Check the Makefile.  Edit as required.
+
+ - Check the top of "global.h".  You may want to change the syslog
+   facility and priorities, and the path to your MTA's sendmail
+   compatible command (/usr/lib/sendmail).
+
+ - cd to the directory.
+
+ - Type "make".
+   You can safely ignore warnings of the form: "*.d: No such file or
+   directory"
+
+ - Become root.  Type "make install".
+
+
+     Setup
+     -----
+
+1. Locate your system's daily, weekly and monthly cron-jobs.
+   See your cron documentation for more details.
+
+2. Decide which of these jobs should be controlled by Anacron.
+   Remember that Anacron does not guarantee execution at any specific
+   day of the month, day of the week, or time of day.  Jobs for which
+   the timing is critical should probably not be controlled by
+   Anacron.
+
+3. Comment these jobs out of their crontab files.  (You may have to
+   use the "crontab" command for this.  See the cron documentation.)
+
+4. Put them in /etc/anacrontab.  Note that the format is not the same
+   as the crontab entries.  See the anacrontab(5) manpage.  Here's an
+   example from a typical Debian system:
+
+-----Cut
+# /etc/anacrontab example
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+# format: period delay job-identifier command
+1       5       cron.daily      run-parts /etc/cron.daily
+7       10      cron.weekly     run-parts /etc/cron.weekly
+30      15      cron.monthly    run-parts /etc/cron.monthly
+-----Cut
+
+5. Put the command "anacron -s" somewhere in your boot-scripts.
+   Make sure that syslogd is started before this command.
+
+6. Schedule the command "anacron -s" as a daily cron-job (preferably
+   at some early morning hour).  This will make sure that jobs are run
+   when the systems is left running for a night.
+
+That's it.
+
+It is a good idea to check what your daily, weekly and monthly scripts
+actually do, and disable any parts that may be irrelevant for your
+system.
+
+
+     Credits
+     -------
+
+Anacron was originally conceived and implemented by Christian Schwarz
+<schwarz@monet.m.isar.de>.
+
+The current implementation is a complete rewrite by Itai Tzur
+<itzur@actcom.co.il>.
+
+Current code base maintained by Sean 'Shaleh' Perry <shaleh@(debian.org|valinux.com)>.

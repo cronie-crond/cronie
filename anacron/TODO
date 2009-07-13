@@ -1,0 +1,6 @@
+anacron runs jobs twice in a 31 day month
+add hostname to emails sent to admin
+allow user anacrontabs
+make manpages match #defines automagically --> sed fu
+full ANSI / POSIX compliance
+code cleaning

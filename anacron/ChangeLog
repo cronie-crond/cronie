@@ -1,0 +1,34 @@
+   Changes in Anacron 2.3
+   ----------------------
+* anacron can now read an arbitrary anacrontab file, use the -t option
+
+
+   Changes in Anacron 2.1/2.2
+   --------------------------
+* Sean 'Shaleh' Perry <shaleh@(debian.org|valinux.com)> is now maintainer
+* if timestamp is from the future, re-run job
+* ansi cleanup / code cleaning
+
+
+   Changes in Anacron 2.0.1
+   ------------------------
+* Minor cosmetic changes to log messages.
+* Jobs are now started with "/" as their working directory.  This is
+  more compatible with older Anacron versions, avoids annoying errors on
+  some systems, and generally seems to make more sense.
+
+
+   Summary of major changes in Anacron 2.0
+   ---------------------------------------
+* Complete rewrite in C.  Should be backwards compatible with existing
+  Anacron installations.
+* First release as a "generic" Linux package (was a Debian package).
+* No longer needs special lock-files.  Locking is done on the timestamp
+  files.
+* Sends log messages to syslogd.  There's no log file now.
+* Output of jobs, if any, is mailed to the user.
+* Added command line options: -s -f -n -d -q -u -V -h.  See the manpage.
+* Specific jobs can now be selected on the command line.
+* Added SIGUSR1 handling, to cleanly stop execution.
+* Jobs will now be started with their current directory set to the home
+  of the user running Anacron (usually root).
