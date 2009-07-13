@@ -1,4 +1,4 @@
-.TH ANACRON 8 2004-07-11 "Pascal Hakim" "Anacron Users' Manual"
+.TH ANACRON 8 2009-03-24 "Marcela Mašláňová" "Anacron Users' Manual"
 .SH NAME
 anacron \- runs commands periodically
 .SH SYNOPSIS
@@ -66,8 +66,8 @@ exists. If the LOGNAME environment variable is set, it will be used as From:
 field.
 .PP
 Informative messages about what Anacron is doing are sent to \fBsyslogd(8)\fR
-under facility \fBcron\fR, priority \fBnotice\fR.  Error messages are sent at
-priority \fBerror\fR.
+or \fBrsyslogd(8)\fR under facility \fBcron\fR, priority \fBnotice\fR.  Error 
+messages are sent at priority \fBerror\fR.
 .PP
 "Active" jobs (i.e. jobs that Anacron already decided
 to run and now wait for their delay to pass, and jobs that are currently
@@ -163,4 +163,5 @@ The current implementation is a complete rewrite by Itai Tzur
 The code base was maintained by Sean 'Shaleh' Perry <shaleh@(debian.org|valinux.com)>.
 .PP
 Since 2004, it is maintained by Pascal Hakim <pasc@(debian.org|redellipse.net)>.
-
+.PP
+For Fedora is anacron maintained by Marcela Mašláňová <mmaslano@redhat.com>.

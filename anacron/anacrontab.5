@@ -1,4 +1,4 @@
-.TH ANACRONTAB 5 2004-07-11 "Pascal Hakim" "Anacron Users' Manual"
+.TH ANACRONTAB 5 2009-03-24 "Marcela Mašláňová" "Anacron Users' Manual"
 .SH NAME
 /etc/anacrontab \- configuration file for anacron
 .SH DESCRIPTION
@@ -15,11 +15,20 @@ Job-description lines are of one of these two forms:
 .PP
    @period_name delay job-identify command
 .PP
-The
+The 
 .I period
-is specified in days, the
+is specified in days, the 
 .I delay
-in minutes.  The
+in minutes. In addition, if the 
+.I RANDOM_DELAY
+environment variable is set, then the value of 
+.I RANDOM_DELAY 
+is added to the delay. The value in 
+.I RANDOM_DELAY 
+denotes a maximal additional delay in minutes, where the minimum delay value is set, to user delay from anacrontab. A 
+.I RANDOM_DELAY 
+set to 12 would therefore add, randomly, between 0 and 12 minutes to the user defined delay.
+The
 .I job-identifier
 can contain any non-blank character, except slashes.  It is used to identify
 the job in Anacron messages,
@@ -42,12 +51,28 @@ are removed.  No spaces around
 .I VALUE
 are allowed (unless you want them to be part of the value).  The assignment
 takes effect from the next line to the end of the file, or to the next
-assignment of the same variable.
+assignment of the same variable. The enviroment variable 
+.I START_HOURS_RANGE
+sets the time frame, when the job could started.
 .PP
 Empty lines are either blank lines, line containing white-space only, or
 lines with white-space followed by a '#' followed by an arbitrary comment.
 .PP
 You can continue a line onto the next line by ending it with a '\'.
+.SH EXAMPLE
+.nf
+# environment variables
+SHELL=/bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+RANDOM_DELAY=60
+# Anacron jobs will start between 6 and 8 o'clock.
+START_HOURS_RANGE=6-8
+# delay will be 5 minutes + RANDOM_DELAY for cron.daily
+1		5	cron.daily		nice run-parts /etc/cron.daily
+7		8	cron.weekly		nice run-parts /etc/cron.weekly
+@monthly	35	cron.monthly		nice run-parts /etc/cron.monthly
+.fi
 .SH "SEE ALSO"
 .B anacron(8)
 .PP
@@ -58,3 +83,5 @@ file.
 Itai Tzur <itzur@actcom.co.il>
 .PP
 Currently maintained by Pascal Hakim <pasc@(debian.org|redellipse.net)>.
+.PP
+For Fedora maintained by Marcela Mašláňová <mmaslano@redhat.com>.
