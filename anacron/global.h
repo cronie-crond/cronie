@@ -63,6 +63,7 @@ struct job_rec1 {
    int tab_line;
    int arg_num;
    int timestamp_fd;
+   int input_fd;
    int output_fd;
    int mail_header_size;
    pid_t job_pid;

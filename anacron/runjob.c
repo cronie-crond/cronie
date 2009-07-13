@@ -38,12 +38,12 @@
 #include <langinfo.h>
 
 static int
-temp_file()
+temp_file(job_rec *jr)
 /* Open a temporary file and return its file descriptor */
 {
     const int max_retries = 50;
     char *name;
-    int fd, i;
+    int fdin, fdout, i;
 
     i = 0;
     name = NULL;
@@ -53,16 +53,24 @@ temp_file()
 	free(name);
 	name = tempnam(NULL, NULL);
 	if (name == NULL) die("Can't find a unique temporary filename");
-	fd = open(name, O_RDWR | O_CREAT | O_EXCL | O_APPEND,
-		  S_IRUSR | S_IWUSR);
+	fdout = open(name, O_WRONLY | O_CREAT | O_EXCL | O_APPEND,
+				S_IRUSR | S_IWUSR);
+	if ( fdout != -1 )
+		fdin = open(name, O_RDONLY, S_IRUSR | S_IWUSR);
 	/* I'm not sure we actually need to be so persistent here */
-    } while (fd == -1 && errno == EEXIST && i < max_retries);
+    } while (fdout == -1 && errno == EEXIST && i < max_retries);
     
-    if (fd == -1) die_e("Can't open temporary file");
+    if (fdout == -1) die_e("Can't open temporary file for writing");
+    if (fdin == -1) die_e("Can't open temporary file for reading");
     if (unlink(name)) die_e("Can't unlink temporary file");
     free(name);
-    fcntl(fd, F_SETFD, 1);    /* set close-on-exec flag */
-    return fd;
+    fcntl(fdout, F_SETFD, 1);    /* set close-on-exec flag */
+    fcntl(fdin, F_SETFD, 1);    /* set close-on-exec flag */
+
+    jr->input_fd = fdin;
+    jr->output_fd = fdout;
+
+    return fdout;
 }
 
 static off_t
@@ -167,16 +175,27 @@ launch_mailer(job_rec *jr)
     pid = xfork();
     if (pid == 0)
     {
+	long fdflags;
+
 	/* child */
 	in_background = 1;
 	/* set stdin to the job's output */
 	xclose(0);
-	if (dup2(jr->output_fd, 0) != 0) die_e("Can't dup2()");
+	if (dup2(jr->input_fd, 0) != 0) die_e("Can't dup2()");
 	if (lseek(0, 0, SEEK_SET) != 0) die_e("Can't lseek()");
 	umask(old_umask);
 	if (sigprocmask(SIG_SETMASK, &old_sigmask, NULL))
 	    die_e("sigprocmask error");
 	xcloselog();
+
+	/* Ensure stdout/stderr are sane before exec-ing sendmail */
+	xclose(1); xopen(1, "/dev/null", O_WRONLY);
+	xclose(2); xopen(2, "/dev/null", O_WRONLY);
+	xclose(jr->output_fd);
+
+	/* Ensure stdin is not appendable ... ? */
+	/* fdflags = fcntl(0, F_GETFL); fdflags &= ~O_APPEND; */
+	/* fcntl(0, F_SETFL, fdflags ); */
 
 	/* Here, I basically mirrored the way /usr/sbin/sendmail is called
 	 * by cron on a Debian system, except for the "-oem" and "-or0s"
@@ -236,7 +255,7 @@ launch_job(job_rec *jr)
 	    jr->mailto = username ();
 
     /* create temporary file for stdout and stderr of the job */
-    fd = jr->output_fd = temp_file();
+    temp_file(jr); fd = jr->output_fd;
     /* write mail header */
     xwrite(fd, "From: ");
     xwrite(fd, "Anacron <");
@@ -302,6 +321,7 @@ tend_job(job_rec *jr, int status)
     running_jobs--;
     if (mail_output) launch_mailer(jr);
     xclose(jr->output_fd);
+    xclose(jr->input_fd);
 }
 
 void
