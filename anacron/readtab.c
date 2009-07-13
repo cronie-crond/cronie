@@ -2,6 +2,7 @@
     Anacron - run commands periodically
     Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>
     Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>
+    Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>
  
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,11 +84,23 @@ read_tab_line ()
 Return NULL if no more lines.
  */
 {
-    int c;
+    int c, prev=0;
 
     if (feof(tab)) return NULL;
-    while ((c = getc(tab)) != EOF && c != '\n')
-	obstack_1grow(&input_o, c);
+    while (1)
+    {
+	c = getc(tab);
+	if ((c == '\n' && prev != '\\') || c == EOF)
+	{
+	    if (0 != prev) obstack_1grow(&input_o, prev);
+	    break;
+	}
+
+	if ('\\' != prev && 0 != prev && '\n' != prev) obstack_1grow(&input_o, prev);
+	else if ('\n' == prev) obstack_1grow(&input_o, ' ');
+
+	prev = c;
+    }
     if (ferror(tab)) die_e("Error reading %s", anacrontab);
     obstack_1grow(&input_o, '\0');
     return obstack_finish(&input_o);
@@ -153,6 +166,7 @@ register_job(const char *periods, const char *delays,
     }
     jr = obstack_alloc(&tab_o, sizeof(job_rec));
     jr->period = period;
+    jr->named_period = 0;
     jr->delay = delay;
     jr->tab_line = line_num;
     jr->ident = obstack_alloc(&tab_o, ident_len + 1);
@@ -168,6 +182,54 @@ register_job(const char *periods, const char *delays,
     jr->next = NULL;
     Debug(("Read job - period=%d, delay=%d, ident=%s, command=%s",
 	   jr->period, jr->delay, jr->ident, jr->command));
+}
+
+static void
+register_period_job(const char *periods, const char *delays,
+		    const char *ident, char *command)
+/* Store a job definition with a named period */
+{
+    int delay;
+    job_rec *jr;
+    int period_len, ident_len, command_len;
+
+    period_len = strlen(periods);
+    ident_len = strlen(ident);
+    command_len = strlen(command);
+    jobs_read++;
+    delay = conv2int(delays);
+    if (delay < 0)
+    {
+	complain("%s: number out of range on line %d, skipping",
+		 anacrontab, line_num);
+	return;
+    }
+
+    jr = obstack_alloc(&tab_o, sizeof(job_rec));
+    if (!strncmp ("@monthly", periods, 7)) {
+	jr->named_period = 1;
+    } else if (!strncmp("@yearly", periods, 7)) {
+	jr->named_period = 2;
+    } else {
+	complain("%s: Unknown named period on line %d, skipping",
+		 anacrontab, line_num);
+    }
+    jr->period = 0;
+    jr->delay = delay;
+    jr->tab_line = line_num;
+    jr->ident = obstack_alloc(&tab_o, ident_len + 1);
+    strcpy(jr->ident, ident);
+    jr->arg_num = job_arg_num(ident);
+    jr->command = obstack_alloc(&tab_o, command_len + 1);
+    strcpy(jr->command, command);
+    jr->job_pid = jr->mailer_pid = 0;
+    if (last_job_rec != NULL) last_job_rec->next = jr;
+    else first_job_rec = jr;
+    last_job_rec = jr;
+    jr->prev_env_rec = last_env_rec;
+    jr->next = NULL;
+    Debug(("Read job - period %d, delay=%d, ident%s, command=%s",
+	  jr->named_period, jr->delay, jr->ident, jr->command));
 }
 
 static void
@@ -210,6 +272,18 @@ parse_tab_line(char *line)
 	register_job(periods, delays, ident, command);
 	return;
     }
+
+    /* A period job? */
+    r = match_rx("^[ \t]*(@[^ \t]+)[ \t]+([[:digit:]]+)[ \t]+"
+		 "([^ \t/]+)[ \t]+([^ \t].*)$",
+		 line, 4, &periods, &delays, &ident, &command);
+    if (r == -1) goto reg_err;
+    if (r)
+    {
+	register_period_job(periods, delays, ident, command);
+	return;
+    }
+
     complain("Invalid syntax in %s on line %d - skipping this line",
 	     anacrontab, line_num);
     return;
@@ -219,7 +293,7 @@ parse_tab_line(char *line)
 }
 
 void
-read_tab()
+read_tab(int cwd)
 /* Read the anacrontab file into memory */
 {
     char *tab_line;
@@ -229,7 +303,10 @@ read_tab()
     jobs_read = 0;
     line_num = 0;
     /* Open the anacrontab file */
+    fchdir (cwd);
     tab = fopen(anacrontab, "r");
+    if (chdir(spooldir)) die_e("Can't chdir to %s", SPOOLDIR);
+
     if (tab == NULL) die_e("Error opening %s", anacrontab);
     /* Initialize the obstacks */
     obstack_init(&input_o);
@@ -271,7 +348,7 @@ arrange_jobs()
     njobs = 0;
     while (j != NULL)
     {
-	if (j->arg_num != -1 && (update_only || consider_job(j)))
+	if (j->arg_num != -1 && (update_only || testing_only || consider_job(j)))
 	{
 	    njobs++;
 	    obstack_grow(&tab_o, &j, sizeof(j));

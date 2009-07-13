@@ -1,3 +1,8 @@
+   Changes in Anacron 2.3.1
+   ------------------------
+* documentation no longer suggests adding local directories to the PATH
+
+
    Changes in Anacron 2.3
    ----------------------
 * anacron can now read an arbitrary anacrontab file, use the -t option

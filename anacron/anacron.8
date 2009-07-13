@@ -1,13 +1,15 @@
-.TH ANACRON 8 2000-06-22 "Sean 'Shaleh' Perry" "Anacron Users' Manual"
+.TH ANACRON 8 2004-07-11 "Pascal Hakim" "Anacron Users' Manual"
 .SH NAME
 anacron \- runs commands periodically
 .SH SYNOPSIS
 .B anacron \fR[\fB-s\fR] [\fB-f\fR] [\fB-n\fR] [\fB-d\fR] [\fB-q\fR]
-[\fB-t anacrontab\fR] [\fIjob\fR] ...
+[\fB-t anacrontab\fR] [\fB-S spooldir\fR] [\fIjob\fR] ...
 .br
-.B anacron -u [\fB-t anacrontab\fR] \fR[\fIjob\fR] ...
+.B anacron [\fB-S spooldir\fR] -u [\fB-t anacrontab\fR] \fR[\fIjob\fR] ...
 .br
 .B anacron \fR[\fB-V\fR|\fB-h\fR]
+.br
+.B anacron -T [\fB-t anacrontab\fR]
 .SH DESCRIPTION
 Anacron
 can be used to execute commands periodically, with a
@@ -58,7 +60,10 @@ immediately when their delay is over.  The execution of different jobs is
 completely independent.
 .PP
 If a job generates any output on its standard output or standard error,
-the output is mailed to the user running Anacron (usually root).
+the output is mailed to the user running Anacron (usually root), or to
+the address contained by the MAILTO environment variable in the crontab, if such
+exists. If the LOGNAME environment variable is set, it will be used as From:
+field.
 .PP
 Informative messages about what Anacron is doing are sent to \fBsyslogd(8)\fR
 under facility \fBcron\fR, priority \fBnotice\fR.  Error messages are sent at
@@ -98,6 +103,15 @@ Suppress messages to standard error.  Only applicable with \fB-d\fR.
 .B -t anacrontab
 Use specified anacrontab, rather than the default
 .TP
+.B -T
+Anacrontab testing. The configuration file will be tested for validity. If
+there is an error in the file, an error will be shown and anacron will 
+return 1. Valid anacrontabs will return 0.
+.TP
+.B -S spooldir
+Use the specified spooldir to store timestamps in. This option is required for
+users who wish to run anacron themselves.
+.TP
 .B -V
 Print version information, and exit.
 .TP
@@ -115,6 +129,8 @@ by setting the TZ environment variable, or by installing a
 file.  See
 .B tzset(3)
 for more information.
+
+Timestamp files are created in the spool directory for each job in anacrontab. These are never removed automatically by anacron, and should be removed by hand if a job is no longer being scheduled.
 .SH FILES
 .TP
 .I /etc/anacrontab
@@ -144,4 +160,7 @@ Anacron was originally conceived and implemented by Christian Schwarz
 The current implementation is a complete rewrite by Itai Tzur
 <itzur@actcom.co.il>.
 .PP
-The code base is currently maintained by Sean 'Shaleh' Perry <shaleh@(debian.org|valinux.com)>.
+The code base was maintained by Sean 'Shaleh' Perry <shaleh@(debian.org|valinux.com)>.
+.PP
+Since 2004, it is maintained by Pascal Hakim <pasc@(debian.org|redellipse.net)>.
+

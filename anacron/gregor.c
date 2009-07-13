@@ -2,6 +2,7 @@
     Anacron - run commands periodically
     Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>
     Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>
+    Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>
  
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@
 
 
 #include <limits.h>
+#include <time.h>
 #include "gregor.h"
 
 const static int
@@ -65,7 +67,7 @@ day_num(int year, int month, int day)
 {
     int dn;
     int i;
-    const int isleap; /* save three calls to leap() */
+    int isleap; /* save three calls to leap() */
 
     /* Some validity checks */
 
@@ -113,4 +115,67 @@ leap(int year)
     /* unless it is exactly divisible by 100 */
     /* but not by 400 */
     return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+}
+
+int
+days_last_month (void)
+/* How many days did last month have? */
+{
+    struct tm time_record;
+    time_t current_time;
+    time (&current_time);
+    localtime_r (&current_time, &time_record);
+
+    switch (time_record.tm_mon) {
+	case 0: return days_in_month[11];
+	case 2: return days_in_month[1] + (leap (time_record.tm_year + 1900) ? 1 : 0);
+	default: return days_in_month[time_record.tm_mon - 1];
+    }
+}
+
+int
+days_this_month (void)
+/* How many days does this month have? */
+{
+    struct tm time_record;
+    time_t current_time;
+    time (&current_time);
+    localtime_r (&current_time, &time_record);
+
+    switch (time_record.tm_mon) {
+	case 1: return days_in_month[1] + (leap (time_record.tm_year + 1900) ? 1 : 0);
+	default: return days_in_month[time_record.tm_mon];
+    }
+}
+
+int
+days_last_year (void)
+/* How many days this last year have? */
+{
+    struct tm time_record;
+    time_t current_time;
+    time (&current_time);
+    localtime_r (&current_time, &time_record);
+
+    if (leap(time_record.tm_year - 1 + 1900)) {
+	return 366;
+    }
+
+    return 365;
+}
+
+int
+days_this_year (void)
+/* How many days does this year have */
+{
+     struct tm time_record;
+    time_t current_time;
+    time (&current_time);
+    localtime_r (&current_time, &time_record);
+
+    if (leap(time_record.tm_year + 1900)) {
+	return 366;
+    }
+
+    return 365;
 }

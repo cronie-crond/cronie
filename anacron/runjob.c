@@ -109,7 +109,6 @@ static void
 run_job(const job_rec *jr)
 /* This is called to start the job, after the fork */
 {
-    setup_env(jr);
     /* setup stdout and stderr */
     xclose(1);
     xclose(2);
@@ -153,6 +152,15 @@ static void
 launch_mailer(job_rec *jr)
 {
     pid_t pid;
+    struct stat buf;
+    int r;
+
+    /* Check that we have a way of sending mail. */
+    if(stat(SENDMAIL, &buf))
+    {
+	complain("Can't find sendmail at %s, not mailing output", SENDMAIL);
+	return;
+    }
 
     pid = xfork();
     if (pid == 0)
@@ -173,7 +181,7 @@ launch_mailer(job_rec *jr)
 	 * options, which don't seem to be appropriate here.
 	 * Hopefully, this will keep all the MTAs happy. */
 	execl(SENDMAIL, SENDMAIL, "-FAnacron", "-odi",
-	      username(), (char *)NULL);
+	      jr->mailto, (char *)NULL);
 	die_e("Can't exec " SENDMAIL);
     }
     /* parent */
@@ -207,19 +215,44 @@ launch_job(job_rec *jr)
 {
     pid_t pid;
     int fd;
+    char hostname[512];
+    char *mailto;
+
+    /* get hostname */
+    if (gethostname(hostname, 512)) {
+      strcpy (hostname,"unknown machine");
+    }
+
+    setup_env(jr);
+   
+    /* Get the destination email address if set, or current user otherwise */
+    mailto = getenv("MAILTO");
+
+    if (mailto)
+	    jr->mailto = mailto;
+    else
+	    jr->mailto = username ();
 
     /* create temporary file for stdout and stderr of the job */
     fd = jr->output_fd = temp_file();
     /* write mail header */
     xwrite(fd, "From: ");
+    xwrite(fd, "Anacron <");
     xwrite(fd, username());
-    xwrite(fd, " (Anacron)\n");
+    xwrite(fd, ">\n");
     xwrite(fd, "To: ");
-    xwrite(fd, username());
+    if (mailto) {
+       xwrite(fd, mailto);
+    } else {
+       xwrite(fd, username());
+    }
     xwrite(fd, "\n");
     xwrite(fd, "Subject: Anacron job '");
     xwrite(fd, jr->ident);
-    xwrite(fd, "'\n\n");
+    xwrite(fd, "' on ");
+    xwrite(fd, hostname);
+    xwrite(fd, "\n\n");
+
     jr->mail_header_size = file_size(fd);
 
     pid = xfork();

@@ -2,6 +2,7 @@
     Anacron - run commands periodically
     Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>
     Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>
+    Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>
  
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,8 +40,9 @@ int year, month, day_of_month;                 /* date anacron started */
 
 char *program_name;
 char *anacrontab;
+char *spooldir;
 int serialize, force, update_only, now,
-    no_daemon, quiet;                            /* command-line options */
+    no_daemon, quiet, testing_only;            /* command-line options */
 char **args;                       /* vector of "job" command-line arguments */
 int nargs;                                     /* number of these */
 char *defarg = "*";
@@ -61,17 +63,19 @@ print_version()
     printf("Anacron " RELEASE "\n"
 	   "Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>\n"
 	   "Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>\n"
+	   "Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>\n"
 	   "\n"
-	   "Mail comments, suggestions and bug reports to <shaleh@debian.org>."
+	   "Mail comments, suggestions and bug reports to <pasc@redellipse.net>."
 	   "\n\n");
 }
 
 static void
 print_usage()
 {
-    printf("Usage:  anacron [-s] [-f] [-n] [-d] [-q] [-t anacrontab] [job] ...\n"
-	   "        anacron -u [job] ...\n"
+    printf("Usage:  anacron [-s] [-f] [-n] [-d] [-q] [-t anacrontab] [-S spooldir] [job] ...\n"
+	   "        anacron [-S spooldir] -u [job] ...\n"
 	   "        anacron [-V|-h]\n"
+	   "        anacron -T [-t anacrontab]\n"
 	   "\n"
 	   " -s  Serialize execution of jobs\n"
 	   " -f  Force execution of jobs, even before their time\n"
@@ -82,6 +86,8 @@ print_usage()
 	   " -t  Use this anacrontab\n"
 	   " -V  Print version information\n"
 	   " -h  Print this message\n"
+	   " -T  Test an anacrontab\n"
+	   " -S  Select a different spool directory\n"
 	   "\n"
 	   "See the manpage for more details.\n"
 	   "\n");
@@ -95,7 +101,7 @@ parse_opts(int argc, char *argv[])
 
     quiet = no_daemon = serialize = force = update_only = now = 0;
     opterr = 0;
-    while ((opt = getopt(argc, argv, "sfundqt:Vh")) != EOF)
+    while ((opt = getopt(argc, argv, "sfundqt:TS:Vh")) != EOF)
     {
 	switch (opt)
 	{
@@ -119,6 +125,12 @@ parse_opts(int argc, char *argv[])
 	    break;
 	case 't':
 	    anacrontab = strdup(optarg);
+	    break;
+	case 'T':
+	    testing_only = 1;
+	    break;
+	case 'S':
+	    spooldir = strdup(optarg);
 	    break;
 	case 'V':
 	    print_version();
@@ -351,7 +363,7 @@ record_start_time()
     day_of_month = tm_now->tm_mday;
     day_now = day_num(year, month, day_of_month);
     if (day_now == -1) die("Invalid date (this is really embarrassing)");
-    if (!update_only)
+    if (!update_only && !testing_only)
 	explain("Anacron " RELEASE " started on %04d-%02d-%02d",
 		year, month, day_of_month);
 }
@@ -414,7 +426,10 @@ main(int argc, char *argv[])
 {
     int j;
 
+    int cwd;
+
     anacrontab = NULL;
+    spooldir = NULL;
 
     if((program_name = strrchr(argv[0], '/')) == NULL)
 	program_name = argv[0];
@@ -426,9 +441,16 @@ main(int argc, char *argv[])
     if (anacrontab == NULL)
 	anacrontab = strdup(ANACRONTAB);
 
+    if (spooldir == NULL)
+	spooldir = strdup(SPOOLDIR);
+
+    if ((cwd = open ("./", O_RDONLY)) == -1) {
+	die_e ("Can't save current directory");
+    }
+
     in_background = 0;
 
-    if (chdir(SPOOLDIR)) die_e("Can't chdir to " SPOOLDIR);
+    if (chdir(spooldir)) die_e("Can't chdir to %s", spooldir );
 
     old_umask = umask(0);
 
@@ -437,14 +459,21 @@ main(int argc, char *argv[])
     if (fclose(stdin)) die_e("Can't close stdin");
     xopen(0, "/dev/null", O_RDONLY);
 
-    if (!no_daemon)
+    if (!no_daemon && !testing_only)
 	go_background();
     else
 	primary_pid = getpid();
 
     record_start_time();
-    read_tab();
+    read_tab(cwd);
     arrange_jobs();
+
+    if (testing_only)
+    {
+	if (complaints) exit (1);
+	
+	exit (0);
+    }
 
     if (update_only)
     {
@@ -462,6 +491,6 @@ main(int argc, char *argv[])
 	launch_job(job_array[j]);
     }
     wait_children();
-    explain("Normal exit (%d jobs run)", njobs);
+    explain("Normal exit (%d job%s run)", njobs, (njobs == 1 ? "" : "s"));
     exit(0);
 }

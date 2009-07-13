@@ -40,7 +40,7 @@ scripts are scheduled to run on Sundays.  On machines that are turned
 off for the night or for the weekend, these scripts rarely get run.
 
    Anacron solves this problem.  These jobs can simply be scheduled as
-Anacron-jobs with periods of 1, 7 and 30 days.
+Anacron-jobs with periods of 1, 7 and a special target called @monthly.
 
 
      What Anacron is not ?
@@ -109,11 +109,11 @@ scripts, from cron-jobs, or explicitly.
 -----Cut
 # /etc/anacrontab example
 SHELL=/bin/sh
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
 # format: period delay job-identifier command
 1       5       cron.daily      run-parts /etc/cron.daily
 7       10      cron.weekly     run-parts /etc/cron.weekly
-30      15      cron.monthly    run-parts /etc/cron.monthly
+@monthly      15      cron.monthly    run-parts /etc/cron.monthly
 -----Cut
 
 5. Put the command "anacron -s" somewhere in your boot-scripts.

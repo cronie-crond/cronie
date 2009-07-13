@@ -2,6 +2,7 @@
     Anacron - run commands periodically
     Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>
     Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>
+    Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,9 +54,11 @@ typedef struct env_rec1 env_rec;
 
 struct job_rec1 {
    int period;
+   int named_period;
    int delay;
    char *ident;
    char *command;
+   char *mailto;
 
    int tab_line;
    int arg_num;
@@ -75,9 +78,10 @@ typedef struct job_rec1 job_rec;
 extern pid_t primary_pid;
 extern char *program_name;
 extern char *anacrontab;
+extern char *spooldir;
 extern int old_umask;
 extern sigset_t old_sigmask;
-extern int serialize,force,update_only,now,no_daemon,quiet;
+extern int serialize,force,update_only,now,no_daemon,quiet,testing_only;
 extern int day_now;
 extern int year,month,day_of_month;
 extern int in_background;
@@ -93,6 +97,7 @@ extern job_rec **job_array;
 
 extern int running_jobs,running_mailers;
 
+extern int complaints;
 
 /* Function prototypes */
 
@@ -121,7 +126,7 @@ void xcloselog();
 #endif /* not DEBUG */
 
 /* readtab.c */
-void read_tab();
+void read_tab(int cwd);
 void arrange_jobs();
 
 /* lock.c */

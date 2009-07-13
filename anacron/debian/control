@@ -1,0 +1,27 @@
+Source: anacron
+Section: admin
+Priority: optional
+Build-Depends: debhelper (>= 4.0)
+Maintainer: Pascal Hakim <pasc@debian.org>
+Standards-Version: 3.7.2
+
+Package: anacron
+Architecture: any
+Depends: ${shlibs:Depends}, debianutils (>= 1.7), ${misc:Depends}, lsb-base (>= 3.0-10)
+Replaces: pe
+Recommends: cron (>= 3.0pl1-43), exim4 | mail-transport-agent, sysklogd | system-log-daemon
+Suggests: powermgmt-base
+Description: cron-like program that doesn't go by time
+ Anacron (like `anac(h)ronistic') is a periodic command scheduler.  It
+ executes commands at intervals specified in days.  Unlike cron, it
+ does not assume that the system is running continuously.  It can
+ therefore be used to control the execution of daily, weekly and
+ monthly jobs (or anything with a period of n days), on systems that
+ don't run 24 hours a day.  When installed and configured properly,
+ Anacron will make sure that the commands are run at the specified
+ intervals as closely as machine-uptime permits.
+ .
+ This package is pre-configured to execute the daily jobs of the Debian 
+ system. You should install this program if your system isn't powered on
+ 24 hours a day to make sure the maintenance jobs of other Debian packages
+ are executed each day.

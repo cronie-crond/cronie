@@ -2,6 +2,7 @@
     Anacron - run commands periodically
     Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>
     Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>
+    Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>
  
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,6 +48,9 @@
 static char truncated[] = " (truncated)";
 static char msg[MAX_MSG + 1];
 static int log_open = 0;
+
+/* Number of complaints that we've seen */
+int complaints = 0;
 
 static void
 xopenlog()
@@ -147,6 +151,8 @@ complain(const char *fmt, ...)
     va_start(args, fmt);
     log(COMPLAIN_LEVEL, fmt, args);
     va_end(args);
+
+    complaints += 1;
 }
 
 void
@@ -158,6 +164,8 @@ complain_e(const char *fmt, ...)
     va_start(args, fmt);
     log_e(COMPLAIN_LEVEL, fmt, args);
     va_end(args);
+
+    complaints += 1;
 }
 
 void

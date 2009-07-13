@@ -1,4 +1,4 @@
-.TH ANACRONTAB 5 1998-02-02 "Itai Tzur" "Anacron Users' Manual"
+.TH ANACRONTAB 5 2004-07-11 "Pascal Hakim" "Anacron Users' Manual"
 .SH NAME
 /etc/anacrontab \- configuration file for anacron
 .SH DESCRIPTION
@@ -8,9 +8,12 @@ describes the jobs controlled by \fBanacron(8)\fR.  Its lines can be of
 three kinds:  job-description lines, environment
 assignments, or empty lines.
 .PP
-Job-description lines are of the form:
+Job-description lines are of one of these two forms:
 .PP
    period  delay  job-identifier  command
+.PP
+.PP
+   @period_name delay job-identify command
 .PP
 The
 .I period
@@ -22,7 +25,12 @@ can contain any non-blank character, except slashes.  It is used to identify
 the job in Anacron messages,
 and as the name for the job's timestamp file.  The
 .I command
-can be any shell command.
+can be any shell command. The fields can be seperated by blank spaces or tabs.
+The
+.I period_name
+can only be set to monthly at the present time. This will ensure jobs
+are only run once a month, no matter the number of days in this month,
+or the previous month.
 .PP
 Environment assignment lines are of the form:
 .PP
@@ -38,6 +46,8 @@ assignment of the same variable.
 .PP
 Empty lines are either blank lines, line containing white-space only, or
 lines with white-space followed by a '#' followed by an arbitrary comment.
+.PP
+You can continue a line onto the next line by ending it with a '\'.
 .SH "SEE ALSO"
 .B anacron(8)
 .PP
@@ -46,3 +56,5 @@ The Anacron
 file.
 .SH AUTHOR
 Itai Tzur <itzur@actcom.co.il>
+.PP
+Currently maintained by Pascal Hakim <pasc@(debian.org|redellipse.net)>.

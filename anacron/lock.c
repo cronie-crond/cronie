@@ -2,6 +2,7 @@
     Anacron - run commands periodically
     Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>
     Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>
+    Copyirght (C) 2004  Pascal Hakim <pasc@redellipse.net>
  
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -110,6 +111,35 @@ consider_job(job_rec *jr)
             /* yes, skip job */
 	    xclose(jr->timestamp_fd);
 	    return 0;
+	}
+
+	/*
+	 * Check to see if it's a named period, in which case we need 
+	 * to figure it out.
+	 */
+	if (jr->named_period)
+	{
+	    int period = 0, bypass = 0;
+	    switch (jr->named_period)
+	    {
+		case 1:
+		    period = days_last_month ();
+		    bypass = days_this_month ();
+		    break;
+		case 2:
+		    period = days_last_year ();
+		    bypass = days_this_year ();
+		    break;
+		default:
+		    die ("Unknown named period for %s (%d)", jr->ident, jr->named_period);
+	    }
+	    printf ("Checking against %d with %d\n", day_delta, period);
+	    if (day_delta < period && day_delta != bypass)
+	    {
+		/* Job is still too young */
+		xclose (jr->timestamp_fd);
+		return 0;
+	    }
 	}
     }
 

@@ -1,0 +1,13 @@
+anacron for DEBIAN
+----------------------
+
+Anacron runs transparently to the system.  In other words, you should never be
+aware that anacron and not cron is actually running cron.{daily,weekly,monthly}.
+
+Anacron itself however is not a daemon, so it will either be called at startup,
+on APM power status change, or by cron. Disabling those will result in some
+jobs not being executed on time.
+
+Anacron leaves messages in /var/log/syslog and /var/log/messages by default.
+
+-- Pascal hakim <pasc@debian.org>, Tue, 02 Aug 2005 20:27:00 +1100

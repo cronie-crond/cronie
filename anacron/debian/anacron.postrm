@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "purge" ]; then
+# here for historical reasons
+	rm -f /var/log/anacron /var/log/anacron.[0-9]*
+	rm -rf /var/spool/anacron
+fi
+
+#DEBHELPER#
