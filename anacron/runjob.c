@@ -35,6 +35,8 @@
 #include <string.h>
 #include "global.h"
 
+#include <langinfo.h>
+
 static int
 temp_file()
 /* Open a temporary file and return its file descriptor */
@@ -247,6 +249,9 @@ launch_job(job_rec *jr)
        xwrite(fd, username());
     }
     xwrite(fd, "\n");
+    xwrite(fd, "Content-Type: text/plain; charset=\"");
+    xwrite(fd, nl_langinfo(CODESET));
+    xwrite(fd, "\"\n");
     xwrite(fd, "Subject: Anacron job '");
     xwrite(fd, jr->ident);
     xwrite(fd, "' on ");
