@@ -68,6 +68,7 @@ struct job_rec1 {
    int mail_header_size;
    pid_t job_pid;
    pid_t mailer_pid;
+   int drop_job;
 
    struct job_rec1 *next;
    env_rec *prev_env_rec;
@@ -99,6 +100,10 @@ extern job_rec **job_array;
 extern int running_jobs,running_mailers;
 
 extern int complaints;
+
+/* time ranges for START_HOURS_RANGE */
+extern int range_start;
+extern int range_stop;
 
 /* Function prototypes */
 

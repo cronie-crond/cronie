@@ -48,6 +48,8 @@ static int line_num;             /* current line in anacrontab */
 static job_rec *last_job_rec;    /* last job stored in memory, at the moment */
 static env_rec *last_env_rec;    /* last environment assignment stored */
 
+static int random_number = 0;
+
 /* some definitions for the obstack macros */
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
@@ -167,6 +169,7 @@ register_job(const char *periods, const char *delays,
     jr = obstack_alloc(&tab_o, sizeof(job_rec));
     jr->period = period;
     jr->named_period = 0;
+    delay += random_number;
     jr->delay = delay;
     jr->tab_line = line_num;
     jr->ident = obstack_alloc(&tab_o, ident_len + 1);
@@ -215,6 +218,7 @@ register_period_job(const char *periods, const char *delays,
 		 anacrontab, line_num);
     }
     jr->period = 0;
+    delay += random_number;
     jr->delay = delay;
     jr->tab_line = line_num;
     jr->ident = obstack_alloc(&tab_o, ident_len + 1);
@@ -242,6 +246,8 @@ parse_tab_line(char *line)
     char *delays;
     char *ident;
     char *command;
+    char *from;
+    char *to;
 
     /* an empty line? */
     r = match_rx("^[ \t]*($|#)", line, 0);
@@ -258,6 +264,25 @@ parse_tab_line(char *line)
     if (r == -1) goto reg_err;
     if (r)
     {
+        if (strncmp(env_var, "START_HOURS_RANGE", 17) == 0)
+        {
+            r = match_rx("^([[:digit:]]+)-([[:digit:]]+)$", value, 2, &from, &to);
+            if ((r == -1) || (from == NULL) || (to == NULL)) goto reg_invalid;
+            range_start = atoi(from);
+            range_stop = atoi(to);
+            Debug(("Jobs will start in the %02d:00-%02d:00 range.", range_start, range_stop));
+        }
+        if (strncmp(env_var, "RANDOM_DELAY", 12) == 0) {
+            r = match_rx("^([[:digit:]]+)$", value, 1);
+            if (r != -1) {
+                int i = random();
+                double x = 0;
+                x = (double) i / (double) RAND_MAX * (double) (atoi(value));
+                random_number = (int)x;
+                Debug(("Randomized delay set: %d", random_number));
+            }
+        else goto reg_invalid;
+        }
 	register_env(env_var, value);
 	return;
     }
@@ -284,6 +309,7 @@ parse_tab_line(char *line)
 	return;
     }
 
+ reg_invalid:
     complain("Invalid syntax in %s on line %d - skipping this line",
 	     anacrontab, line_num);
     return;

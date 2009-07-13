@@ -43,6 +43,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <string.h>
+#include <stdlib.h>
 #include "global.h"
 
 static char truncated[] = " (truncated)";
