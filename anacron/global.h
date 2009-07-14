@@ -42,6 +42,7 @@
 #define MAX_MSG 150
 
 #include <signal.h>
+#include "anacron-paths.h"
 
 /* Some declarations */
 

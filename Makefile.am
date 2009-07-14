@@ -1,4 +1,4 @@
-SUBDIRS = src man
+SUBDIRS = src man anacron
 
 if PAM
 pamdir = $(sysconfdir)/pam.d
@@ -9,5 +9,5 @@ endif
 
 #init_SCRIPTS = cronie.init
 
-EXTRA_DIST = cronie.init crond.sysconfig
+EXTRA_DIST = cronie.init crond.sysconfig regularly-jobs
 

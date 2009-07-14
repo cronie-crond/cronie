@@ -64,7 +64,7 @@ int range_stop = -1;
 static void
 print_version()
 {
-    printf("Anacron " RELEASE "\n"
+    printf("Anacron \n"
 	   "Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>\n"
 	   "Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>\n"
 	   "Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>\n"
@@ -368,7 +368,7 @@ record_start_time()
     day_now = day_num(year, month, day_of_month);
     if (day_now == -1) die("Invalid date (this is really embarrassing)");
     if (!update_only && !testing_only)
-	explain("Anacron " RELEASE " started on %04d-%02d-%02d",
+	explain("Anacron started on %04d-%02d-%02d",
 		year, month, day_of_month);
 }
 
@@ -469,7 +469,7 @@ main(int argc, char *argv[])
 	anacrontab = strdup(ANACRONTAB);
 
     if (spooldir == NULL)
-	spooldir = strdup(SPOOLDIR);
+	spooldir = strdup(ANACRON_SPOOL_DIR);
 
     if ((cwd = open ("./", O_RDONLY)) == -1) {
 	die_e ("Can't save current directory");

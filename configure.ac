@@ -224,6 +224,10 @@ CRONIE_CONF_VAR([SYSCRONTAB], [the current working directory of the running daem
 CRONIE_CONF_VAR([SYS_CROND_DIR], [the current working directory of the running daemon], [${sysconfdir}/cron.d])
 CRONIE_CONF_VAR([SPOOL_DIR], [the directory where all the user cron tabs reside], [${localstatedir}/spool/cron])
 
-AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
+CRONIE_CONF_VAR([ANACRON_SPOOL_DIR],[The path for anacron locks.],[${localstatedir}/spool/anacron])
+CRONIE_CONF_VAR([ANACRONTAB],[The anacron table for regular jobs.],[${sysconfdir}/regularly-jobs])
+
+
+AC_CONFIG_FILES([Makefile src/Makefile man/Makefile anacron/Makefile])
 AC_OUTPUT
 
