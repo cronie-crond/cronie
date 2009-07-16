@@ -1,6 +1,6 @@
 # Makefile.am - two binaries crond and crontab
 
-bin_PROGRAMS = anacron
+sbin_PROGRAMS = anacron
 
 anacron_SOURCES = \
 	gregor.c lock.c log.c main.c matchrx.c readtab.c runjob.c \
