@@ -1,5 +1,7 @@
 Makefile.in
 Makefile
+anacron/Makefile
+anacron/Makefile.in
 aclocal.m4
 autom4te.cache
 config.guess
@@ -11,6 +13,8 @@ config.sub
 configure
 depcomp
 install-sh
+man/Makefile
+man/Makefile.in
 missing
 stamp-h1
 .deps

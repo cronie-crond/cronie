@@ -9,5 +9,6 @@ endif
 
 #init_SCRIPTS = cronie.init
 
-EXTRA_DIST = cronie.init crond.sysconfig regularly-jobs
+EXTRA_DIST = cronie.init crond.sysconfig contrib/regularly-jobs \
+                contrib/0anacron contrib/0hourly
 

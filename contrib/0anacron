@@ -1,0 +1,18 @@
+#!/bin/bash
+#in case file doesn't exist 
+if test -x /var/spool/anacron/cron.daily; then
+    day=`cat /var/spool/anacron/cron.daily`
+fi
+if [ `date +%Y%m%d` = "$day" ]; then
+    exit 0;
+fi
+
+# in case anacron is already running,
+# there will be log (daemon won't be running twice).
+if test -x /usr/bin/on_ac_power; then
+    /usr/bin/on_ac_power &> /dev/null
+    if test $? -eq 1; then
+    exit 0
+    fi
+fi
+/usr/sbin/anacron -s
