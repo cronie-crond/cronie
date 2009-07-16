@@ -5,10 +5,9 @@ pamdir = $(sysconfdir)/pam.d
 dist_pam_DATA = pam/crond
 endif
 
-#config_DATA = crond.sysconfig
+EXTRA_DIST = cronie.init crond.sysconfig contrib/regularly-jobs
 
-#init_SCRIPTS = cronie.init
-
-EXTRA_DIST = cronie.init crond.sysconfig contrib/regularly-jobs \
-                contrib/0anacron contrib/0hourly
-
+if ANACRON
+	SUBDIRS += anacron
+	EXTRA_DIST += contrib/0anacron contrib/0hourly
+endif

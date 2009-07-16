@@ -1,5 +1,5 @@
 # Makefile.am - two binaries crond and crontab
-
+if ANACRON
 sbin_PROGRAMS = anacron
 
 anacron_SOURCES = \
@@ -27,3 +27,4 @@ anacron-paths.h: Makefile
 	#define ANACRONTAB "$(ANACRONTAB)" \
 	#endif /* _ANACRON_PATHS_H_ */ \
 	END
+endif

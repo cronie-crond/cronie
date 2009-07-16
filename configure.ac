@@ -220,13 +220,24 @@ if test "$$1" = ""; then
 	$1='$3'
 fi
 ])
+
+AC_DEFUN([ANACRON_CONF_VAR],
+[AC_ARG_VAR([$1], [$2 @<:@$3@:>@])
+if test "$$1" = ""; then
+	    $1='$3'
+		fi
+])
+
 CRONIE_CONF_VAR([SYSCRONTAB], [the current working directory of the running daemon], [${sysconfdir}/crontab])
 CRONIE_CONF_VAR([SYS_CROND_DIR], [the current working directory of the running daemon], [${sysconfdir}/cron.d])
 CRONIE_CONF_VAR([SPOOL_DIR], [the directory where all the user cron tabs reside], [${localstatedir}/spool/cron])
 
-CRONIE_CONF_VAR([ANACRON_SPOOL_DIR],[The path for anacron locks.],[${localstatedir}/spool/anacron])
-CRONIE_CONF_VAR([ANACRONTAB],[The anacron table for regular jobs.],[${sysconfdir}/regularly-jobs])
-
+AC_ARG_ENABLE([anacron], [AS_HELP_STRING([--enable-anacron], [Build also anacron.])])
+AM_CONDITIONAL([ANACRON], [test "$enable_anacron" = yes])
+if test "$enable_anacron" != no; then
+	ANACRON_CONF_VAR([ANACRON_SPOOL_DIR],[The path for anacron locks.],[${localstatedir}/spool/anacron])
+	ANACRON_CONF_VAR([ANACRONTAB],[The anacron table for regular jobs.],[${sysconfdir}/regularly-jobs])
+fi
 
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile anacron/Makefile])
 AC_OUTPUT
