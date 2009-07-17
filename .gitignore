@@ -1,5 +1,7 @@
 Makefile.in
 Makefile
+anacron/anacron
+anacron/anacron-paths.h
 anacron/Makefile
 anacron/Makefile.in
 aclocal.m4

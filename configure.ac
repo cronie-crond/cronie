@@ -212,7 +212,7 @@ AC_ARG_WITH(audit,
         fi ]
 )
 
-dnl CRON_VAR_DEFAULT (VAR, DESCRIPTION, DEFAULT)
+dnl CRONIE_VAR_DEFAULT (VAR, DESCRIPTION, DEFAULT)
 dnl --------------------------------------------
 AC_DEFUN([CRONIE_CONF_VAR],
 [AC_ARG_VAR([$1], [$2 @<:@$3@:>@])
