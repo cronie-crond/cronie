@@ -1,3 +1,200 @@
+2009-07-17  Štěpán Kasal <kasal AT redhat DOT com>
+
+	* .gitignore, Makefile.am, anacron/Makefile.am, configure.ac: Fix of
+	autotools stuff for anacron.  Signed-off-by: Marcela Mašláňová
+	<mmaslano@redhat.com>
+
+2009-07-16  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* Makefile.am, anacron/Makefile.am, configure.ac, man/Makefile.am: 
+	Make anacron configurable. The option --enable-anacron in configure
+	can switch on/off compilation of this part of the package.
+
+2009-07-16  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/Makefile.am: Put anacron binary into proper location.
+
+2009-07-16  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* .gitignore, Makefile.am, anacron/anacron.8, anacron/anacrontab.5,
+	contrib/0anacron, contrib/0hourly, contrib/regularly-jobs,
+	man/Makefile.am, man/anacron.8, man/anacrontab.5, regularly-jobs: 
+	Add configuration scripts into contrib. Cleaning/adding man pages
+	into Makefile/directories.
+
+2009-07-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* COPYING.anacron, ChangeLog.anacron, README.anacron,
+	anacron/COPYING, anacron/ChangeLog, anacron/README, anacron/TODO,
+	anacron/anacron.apm, anacron/debian/0anacron.daily,
+	anacron/debian/0anacron.monthly, anacron/debian/0anacron.weekly,
+	anacron/debian/README.debian, anacron/debian/anacron.postinst,
+	anacron/debian/anacron.postrm, anacron/debian/anacrontab,
+	anacron/debian/apm.d, anacron/debian/changelog,
+	anacron/debian/compat, anacron/debian/control,
+	anacron/debian/copyright, anacron/debian/cron.d,
+	anacron/debian/dirs, anacron/debian/docs, anacron/debian/init.d,
+	anacron/debian/rules: Cleaning useless files.
+
+2009-07-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* Makefile.am, anacron/Makefile, anacron/Makefile.am,
+	anacron/global.h, anacron/main.c, configure.ac, regularly-jobs: 
+	Anacron makefile was rewritten according to the rest of autotools
+	makefiles in this project.
+
+2009-07-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/global.h, anacron/log.c, anacron/main.c,
+	anacron/readtab.c: New options: random delay could be set from
+	anacrontab instead of sysconfig file, range of hours when should be
+	jobs started.
+
+2009-07-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/anacron.8, anacron/anacrontab.5: Update manual pages.
+
+2009-07-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/readtab.c: Fix error message for wrong spooldir.
+
+2009-07-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/global.h, anacron/gregor.c, anacron/log.c,
+	anacron/matchrx.c, anacron/runjob.c: Memory leaks should be fixed.
+	Instead of log is used slog function.
+
+2009-07-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/global.h, anacron/runjob.c: The temporary file has file
+	descriptors for input and output instead of one descriptor.
+
+2009-07-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/runjob.c: Mail langinfo was fixed.
+
+2009-07-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/ChangeLog, anacron/README, anacron/TODO,
+	anacron/anacron.8, anacron/anacron.apm, anacron/anacrontab.5,
+	anacron/debian/0anacron.daily, anacron/debian/0anacron.monthly,
+	anacron/debian/0anacron.weekly, anacron/debian/README.debian,
+	anacron/debian/anacron.postinst, anacron/debian/anacron.postrm,
+	anacron/debian/anacrontab, anacron/debian/apm.d,
+	anacron/debian/changelog, anacron/debian/compat,
+	anacron/debian/control, anacron/debian/copyright,
+	anacron/debian/cron.d, anacron/debian/dirs, anacron/debian/docs,
+	anacron/debian/init.d, anacron/debian/rules, anacron/global.h,
+	anacron/gregor.c, anacron/gregor.h, anacron/lock.c, anacron/log.c,
+	anacron/main.c, anacron/readtab.c, anacron/runjob.c: Minor debian
+	release anacron-2.3.1 which adds this features: -anacron runs jobs
+	twice in a 31 day month -add hostname to emails sent to admin -allow
+	user anacrontabs and some debian scripts for apm support.
+
+2009-07-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/COPYING, anacron/ChangeLog, anacron/Makefile,
+	anacron/README, anacron/TODO, anacron/anacron.8,
+	anacron/anacrontab.5, anacron/global.h, anacron/gregor.c,
+	anacron/gregor.h, anacron/lock.c, anacron/log.c, anacron/main.c,
+	anacron/matchrx.c, anacron/matchrx.h, anacron/readtab.c,
+	anacron/runjob.c: Initial upload of anacron-2.3 which should be
+	optimized for better cooperation with cronie. However, cronie should
+	be working with or without anacron, which should be configurable.
+
+2009-06-19  Tomas Mraz <t8m@centrum.cz>
+
+	* src/cron.c: Fix the disable inotify functionality.
+
+2009-06-19  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c: Option -i for disabling inotify support. This option
+	was based on email by user who can't set up daemon when they have
+	mounted from NFS /var/spool/cron for a number of identical machines.
+	Inotify pass the test because it find the directory, but didn't
+	notice changes.
+	http://linux-nfs.org/pipermail/nfsv4/2007-November/007127.html
+	Thanks to: Alex Bame
+
+2009-06-05  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c, src/do_command.c, src/globals.h: ValidateMailRcpts
+	removed for problems when could be enviromental settings exported
+	under wrong user.
+
+2009-05-29  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/.indent.pro, src/cron.c, src/crontab.c, src/database.c,
+	src/do_command.c, src/entry.c, src/env.c, src/job.c, src/misc.c,
+	src/popen.c, src/security.c, src/user.c: Beautify the code with
+	indent. Thanks for .indent.pro to Martin Klozik.
+
+2009-05-29  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac, src/Makefile.am, src/misc.c: CRON_DIR became
+	obsolete. SPOOL_DIR is enough for work with user crontables.
+
+2009-05-22  Marcela Mašláňová <mmaslano@redhat.com>
+
+	Merge branch 'master' of
+	ssh://mmaslano@git.fedorahosted.org/git/cronie
+
+2009-05-22  Štěpán Kasal <kasal AT redhat DOT com>
+
+	* .gitignore, configure.ac, src/Makefile.am, src/pathnames.h: Make
+	the paths more configurable.
+
+2009-05-22  Štěpán Kasal <kasal AT redhat DOT com>
+
+	* src/cron.c, src/database.c, src/pathnames.h: Rename RH_CRON_DIR to
+	SYS_CRON_DIR.
+
+2009-05-22  Štěpán Kasal <kasal AT redhat DOT com>
+
+	* configure.ac: Drop uselles part of configure.
+
+2009-05-22  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8, src/funcs.h, src/security.c: Remove unused function
+	cron_get_job_context.
+
+2009-05-20  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/do_command.c, src/funcs.h, src/security.c: PAM logging was
+	incorrect bz#249870. The jobs is setuid to user before exec. Mail
+	runs under root permissions.
+
+2009-05-14  Vlad Glagolev <stealth at sourcemage.org>
+
+	* src/cron.c: @reboot alias check the return value.  Signed-off-by:
+	Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-05-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/do_command.c: Save delimiters need more characters f.e. '_'.
+	Fix based on: http://bugs.gentoo.org/show_bug.cgi?id=197625
+
+2009-05-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac, man/crontab.5, src/do_command.c: MAILFROM, if set,
+	will be used as the envelope sender address when cron mails the
+	output of commands in that crontab. The initial patch was written
+	by: Heath Caldwell
+
+2009-04-28  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/globals.h: No need to initialize globals, which are set by
+	default to zero.
+
+2009-04-28  Stěpán Kasal <kasal AT redhat DOT com>
+
+	* configure.ac: Fix with(out)-pam in configure.  Signed-off-by:
+	Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-04-27  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: Update ChangeLog for new release.
+
 2009-04-23  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* src/cron.c: Inotify initialization left open file descriptors

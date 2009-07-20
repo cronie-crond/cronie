@@ -1,6 +1,6 @@
 SUBDIRS = src man
 if ANACRON
-	SUBDIRS += anacron
+SUBDIRS += anacron
 endif
 
 if PAM

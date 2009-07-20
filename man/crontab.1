@@ -19,10 +19,9 @@
 .\"
 .\" $Id: crontab.1,v 1.7 2004/01/23 19:03:32 vixie Exp $
 .\"
-.TH CRONTAB 1 "27 July 2007"
-.UC 4
+.TH CRONTAB 1 "20 July 2009" "Marcela Mašláňová" "Cronie Users' Manual"
 .SH NAME
-crontab \- maintain crontab files for individual users (ISC Cron V4.1)
+crontab \- maintain crontab files for individual users
 .SH SYNOPSIS
 .B crontab
 .RB [ -u
@@ -38,7 +37,7 @@ crontab \- maintain crontab files for individual users (ISC Cron V4.1)
 is the program used to install, deinstall or list the tables
 used to drive the
 .BR cron (8)
-daemon in ISC Cron.  Each user can have their own crontab, and though these are files in 
+daemon.  Each user can have their own crontab, and though these are files in 
 .I /var/spool/
 , they are not intended to be edited directly. For SELinux in mls mode can be even 
 more crontabs - for each range. For more see

@@ -2,8 +2,8 @@
 sbin_PROGRAMS = anacron
 
 anacron_SOURCES = \
-	gregor.c lock.c log.c main.c matchrx.c readtab.c runjob.c \
-	$(common_src)
+  gregor.c lock.c log.c main.c matchrx.c readtab.c runjob.c \
+  $(common_src)
 common_src = global.h gregor.h matchrx.h
 common_nodist = anacron-paths.h
 nodist_anacron_SOURCES = $(common_nodist)

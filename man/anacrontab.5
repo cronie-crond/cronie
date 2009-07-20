@@ -1,9 +1,9 @@
-.TH ANACRONTAB 5 2009-03-24 "Marcela Mašláňová" "Anacron Users' Manual"
+.TH ANACRONTAB 5 2009-07-17 "Marcela Mašláňová" "Anacron Users' Manual"
 .SH NAME
-/etc/anacrontab \- configuration file for anacron
+/etc/regularly-jobs \- configuration file for anacron
 .SH DESCRIPTION
 The file
-.I /etc/anacrontab
+.I /etc/regularly-jobs
 describes the jobs controlled by \fBanacron(8)\fR.  Its lines can be of
 three kinds:  job-description lines, environment
 assignments, or empty lines.
@@ -58,23 +58,37 @@ sets the time frame, when the job could started.
 Empty lines are either blank lines, line containing white-space only, or
 lines with white-space followed by a '#' followed by an arbitrary comment.
 .PP
-You can continue a line onto the next line by ending it with a '\'.
+You can continue a line onto the next line by ending it with a '\\'.
+.PP
+In case there is need for having anacron off, then it can be done by
+adding cron job
+.I 0anacron
+into 
+.I /etc/cron.hourly/jobs.deny
 .SH EXAMPLE
+This example shows how to set up the behaviour similar to previous setting in 
+.I /etc/crontab
+which will start all regular jobs
+.I only
+between 6:00 and 8:00. There is added RANDOM_DELAY which will be maximally
+30 minutes. Jobs will be running in queue. After one finish, then next will start.
+
 .nf
 # environment variables
 SHELL=/bin/sh
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
-RANDOM_DELAY=60
+RANDOM_DELAY=30
 # Anacron jobs will start between 6 and 8 o'clock.
 START_HOURS_RANGE=6-8
 # delay will be 5 minutes + RANDOM_DELAY for cron.daily
-1		5	cron.daily		nice run-parts /etc/cron.daily
-7		8	cron.weekly		nice run-parts /etc/cron.weekly
-@monthly	35	cron.monthly		nice run-parts /etc/cron.monthly
+1		0	cron.daily		nice run-parts /etc/cron.daily
+7		0	cron.weekly		nice run-parts /etc/cron.weekly
+@monthly	0	cron.monthly		nice run-parts /etc/cron.monthly
 .fi
 .SH "SEE ALSO"
-.B anacron(8)
+.IR anacron(8),
+.IR crontabs(4)
 .PP
 The Anacron
 .I README

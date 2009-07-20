@@ -1,4 +1,4 @@
-.TH ANACRON 8 2009-03-24 "Marcela Mašláňová" "Anacron Users' Manual"
+.TH ANACRON 8 2009-07-17 "Marcela Mašláňová" "Anacron Users' Manual"
 .SH NAME
 anacron \- runs commands periodically
 .SH SYNOPSIS
@@ -12,15 +12,14 @@ anacron \- runs commands periodically
 .B anacron -T [\fB-t anacrontab\fR]
 .SH DESCRIPTION
 Anacron
-can be used to execute commands periodically, with a
+is used to execute commands periodically, with a
 frequency specified in days.  Unlike \fBcron(8)\fR,
 it does not assume that the machine is running continuously.  Hence,
 it can be used on machines that aren't running 24 hours a day,
-to control daily, weekly, and monthly jobs that are
-usually controlled by \fBcron\fR.
+to control regular jobs as daily, weekly, and monthly jobs.
 .PP
-When executed, Anacron reads a list of jobs from a configuration file, normally
-.I /etc/anacrontab
+Anacron reads a list of jobs from a configuration file, 
+.I /etc/regularly-jobs
 (see \fBanacrontab(5)\fR).  This file
 contains the list of jobs that Anacron controls.  Each
 job entry specifies a period in days, 
@@ -89,7 +88,7 @@ previous one finished.
 .TP
 .B -n
 Run jobs now.  Ignore the delay specifications in the
-.I /etc/anacrontab
+.I /etc/regularly-jobs
 file.  This options implies \fB-s\fR.
 .TP
 .B -d
@@ -100,7 +99,7 @@ is mailed as usual.
 .B -q
 Suppress messages to standard error.  Only applicable with \fB-d\fR.
 .TP
-.B -t anacrontab
+.B -t some_anacrontab
 Use specified anacrontab, rather than the default
 .TP
 .B -T
@@ -133,7 +132,7 @@ for more information.
 Timestamp files are created in the spool directory for each job in anacrontab. These are never removed automatically by anacron, and should be removed by hand if a job is no longer being scheduled.
 .SH FILES
 .TP
-.I /etc/anacrontab
+.I /etc/regularly-jobs
 Contains specifications of jobs.  See \fBanacrontab(5)\fR for a complete
 description.
 .TP

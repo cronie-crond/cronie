@@ -19,10 +19,9 @@
 .\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
 .\" 
-.TH CRON "8" "20 May 2009" "Linux Programmer's Manual"
-.UC 4
+.TH CRON "8" "July 2009" "Marcela Mašláňová" "Cronie Users' Manual"
 .SH NAME
-cron \- daemon to execute scheduled commands (cronie V1.2)
+cron \- daemon to execute scheduled commands
 .SH SYNOPSIS
 .B cron
 .RB [ -n " | " -p " | " -m \fP\fI<mail command>\fP\fB ]
@@ -43,19 +42,19 @@ or
 searches 
 .I /var/spool/cron 
 for crontab files which are named after accounts in
-.I/etc/passwd; 
-crontabs found are loaded into memory.
+.I /etc/passwd;
+The founded crontabs are loaded into memory.
 .I Cron
 also searches for 
-.I /etc/crontab 
+.I /etc/regularly-jobs 
 and the files in the 
-.I/etc/cron.d 
+.I /etc/cron.d 
 directory, which are in a different format (see
 .BR crontab (5)
 ).
 .I Cron
-then wakes up every minute, examining all stored crontabs, checking each
-command to see if it should be run in the current minute.  When executing
+examines all stored crontabs, checking each command to see if it should be
+run in the current minute. When executing 
 commands, any output is mailed to the owner of the crontab (or to the user
 named in the MAILTO environment variable in the crontab, if such exists).
 .PP
@@ -71,11 +70,11 @@ In other case
 .I cron
 checks each minute to see if its crontables modtime have changes and reload
 those which have changes. There is no need to restart cron after some of the
-crontable is modified. This option is used also when inotify couldn't be initialized.
+crontable is modified. The modtime option is used also when inotify couldn't be initialized.
 .PP
 .I Cron
 is checking those files or directories:
-.IR /etc/crontab
+.IR /etc/regularly-jobs
 system crontab is usually for running daily, weekly, monthly jobs.
 .BR
 .IR /etc/cron.d/
@@ -113,17 +112,17 @@ On Red Hat systems, crond now supports access control with PAM - see
 A PAM configuration file for crond is installed in /etc/pam.d/crond.
 crond loads the PAM environment from the pam_env module, but these
 can be overriden by settings in the appropriate crontab file.
-.SH "OPTIONS"                                                                                                                 
-.TP                                                                                                                           
-.B "\-m"                                                                                                                      
-This option allows you to specify a shell command string to use for sending cron mail                                         
-output instead of                                                                                                             
-.BR sendmail (8).                                                                                                             
-This command must accept a fully formatted mail message (with headers) on stdin and send it                                   
+.SH "OPTIONS"
+.TP
+.B "\-m"
+This option allows you to specify a shell command string to use for sending cron mail
+output instead of
+.BR sendmail (8).
+This command must accept a fully formatted mail message (with headers) on stdin and send it
 as a mail message to the recipients specified in the mail headers.
-.TP                                                                                                                           
-.B "\-n"                                                                                                                      
-This option changes default behavior causing it to run crond in the foreground.  This can be                                  
+.TP
+.B "\-n"
+This option changes default behavior causing it to run crond in the foreground.  This can be
 useful when starting it out of init.
 .TP
 .B "\-p"
@@ -142,7 +141,7 @@ The
 files have to be regular files or symlinks to regular files, they must not be executable
 or writable by anyone else than the owner.
 This requirement can be overridden by using the \fB-p\fP option on the crond command line.
-If inotify support is in use changes in the symlinked crontabs are not automatically
+If inotify support is in use, changes in the symlinked crontabs are not automatically
 noticed by the cron daemon. The cron daemon must receive a SIGHUP to reload the crontabs.
 This is a limitation of inotify API.
 
@@ -153,4 +152,5 @@ This is a limitation of inotify API.
 .IR pam (8)
 .SH AUTHOR
 .nf
+Paul Vixie <vixie@isc.org>
 Marcela Mašláňová <mmaslano@redhat.com>

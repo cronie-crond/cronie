@@ -19,8 +19,7 @@
 .\"
 .\" $Id: crontab.5,v 1.6 2004/01/23 19:03:33 vixie Exp $
 .\" 
-.TH CRONTAB 5 "27 July 2007"
-.UC 4
+.TH ANACRONTAB 5 "20 July 2009" "Marcela Mašláňová" "Cronie Users' Manual"
 .SH NAME
 crontab \- tables for driving cron (ISC Cron V4.1)
 .SH DESCRIPTION
@@ -237,8 +236,12 @@ When I log in as a normal user, it can't work, because \fI/tmp/SystemHigh\fR is
 higher than my level.
 .fi
 .SH FILES
-.I /etc/crontab
-system crontab file
+.I /etc/regularly-jobs
+system crontab file for jobs like cron.daily, weekly, monthly.
+.I /var/spool/cron/
+usual place for storing users crontab.
+.I /etc/cron.d/
+stored system crontables.
 .SH "SEE ALSO"
 .BR cron (8), 
 .BR crontab (1)
