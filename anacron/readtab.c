@@ -273,7 +273,7 @@ parse_tab_line(char *line)
             Debug(("Jobs will start in the %02d:00-%02d:00 range.", range_start, range_stop));
         }
         if (strncmp(env_var, "RANDOM_DELAY", 12) == 0) {
-            r = match_rx("^([[:digit:]]+)$", value, 1);
+            r = match_rx("^([[:digit:]]+)$", value, 0);
             if (r != -1) {
                 int i = random();
                 double x = 0;
