@@ -46,7 +46,7 @@ for crontab files which are named after accounts in
 The founded crontabs are loaded into memory.
 .I Cron
 also searches for 
-.I /etc/regularly-jobs 
+.I /etc/anacrontab
 and the files in the 
 .I /etc/cron.d 
 directory, which are in a different format (see
@@ -74,7 +74,7 @@ crontable is modified. The modtime option is used also when inotify couldn't be 
 .PP
 .I Cron
 is checking those files or directories:
-.IR /etc/regularly-jobs
+.IR /etc/anacrontab
 system crontab is usually for running daily, weekly, monthly jobs.
 .BR
 .IR /etc/cron.d/

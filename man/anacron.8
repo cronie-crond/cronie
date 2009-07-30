@@ -19,7 +19,7 @@ it can be used on machines that aren't running 24 hours a day,
 to control regular jobs as daily, weekly, and monthly jobs.
 .PP
 Anacron reads a list of jobs from a configuration file, 
-.I /etc/regularly-jobs
+.I /etc/anacrontab
 (see \fBanacrontab(5)\fR).  This file
 contains the list of jobs that Anacron controls.  Each
 job entry specifies a period in days, 
@@ -88,7 +88,7 @@ previous one finished.
 .TP
 .B -n
 Run jobs now.  Ignore the delay specifications in the
-.I /etc/regularly-jobs
+.I /etc/anacrontab
 file.  This options implies \fB-s\fR.
 .TP
 .B -d
@@ -132,7 +132,7 @@ for more information.
 Timestamp files are created in the spool directory for each job in anacrontab. These are never removed automatically by anacron, and should be removed by hand if a job is no longer being scheduled.
 .SH FILES
 .TP
-.I /etc/regularly-jobs
+.I /etc/anacrontab
 Contains specifications of jobs.  See \fBanacrontab(5)\fR for a complete
 description.
 .TP

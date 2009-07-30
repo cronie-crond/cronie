@@ -8,5 +8,5 @@ pamdir = $(sysconfdir)/pam.d
 dist_pam_DATA = pam/crond
 endif
 
-EXTRA_DIST = cronie.init crond.sysconfig contrib/regularly-jobs \
+EXTRA_DIST = cronie.init crond.sysconfig contrib/anacrontab \
 			contrib/0anacron contrib/0hourly

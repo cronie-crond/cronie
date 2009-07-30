@@ -236,7 +236,7 @@ AC_ARG_ENABLE([anacron], [AS_HELP_STRING([--enable-anacron], [Build also anacron
 AM_CONDITIONAL([ANACRON], [test "$enable_anacron" = yes])
 if test "$enable_anacron" != no; then
 	ANACRON_CONF_VAR([ANACRON_SPOOL_DIR],[The path for anacron locks.],[${localstatedir}/spool/anacron])
-	ANACRON_CONF_VAR([ANACRONTAB],[The anacron table for regular jobs.],[${sysconfdir}/regularly-jobs])
+	ANACRON_CONF_VAR([ANACRONTAB],[The anacron table for regular jobs.],[${sysconfdir}/anacrontab])
 fi
 
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile anacron/Makefile])
