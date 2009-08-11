@@ -3,13 +3,13 @@
 anacron \- runs commands periodically
 .SH SYNOPSIS
 .B anacron \fR[\fB-s\fR] [\fB-f\fR] [\fB-n\fR] [\fB-d\fR] [\fB-q\fR]
-[\fB-t anacrontab\fR] [\fB-S spooldir\fR] [\fIjob\fR] ...
+[\fB-t anacrontab\fR] [\fB-S spooldir\fR] [\fIjob\fR]
 .br
-.B anacron [\fB-S spooldir\fR] -u [\fB-t anacrontab\fR] \fR[\fIjob\fR] ...
+.B anacron \fR[\fB-S spooldir\fR] -u [\fB-t anacrontab\fR] \fR[\fIjob\fR]
 .br
 .B anacron \fR[\fB-V\fR|\fB-h\fR]
 .br
-.B anacron -T [\fB-t anacrontab\fR]
+.B anacron -T \fR[\fB-t anacrontab\fR]
 .SH DESCRIPTION
 Anacron
 is used to execute commands periodically, with a
@@ -139,7 +139,7 @@ description.
 .I /var/spool/anacron
 This directory is used by Anacron for storing timestamp files.
 .SH "SEE ALSO"
-.B anacrontab(5), cron(8), tzset(3)
+.BR anacrontab (5), cron (8), tzset (3)
 .PP
 The Anacron
 .I README

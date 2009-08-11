@@ -34,7 +34,7 @@ crontab \- maintain crontab files for individual users
 .RB [ -s ]
 .SH DESCRIPTION
 .I Crontab
-is the program used to install, deinstall or list the tables
+is the program used to install, remove or list the tables
 used to drive the
 .BR cron (8)
 daemon.  Each user can have their own crontab, and though these are files in 
@@ -64,7 +64,7 @@ The second option is using PAM authentication, where you set up users,
 which could or couldn't use
 .I crontab
 and \fBalso\fR system cron jobs from
-/etc/cron.d/.
+.IR /etc/cron.d/.
 .PP
 The temporary directory could be set in enviroment variables. If it's not set
 by user than
@@ -113,7 +113,7 @@ MLS_LEVEL setting to the crontab file before editing / replacement
 occurs - see the documentation of MLS_LEVEL in 
 .BR crontab(5)\.
 .SH "SEE ALSO"
-crontab(5), cron(8)
+.BR crontab (5), cron (8)
 .SH FILES
 .nf
 /etc/cron.allow

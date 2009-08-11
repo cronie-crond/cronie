@@ -65,6 +65,8 @@ adding cron job
 .I 0anacron
 into 
 .I /etc/cron.hourly/jobs.deny
+which is part of
+.IR crontabs(4).
 .SH EXAMPLE
 This example shows how to set up the behaviour similar to previous setting in 
 .I /etc/crontab
@@ -87,8 +89,8 @@ START_HOURS_RANGE=6-8
 @monthly	0	cron.monthly		nice run-parts /etc/cron.monthly
 .fi
 .SH "SEE ALSO"
-.IR anacron(8),
-.IR crontabs(4)
+.BR anacron (8),
+.BR crontabs (4)
 .PP
 The Anacron
 .I README
