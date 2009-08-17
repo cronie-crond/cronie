@@ -122,14 +122,22 @@ consider_job(job_rec *jr)
 	    int period = 0, bypass = 0;
 	    switch (jr->named_period)
 	    {
-		case 1:
+		case 1: /* monthly */
 		    period = days_last_month ();
 		    bypass = days_this_month ();
 		    break;
-		case 2:
+		case 2: /* yearly, annualy */
 		    period = days_last_year ();
 		    bypass = days_this_year ();
 		    break;
+		case 3: /* daily */
+			period = 1;
+			bypass = 1;
+			break;
+		case 4:	/* weekly */
+			period = 7;
+			bypass = 7;
+			break;
 		default:
 		    die ("Unknown named period for %s (%d)", jr->ident, jr->named_period);
 	    }

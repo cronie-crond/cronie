@@ -210,12 +210,16 @@ register_period_job(const char *periods, const char *delays,
 
     jr = obstack_alloc(&tab_o, sizeof(job_rec));
     if (!strncmp ("@monthly", periods, 7)) {
-	jr->named_period = 1;
-    } else if (!strncmp("@yearly", periods, 7)) {
-	jr->named_period = 2;
+		jr->named_period = 1;
+    } else if (!strncmp("@yearly", periods, 7) || !strncmp("@annualy", periods, 8)) {
+		jr->named_period = 2;
+	} else if (!strncmp ("@daily", periods, 7)) {
+		jr->named_period = 3;
+	} else if (!strncmp ("@weekly", periods, 7)) {
+		jr->named_period = 4;
     } else {
-	complain("%s: Unknown named period on line %d, skipping",
-		 anacrontab, line_num);
+		complain("%s: Unknown named period on line %d, skipping",
+			 anacrontab, line_num);
     }
     jr->period = 0;
     delay += random_number;

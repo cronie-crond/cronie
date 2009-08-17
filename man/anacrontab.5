@@ -1,4 +1,4 @@
-.TH ANACRONTAB 5 2009-07-17 "Marcela Mašláňová" "Anacron Users' Manual"
+.TH ANACRONTAB 5 2009-08-17 "Marcela Mašláňová" "Anacron Users' Manual"
 .SH NAME
 /etc/anacrontab \- configuration file for anacron
 .SH DESCRIPTION
@@ -37,9 +37,8 @@ and as the name for the job's timestamp file.  The
 can be any shell command. The fields can be seperated by blank spaces or tabs.
 The
 .I period_name
-can only be set to monthly at the present time. This will ensure jobs
-are only run once a month, no matter the number of days in this month,
-or the previous month.
+can be set to daily, weekly, monthly, yearly or annualy. This will ensure jobs
+are run once a week, month or year no matter the number of days in this period.
 .PP
 Environment assignment lines are of the form:
 .PP
