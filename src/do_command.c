@@ -330,7 +330,7 @@ static void child_process(entry * e, user * u) {
 		int ch = getc(in);
 
 		if (ch != EOF) {
-			FILE *mail = 0L;
+			FILE *mail = NULL;
 			int bytes = 1;
 			int status = 0;
 
@@ -453,7 +453,7 @@ static void child_process(entry * e, user * u) {
 
 			while (EOF != (ch = getc(in))) {
 				bytes++;
-				if (mailto)
+				if (mail)
 					putc(ch, mail);
 			}
 
@@ -461,7 +461,7 @@ static void child_process(entry * e, user * u) {
 			 * mailing...
 			 */
 
-			if (mailto) {
+			if (mail) {
 				Debug(DPROC, ("[%ld] closing pipe to mail\n", (long) getpid()))
 					/* Note: the pclose will probably see
 					 * the termination of the grandchild
@@ -476,7 +476,7 @@ static void child_process(entry * e, user * u) {
 			 * log the facts so the poor user can figure out
 			 * what's going on.
 			 */
-			if (mailto && status) {
+			if (mail && status) {
 				char buf[MAX_TEMPSTR];
 
 				sprintf(buf,
