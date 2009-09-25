@@ -51,7 +51,7 @@ check_open(const char *tabname, const char *fname, const char *uname,
 	pid_t pid = getpid();
 
 	if ((crontab_fd =
-			open(tabname, O_RDONLY | O_NONBLOCK | O_NOFOLLOW, 0)) == -1) {
+			open(tabname, O_RDONLY | O_NONBLOCK, 0)) == -1) {
 		log_it(uname, pid, "CAN'T OPEN", tabname, errno);
 		return (-1);
 	}
