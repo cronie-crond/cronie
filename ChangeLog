@@ -1,3 +1,41 @@
+2009-09-25  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/database.c: Symlinks were not followed. This is a limitation
+	of inotify API.  rhbz#477100
+
+2009-09-18  Tomas Mraz <t8m@centrum.cz>
+
+	* src/do_command.c: Do not segfault if mailto does not pass safe_p
+	test.
+
+2009-09-16  Tomas Mraz <t8m@centrum.cz>
+
+	* pam/crond: Use password-auth common PAM configuration.
+
+2009-08-17  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/lock.c, anacron/readtab.c, man/anacrontab.5: Add daily,
+	weekly as a possibility of anacrontab configuration.
+
+2009-08-11  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* contrib/anacrontab: Add anacrontab configuration file.
+
+2009-08-11  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/anacron.8, man/anacrontab.5, man/cron.8, man/crontab.1,
+	man/regularly-jobs.5: Polish manual pages.
+
+2009-07-30  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* Makefile.am, anacron/Makefile, configure.ac, man/Makefile.am,
+	man/anacron.8, man/anacrontab.5, man/cron.8, man/crontab.5: Revert
+	configuration file regularly-file back to anacrontab.
+
+2009-07-29  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: Start minor releases cronie-1.4.1.
+
 2009-07-29  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* contrib/regularly-jobs: Revert configure file for anacrontab.
@@ -5,8 +43,7 @@
 2009-07-29  Rocco Iannacci <rocian AT gmail DOT com>
 
 	* anacron/readtab.c: Segfault on ppc64 was caused by parsing random
-	delay from anacrontab.  Signed-off-by: Marcela Mašláňová
-	<mmaslano@redhat.com>
+	delay from anacrontab.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2009-07-21  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -18,13 +55,12 @@
 	man/anacron.8, man/anacrontab.5, man/cron.8, man/crontab.1,
 	man/crontab.5, man/regularly-jobs.5: New option: enable-anacron in
 	configure which can set compilation with or without anacron part.
-	Also there were changes in manual pages. Updated ChangeLog.
+	Also there were changes in manual pages.  Updated ChangeLog.
 
 2009-07-17  Štěpán Kasal <kasal AT redhat DOT com>
 
 	* .gitignore, Makefile.am, anacron/Makefile.am, configure.ac: Fix of
-	autotools stuff for anacron.  Signed-off-by: Marcela Mašláňová
-	<mmaslano@redhat.com>
+	autotools stuff for anacron.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2009-07-16  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -41,7 +77,7 @@
 	* .gitignore, Makefile.am, anacron/anacron.8, anacron/anacrontab.5,
 	contrib/0anacron, contrib/0hourly, contrib/regularly-jobs,
 	man/Makefile.am, man/anacron.8, man/anacrontab.5, regularly-jobs: 
-	Add configuration scripts into contrib. Cleaning/adding man pages
+	Add configuration scripts into contrib.  Cleaning/adding man pages
 	into Makefile/directories.
 
 2009-07-14  Marcela Mašláňová <mmaslano@redhat.com>
@@ -130,7 +166,7 @@
 
 2009-06-19  Marcela Mašláňová <mmaslano@redhat.com>
 
-	* src/cron.c: Option -i for disabling inotify support. This option
+	* src/cron.c: Option -i for disabling inotify support.  This option
 	was based on email by user who can't set up daemon when they have
 	mounted from NFS /var/spool/cron for a number of identical machines.
 	Inotify pass the test because it find the directory, but didn't
@@ -149,7 +185,7 @@
 	* src/.indent.pro, src/cron.c, src/crontab.c, src/database.c,
 	src/do_command.c, src/entry.c, src/env.c, src/job.c, src/misc.c,
 	src/popen.c, src/security.c, src/user.c: Beautify the code with
-	indent. Thanks for .indent.pro to Martin Klozik.
+	indent.  Thanks for .indent.pro to Martin Klozik.
 
 2009-05-29  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -158,13 +194,9 @@
 
 2009-05-22  Marcela Mašláňová <mmaslano@redhat.com>
 
-	Merge branch 'master' of
-	ssh://mmaslano@git.fedorahosted.org/git/cronie
-
-2009-05-22  Štěpán Kasal <kasal AT redhat DOT com>
-
-	* .gitignore, configure.ac, src/Makefile.am, src/pathnames.h: Make
-	the paths more configurable.
+	* : commit b96c9b94317b31c6bb7e1335a4c7ba7a7dca7e4a Author:
+	Štěpán Kasal <kasal AT redhat DOT com> Date:   Fri May 22
+	09:05:10 2009 +0200
 
 2009-05-22  Štěpán Kasal <kasal AT redhat DOT com>
 
@@ -183,13 +215,12 @@
 2009-05-20  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* src/do_command.c, src/funcs.h, src/security.c: PAM logging was
-	incorrect bz#249870. The jobs is setuid to user before exec. Mail
+	incorrect bz#249870.  The jobs is setuid to user before exec. Mail
 	runs under root permissions.
 
 2009-05-14  Vlad Glagolev <stealth at sourcemage.org>
 
-	* src/cron.c: @reboot alias check the return value.  Signed-off-by:
-	Marcela Mašláňová <mmaslano@redhat.com>
+	* src/cron.c: @reboot alias check the return value.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2009-05-14  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -200,7 +231,7 @@
 
 	* configure.ac, man/crontab.5, src/do_command.c: MAILFROM, if set,
 	will be used as the envelope sender address when cron mails the
-	output of commands in that crontab. The initial patch was written
+	output of commands in that crontab.  The initial patch was written
 	by: Heath Caldwell
 
 2009-04-28  Marcela Mašláňová <mmaslano@redhat.com>
@@ -210,8 +241,7 @@
 
 2009-04-28  Stěpán Kasal <kasal AT redhat DOT com>
 
-	* configure.ac: Fix with(out)-pam in configure.  Signed-off-by:
-	Marcela Mašláňová <mmaslano@redhat.com>
+	* configure.ac: Fix with(out)-pam in configure.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2009-04-27  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -220,7 +250,7 @@
 2009-04-23  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* src/cron.c: Inotify initialization left open file descriptors
-	which are leaking and annoying SElinux. This could be once fixed by
+	which are leaking and annoying SElinux.  This could be once fixed by
 	inotify_init1, but that's supported from kernel 2.6.27.
 
 2009-04-15  Willy Tarreua <wtarreau AT exosec DOT fr>
@@ -231,13 +261,12 @@
 	was the INIT() macro in globals.h \ which initializes huge strings
 	MailCmd and cron_default_mail_charset both of which are 128 kB. Due
 	to this initialization, the memory \ areas are stored for real in
-	the binary, resulting in larger sizes  Signed-off-by: Marcela
-	Mašláňová <mmaslano@redhat.com>
+	the binary, resulting in larger sizes Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2009-02-12  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* configure.ac: Cronie could be build as Position Independent
-	Executable when the configure is executed with --enable-pie. Erased
+	Executable when the configure is executed with --enable-pie.  Erased
 	commented unused stuff from configure.
 
 2009-02-12  Marcela Mašláňová <mmaslano@redhat.com>
@@ -279,7 +308,7 @@
 2008-07-28  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* man/crontab.5, src/cron.c, src/pathnames.h: @reboot jobs should be
-	run only after reboot instead of every daemon's restart. Patch
+	run only after reboot instead of every daemon's restart.  Patch
 	inspired by debian.
 
 2008-06-26  Marcela Mašláňová <mmaslano@redhat.com>
@@ -294,30 +323,25 @@
 2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
 
 	* configure.ac, src/misc.c: Portability: File locking by fcntl,
-	lockf or flock  Signed-off-by: Marcela Mašláňová
-	<mmaslano@redhat.com>
+	lockf or flock Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
 
-	* src/macros.h, src/misc.c: Bugfix: PATH_MAX is defined in limits.h
-	Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+	* src/macros.h, src/misc.c: Bugfix: PATH_MAX is defined in limits.h Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
 
 	* configure.ac, src/popen.c: Portability: Check if sys/cdefs.h is
-	there on the platform  Signed-off-by: Marcela Mašláňová
-	<mmaslano@redhat.com>
+	there on the platform Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2008-06-23  SATOH Fumiyasu <fumiyas@osstech.co.jp>
 
 	* configure.ac, src/funcs.h, src/macros.h, src/misc.c: Portability:
-	Check for struct tm.tm_gmtoff by AC_CHECK_MEMBERS  Signed-off-by:
-	Marcela Mašláňová <mmaslano@redhat.com>
+	Check for struct tm.tm_gmtoff by AC_CHECK_MEMBERS Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
 
-	* src/funcs.h: Bugfix: Correct log_it() prototype  Signed-off-by:
-	Marcela Mašláňová <mmaslano@redhat.com>
+	* src/funcs.h: Bugfix: Correct log_it() prototype Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
 2008-06-26  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -362,12 +386,12 @@
 
 2008-05-30  Marcela Mašláňová <mmaslano@redhat.com>
 
-	* ChangeLog: cronie-1.1 released. Updated Changelog.
+	* ChangeLog: cronie-1.1 released.  Updated Changelog.
 
 2008-05-30  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* cronie.init: Init script die faster, if the sysconfig script is
-	missing. Patch from scop.
+	missing.  Patch from scop.
 
 2008-05-29  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -407,14 +431,14 @@
 
 	* src/security.c, src/user.c: Using get_default_context() for name =
 	NULL instead of getseuserbyname because files created in
-	/var/spool/cron hadn't wrong context. rhbz#426704
+	/var/spool/cron hadn't wrong context.  rhbz#426704
 
 2008-01-31  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* .gitignore, Makefile.am, crond.pam, man/bitstring.3, man/cron.8,
 	man/crontab.1, man/crontab.5, pam/crond: Stepan Kasal: create pam's
-	own directory for pam configure. Create correct man pages in man
-	directory. Add .gitignore file.
+	own directory for pam configure.  Create correct man pages in man
+	directory.  Add .gitignore file.
 
 2008-01-30  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -445,8 +469,7 @@
 	man/crontab.1, man/crontab.5, missing, src/Makefile,
 	src/Makefile.am, src/Makefile.in, vixie-cron.init: Cleaning git from
 	unnecessary files, which were generated from autotools. Add files or
-	rename according to autotools custom practice.  There were also
-	alternation of configure and makefiles.
+	rename according to autotools custom practice.  There were also alternation of configure and makefiles.
 
 2008-01-09  Marcela Maslanova <marca@caladan.englab.brq.redhat.com>
 
@@ -496,7 +519,7 @@
 
 2007-11-12  Marcela Maslanova <marca@dhcp-lab-135.englab.brq.redhat.com>
 
-	* src/cron.c, src/misc.c: Time zones are now supported. Setting in
+	* src/cron.c, src/misc.c: Time zones are now supported.  Setting in
 	cron table CRON_TZ=SomeTimeZone does jobs in this time zone. There
 	was problem with syslog, because it print local time into log only,
 	when I remove ifdef parts from misc.c. With ifdef parts print out
@@ -542,13 +565,13 @@
 	* COPYING, ChangeLog, INSTALL, Makefile.am, NEWS, README,
 	configure.ac, doc/CHANGES, doc/CONVERSION, doc/FEATURES,
 	doc/INSTALL, doc/MAIL, doc/Makefile.am, doc/README, doc/THANKS,
-	src/Makefile.am: Deleting and modyfing files with license etc. The
+	src/Makefile.am: Deleting and modyfing files with license etc.  The
 	compilation with selinux and audit is optional.
 
 2007-10-02  Marcela Maslanova <marca@dhcp-lab-135.englab.brq.redhat.com>
 
 	* src/user.c: The jobs in RH_CROND_DIR weren't syntactically
-	checked. Also SYSCRON wasn't checked. The problem is reported into
+	checked.  Also SYSCRON wasn't checked. The problem is reported into
 	log.
 
 2007-08-28  Marcela Mašláňová <marca@arrakis.(none)>
@@ -557,53 +580,41 @@
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
-	* src/security.c: Commented out cron_open_pam_session, it's unused.
-	Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
+	* src/security.c: Commented out cron_open_pam_session, it's unused.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
-	* src/security.c: Protect the call to setexeccon with WITH_SELINUX.
-	Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
+	* src/security.c: Protect the call to setexeccon with WITH_SELINUX.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
-	* src/misc.c: Compile fix in misc.c.  (I have no f*cking idea why do
-	I do this change now...)  Signed-off-by: Tomas Janousek
-	<tjanouse@redhat.com>
+	* src/misc.c: Compile fix in misc.c.  (I have no f*cking idea why do I do this change now...) Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
-	* src/crontab.c, src/funcs.h: Kill a few warnings.  Signed-off-by:
-	Tomas Janousek <tjanouse@redhat.com>
+	* src/crontab.c, src/funcs.h: Kill a few warnings.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
 	* config.h.in, configure.ac: Fix the MAILARG and MAILFMT definitions
-	and regenerate config.h.in.  Signed-off-by: Tomas Janousek
-	<tjanouse@redhat.com>
+	and regenerate config.h.in.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
 	* configure.ac, src/security.c: Move #define _GNU_SOURCE from
-	security.c to CFLAGS.  (it's needed for HAVE_SELINUX as well)
-	Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
+	security.c to CFLAGS.  (it's needed for HAVE_SELINUX as well) Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
-	* src/pathnames.h: Don't define SYSLOG in pathnames.h.  It's in
-	configure.ac and gets defined in config.h.  Signed-off-by: Tomas
-	Janousek <tjanouse@redhat.com>
+	* src/pathnames.h: Don't define SYSLOG in pathnames.h.  It's in configure.ac and gets defined in config.h.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
-	* configure.ac: CRON_GROUP shall not be defined at all.  (also
-	filled in a sensible default in case someone enables it again)
-	Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
+	* configure.ac: CRON_GROUP shall not be defined at all.  (also filled in a sensible default in case someone enables it again) Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
-	* src/Makefile.am: Added -laudit to LDADD.  Signed-off-by: Tomas
-	Janousek <tjanouse@redhat.com>
+	* src/Makefile.am: Added -laudit to LDADD.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  mmaslano <mmaslano@redhat.com>
 
@@ -629,35 +640,29 @@
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
-	* src/crontab.c: Added missing #ifdef WITH_PAM.  Signed-off-by:
-	Tomas Janousek <tjanouse@redhat.com>
+	* src/crontab.c: Added missing #ifdef WITH_PAM.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
 	* src/funcs.h, src/security.c: Make
-	cron_restore_default_security_context return void.  Signed-off-by:
-	Tomas Janousek <tjanouse@redhat.com>
+	cron_restore_default_security_context return void.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-27  Tomas Janousek <tjanouse@redhat.com>
 
 	* src/misc.c: Revert "System table wasn't sometimes checked for
-	changes."  This reverts commit
-	b18c0c9a01bef691c7b696709cd2f9736ba98a82.  Signed-off-by: Tomas
-	Janousek <tjanouse@redhat.com>
+	changes." This reverts commit b18c0c9a01bef691c7b696709cd2f9736ba98a82.  Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
 	* src/popen.c: rhbz#247228 cron jobs fail semi-randomly if sendmail
-	(or other mail)  isn't set. The jobs aren't "sometimes" run, because
-	output, which has to be sent isn't set and the stdin pipe, which is
-	used haven't enough capacity. The problem is at least reported in
-	log.
+	(or other mail) isn't set. The jobs aren't "sometimes" run, because output, which
+	has to be sent isn't set and the stdin pipe, which is used haven't
+	enough capacity.  The problem is at least reported in log.
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
 	* man/crond.8.in, man/crontab.1.in, man/crontab.5.in: Add crond.8
-	(the same as cron.8) manual page  and other man pages were updated.
-
+	(the same as cron.8) manual page and other man pages were updated.
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
@@ -666,8 +671,7 @@
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
 	* src/bitstring.h, src/popen.c: For the same license for whole cron,
-	I've removed two  files and found almost the same with correct
-	license.
+	I've removed two files and found almost the same with correct license.
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
@@ -687,14 +691,14 @@
 	src/misc.c, src/pathnames.h, src/popen.c, src/pw_dup.c,
 	src/security.c, src/structs.h, src/user.c, stamp-h1, structs.h,
 	user.c, vixie-cron.init: Cron source was ready for merge with
-	patches. After the merge  I used autotools (files were copied to new
-	dirs and configure.ac and Makefile.am were written).
+	patches. After the merge I used autotools (files were copied to new dirs and configure.ac and
+	Makefile.am were written).
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
 	* cron.h, crontab.c, do_command.c, security.c: Pam authentication
-	wasn't used wise. User's crontab  didn't use pam and functions,
-	which were for pam opening etc. were incorrect (wrong credetials).
+	wasn't used wise. User's crontab didn't use pam and functions, which were for pam opening etc. were
+	incorrect (wrong credetials).
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
@@ -721,8 +725,7 @@
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
 	* security.c: Audit: new auditing message is print, when the user
-	isn't allowed  to use mls range. Job wasn't runned without warning
-	message.
+	isn't allowed to use mls range. Job wasn't runned without warning message.
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
@@ -737,23 +740,22 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* cron.c, database.c: Force reload of database when SIGGUP is
-	received. max_mtime uses dir_name instead of SPOOL_DIR now. (which
+	received.  max_mtime uses dir_name instead of SPOOL_DIR now. (which
 	caused a bug preventing correct detection of changes in
-	RH_CROND_DIR)  (comment updated by <tjanouse@redhat.com>)
+	RH_CROND_DIR) (comment updated by <tjanouse@redhat.com>)
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c, do_command.c, funcs.h, security.c: Selinux ranges: for
-	every selinux operation are now checked  the ranges of user. Now is
-	set not only context for user, but even ranges(enabled selinux or
-	selinux in mls mode).
+	every selinux operation are now checked the ranges of user. Now is set not only context for user, but even
+	ranges(enabled selinux or selinux in mls mode).
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c: It's possible to change file without changing mtime of
-	file.  So we're stat'ing files for the changes of files. The
-	detection of not_a_crontab files was added: files started with dot
-	aren't crontabs etc.
+	file.  So we're stat'ing files for the changes of files.  The detection of
+	not_a_crontab files was added: files started with dot aren't
+	crontabs etc.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -767,14 +769,12 @@
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* cron.c: Loading database before reaping the child take up time of
-	running the jobs.
+	* cron.c: Loading database before reaping the child take up time of running the jobs.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* do_command.c: The Auto-Submitted header is defined (and suggested
-	by) RFC3834.  Added into mail header: 'Auto-Submitted:
-	auto-generated'
+	by) RFC3834.  Added into mail header: 'Auto-Submitted: auto-generated'
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -783,48 +783,43 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* database.c: It's possible to change file without changing mtime of
-	file.  So we're stat'ing files for the changes of files. The
-	detection of not_a_crontab files was added: files started with dot
-	aren't crontabs etc.
+	file.  So we're stat'ing files for the changes of files.  The detection of
+	not_a_crontab files was added: files started with dot aren't
+	crontabs etc.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.1, crontab.5, crontab.c, funcs.h, security.c: Selinux:
-	option -s added. Header from crontab was removed and  now is print
-	into crontab the SELINUX_ROLE_TYPE which specify the permission of
-	user. With mls could one user run some jobs with different roles and
-	security level.
+	option -s added. Header from crontab was removed and now is print into crontab the SELINUX_ROLE_TYPE which specify the
+	permission of user. With mls could one user run some jobs with
+	different roles and security level.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* Makefile, security.c, structs.h: Into with_selinux and with_pam
-	part was added variables  used only there. In Makefile are libs set
-	by variables.
+	part was added variables used only there. In Makefile are libs set by variables.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* cron.c, crontab.5, do_command.c, externs.h, globals.h: Now is
 	possible to use different character encodings for mailed cron job
-	output by  setting the CONTENT_TYPE and CONTENT_TRANSFER_ENCODING
-	variables in crontabs, to the correct values of the mail headers of
-	those names.
+	output by setting the CONTENT_TYPE and CONTENT_TRANSFER_ENCODING variables in
+	crontabs, to the correct values of the mail headers of those names.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crond.pam: Module pam_limit.so was added to default configuration.
 
-
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* security.c: Fixing "security": minutely job are made realy only
-	one time per  minute. If the job is delayed into next minute, then
-	it's skipped for this minute.
+	one time per minute. If the job is delayed into next minute, then it's skipped
+	for this minute.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* Makefile, crontab.c, do_command.c, funcs.h, popen.c, security.c,
-	user.c: The security.c file was filled with selinux and pam often
-	used functions, which were removed from other files.
+	user.c: The security.c file was filled with selinux and pam often used functions, which were removed from other files.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -839,8 +834,7 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c, do_command.c, env.c, misc.c, pw_dup.c: The return value
-	were added because of too many warning messages  from compiler. Also
-	the variables were initialized.
+	were added because of too many warning messages from compiler. Also the variables were initialized.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -854,28 +848,27 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* user.c: Selinux: Instead of getting context and then the username
-	is  used function getuserbyname.
+	is used function getuserbyname.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c: Too many flags was set for lstating crontab. Time of
-	change is  checked and uids for reading new crontab are ok.
+	change is checked and uids for reading new crontab are ok.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* database.c, funcs.h, structs.h, user.c: List corruption when items
-	are removed from /etc/cron.d.  Variable tabname is filled with file
-	or NULL and checked when crontab is changed.
+	are removed from /etc/cron.d.  Variable tabname is filled with file or NULL and checked when
+	crontab is changed.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* crond.pam: Crond.pam was changed according to pam modules.  The
-	pam_limits.so could be used.
+	* crond.pam: Crond.pam was changed according to pam modules.  The pam_limits.so could be used.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c: lstat instead of stat can stat even symlink itself, not
-	the file  that it refers to.
+	the file that it refers to.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -888,7 +881,7 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c: fix of bug rhbz#154065: crontab should not use
-	waitpid(...,WUNTRACED)  and stop itself if its child is stopped
+	waitpid(...,WUNTRACED) and stop itself if its child is stopped
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -897,13 +890,12 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* do_command.c, user.c: Selinux doesn't segfault, because of:
-	permissive mode returns 0  and selinux enabled is also check
-	context.
+	permissive mode returns 0 and selinux enabled is also check context.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* cron.c, do_command.c, globals.h: Cron validate the recipient only
-	when CRON_VALIDATE_MAILRCPTS isn't null. Validating of email
+	when CRON_VALIDATE_MAILRCPTS isn't null.  Validating of email
 	recipient is default off.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
@@ -917,8 +909,7 @@
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* cron.8, cron.c, database.c, globals.h: Add -p option for crontab.
-	Without the -p option /etc/crontab must not be writable by any user
+	* cron.8, cron.c, database.c, globals.h: Add -p option for crontab.  Without the -p option /etc/crontab must not be writable by any user
 	other than root, no crontab files may be links, or linked to by any
 	other file, and no crontab files may be executable, or be writable
 	by any user other than their owner
@@ -933,8 +924,7 @@
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* misc.c: For setegid are used saved gid instead of getgid().  Now
-	are swaped back the correct gid.
+	* misc.c: For setegid are used saved gid instead of getgid().  Now are swaped back the correct gid.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -943,8 +933,7 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c: According to changes in selinux
-	selinux_check_passwd_access  is now enough for examinitaion of
-	user's password.
+	selinux_check_passwd_access is now enough for examinitaion of user's password.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -968,7 +957,7 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c: Crontab is stat instead of fstat and crontab is
-	reopened for reading new stdin. This change should: Allowed editors
+	reopened for reading new stdin.  This change should: Allowed editors
 	such as 'gedit' which do not modify original file, but which
 	rename(2) a temp file to original, to be used by crontab -e (bug
 	129170).
@@ -986,7 +975,7 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* crontab.c, user.c: Selinux for crontab: checking users with
-	selinux. User is fixed from char to const char.
+	selinux.  User is fixed from char to const char.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -995,7 +984,7 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* Makefile, crond.pam: Add file crond.pam, which has rules for pam
-	sessions. In Makefile is now crond.pam installed.
+	sessions.  In Makefile is now crond.pam installed.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -1022,7 +1011,7 @@
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
 	* misc.c: Logs now inform about creating crontabs for users, which
-	aren't allowed to use crontab. It's for user in cron.{allow,deny}
+	aren't allowed to use crontab.  It's for user in cron.{allow,deny}
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
@@ -1040,11 +1029,8 @@
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* do_command.c, popen.c: Use fork instead of vfork.     Add signal:
-	Our grandparent is watching for our parent's death by     catching
-	SIGCHLD. Meanwhile, our parent will use wait     explicitly and so
-	has disabled SIGCHLD. So now it's     time to reset SIGCHLD
-	handling.
+	* do_command.c, popen.c: Use fork instead of vfork.      Add signal: Our grandparent is watching for our parent's death
+	    by catching SIGCHLD. Meanwhile, our parent will use wait     explicitly and so has disabled SIGCHLD. So now it's     time to reset SIGCHLD handling.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
