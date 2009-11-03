@@ -179,7 +179,7 @@ if test "$with_pam" != no; then
 	*" -ldl "*) LIBPAM= ;; #(
 	yes:*) LIBPAM=-ldl ;; # libdl found, but is not in $LIBS
 	esac
-	AC_SUBST([LIBPAM], ["-lpam -lpam_misc $LIBPAM"])
+	AC_SUBST([LIBPAM], ["-lpam $LIBPAM"])
 fi
 
 AC_DEFINE(DEBUGGING,1,[Code will be built with debug info.])
