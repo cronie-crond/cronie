@@ -352,7 +352,6 @@ static void edit_cmd(void) {
 	struct utimbuf utimebuf;
 	WAIT_T waiter;
 	PID_T pid, xpid;
-	int uid;
 
 	log_it(RealUser, Pid, "BEGIN EDIT", User, 0);
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, User, '/')) {
@@ -379,16 +378,21 @@ static void edit_cmd(void) {
 	if (!glue_strings(Filename, sizeof Filename, tmp_path(),
 			"crontab.XXXXXXXXXX", '/')) {
 		fprintf(stderr, "path too long\n");
-		goto fatal;
+		exit(ERROR_EXIT);
 	}
-	uid = MY_UID(pw);
-	setreuid(0, uid);
+	if (swap_uids() == -1) {
+		perror("swapping uids");
+		exit(ERROR_EXIT);
+	}
 	if (-1 == (t = mkstemp(Filename))) {
 		perror(Filename);
 		goto fatal;
 	}
 
-	setreuid(uid, 0);
+	if (swap_uids_back() == -1) {
+		perror("swapping uids back");
+		goto fatal;
+	}
 	if (!(NewCrontab = fdopen(t, "r+"))) {
 		perror("fdopen");
 		goto fatal;
