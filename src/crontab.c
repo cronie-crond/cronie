@@ -336,9 +336,11 @@ static void check_error(const char *msg) {
 }
 
 static char *tmp_path() {
-	char *tmpdir;
+	char *tmpdir = NULL;
 
-	tmpdir = getenv("TMPDIR");
+	if ((getuid() == geteuid()) && (getgid() == getegid())) {
+		tmpdir = getenv("TMPDIR");
+	}
 	return tmpdir ? tmpdir : "/tmp";
 }
 
