@@ -1,3 +1,55 @@
+2009-11-03  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* src/misc.c: Fix "warning: unused variable" if LOG_FILE is not
+	defined Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-11-03  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* src/crontab.c: Portability: Use swap_uids() instead of setreuid()
+	directly Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-11-03  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* src/externs.h: Portability: Solaris and AIX support saved UID/GID Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-11-03  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* configure.ac, src/externs.h: Portability: Check if fchown() and
+	fchgrp() exist by configure.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-11-03  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* src/crontab.c: Security: Ignore $TMPDIR if ruid!=euid and/or
+	rgid!=egid A setuid/setgid process with GNU C library does NOT
+	inherit $TMPDIR from the parent process for security reason, but
+	this behavior is NOT standard feature.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-11-03  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* configure.ac: Portability: pam_misc.so is the Linux-PAM specific
+	library Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-11-03  SATOH Fumiyasu <fumiyas@osstech.co.jp>
+
+	* configure.ac, src/externs.h: Portability: Check if sys/fcntl.h
+	exists or not Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-11-03  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* contrib/dailyjobs: Dailyjobs are here for users who don't like
+	anacron.  0hourly executes cron.hourly scripts and other will be
+	executed by dailyjobs.
+
+2009-10-19  HONDA Hirofumi <honda.hirofumi@oss.ntt.co.jp>
+
+	* cronie.init: When parent crond is stopped and child crond
+	(executing program) is running,"service crond status" reports "crond
+	(pid  XXX) is running...".  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-10-12  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: New release with few bugfixes.
+
 2009-09-25  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* src/database.c: Symlinks were not followed. This is a limitation
