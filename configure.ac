@@ -46,6 +46,8 @@ AC_CHECK_FUNCS( \
        fcntl \
        lockf \
        flock \
+       fchown \
+       fchgrp \
 )
 
 dnl Checks for typedefs, structures, and compiler characteristics.
