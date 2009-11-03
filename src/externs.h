@@ -81,7 +81,7 @@ extern char *tzname[2];
 #endif
 #define TZONE(tm) tzname[(tm).tm_isdst]
 
-#if (defined(BSD)) && (BSD >= 199103) || defined(__linux)
+#if (defined(BSD)) && (BSD >= 199103) || defined(__linux) || defined(__sun) || defined(_AIX)
 # define HAVE_SAVED_UIDS
 #endif
 
