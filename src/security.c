@@ -486,9 +486,37 @@ void free_security_context(security_context_t * scontext) {
 
 int crontab_security_access(void) {
 #ifdef WITH_SELINUX
-	if (is_selinux_enabled() > 0)
-		if (selinux_check_passwd_access(PASSWD__CRONTAB) != 0)
-			return -1;
+	int selinux_check_passwd_access = -1;
+	if (is_selinux_enabled() > 0) {
+		security_context_t user_context;
+		if (getprevcon_raw(&user_context) == 0) {
+			security_class_t passwd_class;
+			struct av_decision avd;
+			int retval;
+
+			passwd_class = string_to_security_class("passwd");
+			if (passwd_class == 0) {
+				selinux_check_passwd_access = -1;
+				fprintf(stderr, "Security class \"passwd\" is not defined in the SELinux policy.\n");
+			}
+
+			retval = security_compute_av_raw(user_context,
+							user_context,
+							passwd_class,
+							PASSWD__CRONTAB,
+							&avd);
+
+			if ((retval == 0) && ((PASSWD__CRONTAB & avd.allowed) == PASSWD__CRONTAB)) {
+				selinux_check_passwd_access = 0;
+			}
+			freecon(user_context);
+		}
+
+		if (selinux_check_passwd_access != 0 && security_getenforce() == 0)
+			selinux_check_passwd_access = 0;
+
+		return selinux_check_passwd_access;
+	}
 #endif
 	return 0;
 }
