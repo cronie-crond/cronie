@@ -7,3 +7,4 @@ account    required   pam_access.so
 account    include    password-auth
 session    required   pam_loginuid.so
 session    include    password-auth
+auth       include    password-auth
