@@ -56,6 +56,10 @@ start() {
 }
 
 stop() {
+    if [ $UID -ne 0 ] ; then
+        echo "User has insufficient privilege."
+        exit 4
+    fi
     echo -n $"Stopping $prog: "
 	if [ -n "`pidfileofproc $exec`" ]; then
 		killproc $exec
