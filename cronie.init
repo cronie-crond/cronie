@@ -41,6 +41,10 @@ t=${CRON_VALIDATE_MAILRCPTS:-UNSET}
 [ "$t" != "UNSET" ] && export CRON_VALIDATE_MAILRCPTS="$t"
 
 start() {
+    if [ $UID -ne 0 ] ; then
+        echo "User has insufficient privilege."
+        exit 4
+    fi
     [ -x $exec ] || exit 5
     [ -f $config ] || exit 6
     echo -n $"Starting $prog: "
