@@ -159,6 +159,8 @@ int cron_start_pam(struct passwd *pw) {
 	PAM_FAIL_CHECK;
 	retcode = pam_acct_mgmt(pamh, PAM_SILENT);
 	PAM_FAIL_CHECK;
+	retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
+	PAM_FAIL_CHECK;
 #endif
 
 	return retcode;
@@ -168,8 +170,6 @@ static int cron_open_pam_session(struct passwd *pw) {
 	int retcode = 0;
 
 #if defined(WITH_PAM)
-	retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
-	PAM_FAIL_CHECK;
 	retcode = pam_open_session(pamh, PAM_SILENT);
 	PAM_FAIL_CHECK;
 	if (retcode == PAM_SUCCESS)
