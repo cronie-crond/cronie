@@ -383,7 +383,9 @@ static void child_process(entry * e, user * u) {
 			 * up the mail command and subjects and stuff...
 			 */
 
-			if (mailto && safe_p(usernm, mailto)) {
+			/* Also skip it if MailCmd is set to "off" */
+			if (mailto && safe_p(usernm, mailto)
+			           && strncmp(MailCmd,"off",4)) {
 				char **env;
 				char mailcmd[MAX_COMMAND];
 				char hostname[MAXHOSTNAMELEN];

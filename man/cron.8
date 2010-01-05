@@ -116,12 +116,17 @@ A PAM configuration file for crond is installed in /etc/pam.d/crond.
 crond loads the PAM environment from the pam_env module, but these
 can be overriden by settings in the appropriate crontab file.
 .SH "OPTIONS"
+As a special case, the string
+.I "off"
+will disable sending mail.
 .TP
 .B "\-s"
 This option will direct cron to send job output to the system log using
 .IR syslog (3).
 This is useful if your system has no
-.BR sendmail (8).
+.BR sendmail (8),
+or if mail is disabled using
+.BR "\-m off".
 .TP
 .B "\-m"
 This option allows you to specify a shell command string to use for sending cron mail
