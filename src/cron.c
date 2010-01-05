@@ -123,7 +123,7 @@ static void handle_signals(cron_db * database) {
 static void usage(void) {
 	const char **dflags;
 
-	fprintf(stderr, "usage:  %s [-n] [-p] [-i] [-m <mail command>] [-x [",
+	fprintf(stderr, "usage:  %s [-n] [-p] [-s] [-i] [-m <mail command>] [-x [",
 		ProgramName);
 	for (dflags = DebugFlagNames; *dflags; dflags++)
 		fprintf(stderr, "%s%s", *dflags, dflags[1] ? "," : "]");
@@ -152,6 +152,7 @@ int main(int argc, char *argv[]) {
 	setlinebuf(stderr);
 #endif
 
+	SyslogOutput = 0;
 	NoFork = 0;
 	parse_args(argc, argv);
 
@@ -581,7 +582,7 @@ static void sigchld_reaper(void) {
 static void parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "npix:m:"))) {
+	while (-1 != (argch = getopt(argc, argv, "npsix:m:"))) {
 		switch (argch) {
 		default:
 			usage();
@@ -594,6 +595,9 @@ static void parse_args(int argc, char *argv[]) {
 			break;
 		case 'p':
 			PermitAnyCrontab = 1;
+			break;
+		case 's':
+			SyslogOutput = 1;
 			break;
 		case 'i':
 			DisableInotify = 1;

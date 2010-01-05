@@ -19,12 +19,12 @@
 .\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
 .\" 
-.TH CRON "8" "July 2009" "Marcela Mašláňová" "Cronie Users' Manual"
+.TH CRON "8" "December 2009" "Marcela Mašláňová" "Cronie Users' Manual"
 .SH NAME
 cron \- daemon to execute scheduled commands
 .SH SYNOPSIS
 .B cron
-.RB [ -n " | " -p " | " -m \fP\fI<mail command>\fP\fB ]
+.RB [ -n " | " -p " | " -s " | " -m \fP\fI<mail command>\fP\fB ]
 .br
 .B cron
 .B -x 
@@ -57,6 +57,9 @@ examines all stored crontabs, checking each command to see if it should be
 run in the current minute. When executing 
 commands, any output is mailed to the owner of the crontab (or to the user
 named in the MAILTO environment variable in the crontab, if such exists).
+Job output can also be sent to syslog by using the
+.B "\-s"
+option.
 .PP
 There are two ways, how the changes are checked in crontables. The first
 is checking the modtime of file and the other is using inotify support.
@@ -113,6 +116,12 @@ A PAM configuration file for crond is installed in /etc/pam.d/crond.
 crond loads the PAM environment from the pam_env module, but these
 can be overriden by settings in the appropriate crontab file.
 .SH "OPTIONS"
+.TP
+.B "\-s"
+This option will direct cron to send job output to the system log using
+.IR syslog (3).
+This is useful if your system has no
+.BR sendmail (8).
 .TP
 .B "\-m"
 This option allows you to specify a shell command string to use for sending cron mail

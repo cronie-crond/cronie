@@ -61,6 +61,7 @@ XTRN const char *DowNames[]
 
 XTRN char	*ProgramName;
 XTRN int	LineNumber;
+XTRN int	SyslogOutput;
 XTRN time_t	StartTime;
 XTRN int	NoFork;
 XTRN int        PermitAnyCrontab;

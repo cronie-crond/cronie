@@ -62,6 +62,7 @@ static void child_process(entry * e, user * u) {
 	int children = 0;
 	char **jobenv = 0L;
 	pid_t pid = getpid();
+	pid_t jobpid;
 
 	/* Set up the Red Hat security context for both mail/minder and job processes:
 	 */
@@ -147,7 +148,7 @@ static void child_process(entry * e, user * u) {
 
 	/* fork again, this time so we can exec the user's command.
 	 */
-	switch (fork()) {
+	switch ((jobpid = fork())) {
 	case -1:
 		log_it("CRON", pid, "can't fork", "child_process", errno);
 		cron_close_pam();
@@ -333,6 +334,19 @@ static void child_process(entry * e, user * u) {
 			FILE *mail = NULL;
 			int bytes = 1;
 			int status = 0;
+#if defined(SYSLOG)
+			char jobtag[64], logbuf[1024];
+			int bufidx = 0;
+			/* according to the NOTES section of openlog(3), jobtag will be
+			 * used (implicitly) by future calls to syslog(). That's why it
+			 * was defined outside of the if block here. */
+			if (SyslogOutput) {
+				snprintf(jobtag, sizeof(jobtag), "CROND[%d]", jobpid);
+				openlog(jobtag, 0, LOG_CRON);
+				if (ch != '\n')
+					logbuf[bufidx++] = ch;
+			}
+#endif
 
 			Debug(DPROC | DEXT,
 				("[%ld] got data (%x:%c) from grandchild\n",
@@ -456,6 +470,19 @@ static void child_process(entry * e, user * u) {
 				if (mail)
 					putc(ch, mail);
 			}
+#if defined(SYSLOG)
+				if (SyslogOutput) {
+					logbuf[bufidx++] = ch;
+					if ((ch == '\n') || (bufidx == sizeof(logbuf)-1)) {
+						if (ch == '\n')
+							logbuf[bufidx-1] = '\0';
+						else
+							logbuf[bufidx] = '\0';
+						syslog(LOG_INFO, "%s", logbuf);
+						bufidx = 0;
+					}
+				}
+#endif
 
 			/* only close pipe if we opened it -- i.e., we're
 			 * mailing...
@@ -471,6 +498,15 @@ static void child_process(entry * e, user * u) {
 					 */
 					status = cron_pclose(mail);
 			}
+#if defined(SYSLOG)
+			if (SyslogOutput) {
+				if (bufidx) {
+					logbuf[bufidx] = '\0';
+					syslog(LOG_INFO, "%s", logbuf);
+				}
+				closelog();
+			}
+#endif
 
 			/* if there was output and we could not mail it,
 			 * log the facts so the poor user can figure out
