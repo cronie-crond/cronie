@@ -120,7 +120,7 @@ int cron_set_job_security_context(entry * e, user * u, char ***jobenv) {
 	}
 #endif
 
-	if (cron_change_user(e->pwd, env_get("HOME", *jobenv)) != 0) {
+	if (cron_change_user(e->pwd) != 0) {
 		log_it(e->pwd->pw_name, getpid(), "ERROR", "failed to change user", 0);
 		return -1;
 	}
@@ -189,7 +189,7 @@ void cron_close_pam(void) {
 #endif
 }
 
-int cron_change_user(struct passwd *pw, char *homedir) {
+int cron_change_user(struct passwd *pw) {
 	pid_t pid = getpid();
 	/* set our directory, uid and gid.  Set gid first, since once
 	 * we set uid, we've lost root privledges.
@@ -209,18 +209,19 @@ int cron_change_user(struct passwd *pw, char *homedir) {
 		return -1;
 	}
 
-	if (chdir(homedir) == -1) {
-		log_it("CRON", pid, "ERROR chdir failed", homedir, errno);
-		return -1;
-	}
 	return 0;
 }
 
-int cron_change_user_permanently(struct passwd *pw) {
+int cron_change_user_permanently(struct passwd *pw, char *homedir) {
 	if (setreuid(pw->pw_uid, pw->pw_uid) != 0) {
 		log_it("CRON", getpid(), "ERROR", "setreuid failed", errno);
 		return -1;
 	}
+	if (chdir(homedir) == -1) {
+		log_it("CRON", getpid(), "ERROR chdir failed", homedir, errno);
+		return -1;
+	}
+
 	return 0;
 }
 

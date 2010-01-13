@@ -156,9 +156,9 @@ static void child_process(entry * e, user * u) {
 	 /*NOTREACHED*/ case 0:
 		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n", (long) getpid()))
 
-			if (cron_change_user_permanently(e->pwd) < 0)
+		if (cron_change_user_permanently(e->pwd, env_get("HOME", jobenv)) < 0)
 			_exit(ERROR_EXIT);
-
+		
 		/* write a log message.  we've waited this long to do it
 		 * because it was not until now that we knew the PID that
 		 * the actual user command shell was going to get and the
@@ -272,7 +272,7 @@ static void child_process(entry * e, user * u) {
 			 * are part of its reference count now.
 			 */
 			close(stdout_pipe[READ_PIPE]);
-		if (cron_change_user_permanently(e->pwd) < 0)
+		if (cron_change_user_permanently(e->pwd, env_get("HOME", jobenv)) < 0)
 			_exit(ERROR_EXIT);
 		/* translation:
 		 *  \% -> %
