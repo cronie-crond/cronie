@@ -36,10 +36,6 @@ config=/etc/sysconfig/crond
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
-# validate mail
-t=${CRON_VALIDATE_MAILRCPTS:-UNSET}
-[ "$t" != "UNSET" ] && export CRON_VALIDATE_MAILRCPTS="$t"
-
 start() {
     if [ $UID -ne 0 ] ; then
         echo "User has insufficient privilege."

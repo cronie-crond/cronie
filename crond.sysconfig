@@ -1,9 +1,3 @@
 # Settings for the CRON daemon.
 # CRONDARGS= :  any extra command-line startup arguments for crond
-# CRON_VALIDATE_MAILRCPTS=1:a non-empty value of this variable will
-#                           enable cronie's validation of 
-#                           mail recipient names, which would then be
-#                           restricted to contain only the chars
-#                           from this tr(1) set : [@!:%-_.,:alnum:]
-#                           otherwise mailing is not attempted.
 CRONDARGS=
