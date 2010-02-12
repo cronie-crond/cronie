@@ -19,13 +19,12 @@ The
 .I period
 is specified in days, the 
 .I delay
-in minutes. In addition, if the 
+in minutes. If the  
 .I RANDOM_DELAY
-environment variable is set, then the value of 
+environment variable is set, then a random value between 0 and 
 .I RANDOM_DELAY 
-is added to the delay. The value in 
-.I RANDOM_DELAY 
-denotes a maximal additional delay in minutes, where the minimum delay value is set, to user delay from anacrontab. A 
+minutes will be added to the start up delay of the jobs. 
+For example a 
 .I RANDOM_DELAY 
 set to 12 would therefore add, randomly, between 0 and 12 minutes to the user defined delay.
 The
