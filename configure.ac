@@ -208,8 +208,9 @@ AC_ARG_WITH(audit,
         [ if test "x$withval" != "xno" ; then
                 saved_LIBS="$LIBS"
                 AC_DEFINE(WITH_AUDIT,1,[Define if you want Audit trails.])
-                SELINUX_MSG="yes"
                 AC_CHECK_HEADER([libaudit.h], ,AC_MSG_ERROR(Audit trails requires libaudit.h header))
+                AC_CHECK_LIB(audit, audit_open, [ LIBAUDIT="-laudit" ],
+                    AC_MSG_ERROR(Audit support needs audit libraries.))
                 LIBS="$saved_LIBS $LIBAUDIT"
                 AC_SUBST(LIBAUDIT)
         fi ]
