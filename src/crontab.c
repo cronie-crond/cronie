@@ -436,10 +436,18 @@ static void edit_cmd(void) {
 		perror(Filename);
 		exit(ERROR_EXIT);
 	}
+        if (swap_uids() == -1) {
+                perror("swapping uids");
+                exit(ERROR_EXIT);
+        }
 	/* Set it to 1970 */
 	utimebuf.actime = 0;
 	utimebuf.modtime = 0;
 	utime(Filename, &utimebuf);
+	if (swap_uids_back() == -1) {
+		perror("swapping uids");
+		exit(ERROR_EXIT);
+	}
   again:
 	rewind(NewCrontab);
 	if (ferror(NewCrontab)) {
