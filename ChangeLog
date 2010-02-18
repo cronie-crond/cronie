@@ -1,3 +1,87 @@
+2010-02-17  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/crontab.c: CVE-2010-0424 -- crontab -e crontab file timestamp
+	race condition When run as "crontab -e", crontab creates a temporary file in /tmp,
+	copies the contents of an existing crontab to this file, and then
+	calls utime() on the temporary file name to set its mtime and atime
+	to 0, in order to check after editing whether or not the file has
+	been modified.  Since the file is created with the user's euid, and
+	because utime is called on the file as root, an attacker can replace
+	the temporary file after it is created with a symlink to any file or
+	folder on disk, which will then have its atime and mtime set to 0.
+	This is certainly not a critical issue, but this action can be used
+	to deny service in many scenarios. For example, the cron daemon
+	checks the mtime of the crontab spool folder and its contents to
+	determine whether or not it needs to update its database of
+	cronjobs, and if these times are reset to 0, no new cronjobs will be
+	added. Other daemons relying on accurate timestamps may be similarly
+	affected. Finally, build tools such as make could be tricked into
+	not re-compiling source, based on an old timestamp.  Thanks to: Dan
+	Rosenberg
+
+2010-02-16  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac: Dynamic shared libraries -laudit There is need to add -laudit into gcc options because now it's not
+	found automatically. Based on:
+	http://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
+
+2010-02-12  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/anacrontab.5: Make man page more readable based on #564206.
+
+2010-01-25  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* crond.sysconfig, cronie.init: CRON_VALIDATE_MAILRCPTS was removed,
+	because it was not used anyway.
+
+2010-01-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/do_command.c, src/funcs.h, src/security.c: With NFS homes
+	can't be job executed, because root can't access this directory.
+
+2010-01-05  Will Woods <wwoods@redhat.com>
+
+	* man/cron.8, src/do_command.c: Disable mailing output.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-01-05  Will Woods <wwoods@redhat.com>
+
+	* man/cron.8, src/cron.c, src/do_command.c, src/globals.h: Output
+	could be redirectered to syslog.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-12-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/security.c: Cron doesn't use environment values from
+	/etc/security/pam_env.conf.  This was fixed by moving pam_setcred
+	into first part of authentication of pam.
+
+2009-11-27  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* cronie.init: Initscript: if unprivileged user stop deamon, it
+	should return 4.
+
+2009-11-27  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* cronie.init: Initscript: if unprivileged user restart deamon, it
+	should return 4.
+
+2009-11-05  Guido Trentalancia <guido@trentalancia.com>
+
+	* src/security.c: This function will be probably removed from
+	libselinux, so it is added into source code here.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2009-11-05  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* pam/crond: One line was missing in pam authentication. rhbz#533189
+
+2009-11-03  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* Makefile.am, configure.ac: Autotools - Makefile includes
+	dailyjobs, configure has new version.
+
+2009-11-03  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog: New release 1.4.3.
+
 2009-11-03  SATOH Fumiyasu <fumiyas@osstech.co.jp>
 
 	* src/misc.c: Fix "warning: unused variable" if LOG_FILE is not
