@@ -204,7 +204,11 @@ CRON_TZ=Japan
 5 4 * * sun     echo "run at 5 after 4 every sunday"                                                                          
 .fi
 .SH Jobs in /etc/cron.d/
-The jobs in cron.d are system jobs, which are used usually for more than
+The jobs in 
+.I cron.d 
+and 
+.I /etc/crontab 
+are system jobs, which are used usually for more than
 one user. That's the reason why is name of the user needed. MAILTO on the first line
 is optional.
 .SH EXAMPLE FOR JOB IN /etc/cron.d/job
