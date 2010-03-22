@@ -218,8 +218,11 @@ int cron_change_user_permanently(struct passwd *pw, char *homedir) {
 		return -1;
 	}
 	if (chdir(homedir) == -1) {
-		log_it("CRON", getpid(), "ERROR chdir failed", homedir, errno);
-		return -1;
+		if (setenv(homedir, "/", 0) == -1) {
+			log_it("CRON", getpid(), "ERROR chdir failed", homedir, errno);
+			return -1;
+		}
+		chdir("/");
 	}
 
 	return 0;
