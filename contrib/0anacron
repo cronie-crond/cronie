@@ -1,6 +1,6 @@
 #!/bin/bash
 #in case file doesn't exist 
-if test -x /var/spool/anacron/cron.daily; then
+if test -r /var/spool/anacron/cron.daily; then
     day=`cat /var/spool/anacron/cron.daily`
 fi
 if [ `date +%Y%m%d` = "$day" ]; then
