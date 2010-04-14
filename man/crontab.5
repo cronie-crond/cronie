@@ -263,6 +263,10 @@ Names of months or days of the week can be specified by name.
 Environment variables can be set in the crontab.  In BSD or ATT, the
 environment handed to child processes is basically the one from /etc/rc.
 .PP
+If the uid of the owner is 0 (root), he can put a "-" as first character of
+a crontab entry. This will prevent cron from writing a syslog message about
+this command getting executed.
+.PP
 Command output is mailed to the crontab owner (BSD can't do this), can be
 mailed to a person other than the crontab owner (SysV can't do this), or the
 feature can be turned off and no mail will be sent at all (SysV can't do this

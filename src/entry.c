@@ -99,6 +99,26 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 	e = (entry *) calloc(sizeof (entry), sizeof (char));
 
+	/* check for '-' as a first character, this option will disable 
+	* writing a syslog message about command getting executed
+	*/
+	if (ch == '-') {
+	/* if we are editing system crontab or user uid is 0 (root) 
+	* we are allowed to disable logging 
+	*/
+		if (pw == NULL || pw->pw_uid == 0)
+			e->flags |= DONT_LOG;
+		else {
+			log_it("CRON", getpid(), "error", "You could disable logging to syslog (using '-' option)" \
+				"only in system crontabs or crontabs assigned to user with uid 0 (root)", 0);
+			ecode = e_option;
+			goto eof;
+		}
+		ch = get_char(file);
+		if (ch == EOF)
+			return NULL;
+	}
+
 	if (ch == '@') {
 		/* all of these should be flagged and load-limited; i.e.,
 		 * instead of @hourly meaning "0 * * * *" it should mean
