@@ -36,8 +36,31 @@
 #ifdef WITH_PAM
 static pam_handle_t *pamh = NULL;
 static int pam_session_opened = 0;	//global for open session
+
+static int
+cron_conv(int num_msg, const struct pam_message **msgm,
+        struct pam_response **response, void *appdata_ptr)
+{
+        struct pam_message**m = msgm;
+        int i;
+
+        for (i = 0; i < num_msg; i++) {
+                switch (m[i]->msg_style) {
+                        case PAM_ERROR_MSG:
+                        case PAM_TEXT_INFO:
+                                if (m[i]->msg != NULL) {
+                                        log_it("CRON", getpid(), "pam_message", m[i]->msg, 0);
+                                }
+                        break;
+                        default:
+                        break;
+                }
+        }
+        return (0);
+}
+
 static const struct pam_conv conv = {
-	NULL
+	cron_conv, NULL
 };
 
 static int cron_open_pam_session(struct passwd *pw);
