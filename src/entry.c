@@ -109,8 +109,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		if (pw == NULL || pw->pw_uid == 0)
 			e->flags |= DONT_LOG;
 		else {
-			log_it("CRON", getpid(), "error", "You could disable logging to syslog (using '-' option)" \
-				"only in system crontabs or crontabs assigned to user with uid 0 (root)", 0);
+			log_it("CRON", getpid(), "ERROR", "Only privileged user can disable logging", 0);
 			ecode = e_option;
 			goto eof;
 		}
@@ -300,7 +299,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 			e->envp = tenvp;
 		}
 		else
-			log_it("CRON", getpid(), "error", "can't set SHELL", 0);
+			log_it("CRON", getpid(), "ERROR", "can't set SHELL", 0);
 	}
 	if (!env_get("HOME", e->envp)) {
 		if (glue_strings(envstr, sizeof envstr, "HOME", pw->pw_dir, '=')) {
@@ -311,7 +310,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 			e->envp = tenvp;
 		}
 		else
-			log_it("CRON", getpid(), "error", "can't set HOME", 0);
+			log_it("CRON", getpid(), "ERROR", "can't set HOME", 0);
 	}
 #ifndef LOGIN_CAP
 	/* If login.conf is in used we will get the default PATH later. */
@@ -324,7 +323,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 			e->envp = tenvp;
 		}
 		else
-			log_it("CRON", getpid(), "error", "can't set PATH", 0);
+			log_it("CRON", getpid(), "ERROR", "can't set PATH", 0);
 	}
 #endif /* LOGIN_CAP */
 	if (glue_strings(envstr, sizeof envstr, "LOGNAME", pw->pw_name, '=')) {
@@ -335,7 +334,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		e->envp = tenvp;
 	}
 	else
-		log_it("CRON", getpid(), "error", "can't set LOGNAME", 0);
+		log_it("CRON", getpid(), "ERROR", "can't set LOGNAME", 0);
 #if defined(BSD) || defined(__linux)
 	if (glue_strings(envstr, sizeof envstr, "USER", pw->pw_name, '=')) {
 		if ((tenvp = env_set(e->envp, envstr)) == NULL) {
@@ -345,7 +344,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		e->envp = tenvp;
 	}
 	else
-		log_it("CRON", getpid(), "error", "can't set USER", 0);
+		log_it("CRON", getpid(), "ERROR", "can't set USER", 0);
 #endif
 
 	Debug(DPARS, ("load_entry()...about to parse command\n"))

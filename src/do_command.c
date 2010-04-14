@@ -40,7 +40,7 @@ void do_command(entry * e, user * u) {
 		 */
 		switch (fork()) {
 	case -1:
-		log_it("CRON", pid, "can't fork", "do_command", errno);
+		log_it("CRON", pid, "CAN'T FORK", "do_command", errno);
 		break;
 	case 0:
 		/* child process */
@@ -100,12 +100,12 @@ static void child_process(entry * e, user * u) {
 	/* create some pipes to talk to our future child
 	 */
 	if (pipe(stdin_pipe) == -1) {	/* child's stdin */
-		log_it("CRON", pid, "pipe() failed", "stdin_pipe", errno);
+		log_it("CRON", pid, "PIPE() FAILED", "stdin_pipe", errno);
 		return;
 	}
 
 	if (pipe(stdout_pipe) == -1) {	/* child's stdout */
-		log_it("CRON", pid, "pipe() failed", "stdout_pipe", errno);
+		log_it("CRON", pid, "PIPE() FAILED", "stdout_pipe", errno);
 		return;
 	}
 
@@ -150,7 +150,7 @@ static void child_process(entry * e, user * u) {
 	 */
 	switch ((jobpid = fork())) {
 	case -1:
-		log_it("CRON", pid, "can't fork", "child_process", errno);
+		log_it("CRON", pid, "CAN'T FORK", "child_process", errno);
 		cron_close_pam();
 		exit(ERROR_EXIT);
 	 /*NOTREACHED*/ case 0:
