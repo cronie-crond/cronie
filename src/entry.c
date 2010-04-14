@@ -349,8 +349,6 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 	Debug(DPARS, ("load_entry()...about to parse command\n"))
 
-	unget_char(ch, file);
-
 	/* Everything up to the next \n or EOF is part of the command...
 	 * too bad we don't know in advance how long it will be, since we
 	 * need to malloc a string for it... so, we limit it to MAX_COMMAND.
