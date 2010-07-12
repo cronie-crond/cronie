@@ -158,6 +158,7 @@ This requirement can be overridden by using the \fB-p\fP option on the crond com
 If inotify support is in use, changes in the symlinked crontabs are not automatically
 noticed by the cron daemon. The cron daemon must receive a SIGHUP to reload the crontabs.
 This is a limitation of inotify API.
+The syslog output will be used instead of mail, when sendmail isn't installed.
 
 .SH "SEE ALSO"
 .BR crontab (1),

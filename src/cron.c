@@ -220,6 +220,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	if (access("/usr/sbin/sendmail", X_OK) != 0) {
+		SyslogOutput=1;
+		log_it("CRON", pid, "INFO","Syslog will be used instead of sendmail.", errno);
+	}
+
 	pid = getpid();
 	acquire_daemonlock(0);
 	database.head = NULL;
