@@ -116,9 +116,10 @@ A PAM configuration file for crond is installed in /etc/pam.d/crond.
 crond loads the PAM environment from the pam_env module, but these
 can be overriden by settings in the appropriate crontab file.
 .SH "OPTIONS"
-As a special case, the string
-.I "off"
-will disable sending mail.
+.TP
+.B "\-i"
+By default are crontables checked by inotify. It could be switched
+back to old behaviour, when daemon is running with this option.
 .TP
 .B "\-s"
 This option will direct cron to send job output to the system log using
@@ -133,7 +134,10 @@ This option allows you to specify a shell command string to use for sending cron
 output instead of
 .BR sendmail (8).
 This command must accept a fully formatted mail message (with headers) on stdin and send it
-as a mail message to the recipients specified in the mail headers.
+as a mail message to the recipients specified in the mail headers. As a special case, the string
+.I "off"
+will disable sending mail.
+
 .TP
 .B "\-n"
 This option changes default behavior causing it to run crond in the foreground.  This can be
