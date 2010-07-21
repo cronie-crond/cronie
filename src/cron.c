@@ -123,11 +123,17 @@ static void handle_signals(cron_db * database) {
 static void usage(void) {
 	const char **dflags;
 
-	fprintf(stderr, "usage:  %s [-n] [-p] [-s] [-i] [-m <mail command>] [-x [",
+	fprintf(stderr, "usage:  %s [-h] print this message \n \
+		[-i] deamon runs without inotify support \n \
+		[-m <mail command>] off or specify prefered client for sending mails \n \
+		[-n] run in foreground \n \
+		[-p] permit any crontab \n \
+		[-s] log into syslog instead of sending mails \n \
+		[-x [",
 		ProgramName);
 	for (dflags = DebugFlagNames; *dflags; dflags++)
 		fprintf(stderr, "%s%s", *dflags, dflags[1] ? "," : "]");
-	fprintf(stderr, "]\n");
+	fprintf(stderr, "] print debug information\n");
 	exit(ERROR_EXIT);
 }
 
@@ -587,29 +593,31 @@ static void sigchld_reaper(void) {
 static void parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "npsix:m:"))) {
+	while (-1 != (argch = getopt(argc, argv, "hnpsix:m:"))) {
 		switch (argch) {
-		default:
-			usage();
-		case 'x':
-			if (!set_debug_flags(optarg))
+			case 'x':
+				if (!set_debug_flags(optarg))
+					usage();
+				break;
+			case 'n':
+				NoFork = 1;
+				break;
+			case 'p':
+				PermitAnyCrontab = 1;
+				break;
+			case 's':
+				SyslogOutput = 1;
+				break;
+			case 'i':
+				DisableInotify = 1;
+				break;
+			case 'm':
+				strncpy(MailCmd, optarg, MAX_COMMAND);
+				break;
+			case 'h':
+			default:
 				usage();
-			break;
-		case 'n':
-			NoFork = 1;
-			break;
-		case 'p':
-			PermitAnyCrontab = 1;
-			break;
-		case 's':
-			SyslogOutput = 1;
-			break;
-		case 'i':
-			DisableInotify = 1;
-			break;
-		case 'm':
-			strncpy(MailCmd, optarg, MAX_COMMAND);
-			break;
+				break;
 		}
 	}
 }
