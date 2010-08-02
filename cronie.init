@@ -44,11 +44,10 @@ start() {
     [ -x $exec ] || exit 5
     [ -f $config ] || exit 6
     echo -n $"Starting $prog: "
-    daemon $prog $CRONDARGS && success || failure
+    daemon $prog $CRONDARGS
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
-    return $retval
 }
 
 stop() {
@@ -66,7 +65,6 @@ stop() {
     retval=$?
     echo
     [ $retval -eq 0 ] && rm -f $lockfile
-    return $retval
 }
 
 restart() {
