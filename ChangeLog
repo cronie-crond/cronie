@@ -1,3 +1,73 @@
+2010-08-02  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* cronie.init: OK value printed twice Fix based on 615107. There were too many OK's messages.
+
+2010-07-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c: Help and usage fix Option -h was added. Also details about options were added into
+	usage.
+
+2010-07-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8: man crond -i Document missing option.
+
+2010-07-12  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8, src/cron.c: Syslog output will be used instead of mail If sendmail isn't installed, syslog is used. This patch should also
+	solve problem with RPM requirements of sendmail (and which mail
+	should be installed by default).  Based on: https://bugzilla.redhat.com/show_bug.cgi?id=472710#c42
+
+2010-04-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/entry.c: Remove the whole unused part.
+
+2010-04-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/entry.c: Remove 'dont log' part which probably never worked.
+
+2010-04-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/do_command.c, src/entry.c: Beautify error outputs.
+
+2010-04-14  Michal Seben <mseben@suse.cz>
+
+	* man/crontab.5, src/entry.c: Option "-" don't log jobs as root If the uid of the owner is 0 (root), he can put a "-" as first
+	character of a crontab entry. This will prevent cron from writing a
+	syslog message about this command getting executed.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-04-14  Michal Seben <mseben@suse.cz>
+
+	* src/security.c: Correctly reported PAM errors cron_conv could be helpfull for debug purposes, when something bad
+	happens with pam e.g. : expired user password - without cron_conv
+	cronie doesn't report usefull info in syslog messages  (it just
+	write no conversation function error to messages file),if you want
+	to do quick test of pam conversation function, you  could set
+	PASS_MAX_DAYS and PASS_WARN_AGE in etc/login.defs , add new user and
+	for this user create cron rule (crontab -e) Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-03-25  Andrew Man-Hon Lau <amlau@alum.mit.edu>
+
+	* contrib/0anacron: 0anacron should check only readability.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-03-23  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/security.c: Revert previous change. The code which control the
+	input entry should be sufficient. Only "/" are removed from scripts.
+
+2010-03-22  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* contrib/0hourly, contrib/dailyjobs, src/security.c: In system
+	tables was hardcoded home directory to "/". This was changed to
+	switching to "/" only when home for user isn't defined.  Based on rhbz#575419
+
+2010-02-23  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/crontab.5: Definition of system crontables.
+
+2010-02-18  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: New release
+
 2010-02-17  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* src/crontab.c: CVE-2010-0424 -- crontab -e crontab file timestamp
