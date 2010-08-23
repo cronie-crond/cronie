@@ -493,6 +493,7 @@ main(int argc, char *argv[])
 
     record_start_time();
     read_tab(cwd);
+    close(cwd);
     arrange_jobs();
 
     if (testing_only)
