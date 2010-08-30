@@ -214,7 +214,7 @@ tend_mailer(job_rec *jr, int status)
 {
     if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 	complain("Tried to mail output of job `%s', "
-		 "but mailer process (" SENDMAIL ") exited with ststus %d",
+		 "but mailer process (" SENDMAIL ") exited with status %d",
 		 jr->ident, WEXITSTATUS(status));
     else if (!WIFEXITED(status) && WIFSIGNALED(status))
 	complain("Tried to mail output of job `%s', "
