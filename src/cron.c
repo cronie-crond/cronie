@@ -19,6 +19,11 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * Modified 2010/09/12 by Colin Dean, Durham University IT Service,
+ * to add clustering support.
+ */
+
 #define	MAIN_PROGRAM
 
 #include <cron.h>
@@ -47,6 +52,13 @@ static int DisableInotify;
 
 #if defined WITH_INOTIFY
 
+/*
+ * Note that inotify isn't safe to use with clustering, as changes made
+ * to a shared filesystem on one system cannot be relied on to be notified
+ * on another system, so use of inotify is disabled at runtime if run with
+ * clustering enabled.
+ */
+
 # define NUM_WATCHES 3
 
 int wd[NUM_WATCHES];
@@ -54,6 +66,9 @@ const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB};
 
 void set_cron_unwatched(int fd) {
 	int i;
+
+	if (EnableClustering)
+		return;
 
 	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
 		if (wd[i] < 0) {
@@ -67,7 +82,7 @@ void set_cron_watched(int fd) {
 	pid_t pid = getpid();
 	int i;
 
-	if (fd < 0) {
+	if (fd < 0 || EnableClustering) {
 		inotify_enabled = 0;
 		return;
 	}
@@ -128,6 +143,7 @@ static void usage(void) {
 		[-m <mail command>] off or specify prefered client for sending mails \n \
 		[-n] run in foreground \n \
 		[-p] permit any crontab \n \
+		[-c] enable clustering support \n \
 		[-s] log into syslog instead of sending mails \n \
 		[-x [",
 		ProgramName);
@@ -593,7 +609,7 @@ static void sigchld_reaper(void) {
 static void parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "hnpsix:m:"))) {
+	while (-1 != (argch = getopt(argc, argv, "hnpsix:m:c"))) {
 		switch (argch) {
 			case 'x':
 				if (!set_debug_flags(optarg))
@@ -613,6 +629,9 @@ static void parse_args(int argc, char *argv[]) {
 				break;
 			case 'm':
 				strncpy(MailCmd, optarg, MAX_COMMAND);
+				break;
+			case 'c':
+		        	EnableClustering = 1;
 				break;
 			case 'h':
 			default:

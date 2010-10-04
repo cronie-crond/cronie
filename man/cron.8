@@ -17,14 +17,17 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 .\" OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
+.\" Modified 2010/09/12 by Colin Dean, Durham University IT Service,
+.\" to add clustering support.
+.\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
 .\" 
-.TH CRON "8" "December 2009" "Marcela Mašláňová" "Cronie Users' Manual"
+.TH CRON "8" "22 September 2010"
 .SH NAME
 cron \- daemon to execute scheduled commands
 .SH SYNOPSIS
 .B cron
-.RB [ -n " | " -p " | " -s " | " -m \fP\fI<mail command>\fP\fB ]
+.RB [ -n " | " -p " | " -c " | " -s " | " -m \fP\fI<mail command>\fP\fB ]
 .br
 .B cron
 .B -x 
@@ -146,6 +149,9 @@ useful when starting it out of init.
 .B "\-p"
 Cron permit any crontab, which user set.
 .TP
+.B "\-c"
+This option enables clustering support, as described below.
+.TP
 .B "\-x"
 With this option is possible to set debug flags.
 .SH SIGNALS
@@ -153,6 +159,41 @@ On receipt of a \s-2SIGHUP\s+2, the cron daemon will close and reopen its
 log file.  This is useful in scripts which rotate and age log files.  
 Naturally this is not relevant if cron was built to use
 .IR syslog (3).
+.SH CLUSTERING SUPPORT
+In this version of
+.BR cron
+it is possible to use a network-mounted shared
+.I /var/spool/cron 
+across a cluster of hosts, and to specify that only one of the hosts should
+run the crontab jobs in this directory at any one time, by starting
+.I cron
+with the \fB-c\fP option, and having a file
+.I /var/spool/cron/.cron.hostname
+containing just one line, which is the hostname of whichever host in the
+cluster should run these jobs.  If this file does not exist, or the hostname
+in it does not match that returned by 
+.BR gethostname (2)
+then all crontab files in this directory are ignored.  This has no effect on
+cron jobs specified in the file
+.I /etc/crontab
+or in files in the
+.I /etc/cron.d
+directory, which are always run, and considered host-specific.
+.PP
+Rather than editing
+.I /var/spool/cron/.cron.hostname
+directly, you should use the \fB-h\fP option of
+.BR crontab (1)
+to specify the host.
+.PP
+You should ensure that all hosts in a cluster, and the fileserver from which
+they mount the shared crontab directory, have closely synchronised clocks,
+e.g. using
+.BR ntpd (8)
+, otherwise the results will be very unpredictable.
+.PP
+This option automatically disables inotify support, because inotify cannot be
+relied on with network-mounted shared filesystems.
 .SH CAVEATS
 The
 .BR crontab
@@ -173,3 +214,4 @@ The syslog output will be used instead of mail, when sendmail isn't installed.
 .nf
 Paul Vixie <vixie@isc.org>
 Marcela Mašláňová <mmaslano@redhat.com>
+Colin Dean <c.c.dean@durham.ac.uk>

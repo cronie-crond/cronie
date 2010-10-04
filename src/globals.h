@@ -19,6 +19,11 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * Modified 2010/09/12 by Colin Dean, Durham University IT Service,
+ * to add clustering support.
+ */
+
 #ifdef MAIN_PROGRAM
 # define XTRN
 # define INIT(x) = x
@@ -67,6 +72,7 @@ XTRN int	NoFork;
 XTRN int        PermitAnyCrontab;
 XTRN char       MailCmd[MAX_COMMAND];
 XTRN char       cron_default_mail_charset[MAX_ENVSTR];
+XTRN int        EnableClustering;
  
 #if DEBUGGING
 XTRN int	DebugFlags INIT(0);

@@ -22,6 +22,11 @@
 /* vix 26jan87 [RCS has the log]
  */
 
+/*
+ * Modified 2010/09/12 by Colin Dean, Durham University IT Service,
+ * to add clustering support.
+ */
+
 #include <cron.h>
 
 #define TMAX(a,b) ((a)>(b)?(a):(b))
@@ -153,6 +158,49 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	}
 }
 
+static int
+cluster_host_is_local(void)
+{
+	char filename[MAXNAMLEN+1];
+	int is_local;
+	FILE *f;
+	char hostname[MAXHOSTNAMELEN], myhostname[MAXHOSTNAMELEN];
+
+	if (!EnableClustering)
+		return (1);
+
+	/* to allow option of NFS-mounting SPOOL_DIR on a cluster of
+	 * hosts and to only use crontabs here on any one host at a
+	 * time, allow for existence of a CRON_HOSTNAME file, and if
+	 * it doesn't exist, or exists but does not contain this
+	 * host's hostname, then skip the crontabs.
+	 *
+	 * Note: for safety's sake, no CRON_HOSTNAME file means skip,
+	 * otherwise its accidental deletion could result in multiple
+	 * cluster hosts running the same cron jobs, which is
+	 * potentially worse.
+	 */
+
+	is_local = 0;
+	if (glue_strings(filename, sizeof filename, SPOOL_DIR, CRON_HOSTNAME, '/')) {
+		if ((f = fopen(filename, "r"))) {
+
+			if (EOF != get_string(hostname, MAXHOSTNAMELEN, f, "\n") &&
+			    gethostname(myhostname, MAXHOSTNAMELEN) == 0) {
+				is_local = (strcmp(myhostname, hostname) == 0);
+			} else {
+				Debug(DLOAD, ("cluster: hostname comparison error\n"));
+			}
+
+			fclose(f);
+		} else {
+			Debug(DLOAD, ("cluster: file %s not found\n", filename));
+		}
+	}
+
+	return (is_local);
+}
+
 #if defined WITH_INOTIFY
 void check_inotify_database(cron_db * old_db) {
 	cron_db new_db;
@@ -163,7 +211,7 @@ void check_inotify_database(cron_db * old_db) {
 	int retval = 0;
 	char buf[BUF_LEN];
 	pid_t pid = getpid();
-
+	int is_local;
 	time.tv_sec = 0;
 	time.tv_usec = 0;
 
@@ -226,7 +274,9 @@ void check_inotify_database(cron_db * old_db) {
 			log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
 		}
 		else {
-			while (NULL != (dp = readdir(dir))) {
+			is_local = cluster_host_is_local();
+
+			while (is_local && NULL != (dp = readdir(dir))) {
 				char fname[MAXNAMLEN + 1], tabname[MAXNAMLEN + 1];
 
 				if (not_a_crontab(dp))
@@ -281,6 +331,7 @@ int load_database(cron_db * old_db) {
 	DIR_T *dp;
 	DIR *dir;
 	pid_t pid = getpid();
+	int is_local;
 
 	Debug(DLOAD, ("[%ld] load_database()\n", (long) pid))
 
@@ -371,7 +422,10 @@ int load_database(cron_db * old_db) {
 		log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
 	}
 	else {
-		while (NULL != (dp = readdir(dir))) {
+
+		is_local = cluster_host_is_local();
+
+		while (is_local && NULL != (dp = readdir(dir))) {
 			char fname[MAXNAMLEN + 1], tabname[MAXNAMLEN + 1];
 
 			if (not_a_crontab(dp))
@@ -448,6 +502,10 @@ static int not_a_crontab(DIR_T * dp) {
 	if (dp->d_name[0] == '#')
 		return (1);
 
+	/* ignore CRON_HOSTNAME file (in case doesn't start with ".")  */
+	if (0 == strcmp(dp->d_name, CRON_HOSTNAME))
+		return(1);
+
 	len = strlen(dp->d_name);
 
 	if (len >= MAXNAMLEN)
@@ -479,7 +537,7 @@ static void max_mtime(char *dir_name, struct stat *max_st) {
 	while (NULL != (dp = readdir(dir))) {
 		char tabname[MAXNAMLEN + 1];
 
-		if (not_a_crontab(dp))
+		if ( not_a_crontab ( dp ) && strcmp(dp->d_name, CRON_HOSTNAME) != 0)
 			continue;
 
 		if (!glue_strings(tabname, sizeof tabname, dir_name, dp->d_name, '/'))
