@@ -715,7 +715,7 @@ static int replace_cmd(void) {
 
 	file_owner = (getgid() == getegid())? ROOT_UID : pw->pw_uid;
 
-#ifdef HAS_FCHOWN
+#ifdef HAVE_FCHOWN
 	if (fchown(fileno(tmp), file_owner, -1) < OK) {
 		perror("fchown");
 		fclose(tmp);
