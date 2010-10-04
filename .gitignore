@@ -19,6 +19,7 @@ man/Makefile
 man/Makefile.in
 missing
 stamp-h1
+tags
 .deps
 *.o
 src/crond

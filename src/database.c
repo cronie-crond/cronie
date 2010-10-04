@@ -211,7 +211,7 @@ void check_inotify_database(cron_db * old_db) {
 	int retval = 0;
 	char buf[BUF_LEN];
 	pid_t pid = getpid();
-	int is_local;
+	int is_local = 0;
 	time.tv_sec = 0;
 	time.tv_usec = 0;
 
@@ -331,7 +331,7 @@ int load_database(cron_db * old_db) {
 	DIR_T *dp;
 	DIR *dir;
 	pid_t pid = getpid();
-	int is_local;
+	int is_local = 0;
 
 	Debug(DLOAD, ("[%ld] load_database()\n", (long) pid))
 
