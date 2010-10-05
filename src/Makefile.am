@@ -45,10 +45,11 @@ cron-paths.h: Makefile
 			 */ \
 	#define SPOOL_DIR	"$(SPOOL_DIR)" \
 	\
-			/* CRON_HOSTNAME is file in SPOOL_DIR which, if it \
-			 * exists, and does not just contain a line matching \
-			 * the name returned by gethostname(), causes all \
-			 * crontabs in SPOOL_DIR to be ignored.  This is \
+			/* CRON_HOSTNAME is file in SPOOL_DIR which, if cron is \
+			 * run with the clustering support enabled and the file \
+			 * does not exist or does not just contain a line \
+			 * matching the name returned by gethostname(), causes \
+			 * all crontabs in SPOOL_DIR to be ignored.  This is \
 			 * intended to be used when clustering hosts sharing \
 			 * one NFS-mounted SPOOL_DIR, and where only one host \
 			 * should use the crontab files here at any one time. \
