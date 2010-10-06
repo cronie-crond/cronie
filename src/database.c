@@ -211,7 +211,6 @@ void check_inotify_database(cron_db * old_db) {
 	int retval = 0;
 	char buf[BUF_LEN];
 	pid_t pid = getpid();
-	int is_local = 0;
 	time.tv_sec = 0;
 	time.tv_usec = 0;
 
@@ -274,9 +273,7 @@ void check_inotify_database(cron_db * old_db) {
 			log_it("CRON", pid, "OPENDIR FAILED", SPOOL_DIR, errno);
 		}
 		else {
-			is_local = cluster_host_is_local();
-
-			while (is_local && NULL != (dp = readdir(dir))) {
+			while (NULL != (dp = readdir(dir))) {
 				char fname[MAXNAMLEN + 1], tabname[MAXNAMLEN + 1];
 
 				if (not_a_crontab(dp))
