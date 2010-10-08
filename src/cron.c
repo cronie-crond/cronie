@@ -67,9 +67,6 @@ const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB};
 void set_cron_unwatched(int fd) {
 	int i;
 
-	if (EnableClustering)
-		return;
-
 	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
 		if (wd[i] < 0) {
 			inotify_rm_watch(fd, wd[i]);
@@ -82,7 +79,7 @@ void set_cron_watched(int fd) {
 	pid_t pid = getpid();
 	int i;
 
-	if (fd < 0 || EnableClustering) {
+	if (fd < 0) {
 		inotify_enabled = 0;
 		return;
 	}
@@ -120,7 +117,7 @@ static void handle_signals(cron_db * database) {
 		got_sighup = 0;
 #if defined WITH_INOTIFY
 		/* watches must be reinstated on reload */
-		if (inotify_enabled) {
+		if (inotify_enabled && (EnableClustering != 1)) {
 			set_cron_unwatched(database->ifd);
 			inotify_enabled = 0;
 		}
@@ -312,7 +309,7 @@ int main(int argc, char *argv[]) {
 			check_inotify_database(&database);
 		}
 		else {
-			if (load_database(&database))
+			if (load_database(&database) && EnableClustering)
 				/* try reinstating the watches */
 				set_cron_watched(fd);
 		}
@@ -410,7 +407,7 @@ int main(int argc, char *argv[]) {
 	}
 
 #if defined WITH_INOTIFY
-	if (inotify_enabled)
+	if (inotify_enabled && (EnableClustering != 1))
 		set_cron_unwatched(fd);
 
 	if (fd >= 0 && close(fd) < 0)
@@ -631,7 +628,7 @@ static void parse_args(int argc, char *argv[]) {
 				strncpy(MailCmd, optarg, MAX_COMMAND);
 				break;
 			case 'c':
-		        	EnableClustering = 1;
+				EnableClustering = 1;
 				break;
 			case 'h':
 			default:
