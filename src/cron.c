@@ -254,8 +254,8 @@ int main(int argc, char *argv[]) {
 
 	fd = -1;
 #if defined WITH_INOTIFY
-	if (DisableInotify) {
-		log_it("CRON", getpid(), "No inotify - daemon runs with -i option", 
+	if (DisableInotify || (EnableClustering != 1)) {
+		log_it("CRON", getpid(), "No inotify - daemon runs with -i or -c option", 
 			"", 0);
 	}
 	else {
