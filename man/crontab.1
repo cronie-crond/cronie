@@ -37,8 +37,11 @@ crontab \- maintain crontab files for individual users
 .RB [ -s ]
 .br
 .B crontab
-.BR -h\ [
+.BR -n\ [
 .IR "hostname " ]
+.br
+.B crontab
+.BR -c
 .SH DESCRIPTION
 .I Crontab
 is the program used to install, remove or list the tables
@@ -130,30 +133,36 @@ MLS_LEVEL setting to the crontab file before editing / replacement
 occurs - see the documentation of MLS_LEVEL in 
 .BR crontab(5)\.
 .TP
-.B "\-h"
+.B "\-n"
 This option is only relevant if
 .BR cron (8)
 was started with the \fB-c\fP option, to enable clustering support.  It is
 used to set which host in the cluster should run the jobs specified in the
 crontab files in the directory
-.I /var/spool/cron 
-or to display the current setting.  If a hostname is supplied, then the host
-whose hostname, as returned by
-.BR gethostname(2)\,
-will be selected to run these cron jobs subseqently.  If there is no host
-in the cluster matching that hostname, or you explicitly specify an empty
-hostname, then these jobs will not be run at all.  As a special case,
-specifying "localhost" will select the host on which
-.BR crontab(1)
-is being run.  Using this option has no effect on
+.I /var/spool/cron\.
+If a hostname is supplied, then the host whose hostname as returned by
+.BR gethostname(2)
+matches this will be selected to run these cron jobs subseqently.  If there
+is no host in the cluster matching that hostname, or you explicitly specify
+an empty hostname, then these jobs will not be run at all.  If the hostname
+is omitted, the name of the local host as returned by
+.BR gethostname(2)
+is assumed.  Using this option has no effect on
 .I /etc/crontab
 and the files in the
 .I /etc/cron.d
-directory, which are always run, and considered host-specific.
-If no hostname is supplied, the name of the currently-selected host is
-displayed. Only root may set the hostname, but any user permitted to run
-cron may display it. For more details about clustering support, see
+directory, which are always run, and considered host-specific.  For more
+details about clustering support, see
 .BR cron (8)\.
+.TP
+.B "\-c"
+This option is only relevant if
+.BR cron (8)
+was started with the \fB-c\fP option, to enable clustering support.  It is
+used to query which host in the cluster is currently set to run the jobs
+specified in the crontab files in the directory
+.I /var/spool/cron
+, as set using the \fB-n\fP option.
 .SH "SEE ALSO"
 .BR crontab (5), cron (8)
 .SH FILES

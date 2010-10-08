@@ -40,21 +40,21 @@
 
 #define NHEADER_LINES 0
 
-enum opt_t {opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_host};
+enum opt_t {opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_hostset, opt_hostget};
 
 #if DEBUGGING
-static char *Options[] = {"???", "list", "delete", "edit", "replace", "host"};
+static char *Options[] = {"???", "list", "delete", "edit", "replace", "hostset", "hostget"};
 
 # ifdef WITH_SELINUX
-static char *getoptargs = "u:lerishx:";
+static char *getoptargs = "u:lerisncx:";
 # else
-static char *getoptargs = "u:lerihx:";
+static char *getoptargs = "u:lerincx:";
 # endif
 #else
 # ifdef WITH_SELINUX
-static char *getoptargs = "u:lerish";
+static char *getoptargs = "u:lerisnc";
 # else
-static char *getoptargs = "u:lerih";
+static char *getoptargs = "u:lerinc";
 # endif
 #endif
 static char *selinux_context = 0;
@@ -66,7 +66,7 @@ static char Host[MAXHOSTNAMELEN];
 static FILE *NewCrontab;
 static int CheckErrorCount;
 static int PromptOnDelete;
-static int HostSet;
+static int HostSpecified;
 static enum opt_t Option;
 static struct passwd *pw;
 static void list_cmd(void),
@@ -74,7 +74,7 @@ delete_cmd(void),
 edit_cmd(void),
 poke_daemon(void),
 check_error(const char *), parse_args(int c, char *v[]), die(int);
-static int replace_cmd(void), host_cmd(void);
+static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void);
 static char *host_specific_filename(char *filename, int prefix);
 static char *tmp_path(void);
 
@@ -82,13 +82,15 @@ static void usage(const char *msg) {
 	fprintf(stderr, "%s: usage error: %s\n", ProgramName, msg);
 	fprintf(stderr, "usage:\t%s [-u user] file\n", ProgramName);
 	fprintf(stderr, "\t%s [-u user] [ -e | -l | -r ]\n", ProgramName);
-	fprintf(stderr, "\t%s -h [ hostname ]\n", ProgramName);
+	fprintf(stderr, "\t%s -n [ hostname ]\n", ProgramName);
+	fprintf(stderr, "\t%s -c\n", ProgramName);
 	fprintf(stderr, "\t\t(default operation is replace, per 1003.2)\n");
 	fprintf(stderr, "\t-e\t(edit user's crontab)\n");
 	fprintf(stderr, "\t-l\t(list user's crontab)\n");
 	fprintf(stderr, "\t-r\t(delete user's crontab)\n");
 	fprintf(stderr, "\t-i\t(prompt before deleting user's crontab)\n");
-	fprintf(stderr, "\t-h\t(get or set host in cluster to run users' crontabs)\n");
+	fprintf(stderr, "\t-n\t(set host in cluster to run users' crontabs)\n");
+	fprintf(stderr, "\t-c\t(get host in cluster to run users' crontabs)\n");
 #ifdef WITH_SELINUX
 	fprintf(stderr, "\t-s\t(selinux context)\n");
 #endif
@@ -151,8 +153,12 @@ int main(int argc, char *argv[]) {
 		if (replace_cmd() < 0)
 			exitstatus = ERROR_EXIT;
 		break;
-	case opt_host:
-		if (host_cmd() < 0)
+	case opt_hostset:
+		if (hostset_cmd() < 0)
+			exitstatus = ERROR_EXIT;
+		break;
+	case opt_hostget:
+		if (hostget_cmd() < 0)
 			exitstatus = ERROR_EXIT;
 		break;
 	default:
@@ -180,7 +186,7 @@ static void parse_args(int argc, char *argv[]) {
 	Filename[0] = '\0';
 	Option = opt_unknown;
 	PromptOnDelete = 0;
-	HostSet = 0;
+	HostSpecified = 0;
 	while (-1 != (argch = getopt(argc, argv, getoptargs))) {
 		switch (argch) {
 #if DEBUGGING
@@ -190,11 +196,6 @@ static void parse_args(int argc, char *argv[]) {
 			break;
 #endif
 		case 'u':
-			if (Option == opt_host) {
-				fprintf(stderr,
-					"cannot use -u with -h\n");
-				exit(ERROR_EXIT);
-			}
 			if (MY_UID(pw) != ROOT_UID) {
 				fprintf(stderr, "must be privileged to use -u\n");
 				exit(ERROR_EXIT);
@@ -203,6 +204,12 @@ static void parse_args(int argc, char *argv[]) {
 			if (crontab_security_access() != 0) {
 				fprintf(stderr,
 					"Access denied by SELinux, must be privileged to use -u\n");
+				exit(ERROR_EXIT);
+			}
+
+			if (Option == opt_hostset || Option == opt_hostget) {
+				fprintf(stderr,
+					"cannot use -u with -n or -c\n");
 				exit(ERROR_EXIT);
 			}
 
@@ -241,15 +248,30 @@ static void parse_args(int argc, char *argv[]) {
 			}
 			break;
 #endif
-		case 'h':
+		case 'n':
+			if (MY_UID(pw) != ROOT_UID) {
+				fprintf(stderr,
+					"must be privileged to set host with -n\n");
+				exit(ERROR_EXIT);
+			}
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
 			if (strcmp(User, RealUser) != 0) {
 				fprintf(stderr,
-					"cannot use -u with -h\n");
+					"cannot use -u with -n or -c\n");
 				exit(ERROR_EXIT);
 			}
-			Option = opt_host;
+			Option = opt_hostset;
+			break;
+		case 'c':
+			if (Option != opt_unknown)
+				usage("only one operation permitted");
+			if (strcmp(User, RealUser) != 0) {
+				fprintf(stderr,
+					"cannot use -u with -n or -c\n");
+				exit(ERROR_EXIT);
+			}
+			Option = opt_hostget;
 			break;
 		default:
 			usage("unrecognized option");
@@ -258,14 +280,8 @@ static void parse_args(int argc, char *argv[]) {
 
 	endpwent();
 
-	if (Option == opt_host && argv[optind] != NULL) {
-		if (MY_UID(pw) != ROOT_UID) {
-			fprintf(stderr,
-				"must be privileged to set host with -h\n");
-			exit(ERROR_EXIT);
-		}
-			
-		HostSet = 1;
+	if (Option == opt_hostset && argv[optind] != NULL) {            
+		HostSpecified = 1;
 		if (strlen(argv[optind]) >= sizeof Host)
 			usage("hostname too long");
 		(void) strcpy(Host, argv[optind]);
@@ -837,50 +853,19 @@ static int replace_cmd(void) {
 	return (error);
 }
 
-static int host_cmd(void) {
+static int hostset_cmd(void) {
 	char n[MAX_FNAME];
-	FILE *f, *tmp;
+	FILE *tmp;
 	int fd;
 	int error = 0;
 	char *safename;
-
-	if (!HostSet) {
-
-		if (!glue_strings(n, sizeof n, SPOOL_DIR, CRON_HOSTNAME, '/')) {
-			fprintf(stderr, "path too long\n");
-			return (-2);
-		}
-
-		if (!(f = fopen(n, "r"))) {
-			if (errno == ENOENT)
-				fprintf(stderr, "File %s not found\n", n);
-			else
-				perror(n);
-			return (-2);
-		}
-
-		if (get_string(Host, sizeof Host, f, "\n") == EOF) {
-			fprintf(stderr, "Error reading from %s\n", n);
-			fclose(f);
-			return (-2);
-		}
-
-		fclose(f);
-
-		printf("%s\n", Host);
-		fflush(stdout);
-
-		log_it(RealUser, Pid, "GET HOST", Host, 0);
-		return (0);
-	}
-
-	if (strcmp(Host, "localhost") == 0) {
+	
+	if (!HostSpecified)
 		gethostname(Host, sizeof Host);
-	}
-
+	
 	safename = host_specific_filename("tmp.XXXXXXXXXX", 1);
 	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
-	    safename, '/')) {
+		safename, '/')) {
 		TempFilename[0] = '\0';
 		fprintf(stderr, "path too long\n");
 		return (-2);
@@ -926,7 +911,7 @@ static int host_cmd(void) {
 
 	poke_daemon();
 
-done:
+  done:
 	(void) signal(SIGHUP, SIG_DFL);
 	(void) signal(SIGINT, SIG_DFL);
 	(void) signal(SIGQUIT, SIG_DFL);
@@ -935,6 +920,38 @@ done:
 		TempFilename[0] = '\0';
 	}
 	return (error);
+}
+
+static int hostget_cmd(void) {
+	char n[MAX_FNAME];
+	FILE *f;
+
+	if (!glue_strings(n, sizeof n, SPOOL_DIR, CRON_HOSTNAME, '/')) {
+		fprintf(stderr, "path too long\n");
+		return (-2);
+	}
+
+	if (!(f = fopen(n, "r"))) {
+		if (errno == ENOENT)
+			fprintf(stderr, "File %s not found\n", n);
+		else
+			perror(n);
+			return (-2);
+	}
+
+	if (get_string(Host, sizeof Host, f, "\n") == EOF) {
+		fprintf(stderr, "Error reading from %s\n", n);
+		fclose(f);
+		return (-2);
+	}
+
+	fclose(f);
+
+	printf("%s\n", Host);
+	fflush(stdout);
+
+	log_it(RealUser, Pid, "GET HOST", Host, 0);
+	return (0);
 }
 
 static void poke_daemon(void) {
