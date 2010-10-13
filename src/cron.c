@@ -19,6 +19,11 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * Modified 2010/09/12 by Colin Dean, Durham University IT Service,
+ * to add clustering support.
+ */
+
 #define	MAIN_PROGRAM
 
 #include <cron.h>
@@ -46,6 +51,13 @@ static long GMToff;
 static int DisableInotify;
 
 #if defined WITH_INOTIFY
+
+/*
+ * Note that inotify isn't safe to use with clustering, as changes made
+ * to a shared filesystem on one system cannot be relied on to be notified
+ * on another system, so use of inotify is disabled at runtime if run with
+ * clustering enabled.
+ */
 
 # define NUM_WATCHES 3
 
@@ -105,7 +117,7 @@ static void handle_signals(cron_db * database) {
 		got_sighup = 0;
 #if defined WITH_INOTIFY
 		/* watches must be reinstated on reload */
-		if (inotify_enabled) {
+		if (inotify_enabled && (EnableClustering != 1)) {
 			set_cron_unwatched(database->ifd);
 			inotify_enabled = 0;
 		}
@@ -128,6 +140,7 @@ static void usage(void) {
 		[-m <mail command>] off or specify prefered client for sending mails \n \
 		[-n] run in foreground \n \
 		[-p] permit any crontab \n \
+		[-c] enable clustering support \n \
 		[-s] log into syslog instead of sending mails \n \
 		[-x [",
 		ProgramName);
@@ -296,7 +309,7 @@ int main(int argc, char *argv[]) {
 			check_inotify_database(&database);
 		}
 		else {
-			if (load_database(&database))
+			if (load_database(&database) && EnableClustering)
 				/* try reinstating the watches */
 				set_cron_watched(fd);
 		}
@@ -394,7 +407,7 @@ int main(int argc, char *argv[]) {
 	}
 
 #if defined WITH_INOTIFY
-	if (inotify_enabled)
+	if (inotify_enabled && (EnableClustering != 1))
 		set_cron_unwatched(fd);
 
 	if (fd >= 0 && close(fd) < 0)
@@ -593,7 +606,7 @@ static void sigchld_reaper(void) {
 static void parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "hnpsix:m:"))) {
+	while (-1 != (argch = getopt(argc, argv, "hnpsix:m:c"))) {
 		switch (argch) {
 			case 'x':
 				if (!set_debug_flags(optarg))
@@ -613,6 +626,9 @@ static void parse_args(int argc, char *argv[]) {
 				break;
 			case 'm':
 				strncpy(MailCmd, optarg, MAX_COMMAND);
+				break;
+			case 'c':
+				EnableClustering = 1;
 				break;
 			case 'h':
 			default:

@@ -17,9 +17,12 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 .\" OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
+.\" Modified 2010/09/12 by Colin Dean, Durham University IT Service,
+.\" to add clustering support.
+.\"
 .\" $Id: crontab.1,v 1.7 2004/01/23 19:03:32 vixie Exp $
 .\"
-.TH CRONTAB 1 "20 July 2009" "Marcela Mašláňová" "Cronie Users' Manual"
+.TH CRONTAB 1 "22 September 2010"
 .SH NAME
 crontab \- maintain crontab files for individual users
 .SH SYNOPSIS
@@ -32,6 +35,13 @@ crontab \- maintain crontab files for individual users
 .IR user ]
 .RB [ -l " | " -r " | " -e ]\ [ -i ]
 .RB [ -s ]
+.br
+.B crontab
+.BR -n\ [
+.IR "hostname " ]
+.br
+.B crontab
+.BR -c
 .SH DESCRIPTION
 .I Crontab
 is the program used to install, remove or list the tables
@@ -42,6 +52,16 @@ daemon.  Each user can have their own crontab, and though these are files in
 , they are not intended to be edited directly. For SELinux in mls mode can be even 
 more crontabs - for each range. For more see
 .BR selinux (8).
+.PP
+In this version of
+.BR cron
+it is possible to use a network-mounted shared
+.I /var/spool/cron 
+across a cluster of hosts, and to specify that only one of the hosts should
+run the crontab jobs in this directory at any one time, and to use
+.BR crontab (1)
+from any of these hosts to edit the same shared set of crontab files, and to
+set and query which host should run the crontab jobs.
 .PP
 The cron jobs could be allow or disallow for different users. For classical
 crontab there exists
@@ -112,6 +132,37 @@ It will append the current SELinux security context string as an
 MLS_LEVEL setting to the crontab file before editing / replacement
 occurs - see the documentation of MLS_LEVEL in 
 .BR crontab(5)\.
+.TP
+.B "\-n"
+This option is only relevant if
+.BR cron (8)
+was started with the \fB-c\fP option, to enable clustering support.  It is
+used to set which host in the cluster should run the jobs specified in the
+crontab files in the directory
+.I /var/spool/cron\.
+If a hostname is supplied, then the host whose hostname as returned by
+.BR gethostname(2)
+matches this will be selected to run these cron jobs subseqently.  If there
+is no host in the cluster matching that hostname, or you explicitly specify
+an empty hostname, then these jobs will not be run at all.  If the hostname
+is omitted, the name of the local host as returned by
+.BR gethostname(2)
+is assumed.  Using this option has no effect on
+.I /etc/crontab
+and the files in the
+.I /etc/cron.d
+directory, which are always run, and considered host-specific.  For more
+details about clustering support, see
+.BR cron (8)\.
+.TP
+.B "\-c"
+This option is only relevant if
+.BR cron (8)
+was started with the \fB-c\fP option, to enable clustering support.  It is
+used to query which host in the cluster is currently set to run the jobs
+specified in the crontab files in the directory
+.I /var/spool/cron
+, as set using the \fB-n\fP option.
 .SH "SEE ALSO"
 .BR crontab (5), cron (8)
 .SH FILES
@@ -131,3 +182,4 @@ line.
 .SH AUTHOR
 .nf
 Paul Vixie <vixie@isc.org>
+Colin Dean <c.c.dean@durham.ac.uk>

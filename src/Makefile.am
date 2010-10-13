@@ -25,6 +25,7 @@ LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 # This header contains all the paths.
 # If they are configurable, they are declared in configure script.
 # Depends on this Makefile, because it uses make variables.
+# CCD 2010/09/10 added CRON_HOSTNAME for clustered-cron.
 cron-paths.h: Makefile
 	@echo 'creating $@'
 	@sed >$@ 's/ *\\$$//' <<\END #\
@@ -43,6 +44,16 @@ cron-paths.h: Makefile
 			 * or it will be checked by inotify \
 			 */ \
 	#define SPOOL_DIR	"$(SPOOL_DIR)" \
+	\
+			/* CRON_HOSTNAME is file in SPOOL_DIR which, if it \
+			 * exists, and does not just contain a line matching \
+			 * the name returned by gethostname(), causes all \
+			 * crontabs in SPOOL_DIR to be ignored.  This is \
+			 * intended to be used when clustering hosts sharing \
+			 * one NFS-mounted SPOOL_DIR, and where only one host \
+			 * should use the crontab files here at any one time. \
+			 */ \
+	#define CRON_HOSTNAME	".cron.hostname" \
 	\
 			/* cron allow/deny file.  At least cron.deny must \
 			 * exist for ordinary users to run crontab. \
