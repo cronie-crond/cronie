@@ -254,8 +254,8 @@ int main(int argc, char *argv[]) {
 
 	fd = -1;
 #if defined WITH_INOTIFY
-	if (DisableInotify) {
-		log_it("CRON", getpid(), "No inotify - daemon runs with -i option", 
+	if (DisableInotify || EnableClustering) {
+		log_it("CRON", getpid(), "No inotify - daemon runs with -i or -c option", 
 			"", 0);
 	}
 	else {
@@ -305,7 +305,7 @@ int main(int argc, char *argv[]) {
 		 */
 		timeDiff = timeRunning - virtualTime;
 #if defined WITH_INOTIFY
-		if (inotify_enabled) {
+		if (inotify_enabled && (EnableClustering != 1)) {
 			check_inotify_database(&database);
 		}
 		else {
