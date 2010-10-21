@@ -305,11 +305,11 @@ int main(int argc, char *argv[]) {
 		 */
 		timeDiff = timeRunning - virtualTime;
 #if defined WITH_INOTIFY
-		if (inotify_enabled && (EnableClustering != 1)) {
+		if (inotify_enabled) {
 			check_inotify_database(&database);
 		}
 		else {
-			if (load_database(&database) && EnableClustering)
+			if (load_database(&database) && (EnableClustering != 1))
 				/* try reinstating the watches */
 				set_cron_watched(fd);
 		}
