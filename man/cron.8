@@ -22,189 +22,197 @@
 .\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
 .\" 
-.TH CRON "8" "22 September 2010"
+.TH CRON "8" "July 2010" "Marcela Mašláňová" "Cronie Users' Manual"
 .SH NAME
-cron \- daemon to execute scheduled commands
+crond \- daemon to execute scheduled commands
 .SH SYNOPSIS
-.B cron
-.RB [ -n " | " -p " | " -c " | " -s " | " -m \fP\fI<mail command>\fP\fB ]
-.br
-.B cron
+.B crond
+.RB [ -n " | " -p " | " -s " | " -m \fP\fI<mail command>\fP ]
+
+.B crond
 .B -x 
 .RB [ext,sch,proc,pars,load,misc,test,bit]
 .br
 .SH DESCRIPTION
 .I Cron
-should be started from 
+is started from 
 .I /etc/rc.d/init.d 
 or 
 .I /etc/init.d
-. It will return immediately, so you don't need to start it with '&'. 
+It returns immediately, thus, there is no need to need to start it with the '&' parameter. 
 .PP
 .I Cron
 searches 
 .I /var/spool/cron 
 for crontab files which are named after accounts in
 .I /etc/passwd;
-The founded crontabs are loaded into memory.
+The found crontabs are loaded into the memory.
 .I Cron
 also searches for 
 .I /etc/anacrontab
-and the files in the 
+and any files in the 
 .I /etc/cron.d 
-directory, which are in a different format (see
-.BR crontab (5)
-).
+directory, which have a different format (see
+.BR crontab (5)).
 .I Cron
-examines all stored crontabs, checking each command to see if it should be
+examines all stored crontabs and checks each job to see if it needs to be
 run in the current minute. When executing 
 commands, any output is mailed to the owner of the crontab (or to the user
-named in the MAILTO environment variable in the crontab, if such exists).
-Job output can also be sent to syslog by using the
+specified in the 
+.I MAILTO 
+environment variable in the crontab, if such exists).
+Any job output can also be sent to syslog by using the
 .B "\-s"
 option.
 .PP
-There are two ways, how the changes are checked in crontables. The first
-is checking the modtime of file and the other is using inotify support.
-You can find out which of them are you using, if you check 
+There are two ways how changes in crontables are checked. The first
+method is checking the modtime of a file. The second method is using the inotify support.
+Using of inotify is logged in the 
 .I /var/log/cron
-where is (or isn't) inotify mentioned after start of daemon. The inotify support
-is watching for changes in all crontables and touch the disk only in case
-that something was changed.
+log after the daemon is started. The inotify support checks for changes in all crontables and accesses the 
+hard disk only when a change is detected.
 .PP
-In other case
-.I cron
-checks each minute to see if its crontables modtime have changes and reload
-those which have changes. There is no need to restart cron after some of the
-crontable is modified. The modtime option is used also when inotify couldn't be initialized.
+When using the modtime option,
+.I Cron
+checks its crontables' modtimes every minute to check for any changes and reloads
+the crontables which have changed. There is no need to restart 
+.I Cron 
+after some of the
+crontables were modified. The modtime option is also used when inotify can not be initialized.
 .PP
 .I Cron
-is checking those files or directories:
+checks these files and directories:
 .IR /etc/anacrontab
-system crontab is usually for running daily, weekly, monthly jobs.
-.BR
+system crontab, usually used to run daily, weekly, monthly jobs. See 
+.BR anacrontab (5)
+for more details.
 .IR /etc/cron.d/
-where are system cronjobs stored for different users.
-.BR
+directory that contains system cronjobs stored for different users.
 .IR /var/spool/cron
-that's mean spool directory for user crontables.
+directory that contains user crontables created by the
+.IR crontab 
+command.
 
 Note that the
 .BR crontab (1)
 command updates the modtime of the spool directory whenever it changes a
 crontab.
-.PP 
+.PP
 .SS Daylight Saving Time and other time changes
 Local time changes of less than three hours, such as those caused
-by the start or end of Daylight Saving Time, are handled specially.
+by the Daylight Saving Time changes, are handled in a special way.
 This only applies to jobs that run at a specific time and jobs that
-are run with a granularity greater than one hour.  Jobs that run
+run with a granularity greater than one hour. Jobs that run
 more frequently are scheduled normally.
 .PP
-If time has moved forward, those jobs that would have run in the
+If time was adjusted one hour forward, those jobs that would have run in the
 interval that has been skipped will be run immediately.
-Conversely, if time has moved backward, care is taken to avoid running
-jobs twice.
+Conversely, if time was adjusted backward, running the same job twice is avoided.
 .PP
 Time changes of more than 3 hours are considered to be corrections to
-the clock or timezone, and the new time is used immediately.
+the clock or the timezone, and the new time is used immediately.
 .PP
-It's possible to use different time zones for cron tables. More could
-be found in
-.IR crontab (5).
+It is possible to use different time zones for crontables. See
+.IR crontab (5)
+for more information. 
 .SS PAM Access Control
-On Red Hat systems, crond now supports access control with PAM - see 
+.IR Cron
+supports access control with PAM if the system has PAM installed. For more information, see
 .IR pam (8).
-A PAM configuration file for crond is installed in /etc/pam.d/crond.
-crond loads the PAM environment from the pam_env module, but these
-can be overriden by settings in the appropriate crontab file.
+A PAM configuration file for 
+.IR crond 
+is installed in 
+.IR /etc/pam.d/crond .
+The daemon loads the PAM environment from the pam_env module. This
+can be overridden by defining specific settings in the appropriate crontab file.
 .SH "OPTIONS"
 .TP
-.B "\-i"
-By default are crontables checked by inotify. It could be switched
-back to old behaviour, when daemon is running with this option.
-.TP
-.B "\-s"
-This option will direct cron to send job output to the system log using
-.IR syslog (3).
-This is useful if your system has no
-.BR sendmail (8),
-or if mail is disabled using
-.BR "\-m off".
-.TP
 .B "\-m"
-This option allows you to specify a shell command string to use for sending cron mail
-output instead of
-.BR sendmail (8).
-This command must accept a fully formatted mail message (with headers) on stdin and send it
-as a mail message to the recipients specified in the mail headers. As a special case, the string
-.I "off"
-will disable sending mail.
-
+This option allows you to specify a shell command to use for sending 
+.I Cron 
+mail output instead of using
+.BR sendmail (8)
+This command must accept a fully formatted mail message (with headers) on standard input and send it
+as a mail message to the recipients specified in the mail headers. Specifying
+the string
+.I "off" 
+(i.e. crond -m off)
+will disable the sending of mail.
 .TP
 .B "\-n"
-This option changes default behavior causing it to run crond in the foreground.  This can be
-useful when starting it out of init.
+Tells the daemon to run in the foreground. This can be useful when starting it out of init.
 .TP
 .B "\-p"
-Cron permit any crontab, which user set.
+Allows 
+.I Cron
+to accept any user set crontables.
 .TP
-.B "\-c"
-This option enables clustering support, as described below.
+.B "\-s"
+This option will direct 
+.I Cron
+to send the job output to the system log using
+.IR syslog (3).
+This is useful if your system does not have
+.BR sendmail (8),
+installed or if mail is disabled.
 .TP
 .B "\-x"
-With this option is possible to set debug flags.
+This option allows you to set debug flags. 
 .SH SIGNALS
-On receipt of a \s-2SIGHUP\s+2, the cron daemon will close and reopen its
-log file.  This is useful in scripts which rotate and age log files.  
-Naturally this is not relevant if cron was built to use
+When the \s-2SIGHUP\s+2 is received, the 
+.I Cron 
+daemon will close and reopen its
+log file.  This proves to be useful in scripts which rotate and age log files.  
+Naturally, this is not relevant if 
+.I Cron
+was built to use
 .IR syslog (3).
 .SH CLUSTERING SUPPORT
 In this version of
-.BR cron
+.IR Cron
 it is possible to use a network-mounted shared
 .I /var/spool/cron 
-across a cluster of hosts, and to specify that only one of the hosts should
-run the crontab jobs in this directory at any one time, by starting
-.I cron
-with the \fB-c\fP option, and having a file
+across a cluster of hosts and specify that only one of the hosts should
+run the crontab jobs in this directory at any one time. This is done by starting
+.I Cron
+with the \fB-c\fP option, and have the
 .I /var/spool/cron/.cron.hostname
-containing just one line, which is the hostname of whichever host in the
-cluster should run these jobs.  If this file does not exist, or the hostname
+file contain just one line, which represents the hostname of whichever host in the
+cluster should run the jobs.  If this file does not exist, or the hostname
 in it does not match that returned by 
-.BR gethostname (2)
+.BR gethostname (2) ,
 then all crontab files in this directory are ignored.  This has no effect on
-cron jobs specified in the file
+cron jobs specified in the
 .I /etc/crontab
-or in files in the
+file or on files in the
 .I /etc/cron.d
-directory, which are always run, and considered host-specific.
+directory. These files are always run and considered host-specific.
 .PP
 Rather than editing
 .I /var/spool/cron/.cron.hostname
-directly, you should use the \fB-n\fP option of
+directly, use the \fB-n\fP option of
 .BR crontab (1)
 to specify the host.
 .PP
-You should ensure that all hosts in a cluster, and the fileserver from which
+You should ensure that all hosts in a cluster, and the file server from which
 they mount the shared crontab directory, have closely synchronised clocks,
 e.g. using
-.BR ntpd (8)
+.BR ntpd (8) 
 , otherwise the results will be very unpredictable.
 .PP
-This option automatically disables inotify support, because inotify cannot be
-relied on with network-mounted shared filesystems.
+Using cluster sharing automatically disables inotify support, because inotify cannot be
+relied on with network-mounted shared file systems.
 .SH CAVEATS
-The
+All
 .BR crontab
 files have to be regular files or symlinks to regular files, they must not be executable
-or writable by anyone else than the owner.
+or writable for anyone else but the owner.
 This requirement can be overridden by using the \fB-p\fP option on the crond command line.
 If inotify support is in use, changes in the symlinked crontabs are not automatically
-noticed by the cron daemon. The cron daemon must receive a SIGHUP to reload the crontabs.
-This is a limitation of inotify API.
-The syslog output will be used instead of mail, when sendmail isn't installed.
-
+noticed by the cron daemon. The cron daemon must receive a SIGHUP signal to reload the crontabs.
+This is a limitation of the inotify API.
+.PP
+The syslog output will be used instead of mail, when sendmail is not installed.
 .SH "SEE ALSO"
 .BR crontab (1),
 .BR crontab (5),

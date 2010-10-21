@@ -24,7 +24,7 @@
 .\"
 .TH CRONTAB 1 "22 September 2010"
 .SH NAME
-crontab \- maintain crontab files for individual users
+crontab \- maintains crontab files for individual users
 .SH SYNOPSIS
 .B crontab
 .RB [ -u
@@ -45,79 +45,79 @@ crontab \- maintain crontab files for individual users
 .SH DESCRIPTION
 .I Crontab
 is the program used to install, remove or list the tables
-used to drive the
+used to serve the
 .BR cron (8)
 daemon.  Each user can have their own crontab, and though these are files in 
-.I /var/spool/
-, they are not intended to be edited directly. For SELinux in mls mode can be even 
-more crontabs - for each range. For more see
+.IR /var/spool/ ,
+they are not intended to be edited directly. For SELinux in MLS mode, you can define 
+more crontabs for each range. For more information, see
 .BR selinux (8).
 .PP
 In this version of
-.BR cron
+.IR Cron
 it is possible to use a network-mounted shared
 .I /var/spool/cron 
-across a cluster of hosts, and to specify that only one of the hosts should
-run the crontab jobs in this directory at any one time, and to use
+across a cluster of hosts and specify that only one of the hosts should
+run the crontab jobs in the particular directory at any one time. You may also use
 .BR crontab (1)
 from any of these hosts to edit the same shared set of crontab files, and to
 set and query which host should run the crontab jobs.
 .PP
-The cron jobs could be allow or disallow for different users. For classical
-crontab there exists
+Running cron jobs can be allowed or disallowed for different users. For this purpose, use the 
 .I cron.allow
 and
 .I cron.deny
 files.
-If
+If the
 .I cron.allow
-file exists, then you must be listed therein in order to be allowed to use
-this command.  If the
+file exists, a user must be listed in it to be allowed to use cron
+If the
 .I cron.allow
 file does not exist but the
 .I cron.deny
-file does exist, then you must \fInot\fR be listed in the
+file does exist, then a user must \fInot\fR be listed in the
 .I cron.deny
-file in order to use this command.  If neither of these files exists,
-only the super user will be allowed to use this command.
-The second option is using PAM authentication, where you set up users,
-which could or couldn't use
+file in order to use cron.  If neither of these files exists,
+only the super user is allowed to use cron.
+Another way to restrict access to cron is to use PAM authentication to set up users,
+which are allowed or disallowed to use 
 .I crontab
-and \fBalso\fR system cron jobs from
-.IR /etc/cron.d/.
+or modify system cron jobs in the
+.IR /etc/cron.d/ 
+directory.
 .PP
-The temporary directory could be set in enviroment variables. If it's not set
-by user than
+The temporary directory can be set in an environment variable. If it is not set
+by the user, the
 .I /tmp
-is used.
+directory is used.
 .PP
 .SH "OPTIONS"
 .TP
 .B "\-u"
-Append the name of the user whose crontab is to be tweaked.  If this option 
-is not given,
+Appends the name of the user whose crontab is to be modified.  If this option 
+is not used,
 .I crontab
 examines "your" crontab, i.e., the crontab of the person executing the
 command.  Note that
 .BR su (8)
-can confuse
-.I crontab
-and that if you are running inside of
+may confuse
+.IR crontab ,
+thus, when executing commands under
 .BR su (8)
 you should always use the
 .B -u
-option for safety's sake.
-The first form of this command is used to install a new crontab from some
-named file or standard input if the pseudo-filename "-" is given.
+option. If no crontab exists for a particular user, it is created for him the first time the 
+.B crontab -u
+command is used under his username.
 .TP
 .B "\-l"
-The current crontab will be displayed on standard output.
+Displays the current crontab on standard output.
 .TP
 .B "\-r"
-The current crontab will be removed.
+Removes the current crontab.
 .TP
 .B "\-e"
-This option is used to edit the current crontab using the editor specified by
+Edits the current crontab using the editor specified by
 the \s-1VISUAL\s+1 or \s-1EDITOR\s+1 environment variables.  After you exit
 from the editor, the modified crontab will be installed automatically.
 .TP
@@ -128,31 +128,32 @@ option to prompt the user for a 'y/Y' response
 before actually removing the crontab.
 .TP
 .B "\-s"
-It will append the current SELinux security context string as an
+Appends the current SELinux security context string as an
 MLS_LEVEL setting to the crontab file before editing / replacement
 occurs - see the documentation of MLS_LEVEL in 
 .BR crontab(5)\.
 .TP
 .B "\-n"
-This option is only relevant if
+This option is relevant only if
 .BR cron (8)
 was started with the \fB-c\fP option, to enable clustering support.  It is
-used to set which host in the cluster should run the jobs specified in the
-crontab files in the directory
-.I /var/spool/cron\.
-If a hostname is supplied, then the host whose hostname as returned by
+used to set the host in the cluster which should run the jobs specified in the
+crontab files in the 
+.I /var/spool/cron\
+directory.
+If a hostname is supplied, the host whose hostname returned by
 .BR gethostname(2)
-matches this will be selected to run these cron jobs subseqently.  If there
-is no host in the cluster matching that hostname, or you explicitly specify
-an empty hostname, then these jobs will not be run at all.  If the hostname
-is omitted, the name of the local host as returned by
+matches the supplied hostname, will be selected to run the selected cron jobs subsequently.  If there
+is no host in the cluster matching the supplied hostname, or you explicitly specify
+an empty hostname, then the selected jobs will not be run at all.  If the hostname
+is omitted, the name of the local host returned by
 .BR gethostname(2)
-is assumed.  Using this option has no effect on
+is used.  Using this option has no effect on the
 .I /etc/crontab
-and the files in the
+file and the files in the
 .I /etc/cron.d
 directory, which are always run, and considered host-specific.  For more
-details about clustering support, see
+information on clustering support, see
 .BR cron (8)\.
 .TP
 .B "\-c"
@@ -177,8 +178,8 @@ command conforms to IEEE Std1003.2-1992 (``POSIX'').  This new command syntax
 differs from previous versions of Vixie Cron, as well as from the classic
 SVR3 syntax.
 .SH DIAGNOSTICS
-A fairly informative usage message appears if you run it with a bad command
-line.
+An informative usage message appears if you run a crontab with a faulty command
+defined in it.
 .SH AUTHOR
 .nf
 Paul Vixie <vixie@isc.org>
