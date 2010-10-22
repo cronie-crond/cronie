@@ -1,3 +1,86 @@
+2010-10-21  Martin Prpič <mprpic@redhat.com>
+
+	* man/anacron.8, man/anacrontab.5, man/cron.8, man/crontab.1,
+	man/crontab.5: Rewrite of man pages & correction.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-10-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/bitstring.3: Remove useless man page.  Thanks to Colin Dean.
+
+2010-10-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c: Apply previous patch correctly.
+
+2010-10-20  Colin Dean <c.c.dean@durham.ac.uk>
+
+	* src/cron.c: Check clustering before un/watch function Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-10-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* : commit 2d3a872e9c66d9550a5b3cc97fa78ff9d7708cce Author: Marcela
+	Mašláňová <mmaslano@redhat.com> Date:   Fri Oct 8 12:17:15 2010
+	+0200
+
+2010-10-07  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8: man page typo: change to correct option
+
+2010-10-06  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/database.c: Remove cluster support from inotify_database check_inotify_database is called only when inotify is on, which is
+	not with cluster support.
+
+2010-10-06  Colin Dean <c.c.dean@durham.ac.uk>
+
+	* man/crontab.1, src/crontab.c: The crontab command uses "-c" and
+	"-n" instead of "-h".  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-10-04  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/crontab.c: Correct ifdef HAVE_FCHOWN Based on https://fedorahosted.org/cronie/ticket/7 Thanks to
+	crrodriguez
+
+2010-10-04  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* .gitignore, src/database.c: is_local set to zero
+
+2010-10-04  Colin Dean <c.c.dean@durham.ac.uk>
+
+	* man/cron.8, man/crontab.1, src/Makefile.am, src/cron.c,
+	src/crontab.c, src/database.c, src/globals.h: cronie on cluster On issue we have is that although we've made our services very
+	resilient, by employing HA failover, load balancing and round robin
+	DNS, the one service that's difficult to do anything with is cron,
+	because it has traditionally been tied to a single machine.  For instance, we have a cluster of 4 Fedora servers which our end
+	users use as timeshare systems, using round robin DNS, and if one of
+	the servers is down it doesn't really matter too much. We don't even
+	backup the servers, relying on NFS home directories and rebuilding
+	from scratch using kickstart + cfengine if a server fails and can't
+	be restarted.  However, the users have scattered crontab files around the 4
+	servers, so that if the particular server a cron job is meant to run
+	on dies, the job doesn't run any more, and the crontab file may be
+	permanently lost.  What we needed was a facility to allow crontabs in /var/spool/cron
+	on these 4 servers be NFS mounted from a single directory on our
+	NetApp filers (so giving us backups and snapshots), with any user
+	able to run "crontab -e" from any of the servers to manage a single
+	shared crontab, and for us in the IT Service to be able to set just
+	one of the 4 servers to run user crontab jobs at any time. However,
+	we needed to keep /etc/crontab and the files in /etc/cron.d/
+	specific to each individual server still, and keep crond running on
+	all 4 servers.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-08-30  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/runjob.c: Typo in log message Based on Tom London report
+	https://bugzilla.redhat.com/show_bug.cgi?id=626947
+
+2010-08-23  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/main.c: Close leaking file descriptor anacron was leaking fd, which caused denial of jobs by selinux.
+
+2010-08-02  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: New minor release 1.4.5.
+
 2010-08-02  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* cronie.init: OK value printed twice Fix based on 615107. There were too many OK's messages.
