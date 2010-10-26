@@ -34,7 +34,7 @@ crontab \- maintains crontab files for individual users
 .RB [ -u
 .IR user ]
 .RB [ -l " | " -r " | " -e ]\ [ -i ]
-.RB [ -s ]
+.RB [ -c ]
 .br
 .B crontab
 .BR -n\ [
@@ -139,7 +139,7 @@ This option is relevant only if
 was started with the \fB-c\fP option, to enable clustering support.  It is
 used to set the host in the cluster which should run the jobs specified in the
 crontab files in the 
-.I /var/spool/cron\
+.I /var/spool/cron
 directory.
 If a hostname is supplied, the host whose hostname returned by
 .BR gethostname(2)

@@ -27,7 +27,7 @@
 crond \- daemon to execute scheduled commands
 .SH SYNOPSIS
 .B crond
-.RB [ -n " | " -p " | " -s " | " -m \fP\fI<mail command>\fP ]
+.RB [ -n " | " -p " | " -s " | " -c " | " -m \fP\fI<mail command>\fP ]
 
 .B crond
 .B -x 
@@ -146,6 +146,9 @@ Tells the daemon to run in the foreground. This can be useful when starting it o
 Allows 
 .I Cron
 to accept any user set crontables.
+.TP
+.B "\-c"
+This option enables clustering support, as described below.
 .TP
 .B "\-s"
 This option will direct 
