@@ -94,6 +94,9 @@ consider_job(job_rec *jr)
     if (!force && b == 8)
     {
 	int day_delta;
+	time_t jobtime;
+	struct tm *t;
+
 	if (sscanf(timestamp, "%4d%2d%2d", &ts_year, &ts_month, &ts_day) == 3)
 	    dn = day_num(ts_year, ts_month, ts_day);
 	else
@@ -148,6 +151,18 @@ consider_job(job_rec *jr)
 		xclose (jr->timestamp_fd);
 		return 0;
 	    }
+	}
+
+	jobtime = start_sec + jr->delay * 60;
+
+	t = localtime(&jobtime);
+	if (!now && range_start != -1 && range_stop != -1 && 
+		(t->tm_hour < range_start || t->tm_hour >= range_stop))
+	{
+		Debug(("The job `%s' falls out of the %02d:00-%02d:00 hours range, skipping.",
+			jr->ident, range_start, range_stop));
+		xclose (jr->timestamp_fd);
+		return 0;
 	}
     }
 

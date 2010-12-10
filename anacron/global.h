@@ -42,6 +42,7 @@
 #define MAX_MSG 150
 
 #include <signal.h>
+#include <time.h>
 #include "anacron-paths.h"
 
 /* Some declarations */
@@ -101,6 +102,8 @@ extern job_rec **job_array;
 extern int running_jobs,running_mailers;
 
 extern int complaints;
+
+extern time_t start_sec;
 
 /* time ranges for START_HOURS_RANGE */
 extern int range_start;

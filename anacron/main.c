@@ -55,7 +55,7 @@ sigset_t old_sigmask;                          /* signal mask when started */
 job_rec *first_job_rec;
 env_rec *first_env_rec;
 
-static time_t start_sec;                       /* time anacron started */
+time_t start_sec;                       /* time anacron started */
 static volatile int got_sigalrm, got_sigchld, got_sigusr1;
 int running_jobs, running_mailers;              /* , number of */
 int range_start = -1;
@@ -406,7 +406,6 @@ static void
 explain_intentions()
 {
     int j;
-    struct tm *t;
 
     j = 0;
     while (j < njobs)
@@ -417,21 +416,8 @@ explain_intentions()
 	}
 	else
 	{
-	    time_t jobtime = start_sec + job_array[j]->delay * 60;
-
-	    t = localtime(&jobtime);
-	    if (range_start != -1 && range_stop != -1 && 
-		(t->tm_hour < range_start || t->tm_hour >= range_stop))
-	    {
-		Debug(("The job `%s' falls out of the %02d:00-%02d:00 hours range, skipping.",
-			job_array[j]->ident, range_start, range_stop));
-		job_array[j]->drop_job = 1;
-	    }
-	    else
-	    {
-		explain("Will run job `%s' in %d min.",
+	    explain("Will run job `%s' in %d min.",
 		    job_array[j]->ident, job_array[j]->delay);
-	    }
 	}
 	j++;
     }
@@ -443,15 +429,12 @@ int
 main(int argc, char *argv[])
 {
     int j;
-
     int cwd;
-
-    int dropped_jobs = 0;
+    struct timeval tv;
+    struct timezone tz;
 
     anacrontab = NULL;
     spooldir = NULL;
-    struct timeval tv;
-    struct timezone tz;
 
     if (gettimeofday(&tv, &tz) != 0)
         explain("Can't get exact time, failure.");
@@ -514,16 +497,11 @@ main(int argc, char *argv[])
     running_jobs = running_mailers = 0;
     for(j = 0; j < njobs; ++j)
     {
-	if (job_array[j]->drop_job == 1)
-	{
-	    ++dropped_jobs;
-	    continue;
-	}
 	xsleep(time_till(job_array[j]));
 	if (serialize) wait_jobs();
 	launch_job(job_array[j]);
     }
     wait_children();
-    explain("Normal exit (%d job%s run)", njobs-dropped_jobs, (njobs-dropped_jobs == 1 ? "" : "s"));
+    explain("Normal exit (%d job%s run)", njobs, njobs == 1 ? "" : "s");
     exit(0);
 }
