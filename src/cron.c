@@ -198,6 +198,10 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	if (cron_init_security() < 0) {
+		log_it("CRON", pid, "DEATH", "Critical security parameters not initialized", 0);
+	}
+
 	/* Get the default locale character set for the mail 
 	 * "Content-Type: ...; charset=" header
 	 */
