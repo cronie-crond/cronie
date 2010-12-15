@@ -254,7 +254,13 @@ static int cron_authorize_context(security_context_t scontext,
 #ifdef WITH_SELINUX
 	struct av_decision avd;
 	int retval;
-	unsigned int bit = FILE__ENTRYPOINT;
+
+	security_class_t tclass = string_to_security_class("file");
+	if (!tclass)
+		return 0;
+	access_vector_t bit = string_to_av_perm(tclass, "entrypoint");
+	if (!bit)
+		return 0;
 	/*
 	 * Since crontab files are not directly executed,
 	 * crond must ensure that the crontab file has
@@ -263,7 +269,7 @@ static int cron_authorize_context(security_context_t scontext,
 	 * permission check for this purpose.
 	 */
 	retval = security_compute_av(scontext, file_context,
-		SECCLASS_FILE, bit, &avd);
+		tclass, bit, &avd);
 	if (retval || ((bit & avd.allowed) != bit))
 		return 0;
 #endif
@@ -479,15 +485,22 @@ get_security_context(const char *name, int crontab_fd,
 	}
 
 	if (!cron_authorize_context(scontext, file_context)) {
+		char *msg=NULL;
+		if (asprintf(&msg,
+		     "Unauthorized SELinux context=%s file_context=%s", (char *) scontext, file_context) >= 0) {
+			log_it(name, getpid(), msg, tabname, 0);
+			free(msg);
+		} else {
+			log_it(name, getpid(), "Unauthorized SELinux context", tabname, 0);
+		}
 		freecon(scontext);
 		freecon(file_context);
 		if (security_getenforce() > 0) {
-			log_it(name, getpid(), "Unauthorized SELinux context", tabname, 0);
 			return -1;
 		}
 		else {
 			log_it(name, getpid(),
-				"Unauthorized SELinux context, but SELinux in permissive mode, continuing",
+				"SELinux in permissive mode, continuing",
 				tabname, 0);
 			return 0;
 		}
