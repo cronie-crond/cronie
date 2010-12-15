@@ -41,15 +41,14 @@ static int
 cron_conv(int num_msg, const struct pam_message **msgm,
         struct pam_response **response, void *appdata_ptr)
 {
-        struct pam_message**m = msgm;
         int i;
 
         for (i = 0; i < num_msg; i++) {
-                switch (m[i]->msg_style) {
+                switch (msgm[i]->msg_style) {
                         case PAM_ERROR_MSG:
                         case PAM_TEXT_INFO:
-                                if (m[i]->msg != NULL) {
-                                        log_it("CRON", getpid(), "pam_message", m[i]->msg, 0);
+                                if (msgm[i]->msg != NULL) {
+                                        log_it("CRON", getpid(), "pam_message", msgm[i]->msg, 0);
                                 }
                         break;
                         default:
