@@ -80,51 +80,12 @@ static char **build_env(char **cronenv);
 static int cron_change_selinux_range(user * u, security_context_t ucontext);
 static int cron_get_job_range(user * u, security_context_t * ucontextp,
 	char **jobenv);
-
-static security_class_t file_class;
-static security_class_t context_class;
-static access_vector_t entrypoint_bit;
-static access_vector_t contains_bit;
 #endif
 
 void cron_restore_default_security_context() {
 #ifdef WITH_SELINUX
 	setexeccon(NULL);
 #endif
-}
-
-int cron_init_security() {
-#ifdef WITH_SELINUX
-	int rv = -1;
-
-	if (is_selinux_enabled() <= 0)
-		return 0;
-
-	if (security_getenforce() <= 0)
-		rv = 0;
-
-	file_class = string_to_security_class("file");
-	if (!file_class) {
-		log_it("CRON", getpid(), "ERROR", "Failed to translate security class file", errno);
-		return rv;
-	}
-	context_class = string_to_security_class("context");
-	if (!context_class) {
-		log_it("CRON", getpid(), "ERROR", "Failed to translate security class context", errno);
-		return rv;
-	}
-	entrypoint_bit = string_to_av_perm(file_class, "entrypoint");
-	if (!entrypoint_bit) {
-		log_it("CRON", getpid(), "ERROR", "Failed to translate av perm entrypoint", errno);
-		return rv;
-	}
-	contains_bit = string_to_av_perm(context_class, "contains");
-	if (!contains_bit) {
-		log_it("CRON", getpid(), "ERROR", "Failed to translate av perm contains", errno);
-		return rv;
-	}
-#endif
-	return 0;
 }
 
 int cron_set_job_security_context(entry * e, user * u, char ***jobenv) {
@@ -293,6 +254,12 @@ static int cron_authorize_context(security_context_t scontext,
 	struct av_decision avd;
 	int retval;
 
+	security_class_t tclass = string_to_security_class("file");
+	if (!tclass)
+		return 0;
+	access_vector_t bit = string_to_av_perm(tclass, "entrypoint");
+	if (!bit)
+		return 0;
 	/*
 	 * Since crontab files are not directly executed,
 	 * crond must ensure that the crontab file has
@@ -300,11 +267,9 @@ static int cron_authorize_context(security_context_t scontext,
 	 * the user cron job.  It performs an entrypoint
 	 * permission check for this purpose.
 	 */
-	if (!file_class || !entrypoint_bit)
-		return 0;
 	retval = security_compute_av(scontext, file_context,
-		file_class, entrypoint_bit, &avd);
-	if (retval || ((entrypoint_bit & avd.allowed) != entrypoint_bit))
+		tclass, bit, &avd);
+	if (retval || ((bit & avd.allowed) != bit))
 		return 0;
 #endif
 	return 1;
@@ -315,17 +280,16 @@ static int cron_authorize_range(security_context_t scontext,
 #ifdef WITH_SELINUX
 	struct av_decision avd;
 	int retval;
+	unsigned int bit = CONTEXT__CONTAINS;
 	/*
 	 * Since crontab files are not directly executed,
 	 * so crond must ensure that any user specified range
 	 * falls within the seusers-specified range for that Linux user.
 	 */
-	if (!context_class || !contains_bit)
-		return 0;
 	retval = security_compute_av(scontext, ucontext,
-		context_class, contains_bit, &avd);
+		SECCLASS_CONTEXT, bit, &avd);
 
-	if (retval || ((contains_bit & avd.allowed) != contains_bit))
+	if (retval || ((bit & avd.allowed) != bit))
 		return 0;
 #endif
 	return 1;
@@ -563,30 +527,22 @@ int crontab_security_access(void) {
 		security_context_t user_context;
 		if (getprevcon_raw(&user_context) == 0) {
 			security_class_t passwd_class;
-			access_vector_t crontab_bit;
 			struct av_decision avd;
-			int retval = 0;
+			int retval;
 
 			passwd_class = string_to_security_class("passwd");
 			if (passwd_class == 0) {
+				selinux_check_passwd_access = -1;
 				fprintf(stderr, "Security class \"passwd\" is not defined in the SELinux policy.\n");
-				retval = -1;
 			}
 
-			if (retval == 0) {
-				crontab_bit = string_to_av_perm(passwd_class, "crontab");
-				if (crontab_bit == 0) {
-					fprintf(stderr, "Security av permission \"crontab\" is not defined in the SELinux policy.\n");
-					retval = -1;
-				}
-			}
+			retval = security_compute_av_raw(user_context,
+							user_context,
+							passwd_class,
+							PASSWD__CRONTAB,
+							&avd);
 
-			if (retval == 0)
-				retval = security_compute_av_raw(user_context,
-					user_context, passwd_class,
-					crontab_bit, &avd);
-
-			if ((retval == 0) && ((crontab_bit & avd.allowed) == crontab_bit)) {
+			if ((retval == 0) && ((PASSWD__CRONTAB & avd.allowed) == PASSWD__CRONTAB)) {
 				selinux_check_passwd_access = 0;
 			}
 			freecon(user_context);
