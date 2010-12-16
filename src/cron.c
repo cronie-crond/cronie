@@ -200,6 +200,7 @@ int main(int argc, char *argv[]) {
 
 	if (cron_init_security() < 0) {
 		log_it("CRON", pid, "DEATH", "Critical security parameters not initialized", 0);
+		exit(1);
 	}
 
 	/* Get the default locale character set for the mail 
