@@ -120,9 +120,9 @@ AC_ARG_ENABLE(pie,CRONIE_HELP_STRING(--enable-pie,Build cronie as a Position Ind
 if test "x$enable_pie" = xyes; then
     save_CFLAGS="$CFLAGS"
     save_LDFLAGS="$LDFLAGS"
-    CFLAGS="$CFLAGS -fpie"
-    LDFLAGS="$LDFLAGS -pie -fpie"
-    AC_CACHE_CHECK([whether compiler accepts -pie -fpie], ac_cv_pie_fpie,
+    CFLAGS="$CFLAGS -fPIE -DPIE"
+    LDFLAGS="$LDFLAGS -pie -Wl,-z,relro -Wl,-z,now"
+    AC_CACHE_CHECK([whether compiler accepts -pie & relro], ac_cv_pie_fpie,
     [AC_TRY_LINK([], [],
     ac_cv_pie_fpie=yes, ac_cv_pie_fpie=no)])
     if test $ac_cv_pie_fpie = no; then
