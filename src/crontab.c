@@ -462,7 +462,7 @@ static void edit_cmd(void) {
 	(void) signal(SIGQUIT, SIG_IGN);
 
 	if (!glue_strings(Filename, sizeof Filename, tmp_path(),
-			"crontab.XXXXXXXXXX", '/')) {
+			"crontab.XXXXXX", '/')) {
 		fprintf(stderr, "path too long\n");
 		exit(ERROR_EXIT);
 	}
