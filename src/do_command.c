@@ -372,6 +372,9 @@ static void child_process(entry * e, user * u) {
 
 			/* get sender address.  this is MAILFROM if set (and safe),
 			 * root otherwise.
+			 * mailfrom is not freed because it lives only in this short
+			 * child process. Freeing could lead to segfaul, when mailfrom
+			 * is acquired from env_get function.
 			 */
 			if (!mailfrom || !*mailfrom || !safe_p(usernm, mailfrom)) {
 				mailfrom = calloc(5, sizeof (char));
