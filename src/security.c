@@ -333,18 +333,21 @@ cron_get_job_range(user * u, security_context_t * ucontextp, char **jobenv) {
 		if (!(ccon = context_new(u->scontext))) {
 			log_it(u->name, getpid(), "context_new FAILED for MLS_LEVEL",
 				range, 0);
+			context_free(ccon);
 			return -1;
 		}
 
 		if (context_range_set(ccon, range)) {
 			log_it(u->name, getpid(),
 				"context_range_set FAILED for MLS_LEVEL", range, 0);
+			context_free(ccon);
 			return -1;
 		}
 
 		if (!(*ucontextp = context_str(ccon))) {
 			log_it(u->name, getpid(), "context_str FAILED for MLS_LEVEL",
 				range, 0);
+			context_free(ccon);
 			return -1;
 		}
 
