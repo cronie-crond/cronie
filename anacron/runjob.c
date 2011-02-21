@@ -43,7 +43,8 @@ temp_file(job_rec *jr)
 {
     const int max_retries = 50;
     char *name;
-    int fdin, fdout, i;
+    int fdin = -1;
+    int fdout, i;
 
     i = 0;
     name = NULL;
