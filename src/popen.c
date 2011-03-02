@@ -55,6 +55,7 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 	char *argv[MAX_ARGS];
 	ssize_t out;
 	char buf[PIPE_BUF];
+	struct sigaction sa;
 
 #ifdef __GNUC__
 	(void) &iop;	/* Avoid fork clobbering */
@@ -101,6 +102,11 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 			}
 			(void) close(pdes[1]);
 		}
+
+		/* reset SIGPIPE to default for the child */
+		memset(&sa, 0, sizeof(sa));
+		sa.sa_handler = SIG_DFL;
+		sigaction(SIGPIPE, &sa, NULL);
 
 		if (execvp(argv[0], argv) < 0) {
 			int save_errno = errno;

@@ -21,11 +21,13 @@
 
 #include <cron.h>
 
-static void child_process(entry *, user *);
+static int child_process(entry *, user *, char **);
 static int safe_p(const char *, const char *);
 
 void do_command(entry * e, user * u) {
 	pid_t pid = getpid();
+	int ev;
+	char **jobenv = 0L;
 
 	Debug(DPROC, ("[%ld] do_command(%s, (%s,%ld,%ld))\n",
 			(long) pid, e->cmd, u->name,
@@ -45,9 +47,16 @@ void do_command(entry * e, user * u) {
 	case 0:
 		/* child process */
 		acquire_daemonlock(1);
-		child_process(e, u);
+		/* Set up the Red Hat security context for both mail/minder and job processes:
+		 */
+		if (cron_set_job_security_context(e, u, &jobenv) != 0) {
+			_exit(ERROR_EXIT);
+		}
+		ev = child_process(e, u, jobenv);
+		cron_close_pam();
+		env_free(jobenv);
 		Debug(DPROC, ("[%ld] child process done, exiting\n", (long) getpid()))
-			_exit(OK_EXIT);
+		_exit(ev);
 		break;
 	default:
 		/* parent process */
@@ -56,20 +65,28 @@ void do_command(entry * e, user * u) {
 	Debug(DPROC, ("[%ld] main process returning to work\n", (long) pid))
 }
 
-static void child_process(entry * e, user * u) {
+static int child_process(entry * e, user * u, char **jobenv) {
 	int stdin_pipe[2], stdout_pipe[2];
 	char *input_data, *usernm, *mailto, *mailfrom;
 	int children = 0;
-	char **jobenv = 0L;
 	pid_t pid = getpid();
 	pid_t jobpid;
+	struct sigaction sa;
 
-	/* Set up the Red Hat security context for both mail/minder and job processes:
+	/* Ignore SIGPIPE as we will be writing to pipes and do not want to terminate
+	   prematurely */
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGPIPE, &sa, NULL);
+
+	/* our parent is watching for our death by catching SIGCHLD.  we
+	 * do not care to watch for our children's deaths this way -- we
+	 * use wait() explicitly.  so we have to reset the signal (which
+	 * was inherited from the parent).
 	 */
-	if (cron_set_job_security_context(e, u, &jobenv) != 0) {
-		//syslog(LOG_INFO, "CRON (%s) ERROR: cannot set security context", e->pwd->pw_name);
-		exit(ERROR_EXIT);
-	}
+	sa.sa_handler = SIG_DFL;
+	sigaction(SIGCHLD, &sa, NULL);
+
 
 	Debug(DPROC, ("[%ld] child_process('%s')\n", (long) getpid(), e->cmd))
 #ifdef CAPITALIZE_FOR_PS
@@ -90,23 +107,16 @@ static void child_process(entry * e, user * u) {
 	mailto = env_get("MAILTO", jobenv);
 	mailfrom = env_get("MAILFROM", e->envp);
 
-	/* our parent is watching for our death by catching SIGCHLD.  we
-	 * do not care to watch for our children's deaths this way -- we
-	 * use wait() explicitly.  so we have to reset the signal (which
-	 * was inherited from the parent).
-	 */
-	(void) signal(SIGCHLD, SIG_DFL);
-
 	/* create some pipes to talk to our future child
 	 */
 	if (pipe(stdin_pipe) == -1) {	/* child's stdin */
 		log_it("CRON", pid, "PIPE() FAILED", "stdin_pipe", errno);
-		return;
+		return ERROR_EXIT;
 	}
 
 	if (pipe(stdout_pipe) == -1) {	/* child's stdout */
 		log_it("CRON", pid, "PIPE() FAILED", "stdout_pipe", errno);
-		return;
+		return ERROR_EXIT;
 	}
 
 	/* since we are a forked process, we can diddle the command string
@@ -151,9 +161,9 @@ static void child_process(entry * e, user * u) {
 	switch ((jobpid = fork())) {
 	case -1:
 		log_it("CRON", pid, "CAN'T FORK", "child_process", errno);
-		cron_close_pam();
-		exit(ERROR_EXIT);
-	 /*NOTREACHED*/ case 0:
+		return ERROR_EXIT;
+		/*NOTREACHED*/
+	case 0:
 		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n", (long) getpid()))
 
 		if (cron_change_user_permanently(e->pwd, env_get("HOME", jobenv)) < 0)
@@ -179,6 +189,12 @@ static void child_process(entry * e, user * u) {
 		 */
 		(void) setsid();
 
+		/* reset the SIGPIPE back to default so the child will terminate
+		 * if it tries to write to a closed pipe
+		 */
+		sa.sa_handler = SIG_DFL;
+		sigaction(SIGPIPE, &sa, NULL);
+
 		/* close the pipe ends that we won't use.  this doesn't affect
 		 * the parent, who has to read and write them; it keeps the
 		 * kernel from recording us as a potential client TWICE --
@@ -200,14 +216,6 @@ static void child_process(entry * e, user * u) {
 			close(stdout_pipe[WRITE_PIPE]);
 		}
 		dup2(STDOUT, STDERR);
-
-		/* Our grandparent is watching for our parent's death by
-		 * catching SIGCHLD. Meanwhile, our parent will use wait
-		 * explicitly and so has disabled SIGCHLD. So now it's
-		 * time to reset SIGCHLD handling.
-		 */
-		(void) signal(SIGCHLD, SIG_DFL);
-
 
 		/*
 		 * Exec the command.
@@ -268,6 +276,12 @@ static void child_process(entry * e, user * u) {
 		Debug(DPROC, ("[%ld] child2 sending data to grandchild\n",
 				(long) getpid()))
 
+		/* reset the SIGPIPE back to default so the child will terminate
+		 * if it tries to write to a closed pipe
+		 */
+		sa.sa_handler = SIG_DFL;
+		sigaction(SIGPIPE, &sa, NULL);
+
 			/* close the pipe we don't use, since we inherited it and
 			 * are part of its reference count now.
 			 */
@@ -306,7 +320,7 @@ static void child_process(entry * e, user * u) {
 
 		Debug(DPROC, ("[%ld] child2 done sending to grandchild\n",
 				(long) getpid()))
-			exit(0);
+		_exit(0);
 	}
 
 	/* close the pipe to the grandkiddie's stdin, since its wicked uncle
@@ -553,10 +567,9 @@ static void child_process(entry * e, user * u) {
 			if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
 			Debug(DPROC, (", dumped core"))
 				Debug(DPROC, ("\n"))
-			}
-			cron_close_pam();
-		env_free(jobenv);
 	}
+	return OK_EXIT;
+}
 
 static int safe_p(const char *usernm, const char *s) {
 	static const char safe_delim[] = "@!:%-.,_+";	/* conservative! */
