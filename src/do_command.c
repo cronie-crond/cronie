@@ -250,10 +250,10 @@ static int child_process(entry * e, user * u, char **jobenv) {
 
 	Debug(DPROC, ("[%ld] child continues, closing pipes\n", (long) getpid()))
 
-		/* close the ends of the pipe that will only be referenced in the
-		 * grandchild process...
-		 */
-		close(stdin_pipe[READ_PIPE]);
+	/* close the ends of the pipe that will only be referenced in the
+	 * grandchild process...
+	 */
+	close(stdin_pipe[READ_PIPE]);
 	close(stdout_pipe[WRITE_PIPE]);
 
 	/*
@@ -282,10 +282,11 @@ static int child_process(entry * e, user * u, char **jobenv) {
 		sa.sa_handler = SIG_DFL;
 		sigaction(SIGPIPE, &sa, NULL);
 
-			/* close the pipe we don't use, since we inherited it and
-			 * are part of its reference count now.
-			 */
-			close(stdout_pipe[READ_PIPE]);
+		/* close the pipe we don't use, since we inherited it and
+		 * are part of its reference count now.
+		 */
+		close(stdout_pipe[READ_PIPE]);
+
 		if (cron_change_user_permanently(e->pwd, env_get("HOME", jobenv)) < 0)
 			_exit(ERROR_EXIT);
 		/* translation:
@@ -340,7 +341,7 @@ static int child_process(entry * e, user * u, char **jobenv) {
 	Debug(DPROC, ("[%ld] child reading output from grandchild\n",
 			(long) getpid()))
 
-		/*local */  {
+	/*local */  {
 		FILE *in = fdopen(stdout_pipe[READ_PIPE], "r");
 		int ch = getc(in);
 
@@ -544,7 +545,7 @@ static int child_process(entry * e, user * u, char **jobenv) {
 
 		Debug(DPROC, ("[%ld] got EOF from grandchild\n", (long) getpid()))
 
-			fclose(in);	/* also closes stdout_pipe[READ_PIPE] */
+		fclose(in);	/* also closes stdout_pipe[READ_PIPE] */
 	}
 
 	/* wait for children to die.
