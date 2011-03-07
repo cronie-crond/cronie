@@ -65,7 +65,7 @@ static const struct pam_conv conv = {
 static int cron_open_pam_session(struct passwd *pw);
 
 # define PAM_FAIL_CHECK if (retcode != PAM_SUCCESS) { \
-	fprintf(stderr,"\n%s\n",pam_strerror(pamh, retcode)); \
+	log_it(pw->pw_name, getpid(), "PAM ERROR", pam_strerror(pamh, retcode), 0); \
 	if (pamh != NULL) { \
 		if (pam_session_opened != 0) \
 			pam_close_session(pamh, PAM_SILENT); \
