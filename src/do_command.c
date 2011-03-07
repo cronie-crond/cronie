@@ -166,9 +166,6 @@ static int child_process(entry * e, user * u, char **jobenv) {
 	case 0:
 		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n", (long) getpid()))
 
-		if (cron_change_user_permanently(e->pwd, env_get("HOME", jobenv)) < 0)
-			_exit(ERROR_EXIT);
-		
 		/* write a log message.  we've waited this long to do it
 		 * because it was not until now that we knew the PID that
 		 * the actual user command shell was going to get and the
@@ -181,9 +178,8 @@ static int child_process(entry * e, user * u, char **jobenv) {
 			free(x);
 		}
 
-		/* that's the last thing we'll log.  close the log files.
-		 */
-		log_close();
+		if (cron_change_user_permanently(e->pwd, env_get("HOME", jobenv)) < 0)
+			_exit(ERROR_EXIT);
 
 		/* get new pgrp, void tty, etc.
 		 */
@@ -414,12 +410,11 @@ static int child_process(entry * e, user * u, char **jobenv) {
 				gethostname(hostname, MAXHOSTNAMELEN);
 
 				if (MailCmd[0] == '\0') {
-					if (strlens(MAILFMT, MAILARG, mailfrom, NULL) + 1
+					if (snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG, mailfrom)
 						>= sizeof mailcmd) {
 						fprintf(stderr, "mailcmd too long\n");
 						(void) _exit(ERROR_EXIT);
 					}
-					(void) sprintf(mailcmd, MAILFMT, MAILARG, mailfrom);
 				}
 				else {
 					strncpy(mailcmd, MailCmd, MAX_COMMAND);

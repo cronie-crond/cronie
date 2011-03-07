@@ -108,6 +108,9 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 		sa.sa_handler = SIG_DFL;
 		sigaction(SIGPIPE, &sa, NULL);
 
+		if (cron_change_user_permanently(pw, pw->pw_dir) != 0)
+			_exit(2);
+
 		if (execvp(argv[0], argv) < 0) {
 			int save_errno = errno;
 
