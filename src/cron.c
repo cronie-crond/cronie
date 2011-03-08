@@ -38,7 +38,7 @@ enum timejump { negative, small, medium, large };
 
 static void usage(void),
 run_reboot_jobs(cron_db *),
-find_jobs(int, cron_db *, int, int),
+find_jobs(int, cron_db *, int, int, long),
 set_time(int),
 cron_sleep(int, cron_db *),
 sigchld_handler(int),
@@ -156,6 +156,7 @@ int main(int argc, char *argv[]) {
 	int fd;
 	char *cs;
 	pid_t pid = getpid();
+	long oldGMToff;
 #if defined WITH_INOTIFY
 	int i;
 #endif
@@ -277,6 +278,7 @@ int main(int argc, char *argv[]) {
 	set_time(TRUE);
 	run_reboot_jobs(&database);
 	timeRunning = virtualTime = clockTime;
+	oldGMToff = GMToff;
 
 	/*
 	 * Too many clocks, not enough time (Al. Einstein)
@@ -320,7 +322,8 @@ int main(int argc, char *argv[]) {
 		/* shortcut for the most common case */
 		if (timeDiff == 1) {
 			virtualTime = timeRunning;
-			find_jobs(virtualTime, &database, TRUE, TRUE);
+			oldGMToff = GMToff;
+			find_jobs(virtualTime, &database, TRUE, TRUE, oldGMToff);
 		}
 		else {
 			if (timeDiff > (3 * MINUTE_COUNT) || timeDiff < -(3 * MINUTE_COUNT))
@@ -341,11 +344,14 @@ int main(int argc, char *argv[]) {
 				 */
 				Debug(DSCH, ("[%ld], normal case %d minutes to go\n",
 						(long) pid, timeDiff))
-					do {
+				do {
 					if (job_runqueue())
 						sleep(10);
 					virtualTime++;
-					find_jobs(virtualTime, &database, TRUE, TRUE);
+					if (virtualTime >= timeRunning)
+						/* always run also the other timezone jobs in the last step */
+						oldGMToff = GMToff;
+					find_jobs(virtualTime, &database, TRUE, TRUE, oldGMToff);
 				} while (virtualTime < timeRunning);
 				break;
 
@@ -363,15 +369,18 @@ int main(int argc, char *argv[]) {
 				 */
 				Debug(DSCH, ("[%ld], DST begins %d minutes to go\n",
 						(long) pid, timeDiff))
-					/* run wildcard jobs for current minute */
-					find_jobs(timeRunning, &database, TRUE, FALSE);
+				/* run wildcard jobs for current minute */
+				find_jobs(timeRunning, &database, TRUE, FALSE, GMToff);
 
 				/* run fixed-time jobs for each minute missed */
 				do {
 					if (job_runqueue())
 						sleep(10);
 					virtualTime++;
-					find_jobs(virtualTime, &database, FALSE, TRUE);
+					if (virtualTime >= timeRunning) 
+						/* always run also the other timezone jobs in the last step */
+						oldGMToff = GMToff;
+					find_jobs(virtualTime, &database, FALSE, TRUE, oldGMToff);
 					set_time(FALSE);
 				} while (virtualTime < timeRunning && clockTime == timeRunning);
 				break;
@@ -387,7 +396,7 @@ int main(int argc, char *argv[]) {
 				 */
 				Debug(DSCH, ("[%ld], DST ends %d minutes to go\n",
 						(long) pid, timeDiff))
-					find_jobs(timeRunning, &database, TRUE, FALSE);
+				find_jobs(timeRunning, &database, TRUE, FALSE, GMToff);
 				break;
 			default:
 				/*
@@ -395,8 +404,9 @@ int main(int argc, char *argv[]) {
 				 * jump virtual time, and run everything
 				 */
 				Debug(DSCH, ("[%ld], clock jumped\n", (long) pid))
-					virtualTime = timeRunning;
-				find_jobs(timeRunning, &database, TRUE, TRUE);
+				virtualTime = timeRunning;
+				oldGMToff = GMToff;
+				find_jobs(timeRunning, &database, TRUE, TRUE, GMToff);
 			}
 		}
 
@@ -443,27 +453,35 @@ static void run_reboot_jobs(cron_db * db) {
 	(void) job_runqueue();
 }
 
-static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild) {
+static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long vGMToff) {
 	char *orig_tz, *job_tz;
 	time_t virtualSecond = vtime * SECONDS_PER_MINUTE;
-	struct tm *tm = gmtime(&virtualSecond);
+	time_t virtualGMTSecond = virtualSecond - vGMToff;
+	struct tm *tm;
 	int minute, hour, dom, month, dow;
 	user *u;
 	entry *e;
 	const char *uname;
 	struct passwd *pw = NULL;
 
-	/* make 0-based values out of these so we can use them as indicies
+	/* The support for the job-specific timezones is not perfect. There will
+	 * be jobs missed or run twice during the DST change in the job timezone.
+	 * It is recommended not to schedule any jobs during the hour when
+	 * the DST changes happen if job-specific timezones are used.
+	 *
+	 * Make 0-based values out of tm values so we can use them as indicies
 	 */
 #define maketime(tz1, tz2) do { \
 	char *t = tz1; \
-	if (t != NULL && *t != '\0') \
+	if (t != NULL && *t != '\0') { \
 		setenv("TZ", t, 1); \
-	else if ((tz2) != NULL) \
-		setenv("TZ", (tz2), 1); \
-	else \
-		unsetenv("TZ"); \
-	tm = localtime(&StartTime); \
+		tm = localtime(&virtualGMTSecond); \
+	} else { if ((tz2) != NULL) \
+			setenv("TZ", (tz2), 1); \
+		else \
+			unsetenv("TZ"); \
+		tm = gmtime(&virtualSecond); \
+	} \
 	minute = tm->tm_min -FIRST_MINUTE; \
 	hour = tm->tm_hour -FIRST_HOUR; \
 	dom = tm->tm_mday -FIRST_DOM; \
@@ -502,6 +520,12 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild) {
 						: (bit_test(e->dow, dow) || bit_test(e->dom, dom))
 					)
 					) {
+					if (job_tz != NULL && vGMToff != GMToff)
+						/* do not try to run the jobs from different timezones
+						 * during the DST switch of the default timezone.
+						 */
+						continue;
+
 					if ((doNonWild &&
 							!(e->flags & (MIN_STAR | HR_STAR))) ||
 						(doWild && (e->flags & (MIN_STAR | HR_STAR))))
