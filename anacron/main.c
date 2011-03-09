@@ -384,6 +384,12 @@ time_till(job_rec *jr)
     tn = time(NULL);
     tj = start_sec + jr->delay * 60;
     if (tj < tn) return 0;
+    if (tj - tn > 3600*24)
+    {
+	explain("System time manipulation detected, job `%s' will run immediately",
+	    jr->ident);
+	return 0;
+    }
     return tj - tn;
 }
 
