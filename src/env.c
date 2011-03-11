@@ -22,7 +22,7 @@
 #include <cron.h>
 
 char **env_init(void) {
-	char **p = (char **) malloc(sizeof (char **));
+	char **p = (char **) malloc(sizeof (char *));
 
 	if (p != NULL)
 		p[0] = NULL;
@@ -94,7 +94,7 @@ char **env_set(char **envp, char *envstr) {
 	if ((envtmp = strdup(envstr)) == NULL)
 		return (NULL);
 	p = (char **) realloc((void *) envp,
-		(size_t) ((count + 1) * sizeof (char **)));
+		(size_t) ((count + 1) * sizeof (char *)));
 	if (p == NULL) {
 		free(envtmp);
 		return (NULL);
