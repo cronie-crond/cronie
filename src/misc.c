@@ -235,7 +235,10 @@ void set_cron_cwd(void) {
 		perror(SPOOL_DIR);
 		if (OK == mkdir(SPOOL_DIR, 0700)) {
 			fprintf(stderr, "%s: created\n", SPOOL_DIR);
-			stat(SPOOL_DIR, &sb);
+			if (stat(SPOOL_DIR, &sb) < OK) {
+				perror("stat retry");
+				exit(ERROR_EXIT);
+			}
 		}
 		else {
 			fprintf(stderr, "%s: ", SPOOL_DIR);
@@ -250,7 +253,7 @@ void set_cron_cwd(void) {
 	if (grp != NULL) {
 		if (sb.st_gid != grp->gr_gid)
 			if (chown(SPOOL_DIR, -1, grp->gr_gid) == -1) {
-				fprintf(stderr, "chdir %s failed: %s\n", SPOOL_DIR,
+				fprintf(stderr, "chown %s failed: %s\n", SPOOL_DIR,
 					strerror(errno));
 				exit(ERROR_EXIT);
 			}
