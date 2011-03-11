@@ -140,38 +140,38 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 			bit_set(e->hour, 0);
 			bit_set(e->dom, 0);
 			bit_set(e->month, 0);
-			bit_nset(e->dow, 0, (LAST_DOW - FIRST_DOW + 1));
+			bit_nset(e->dow, 0, LAST_DOW - FIRST_DOW);
 			e->flags |= DOW_STAR;
 		}
 		else if (!strcmp("monthly", cmd)) {
 			bit_set(e->minute, 0);
 			bit_set(e->hour, 0);
 			bit_set(e->dom, 0);
-			bit_nset(e->month, 0, (LAST_MONTH - FIRST_MONTH + 1));
-			bit_nset(e->dow, 0, (LAST_DOW - FIRST_DOW + 1));
+			bit_nset(e->month, 0, LAST_MONTH - FIRST_MONTH);
+			bit_nset(e->dow, 0, LAST_DOW - FIRST_DOW);
 			e->flags |= DOW_STAR;
 		}
 		else if (!strcmp("weekly", cmd)) {
 			bit_set(e->minute, 0);
 			bit_set(e->hour, 0);
-			bit_nset(e->dom, 0, (LAST_DOM - FIRST_DOM + 1));
-			bit_nset(e->month, 0, (LAST_MONTH - FIRST_MONTH + 1));
+			bit_nset(e->dom, 0, LAST_DOM - FIRST_DOM);
+			bit_nset(e->month, 0, LAST_MONTH - FIRST_MONTH);
 			bit_set(e->dow, 0);
 			e->flags |= DOW_STAR;
 		}
 		else if (!strcmp("daily", cmd) || !strcmp("midnight", cmd)) {
 			bit_set(e->minute, 0);
 			bit_set(e->hour, 0);
-			bit_nset(e->dom, 0, (LAST_DOM - FIRST_DOM + 1));
-			bit_nset(e->month, 0, (LAST_MONTH - FIRST_MONTH + 1));
-			bit_nset(e->dow, 0, (LAST_DOW - FIRST_DOW + 1));
+			bit_nset(e->dom, 0, LAST_DOM - FIRST_DOM);
+			bit_nset(e->month, 0, LAST_MONTH - FIRST_MONTH);
+			bit_nset(e->dow, 0, LAST_DOW - FIRST_DOW);
 		}
 		else if (!strcmp("hourly", cmd)) {
 			bit_set(e->minute, 0);
-			bit_nset(e->hour, 0, (LAST_HOUR - FIRST_HOUR + 1));
-			bit_nset(e->dom, 0, (LAST_DOM - FIRST_DOM + 1));
-			bit_nset(e->month, 0, (LAST_MONTH - FIRST_MONTH + 1));
-			bit_nset(e->dow, 0, (LAST_DOW - FIRST_DOW + 1));
+			bit_nset(e->hour, 0, LAST_HOUR - FIRST_HOUR);
+			bit_nset(e->dom, 0, LAST_DOM - FIRST_DOM);
+			bit_nset(e->month, 0, LAST_MONTH - FIRST_MONTH);
+			bit_nset(e->dow, 0, LAST_DOW - FIRST_DOW);
 			e->flags |= HR_STAR;
 		}
 		else {
