@@ -75,6 +75,7 @@ match_rx(const char *rx, char *string, int n_sub,  /* char **substrings */...)
 		if (substring != NULL)
 		{
 			if (sub_offsets[n].rm_so == -1) {
+			    va_end(va);
 			    free(sub_offsets);
 			    return - 1;
 			}
