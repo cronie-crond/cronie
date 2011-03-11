@@ -695,13 +695,9 @@ static int replace_cmd(void) {
 	int error = 0;
 	entry *e;
 	uid_t file_owner;
-	char **envp = env_init();
+	char **envp;
 	char *safename;
 
-	if (envp == NULL) {
-		fprintf(stderr, "%s: Cannot allocate memory.\n", ProgramName);
-		return (-2);
-	}
 
 	safename = host_specific_filename("tmp.XXXXXXXXXX", 1);
 	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
@@ -770,6 +766,15 @@ static int replace_cmd(void) {
 	Set_LineNum(1 - NHEADER_LINES)
 		CheckErrorCount = 0;
 	eof = FALSE;
+
+	envp = env_init();
+	if (envp == NULL) {
+		fprintf(stderr, "%s: Cannot allocate memory.\n", ProgramName);
+		fclose(tmp);
+		error = -2;
+		goto done;
+	}
+
 	while (!CheckErrorCount && !eof) {
 		switch (load_env(envstr, tmp)) {
 		case ERR:
@@ -783,12 +788,13 @@ static int replace_cmd(void) {
 		case FALSE:
 			e = load_entry(tmp, check_error, pw, envp);
 			if (e)
-				free(e);
+				free_entry(e);
 			break;
 		case TRUE:
 			break;
 		}
 	}
+	env_free(envp);
 
 	if (CheckErrorCount != 0) {
 		fprintf(stderr, "errors in crontab file, can't install.\n");
