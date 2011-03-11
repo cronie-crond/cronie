@@ -224,9 +224,9 @@ void set_cron_uid(void) {
 
 void check_spool_dir(void) {
 	struct stat sb;
+#ifdef CRON_GROUP
 	struct group *grp = NULL;
 
-#ifdef CRON_GROUP
 	grp = getgrnam(CRON_GROUP);
 #endif
 	/* check SPOOL_DIR existence
@@ -250,6 +250,7 @@ void check_spool_dir(void) {
 		fprintf(stderr, "'%s' is not a directory, bailing out.\n", SPOOL_DIR);
 		exit(ERROR_EXIT);
 	}
+#ifdef CRON_GROUP
 	if (grp != NULL) {
 		if (sb.st_gid != grp->gr_gid)
 			if (chown(SPOOL_DIR, -1, grp->gr_gid) == -1) {
@@ -264,6 +265,7 @@ void check_spool_dir(void) {
 				exit(ERROR_EXIT);
 			}
 	}
+#endif
 }
 
 /* acquire_daemonlock() - write our PID into /etc/cron.pid, unless
