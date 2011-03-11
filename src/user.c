@@ -53,13 +53,14 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	FILE *file;
 	user *u;
 	entry *e;
-	int status, save_errno;
-	char **envp, **tenvp;
+	int status, save_errno = errno;
+	char **envp = NULL, **tenvp;
 
 	if (!(file = fdopen(crontab_fd, "r")))	{
 		int save_errno = errno;
 		log_it(uname, getpid (), "FAILED", "fdopen on crontab_fd in load_user",
 			save_errno);
+		close(crontab_fd);
 		return (NULL);
 	}
 
@@ -67,26 +68,25 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	/* file is open.  build user entry, then read the crontab file.
 	 */
 	if ((u = (user *) malloc (sizeof (user))) == NULL)
-		return (NULL);
+		goto done;
+	memset(u, 0, sizeof(*u));
 
 	if (((u->name = strdup(fname)) == NULL)
 		|| ((u->tabname = strdup(tabname)) == NULL)) {
 		save_errno = errno;
-		free(u);
-		errno = save_errno;
-		return (NULL);
+		free_user(u);
+		u = NULL;
+		goto done;
 	}
 
-	u->crontab = NULL;
 
 	/* init environment.  this will be copied/augmented for each entry.
 	*/
 	if ((envp = env_init()) == NULL) {
 		save_errno = errno;
-		free(u->name);
-		free(u);
-		errno = save_errno;
-		return (NULL);
+		free_user(u);
+		u = NULL;
+		goto done;
 	}
 
 	if (get_security_context(pw == NULL ? NULL : uname,
@@ -101,6 +101,7 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	while ((status = load_env (envstr, file)) >= OK) {
 		switch (status) {
 			case ERR:
+				save_errno = errno;
 				free_user(u);
 				u = NULL;
 				goto done;
@@ -117,7 +118,6 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 					save_errno = errno;
 					free_user(u);
 					u = NULL;
-					errno = save_errno;
 					goto done;
 				}
 			envp = tenvp;
@@ -126,7 +126,10 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	}
 
 done:
-	env_free(envp);
+	if (envp)
+		env_free(envp);
 	fclose(file);
-	Debug(DPARS, ("...load_user() done\n")) return (u);
+	Debug(DPARS, ("...load_user() done\n"))
+	errno = save_errno;
+	return (u);
 }

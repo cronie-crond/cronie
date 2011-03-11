@@ -146,6 +146,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	}
 
 	u = load_user(crontab_fd, pw, uname, fname, tabname);	/* read the file */
+	crontab_fd = -1; /* load_user takes care of closing the file */
 	if (u != NULL) {
 		u->mtime = mtime;
 		link_user(new_db, u);
