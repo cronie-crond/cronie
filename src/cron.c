@@ -462,7 +462,6 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 	user *u;
 	entry *e;
 	const char *uname;
-	struct passwd *pw = NULL;
 
 	/* The support for the job-specific timezones is not perfect. There will
 	 * be jobs missed or run twice during the DST change in the job timezone.
@@ -508,7 +507,7 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 					(long) e->pwd->pw_gid, e->cmd))
 				uname = e->pwd->pw_name;
 			/* check if user exists in time of job is being run f.e. ldap */
-			if ((pw = getpwnam(uname)) != NULL) {
+			if (getpwnam(uname) != NULL) {
 				job_tz = env_get("CRON_TZ", e->envp);
 				maketime(job_tz, orig_tz);
 				/* here we test whether time is NOW */
