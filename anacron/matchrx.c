@@ -48,16 +48,18 @@ match_rx(const char *rx, char *string, int n_sub,  /* char **substrings */...)
 	char **substring;
 	regmatch_t *sub_offsets;
 	sub_offsets = malloc(sizeof(regmatch_t) * (n_sub + 1));
+	if (sub_offsets == NULL)
+	    return -1;
 	memset(sub_offsets, 0, sizeof(regmatch_t) * (n_sub + 1));
 
 	if (regcomp(&crx, rx, REG_EXTENDED)) {
 	    free(sub_offsets);
-	    return - 1;
+	    return -1;
 	}
 	r = regexec(&crx, string, n_sub + 1, sub_offsets, 0);
 	if (r != 0 && r != REG_NOMATCH) {
 	   free(sub_offsets);
-	   return - 1;
+	   return -1;
 	}
 	regfree(&crx);
 	if (r == REG_NOMATCH) {
