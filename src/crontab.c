@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 		argv[1] = n;
 	}
 	parse_args(argc, argv);	/* sets many globals, opens a file */
-	set_cron_cwd();
+	check_spool_dir();
 	if (!allowed(RealUser, CRON_ALLOW, CRON_DENY)) {
 		fprintf(stderr,
 			"You (%s) are not allowed to use this program (%s)\n",
@@ -304,10 +304,6 @@ static void parse_args(int argc, char *argv[]) {
 	}
 
 	if (Option == opt_replace) {
-		/* we have to open the file here because we're going to
-		 * chdir(2) into /var/cron before we get around to
-		 * reading the file.
-		 */
 		if (!strcmp(Filename, "-"))
 			NewCrontab = stdin;
 		else {

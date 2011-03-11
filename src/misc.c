@@ -222,7 +222,7 @@ void set_cron_uid(void) {
 #endif
 }
 
-void set_cron_cwd(void) {
+void check_spool_dir(void) {
 	struct stat sb;
 	struct group *grp = NULL;
 

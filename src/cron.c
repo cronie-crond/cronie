@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
 
 	acquire_daemonlock(0);
 	set_cron_uid();
-	set_cron_cwd();
+	check_spool_dir();
 
 	if (putenv("PATH=" _PATH_DEFPATH) < 0) {
 		log_it("CRON", pid, "DEATH", "can't putenv PATH", errno);

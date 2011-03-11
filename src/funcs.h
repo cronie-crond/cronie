@@ -25,7 +25,7 @@
  */
 
 void		set_cron_uid(void),
-		set_cron_cwd(void),
+		check_spool_dir(void),
 		open_logfile(void),
 		sigpipe_func(void),
 		job_add(entry *, user *),
