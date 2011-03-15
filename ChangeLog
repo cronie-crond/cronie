@@ -1,3 +1,159 @@
+2011-03-15  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac: Split relro and pie into two options.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* anacron/matchrx.c: Add missing va_end() call.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c: Remove unused variable.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/env.c: Fix incorrect pointer in sizeof.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/crontab.c: Fixed leaking of env and members of entry in
+	replace_cmd().
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/database.c, src/user.c: Fix memory leaks in load_user.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/entry.c: The last bit to set is always LAST_ - FIRST_.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* anacron/matchrx.c: Check malloc return for NULL.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/misc.c: Do not try to compile dead code.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c, src/crontab.c, src/funcs.h, src/misc.c: Rename
+	set_cron_cwd() to check_spool_dir() as we do not do any chdir
+	anymore.
+
+2011-03-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/misc.c: Add missing check for stat() return value.
+
+2011-03-09  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* anacron/main.c: Safeguard for system time changes. Otherwise
+	anacron might wait with the job running for a too long time.
+
+2011-03-08  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c: Fix the non-default timezone support. Do not run jobs
+	multiple times on DST change.
+
+2011-03-07  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/do_command.c, src/security.c: Set mailfrom to the user
+	account, better PAM logging.
+
+2011-03-07  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/do_command.c, src/funcs.h, src/popen.c, src/security.c: Set
+	only groups in the process handling PAM calls. Keep uids at 0 so the
+	process is not killable by the user.
+
+2011-03-02  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/do_command.c: Whitespace cleanups.
+
+2011-03-02  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/do_command.c, src/popen.c: Fix SIGPIPE handling in
+	do_command() and popen.  Ensure that PAM session is always closed.
+
+2011-02-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/do_command.c: Comment not freeing mailfrom - found during code
+	review.
+
+2011-02-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/security.c: Free security contexts.
+
+2011-02-18  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/crontab.c: mkstemp needs only 6 X's
+
+2011-02-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/runjob.c: fdin could be tested before initialization.
+
+2011-02-17  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac: PIE and RELRO flags to be set We want all long running daemons to have PIE and RELRO flags set.
+	This is a missing security mechanism. Fixing this generally involves
+	adding -fPIE -DPIE to the CFLAGS, and -pie -Wl,-z,relro -Wl,-z,now
+	to the LDFLAGS.  Expected results: PIE and partial RELRO at a
+	minimum.
+
+2010-12-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/security.c: Add translation for remaining hardcoded contexts
+	and av bits.
+
+2010-12-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c, src/funcs.h, src/security.c: Revert "Cache the
+	security class and bit values and translate the remaining hardcoded
+	values." Caching cannot be done as the values can change on SELinux
+	policy update.  This reverts commit b15f72976965d2ae1a1273558bf45be7de077b79.
+
+2010-12-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c: Revert "Missing exit if cron_init_security() fails."
+	Caching cannot be done as the values can change on SELinux policy
+	update.  This reverts commit ac70de36ec6c403c28291689701bd2567c565107.
+
+2010-12-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c: Missing exit if cron_init_security() fails.
+
+2010-12-15  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c, src/funcs.h, src/security.c: Cache the security class
+	and bit values and translate the remaining hardcoded values.
+
+2010-12-15  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/security.c: Clean up unnecessary assignment.
+
+2010-12-15  Dan Walsh <dwalsh@redhat.com>
+
+	* src/security.c: This patch causes cronie to ask kernel for
+	constant definition rather then using hard coded Also add info to syslog message to help diagnose problems.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2010-12-10  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* anacron/global.h, anacron/lock.c, anacron/main.c: Do not lock jobs
+	that fall out of allowed range - rhbz#661966
+
+2010-10-26  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/crontab.1: Man - another typo
+
+2010-10-26  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8, man/crontab.1: Re-add missing option into man and fix
+	some typos.  Thanks to Colin Dean.
+
+2010-10-22  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: New release 1.4.6
+
 2010-10-21  Martin Prpič <mprpic@redhat.com>
 
 	* man/anacron.8, man/anacrontab.5, man/cron.8, man/crontab.1,
