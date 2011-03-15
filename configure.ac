@@ -121,14 +121,21 @@ if test "x$enable_pie" = xyes; then
     save_CFLAGS="$CFLAGS"
     save_LDFLAGS="$LDFLAGS"
     CFLAGS="$CFLAGS -fPIE -DPIE"
-    LDFLAGS="$LDFLAGS -pie -Wl,-z,relro -Wl,-z,now"
-    AC_CACHE_CHECK([whether compiler accepts -pie & relro], ac_cv_pie_fpie,
+    LDFLAGS="$LDFLAGS -pie"
+    AC_CACHE_CHECK([whether compiler accepts -pie], ac_cv_pie_fpie,
     [AC_TRY_LINK([], [],
     ac_cv_pie_fpie=yes, ac_cv_pie_fpie=no)])
     if test $ac_cv_pie_fpie = no; then
         CFLAGS="$save_CFLAGS"
         LDFLAGS="$save_LDFLAGS"
     fi
+fi
+
+AC_ARG_ENABLE(relro,CRONIE_HELP_STRING(--enable-relro,Build cronie with relro flag))
+if test "x$enable_relro" = xyes; then
+	save_CFLAGS="$CFLAGS"
+	save_LDFLAGS="$LDFLAGS"
+    LDFLAGS="-Wl,-z,relro -Wl,-z,now"
 fi
 
 # Check whether user wants SELinux support
