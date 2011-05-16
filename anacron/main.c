@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdlib.h>
+#include <locale.h>
 #include "global.h"
 #include "gregor.h"
 
@@ -441,6 +442,8 @@ main(int argc, char *argv[])
 
     anacrontab = NULL;
     spooldir = NULL;
+
+    setlocale(LC_ALL, "");
 
     if (gettimeofday(&tv, &tz) != 0)
         explain("Can't get exact time, failure.");
