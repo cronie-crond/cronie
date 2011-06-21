@@ -39,7 +39,8 @@ void		set_cron_uid(void),
 		acquire_daemonlock(int),
 		skip_comments(FILE *),
 		log_it(const char *, PID_T, const char *, const char *, int),
-		log_close(void);
+		log_close(void),
+		check_orphans(cron_db *);
 #if defined WITH_INOTIFY
 void 		set_cron_watched(int ),
 		set_cron_unwatched(int ),

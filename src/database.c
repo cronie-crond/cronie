@@ -93,12 +93,81 @@ check_open(const char *tabname, const char *fname, const char *uname,
 	return (crontab_fd);
 }
 
+static orphan *orphans;
+
+static void
+free_orphan(orphan *o) {
+	free(o->tabname);
+	free(o->fname);
+	free(o->uname);
+	free(o);
+}
+
+void
+check_orphans(cron_db *db) {
+	orphan *prev_orphan = NULL;
+	orphan *o = orphans;
+
+	while (o != NULL) {
+		if (getpwnam(o->uname) != NULL) {
+			orphan *next = o->next;
+
+			if (prev_orphan == NULL) {
+				orphans = next;
+			} else {
+				prev_orphan->next = next;
+			}
+
+			process_crontab(o->uname, o->fname, o->tabname,
+				db, NULL);
+
+			/* process_crontab could have added a new orphan */
+			if (prev_orphan == NULL && orphans != next) {
+				prev_orphan = orphans;
+			}
+			free_orphan(o);
+			o = next;
+		} else {
+			prev_orphan = o;
+			o = o->next;
+		}
+	}
+}
+
+static void
+add_orphan(const char *uname, const char *fname, const char *tabname) {
+	orphan *o;
+
+	o = calloc(1, sizeof(*o));
+	if (o == NULL)
+		return;
+
+	if (uname)
+		if ((o->uname=strdup(uname)) == NULL)
+			goto cleanup;
+
+	if (fname)
+		if ((o->fname=strdup(fname)) == NULL)
+			goto cleanup;
+
+	if (tabname)
+		if ((o->tabname=strdup(tabname)) == NULL)
+			goto cleanup;
+
+	o->next = orphans;
+	orphans = o;
+	return;
+
+cleanup:
+	free_orphan(o);
+}
+
 static void
 process_crontab(const char *uname, const char *fname, const char *tabname,
 	cron_db * new_db, cron_db * old_db) {
 	struct passwd *pw = NULL;
 	int crontab_fd = -1;
-	user *u;
+	user *u = NULL;
 	time_t mtime;
 	int crond_crontab = (fname == NULL) && (strcmp(tabname, SYSCRONTAB) != 0);
 
@@ -111,6 +180,8 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		/* file doesn't have a user in passwd file.
 		 */
 		log_it(uname, getpid(), "ORPHAN", "no passwd entry", 0);
+		add_orphan(uname, fname, tabname);
+
 		goto next_crontab;
 	}
 
@@ -119,6 +190,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 
 	Debug(DLOAD, ("\t%s:", fname))
 
+	if (old_db != NULL)
 		u = find_user(old_db, fname, crond_crontab ? tabname : NULL);	/* find user in old_db */
 
 	if (u != NULL) {

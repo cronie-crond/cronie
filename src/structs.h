@@ -57,6 +57,13 @@ typedef	struct _user {
 	security_context_t	scontext;    /* SELinux security context */
 } user;
 
+typedef	struct _orphan {
+	struct _orphan	*next;		/* link */
+	char		*uname;
+	char		*fname;
+	char		*tabname;
+} orphan;
+
 typedef	struct _cron_db {
 	user		*head, *tail;	/* links */
 	time_t		mtime;		/* last modtime on spooldir */

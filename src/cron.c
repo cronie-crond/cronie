@@ -307,6 +307,7 @@ int main(int argc, char *argv[]) {
 		 * clock.  Classify the change into one of 4 cases.
 		 */
 		timeDiff = timeRunning - virtualTime;
+		check_orphans(&database);
 #if defined WITH_INOTIFY
 		if (inotify_enabled) {
 			check_inotify_database(&database);
