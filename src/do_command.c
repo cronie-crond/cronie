@@ -70,7 +70,6 @@ static int child_process(entry * e, user * u, char **jobenv) {
 	char *input_data, *usernm, *mailto, *mailfrom;
 	int children = 0;
 	pid_t pid = getpid();
-	pid_t jobpid;
 	struct sigaction sa;
 
 	/* Ignore SIGPIPE as we will be writing to pipes and do not want to terminate
@@ -158,7 +157,7 @@ static int child_process(entry * e, user * u, char **jobenv) {
 
 	/* fork again, this time so we can exec the user's command.
 	 */
-	switch ((jobpid = fork())) {
+	switch (fork()) {
 	case -1:
 		log_it("CRON", pid, "CAN'T FORK", "child_process", errno);
 		return ERROR_EXIT;
@@ -346,14 +345,9 @@ static int child_process(entry * e, user * u, char **jobenv) {
 			int bytes = 1;
 			int status = 0;
 #if defined(SYSLOG)
-			char jobtag[64], logbuf[1024];
+			char logbuf[1024];
 			int bufidx = 0;
-			/* according to the NOTES section of openlog(3), jobtag will be
-			 * used (implicitly) by future calls to syslog(). That's why it
-			 * was defined outside of the if block here. */
 			if (SyslogOutput) {
-				snprintf(jobtag, sizeof(jobtag), "CROND[%d]", jobpid);
-				openlog(jobtag, 0, LOG_CRON);
 				if (ch != '\n')
 					logbuf[bufidx++] = ch;
 			}
@@ -489,7 +483,7 @@ static int child_process(entry * e, user * u, char **jobenv) {
 							logbuf[bufidx-1] = '\0';
 						else
 							logbuf[bufidx] = '\0';
-						syslog(LOG_INFO, "%s", logbuf);
+						log_it(usernm, getpid(), "CMDOUT", logbuf, 0);
 						bufidx = 0;
 					}
 				}
@@ -513,9 +507,8 @@ static int child_process(entry * e, user * u, char **jobenv) {
 			if (SyslogOutput) {
 				if (bufidx) {
 					logbuf[bufidx] = '\0';
-					syslog(LOG_INFO, "%s", logbuf);
+					log_it(usernm, getpid(), "CMDOUT", logbuf, 0);
 				}
-				closelog();
 			}
 #endif
 
