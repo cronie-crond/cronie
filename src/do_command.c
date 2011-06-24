@@ -474,7 +474,6 @@ static int child_process(entry * e, user * u, char **jobenv) {
 				bytes++;
 				if (mail)
 					putc(ch, mail);
-			}
 #if defined(SYSLOG)
 				if (SyslogOutput) {
 					logbuf[bufidx++] = ch;
@@ -488,7 +487,7 @@ static int child_process(entry * e, user * u, char **jobenv) {
 					}
 				}
 #endif
-
+			}
 			/* only close pipe if we opened it -- i.e., we're
 			 * mailing...
 			 */
