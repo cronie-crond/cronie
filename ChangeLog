@@ -1,3 +1,44 @@
+2011-06-24  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/do_command.c: Cron writes job output to syslog incorrectly.
+	When cron is invoked in a way to print job output to syslog, it does
+	print only the first character of the output. Author: Vitezslav
+	Cizek Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2011-06-21  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c, src/database.c, src/funcs.h, src/structs.h: Check
+	orphaned crontabs for adoption.
+
+2011-06-21  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/do_command.c: Unify logging in case of SyslogOutput with the
+	rest of crond.
+
+2011-05-26  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8, man/crontab.1: Change of email adress of cluster
+	support author.
+
+2011-05-16  Kiyoshi OHGISHI <ohgishi@gaia.eonet.ne.jp>
+
+	* anacron/main.c: The charset of anacron's mail is always
+	ANSI_X3.4-1968. There are no setlocale is anacron's source.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2011-04-28  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c: Cronie disables inotify support when the /etc/crontab
+	file does not exist at startup.  Existence of crontab and directories wasn't controlled before
+	creating inotify watches.
+
+2011-03-15  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac: Clean configure.
+
+2011-03-15  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: New release 1.4.7.
+
 2011-03-15  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* configure.ac: Split relro and pie into two options.
