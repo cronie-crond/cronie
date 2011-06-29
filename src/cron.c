@@ -64,11 +64,19 @@ static int DisableInotify;
 int wd[NUM_WATCHES];
 const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB};
 
+static void reset_watches(void) {
+	int i;
+
+	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
+		wd[i] = -2;
+	}
+}
+
 void set_cron_unwatched(int fd) {
 	int i;
 
 	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
-		if (wd[i] < 0) {
+		if (wd[i] > 0) {
 			inotify_rm_watch(fd, wd[i]);
 			wd[i] = -1;
 		}
@@ -90,7 +98,7 @@ void set_cron_watched(int fd) {
 		w = inotify_add_watch(fd, watchpaths[i],
 			IN_CREATE | IN_CLOSE_WRITE | IN_ATTRIB | IN_MODIFY | IN_MOVED_TO |
 			IN_MOVED_FROM | IN_MOVE_SELF | IN_DELETE | IN_DELETE_SELF);
-		if (w < 0) {
+		if (w < 0 && errno != ENOENT) {
 			if (wd[i] != -1) {
 				log_it("CRON", pid, "This directory or file can't be watched",
 					watchpaths[i], errno);
@@ -119,6 +127,7 @@ static void handle_signals(cron_db * database) {
 		/* watches must be reinstated on reload */
 		if (inotify_enabled && (EnableClustering != 1)) {
 			set_cron_unwatched(database->ifd);
+			reset_watches();
 			inotify_enabled = 0;
 		}
 #endif
@@ -157,9 +166,6 @@ int main(int argc, char *argv[]) {
 	char *cs;
 	pid_t pid = getpid();
 	long oldGMToff;
-#if defined WITH_INOTIFY
-	int i;
-#endif
 
 	ProgramName = argv[0];
 	MailCmd[0] = '\0';
@@ -260,13 +266,7 @@ int main(int argc, char *argv[]) {
 			"", 0);
 	}
 	else {
-		for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
-			/* initialize to negative number other than -1
-			 * so an eventual error is reported for the first time
-			 */
-			wd[i] = -2;
-		}
-
+		reset_watches();
 		database.ifd = fd = inotify_init();
 		fcntl(fd, F_SETFD, FD_CLOEXEC);
 		if (fd < 0)
