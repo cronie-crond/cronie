@@ -167,7 +167,13 @@ int main(int argc, char *argv[]) {
 	pid_t pid = getpid();
 	long oldGMToff;
 
-	ProgramName = argv[0];
+	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
+		ProgramName = argv[0];
+	}
+	else {
+		++ProgramName;
+	}
+
 	MailCmd[0] = '\0';
 	cron_default_mail_charset[0] = '\0';
 

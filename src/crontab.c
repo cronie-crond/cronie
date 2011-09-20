@@ -100,8 +100,14 @@ static void usage(const char *msg) {
 int main(int argc, char *argv[]) {
 	int exitstatus;
 
+	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
+		ProgramName = argv[0];
+	}
+	else {
+		++ProgramName;
+	}
+
 	Pid = getpid();
-	ProgramName = argv[0];
 	MailCmd[0] = '\0';
 	cron_default_mail_charset[0] = '\0';
 
