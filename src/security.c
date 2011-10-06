@@ -456,6 +456,7 @@ get_security_context(const char *name, int crontab_fd,
 #ifdef WITH_SELINUX
 	security_context_t scontext = NULL;
 	security_context_t file_context = NULL;
+	security_context_t rawcontext=NULL;
 	int retval = 0;
 	char *seuser = NULL;
 	char *level = NULL;
@@ -474,6 +475,10 @@ get_security_context(const char *name, int crontab_fd,
 
 	retval = get_default_context_with_level(name == NULL ? "system_u" : seuser,
 		level, NULL, &scontext);
+	if (selinux_trans_to_raw_context(scontext, &rawcontext) == 0) {
+		freecon(scontext);
+		scontext = rawcontext;
+	}
 	free(seuser);
 	free(level);
 	if (retval) {
