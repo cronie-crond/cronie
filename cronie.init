@@ -68,7 +68,7 @@ stop() {
 }
 
 restart() {
-    stop
+    rh_status_q && stop
     start
 }
 
