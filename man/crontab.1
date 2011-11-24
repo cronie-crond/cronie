@@ -22,7 +22,7 @@
 .\"
 .\" $Id: crontab.1,v 1.7 2004/01/23 19:03:32 vixie Exp $
 .\"
-.TH CRONTAB 1 "22 September 2010"
+.TH CRONTAB 1 "24 November 2011"
 .SH NAME
 crontab \- maintains crontab files for individual users
 .SH SYNOPSIS
@@ -79,8 +79,9 @@ file does exist, then a user must \fInot\fR be listed in the
 .I cron.deny
 file in order to use cron.  If neither of these files exists,
 only the super user is allowed to use cron.
-Another way to restrict access to cron is to use PAM authentication to set up users,
-which are allowed or disallowed to use 
+Another way to restrict access to cron is to use PAM authentication in
+.I /etc/security/access.conf
+to set up users, which are allowed or disallowed to use 
 .I crontab
 or modify system cron jobs in the
 .IR /etc/cron.d/ 
