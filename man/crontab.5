@@ -245,7 +245,7 @@ The jobs in
 and 
 .I /etc/crontab 
 are system jobs, which are used usually for more than
-one user, thus, the username is needed. MAILTO on the first line
+one user, thus, additionaly the username is needed. MAILTO on the first line
 is optional.
 .SH EXAMPLE OF A JOB IN /etc/cron.d/job
 .nf
@@ -274,12 +274,12 @@ MLS_LEVEL=SystemHigh
 0-59 * * * * id -Z > /tmp/SystemHigh/crontest
 .fi
 .SH FILES
-.I /etc/anacrontab
-system crontab file for jobs like cron.daily, weekly, monthly.
+.I /etc/crontab
+main system crontab file.
 .I /var/spool/cron/
 a directory for storing crontabs defined by users.
 .I /etc/cron.d/
-a directory for storing system crontables.
+a directory for storing system crontabs.
 .SH "SEE ALSO"
 .BR cron (8), 
 .BR crontab (1)

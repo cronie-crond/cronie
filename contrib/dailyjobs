@@ -1,3 +1,4 @@
+# Run the daily, weekly, and monthly jobs if cronie-anacron is not installed
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root

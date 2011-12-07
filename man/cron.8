@@ -82,17 +82,23 @@ crontables were modified. The modtime option is also used when inotify can not b
 .PP
 .I Cron
 checks these files and directories:
+.TP
+.IR /etc/crontab
+system crontab. Nowadays the file is empty by default. Originally it was usually used to run daily, weekly,
+monthly jobs. By default these jobs are now run through anacron which reads
 .IR /etc/anacrontab
-system crontab, usually used to run daily, weekly, monthly jobs. See 
+configuration file. See 
 .BR anacrontab (5)
 for more details.
+.TP
 .IR /etc/cron.d/
 directory that contains system cronjobs stored for different users.
+.TP
 .IR /var/spool/cron
 directory that contains user crontables created by the
 .IR crontab 
 command.
-
+.PP
 Note that the
 .BR crontab (1)
 command updates the modtime of the spool directory whenever it changes a
