@@ -10,4 +10,4 @@ endif
 
 EXTRA_DIST = cronie.init crond.sysconfig contrib/anacrontab \
 			contrib/0anacron contrib/0hourly \
-			contrib/dailyjobs
+			contrib/dailyjobs contrib/cronie.systemd

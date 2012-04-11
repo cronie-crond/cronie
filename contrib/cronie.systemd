@@ -1,0 +1,11 @@
+[Unit]
+Description=Command Scheduler
+After=syslog.target auditd.service systemd-user-sessions.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/crond
+ExecStart=/usr/sbin/crond -n $CRONDARGS
+
+[Install]
+WantedBy=multi-user.target
+
