@@ -424,7 +424,7 @@ static int cron_change_selinux_range(user * u, security_context_t ucontext) {
 		}
 	}
 
-	if (setexeccon(ucontext) < 0 || setkeycreatecon(ucontext) < 0) {
+	if (setexeccon(ucontext) < 0) {
 		if (security_getenforce() > 0) {
 			if (asprintf
 				(&msg, "Could not set exec or keycreate context to %s for user",
@@ -437,7 +437,7 @@ static int cron_change_selinux_range(user * u, security_context_t ucontext) {
 		else {
 			if (asprintf
 				(&msg,
-					"Could not set exec or keycreate context to %s for user,"
+					"Could not set exec context to %s for user,"
 					" but SELinux in permissive mode, continuing",
 					(char *) ucontext) >= 0) {
 				log_it(u->name, getpid(), "WARNING", msg, 0);
