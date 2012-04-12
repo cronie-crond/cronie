@@ -455,6 +455,7 @@ static int child_process(entry * e, user * u, char **jobenv) {
 				 * defined (and suggested by) RFC3834.
 				 */
 				fprintf(mail, "Auto-Submitted: auto-generated\n");
+				fprintf(mail, "Precedence: bulk\n");
 
 				for (env = jobenv; *env; env++)
 					fprintf(mail, "X-Cron-Env: <%s>\n", *env);
