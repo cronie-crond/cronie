@@ -407,7 +407,7 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 		 */
 		/* clear the bit string, since the default is 'off'.
 		 */
-		bit_nclear(bits, 0, (high - low + 1));
+		bit_nclear(bits, 0, (high - low));
 
 	/* process all ranges
 	 */
