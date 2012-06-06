@@ -194,9 +194,8 @@ register_period_job(const char *periods, const char *delays,
 {
     int delay;
     job_rec *jr;
-    int period_len, ident_len, command_len;
+    int ident_len, command_len;
 
-    period_len = strlen(periods);
     ident_len = strlen(ident);
     command_len = strlen(command);
     jobs_read++;

@@ -166,7 +166,6 @@ launch_mailer(job_rec *jr)
 {
     pid_t pid;
     struct stat buf;
-    int r;
 
     /* Check that we have a way of sending mail. */
     if(stat(SENDMAIL, &buf))
