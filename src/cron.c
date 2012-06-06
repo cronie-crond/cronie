@@ -43,9 +43,9 @@ set_time(int),
 cron_sleep(int, cron_db *),
 sigchld_handler(int),
 sighup_handler(int),
-sigchld_reaper(void), quit(int), parse_args(int c, char *v[]);
+sigchld_reaper(void), sigintterm_handler(int), parse_args(int c, char *v[]);
 
-static volatile sig_atomic_t got_sighup, got_sigchld;
+static volatile sig_atomic_t got_sighup, got_sigchld, got_sigintterm;
 static int timeRunning, virtualTime, clockTime;
 static long GMToff;
 static int DisableInotify;
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 	(void) sigaction(SIGCHLD, &sact, NULL);
 	sact.sa_handler = sighup_handler;
 	(void) sigaction(SIGHUP, &sact, NULL);
-	sact.sa_handler = quit;
+	sact.sa_handler = sigintterm_handler;
 	(void) sigaction(SIGINT, &sact, NULL);
 	(void) sigaction(SIGTERM, &sact, NULL);
 
@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
 	 * timeRunning: is the time we last awakened.
 	 * clockTime: is the time when set_time was last called.
 	 */
-	while (TRUE) {
+	while (!got_sigintterm) {
 		int timeDiff;
 		enum timejump wakeupKind;
 
@@ -304,7 +304,9 @@ int main(int argc, char *argv[]) {
 		do {
 			cron_sleep(timeRunning + 1, &database);
 			set_time(FALSE);
-		} while (clockTime == timeRunning);
+		} while (!got_sigintterm && clockTime == timeRunning);
+		if (got_sigintterm)
+			break;
 		timeRunning = clockTime;
 
 		/*
@@ -430,6 +432,10 @@ int main(int argc, char *argv[]) {
 	if (fd >= 0 && close(fd) < 0)
 		log_it("CRON", pid, "INFO", "Inotify close failed", errno);
 #endif
+
+	(void) unlink(_PATH_CRON_PID);
+
+	return 0;
 }
 
 static void run_reboot_jobs(cron_db * db) {
@@ -580,8 +586,11 @@ static void cron_sleep(int target, cron_db * db) {
 			(long) getpid(), (long) target * SECONDS_PER_MINUTE,
 			seconds_to_wait))
 
-		while (seconds_to_wait > 0 && seconds_to_wait < 65) {
+	while (seconds_to_wait > 0 && seconds_to_wait < 65) {
 		sleep((unsigned int) seconds_to_wait);
+
+		if (got_sigintterm)
+			return;
 
 		/*
 		 * Check to see if we were interrupted by a signal.
@@ -604,9 +613,8 @@ static void sigchld_handler(int x) {
 	got_sigchld = 1;
 }
 
-static void quit(int x) {
-	(void) unlink(_PATH_CRON_PID);
-	_exit(0);
+static void sigintterm_handler(int x) {
+	got_sigintterm = 1;
 }
 
 static void sigchld_reaper(void) {
