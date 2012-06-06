@@ -97,7 +97,9 @@ username()
 static void
 xputenv(const char *s)
 {
-    if (putenv(s)) die_e("Can't set the environment");
+    char *copy = strdup (s);
+    if (!copy) die_e("Not enough memory to set the environment");
+    if (putenv(copy)) die_e("Can't set the environment");
 }
 
 static void
