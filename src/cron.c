@@ -59,10 +59,16 @@ static int DisableInotify;
  * clustering enabled.
  */
 
-# define NUM_WATCHES 3
+# if defined WITH_SYSCRONTAB
+# 	define NUM_WATCHES 3
 
 int wd[NUM_WATCHES];
 const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB};
+# else
+#	define NUM_WATCHES 2
+int wd[NUM_WATCHES];
+const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR};
+# endif
 
 static void reset_watches(void) {
 	int i;
