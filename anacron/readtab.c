@@ -273,6 +273,10 @@ parse_tab_line(char *line)
             if ((r == -1) || (from == NULL) || (to == NULL)) goto reg_invalid;
             range_start = atoi(from);
             range_stop = atoi(to);
+            if (range_stop < range_start) {
+                range_start = 0; range_stop = 0;
+                goto reg_invalid;
+            }
             Debug(("Jobs will start in the %02d:00-%02d:00 range.", range_start, range_stop));
         }
         if (strncmp(env_var, "RANDOM_DELAY", 12) == 0) {
