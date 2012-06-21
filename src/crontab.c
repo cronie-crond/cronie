@@ -809,7 +809,7 @@ static int replace_cmd(void) {
 		goto done;
 	}
 
-	file_owner = (getgid() == getegid())? ROOT_UID : pw->pw_uid;
+	file_owner = (getgid() == geteuid() && getgid() == getegid()) ? ROOT_UID : pw->pw_uid;
 
 #ifdef HAVE_FCHOWN
 	if (fchown(fileno(tmp), file_owner, -1) < OK) {
