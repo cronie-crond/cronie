@@ -61,6 +61,7 @@ static volatile int got_sigalrm, got_sigchld, got_sigusr1;
 int running_jobs, running_mailers;              /* , number of */
 int range_start = -1;
 int range_stop = -1;
+int preferred_hour = -1;
 
 static void
 print_version()

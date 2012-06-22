@@ -156,6 +156,12 @@ consider_job(job_rec *jr)
 	jobtime = start_sec + jr->delay * 60;
 
 	t = localtime(&jobtime);
+	if (!now && preferred_hour != -1 && t->tm_hour != preferred_hour) {
+		Debug(("The job's %s preferred hour %d was missed, skipping the job.", jr->ident, preferred_hour));
+		xclose (jr->timestamp_fd);
+		return 0;
+	}
+
 	if (!now && range_start != -1 && range_stop != -1 && 
 		(t->tm_hour < range_start || t->tm_hour >= range_stop))
 	{

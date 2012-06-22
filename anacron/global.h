@@ -109,6 +109,9 @@ extern time_t start_sec;
 extern int range_start;
 extern int range_stop;
 
+/* preferred hour for jobs */
+extern int preferred_hour;
+
 /* Function prototypes */
 
 /* main.c */

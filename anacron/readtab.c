@@ -251,6 +251,7 @@ parse_tab_line(char *line)
     char *command;
     char *from;
     char *to;
+    char *pref_hour;
 
     /* an empty line? */
     r = match_rx("^[ \t]*($|#)", line, 0);
@@ -289,6 +290,16 @@ parse_tab_line(char *line)
                 Debug(("Randomized delay set: %d", random_number));
             }
         else goto reg_invalid;
+        }
+        if (strncmp(env_var, "PREFERRED_HOUR", 14) == 0) {
+            r = match_rx("^([[:digit:]]+)$", value, 1, &pref_hour);
+            if ((r != -1) || (pref_hour != NULL)) {
+                preferred_hour = atoi(pref_hour);
+                if ((preferred_hour < 0) || (preferred_hour > 24)) {
+                    preferred_hour = -1;
+                    goto reg_invalid;
+                }
+            }
         }
 	register_env(env_var, value);
 	return;
