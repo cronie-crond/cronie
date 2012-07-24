@@ -124,7 +124,7 @@ fi
 
 AC_ARG_ENABLE(relro,CRONIE_HELP_STRING(--enable-relro,Build cronie with relro flag))
 if test "x$enable_relro" = xyes; then
-    LDFLAGS="-Wl,-z,relro -Wl,-z,now"
+    LDFLAGS="$LDFLAGS -Wl,-z,relro -Wl,-z,now"
 fi
 
 # Check whether user wants SELinux support
