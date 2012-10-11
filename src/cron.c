@@ -192,6 +192,7 @@ int main(int argc, char *argv[]) {
 
 	SyslogOutput = 0;
 	NoFork = 0;
+	ChangePath = 1;
 	parse_args(argc, argv);
 
 	bzero((char *) &sact, sizeof sact);
@@ -212,9 +213,12 @@ int main(int argc, char *argv[]) {
 	set_cron_uid();
 	check_spool_dir();
 
-	if (putenv("PATH=" _PATH_DEFPATH) < 0) {
-		log_it("CRON", pid, "DEATH", "can't putenv PATH", errno);
-		exit(1);
+	if (ChangePath) {
+		if (putenv("PATH=" _PATH_DEFPATH) < 0) {
+			log_it("CRON", pid, "DEATH", "can't putenv PATH",
+				errno);
+			exit(1);
+		}
 	}
 
 	/* Get the default locale character set for the mail 
@@ -650,7 +654,7 @@ static void sigchld_reaper(void) {
 static void parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "hnpsix:m:c"))) {
+	while (-1 != (argch = getopt(argc, argv, "hnpsiPx:m:c"))) {
 		switch (argch) {
 			case 'x':
 				if (!set_debug_flags(optarg))
@@ -667,6 +671,9 @@ static void parse_args(int argc, char *argv[]) {
 				break;
 			case 'i':
 				DisableInotify = 1;
+				break;
+			case 'P':
+				ChangePath = 0;
 				break;
 			case 'm':
 				strncpy(MailCmd, optarg, MAX_COMMAND);

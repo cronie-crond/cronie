@@ -314,7 +314,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 	}
 #ifndef LOGIN_CAP
 	/* If login.conf is in used we will get the default PATH later. */
-	if (!env_get("PATH", e->envp)) {
+	if (ChangePath && !env_get("PATH", e->envp)) {
 		if (glue_strings(envstr, sizeof envstr, "PATH", _PATH_DEFPATH, '=')) {
 			if ((tenvp = env_set(e->envp, envstr)) == NULL) {
 				ecode = e_memory;

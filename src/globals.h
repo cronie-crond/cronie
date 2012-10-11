@@ -73,6 +73,7 @@ XTRN int        PermitAnyCrontab;
 XTRN char       MailCmd[MAX_COMMAND];
 XTRN char       cron_default_mail_charset[MAX_ENVSTR];
 XTRN int        EnableClustering;
+XTRN int	ChangePath;
  
 #if DEBUGGING
 XTRN int	DebugFlags INIT(0);
