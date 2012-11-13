@@ -27,7 +27,7 @@
 crond \- daemon to execute scheduled commands
 .SH SYNOPSIS
 .B crond
-.RB [ -n " | " -p " | " -s " | " -c " | " -m \fP\fI<mail command>\fP ]
+.RB [ -c " | " -h " | " -i " | " -n " | " -p " | " -P " | " -s " | " -m \fP\fI<mail command>\fP ]
 
 .B crond
 .B -x 
@@ -133,6 +133,11 @@ The daemon loads the PAM environment from the pam_env module. This
 can be overridden by defining specific settings in the appropriate crontab file.
 .SH "OPTIONS"
 .TP
+.B "\-h"
+Prints a help message and exits.
+.TP
+.B "\-i"
+Disables inotify support.
 .B "\-m"
 This option allows you to specify a shell command to use for sending 
 .I Cron 
@@ -152,6 +157,9 @@ Tells the daemon to run in the foreground. This can be useful when starting it o
 Allows 
 .I Cron
 to accept any user set crontables.
+.TP
+.B "\-P"
+Change PATH.
 .TP
 .B "\-c"
 This option enables clustering support, as described below.
