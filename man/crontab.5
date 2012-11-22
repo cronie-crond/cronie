@@ -1,7 +1,7 @@
 .\"/* Copyright 1988,1990,1993,1994 by Paul Vixie
 .\" * All rights reserved
 .\" */
-.\" 
+.\"
 .\" Copyright (c) 2004 by Internet Systems Consortium, Inc. ("ISC")
 .\" Copyright (c) 1997,2000 by Internet Software Consortium, Inc.
 .\"
@@ -18,8 +18,8 @@
 .\" OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .\" $Id: crontab.5,v 1.6 2004/01/23 19:03:33 vixie Exp $
-.\" 
-.TH CRONTAB 5 "July 2010" "Marcela Mašláňová" "Cronie Users' Manual"
+.\"
+.TH CRONTAB 5 2012-11-22 "cronie" "File Formats"
 .SH NAME
 crontab \- files used to schedule the execution of programs
 .SH DESCRIPTION
@@ -27,137 +27,141 @@ A
 .I crontab
 file contains instructions for the
 .BR cron (8)
-daemon in the following simplified manner: "run this command at this time on this date".
-Each user can define their own crontab. Commands defined in any given crontab are
-executed under the user who owns that particular crontab.  Uucp and News usually have
-their own crontabs, eliminating the need for explicitly running
+daemon in the following simplified manner: "run this command at this time
+on this date".  Each user can define their own crontab.  Commands defined
+in any given crontab are executed under the user who owns that particular
+crontab.  Uucp and News usually have their own crontabs, eliminating the
+need for explicitly running
 .BR su (1)
 as part of a cron command.
 .PP
 Blank lines, leading spaces, and tabs are ignored.  Lines whose first
-non-white space character is a pound-sign (#) are comments, and are not processed.
-Note that comments are not allowed on the same line as cron commands, since
-they are considered a part of the command.  Similarly, comments are not
-allowed on the same line as environment variable settings.
+non-white space character is a pound-sign (#) are comments, and are not
+processed.  Note that comments are not allowed on the same line as cron
+commands, since they are considered a part of the command.  Similarly,
+comments are not allowed on the same line as environment variable
+settings.
 .PP
 An active line in a crontab is either an environment setting or a cron
 command.  An environment setting is of the form:
 .PP
    name = value
 .PP
-where the white spaces around the equal-sign (=) are optional, and any subsequent
-non-leading white spaces in
+where the white spaces around the equal-sign (=) are optional, and any
+subsequent non-leading white spaces in
 .I value
 is a part of the value assigned to
 .IR name .
 The
 .I value
-string may be placed in quotes (single or double, but matching) to preserve
-leading or trailing white spaces.
+string may be placed in quotes (single or double, but matching) to
+preserve leading or trailing white spaces.
 .PP
-Several environment variables are set up
-automatically by the
+Several environment variables are set up automatically by the
 .BR cron (8)
 daemon.
-.I SHELL 
-is set to /bin/sh, and 
-.I LOGNAME 
-and 
+.I SHELL
+is set to /bin/sh, and
+.I LOGNAME
+and
 .I HOME
 are set from the /etc/passwd line of the crontab\'s owner.
-.I HOME 
+.I HOME
 and
-.I SHELL 
+.I SHELL
 can be overridden by settings in the crontab; LOGNAME can not.
 .PP
-(Note: the 
+(Note: the
 .I LOGNAME
-variable is sometimes called 
+variable is sometimes called
 .I USER
 on BSD systems and is also automatically set).
 .PP
-In addition to 
+In addition to
 .IR LOGNAME ,
 .IR HOME ,
-and 
+and
 .IR SHELL ,
 .BR cron (8)
-looks at the 
-.I MAILTO 
-variable if a mail needs to be send as a result of running
-any commands in that particular crontab.  If 
-.I MAILTO 
-is defined (and non-empty), mail is
-sent to the specified address.  If 
-.I MAILTO 
-is defined but empty (\fIMAILTO=""\fR), no
-mail is sent.  Otherwise, mail is sent to the owner of the crontab.  This
-option is useful if you decide to use /bin/mail instead of /usr/lib/sendmail as
-your mailer. Note that /bin/mail does not provide aliasing and UUCP
-usually does not read its mail. If 
-.I MAILFROM 
-is defined (and non-empty), it
-is used as the envelope sender address, otherwise, ``root'' is used.
+looks at the
+.I MAILTO
+variable if a mail needs to be send as a result of running any commands
+in that particular crontab.  If
+.I MAILTO
+is defined (and non-empty), mail is sent to the specified address.  If
+.I MAILTO
+is defined but empty
+.RI ( MAILTO="" ),
+no mail is sent.  Otherwise, mail is sent to the owner of the crontab.
+This option is useful if you decide to use /bin/mail instead of
+/usr/lib/sendmail as your mailer.  Note that /bin/mail does not provide
+aliasing and UUCP usually does not read its mail.  If
+.I MAILFROM
+is defined (and non-empty), it is used as the envelope sender address,
+otherwise, ``root'' is used.
 .PP
-By default, cron sends a mail using the 'Content-Type:' header of 'text/plain' 
-with the 'charset=' parameter set to the 'charmap/codeset' of the locale in which 
+By default, cron sends a mail using the 'Content-Type:' header of
+'text/plain' with the 'charset=' parameter set to the 'charmap/codeset'
+of the locale in which
 .BR crond (8)
-is started up - i.e. either the default system locale, if no LC_* environment
-variables are set, or the locale specified by the LC_* environment variables
-(see 
+is started up, i.e., either the default system locale, if no LC_*
+environment variables are set, or the locale specified by the LC_*
+environment variables (see
 .BR locale (7)).
-Different character encodings can be used for mailing cron job outputs by 
-setting the 
-.I CONTENT_TYPE 
+Different character encodings can be used for mailing cron job outputs by
+setting the
+.I CONTENT_TYPE
 and
-.I CONTENT_TRANSFER_ENCODING 
-variables in a crontab to the correct values of the mail headers of those names.  
+.I CONTENT_TRANSFER_ENCODING
+variables in a crontab to the correct values of the mail headers of those
+names.
 .PP
-The 
+The
 .I CRON_TZ
-variable specifies the time zone specific for the cron table. 
-The user should enter a time according to the specified time zone into the table. 
-The time used for writing into a log file is taken from the local time zone, where the 
-daemon is running.
+variable specifies the time zone specific for the cron table.  The user
+should enter a time according to the specified time zone into the table.
+The time used for writing into a log file is taken from the local time
+zone, where the daemon is running.
 .PP
-The 
+The
 .I MLS_LEVEL
-environment variable provides support for multiple per-job 
-SELinux security contexts in the same crontab.
-By default, cron jobs execute with the default SELinux security context of the 
-user that created the crontab file.
-When using multiple security levels and roles, this may not be sufficient, because
-the same user may be running in different roles or in different security levels.
-For more information about roles and SELinux MLS/MCS, see 
-.BR selinux (8) 
-and the crontab example mentioned later on in this text.
-You can set the 
+environment variable provides support for multiple per-job SELinux
+security contexts in the same crontab.  By default, cron jobs execute
+with the default SELinux security context of the user that created the
+crontab file.  When using multiple security levels and roles, this may
+not be sufficient, because the same user may be running in different
+roles or in different security levels.  For more information about roles
+and SELinux MLS/MCS, see
+.BR selinux (8)
+and the crontab example mentioned later on in this text.  You can set the
 .I MLS_LEVEL
-variable to the SELinux security context string specifying
-the particular SELinux security context in which you want jobs to be run. 
-.B crond 
-will then set the execution context of those jobs that meet the specifications of the particular security context.
-For more information, see 
+variable to the SELinux security context string specifying the particular
+SELinux security context in which you want jobs to be run.
+.B crond
+will then set the execution context of those jobs that meet the
+specifications of the particular security context.  For more information,
+see
 .BR crontab (1)\ -s\ option.
 .PP
-The format of a cron command is similar to the V7 standard, with a number of
-upward-compatible extensions.  Each line has five time-and-date fields
+The format of a cron command is similar to the V7 standard, with a number
+of upward-compatible extensions.  Each line has five time-and-date fields
 followed by a
 .BR user name
-(if this is the 
+(if this is the
 .BR system
-crontab file), and followed by a command. Commands are executed by
+crontab file), and followed by a command.  Commands are executed by
 .BR cron (8)
-when the 'minute', 'hour', and 'month of the year' fields match the current time,
+when the 'minute', 'hour', and 'month of the year' fields match the
+current time,
 .I and
 at least one of the two 'day' fields ('day of month', or 'day of week')
 match the current time (see "Note" below).
 .PP
 Note that this means that non-existent times, such as the "missing hours"
-during the daylight savings time conversion, will never match, causing jobs
-scheduled during the "missing times" not to be run.  Similarly, times
-that occur more than once (again, during the daylight savings time conversion)
-will cause matching jobs to be run twice.
+during the daylight savings time conversion, will never match, causing
+jobs scheduled during the "missing times" not to be run.  Similarly,
+times that occur more than once (again, during the daylight savings time
+conversion) will cause matching jobs to be run twice.
 .PP
 .BR cron (8)
 examines cron entries every minute.
@@ -180,73 +184,70 @@ month	1-12 (or names, see below)
 day of week	0-7 (0 or 7 is Sunday, or use names)
 .br
 .PP
-A field may contain an asterisk (*), which always stands for "first\-last".
+A field may contain an asterisk (*), which always stands for
+"first\-last".
 .PP
-Ranges of numbers are allowed.  Ranges are two numbers separated
-with a hyphen.  The specified range is inclusive.  For example,
-8-11 for an 'hours' entry specifies execution at hours 8, 9, 10,
-and 11.
+Ranges of numbers are allowed.  Ranges are two numbers separated with a
+hyphen.  The specified range is inclusive.  For example, 8-11 for an
+'hours' entry specifies execution at hours 8, 9, 10, and 11.
 .PP
-Lists are allowed.  A list is a set of numbers (or ranges)
-separated by commas.  Examples: "1,2,5,9", "0-4,8-12".
+Lists are allowed.  A list is a set of numbers (or ranges) separated by
+commas.  Examples: "1,2,5,9", "0-4,8-12".
 .PP
-Step values can be used in conjunction with ranges.  Following
-a range with "/<number>" specifies skips of the number's value
-through the range.  For example, "0-23/2" can be used in the 'hours'
-field to specify command execution for every other hour (the alternative
-in the V7 standard is "0,2,4,6,8,10,12,14,16,18,20,22").  Step values are
-also permitted after an asterisk, so if specifying a job to be run every two
-hours, you can use "*/2".
+Step values can be used in conjunction with ranges.  Following a range
+with "/<number>" specifies skips of the number's value through the range.
+For example, "0-23/2" can be used in the 'hours' field to specify command
+execution for every other hour (the alternative in the V7 standard is
+"0,\:2,\:4,\:6,\:8,\:10,\:12,\:14,\:16,\:18,\:20,\:22").  Step values are
+also permitted after an asterisk, so if specifying a job to be run every
+two hours, you can use "*/2".
 .PP
-Names can also be used for the 'month' and 'day of week'
-fields.  Use the first three letters of the particular
-day or month (case does not matter).  Ranges or
-lists of names are not allowed.
+Names can also be used for the 'month' and 'day of week' fields.  Use the
+first three letters of the particular day or month (case does not
+matter).  Ranges or lists of names are not allowed.
 .PP
-The "sixth" field (the rest of the line) specifies the command to be
-run.
+The "sixth" field (the rest of the line) specifies the command to be run.
 The entire command portion of the line, up to a newline or a "%"
-character, will be executed by /bin/sh or by the shell
-specified in the SHELL variable of the cronfile.
-A "%" character in the command, unless escaped with a backslash
-(\\), will be changed into newline characters, and all data
-after the first % will be sent to the command as standard
+character, will be executed by /bin/sh or by the shell specified in the
+SHELL variable of the cronfile.  A "%" character in the command, unless
+escaped with a backslash (\\), will be changed into newline characters,
+and all data after the first % will be sent to the command as standard
 input.
 .PP
-Note: The day of a command's execution can be specified in the following two
-fields \(em 'day of month', and 'day of week'.  If both fields are
-restricted (i.e., do not contain the "*" character), the command will be run when
+Note: The day of a command's execution can be specified in the following
+two fields \(em 'day of month', and 'day of week'.  If both fields are
+restricted (i.e., do not contain the "*" character), the command will be
+run when
 .I either
 field matches the current time.  For example,
 .br
-"30 4 1,15 * 5"
-would cause a command to be run at 4:30 am on the 1st and 15th of each
-month, plus every Friday.
-.SH EXAMPLE CRON FILE                                                                                                         
-.nf                                                                                                                           
-# use /bin/sh to run commands, no matter what /etc/passwd says                                                                
-SHELL=/bin/sh                                                                                                                 
-# mail any output to `paul', no matter whose crontab this is                                                                  
-MAILTO=paul                                                                                                                   
+"30 4 1,15 * 5" would cause a command to be run at 4:30 am on the 1st and
+15th of each month, plus every Friday.
+.SH EXAMPLE CRON FILE
+.nf
+# use /bin/sh to run commands, no matter what /etc/passwd says
+SHELL=/bin/sh
+# mail any output to `paul', no matter whose crontab this is
+MAILTO=paul
 #
 CRON_TZ=Japan
-# run five minutes after midnight, every day                                                                                  
-5 0 * * *       $HOME/bin/daily.job >> $HOME/tmp/out 2>&1                                                                     
-# run at 2:15pm on the first of every month -- output mailed to paul                                                          
-15 14 1 * *     $HOME/bin/monthly                                                                                             
-# run at 10 pm on weekdays, annoy Joe                                                                                         
-0 22 * * 1-5    mail -s "It's 10pm" joe%Joe,%%Where are your kids?%                                                           
-23 0-23/2 * * * echo "run 23 minutes after midn, 2am, 4am ..., everyday"                                                      
-5 4 * * sun     echo "run at 5 after 4 every sunday"                                                                          
+# run five minutes after midnight, every day
+5 0 * * *       $HOME/bin/daily.job >> $HOME/tmp/out 2>&1
+# run at 2:15pm on the first of every month -- output mailed to paul
+15 14 1 * *     $HOME/bin/monthly
+# run at 10 pm on weekdays, annoy Joe
+0 22 * * 1-5    mail -s "It's 10pm" joe%Joe,%%Where are your kids?%
+23 0-23/2 * * * echo "run 23 minutes after midn, 2am, 4am ..., everyday"
+5 4 * * sun     echo "run at 5 after 4 every sunday"
 .fi
 .SH Jobs in /etc/cron.d/
-The jobs in 
-.I cron.d 
-and 
-.I /etc/crontab 
-are system jobs, which are used usually for more than
-one user, thus, additionaly the username is needed. MAILTO on the first line
-is optional.
+The jobs in
+.I cron.d
+and
+.I /etc/crontab
+are system jobs, which are used usually for more than one user, thus,
+additionaly the username is needed.  MAILTO on the first line is
+optional.
 .SH EXAMPLE OF A JOB IN /etc/cron.d/job
 .nf
 #login as root
@@ -255,13 +256,19 @@ MAILTO=root
 * * * * * root touch /tmp/file
 .fi
 .SH SELinux with multi level security (MLS)
-In a crontab, it is important to specify a security level by \fIcrontab\ -s\fR or specifying 
-the required level on the first line of the crontab. Each level is specified 
-in \fI/etc/selinux/targeted/seusers\fR. When using crontab in the MLS mode, it is especially important to:
-.br 
-- check/change the actual role, 
+In a crontab, it is important to specify a security level by
+.I crontab \-s
+or specifying the required level on the first line of the crontab.  Each
+level is specified in
+.IR /etc/selinux/targeted/seusers .
+When using crontab in the MLS mode, it is especially important to:
 .br
-- set correct \fIrole for directory\fR, which is used for input/output.
+- check/change the actual role,
+.br
+- set correct
+.I role for
+.IR directory ,
+which is used for input/output.
 .SH EXAMPLE FOR SELINUX MLS
 .nf
 # login as root
@@ -281,11 +288,13 @@ a directory for storing crontabs defined by users.
 .I /etc/cron.d/
 a directory for storing system crontabs.
 .SH "SEE ALSO"
-.BR cron (8), 
+.BR cron (8),
 .BR crontab (1)
 .SH EXTENSIONS
-These special time specification "nicknames" which replace
-the 5 initial time and date fields, and are prefixed with the '@' character, are supported:
+These special time specification "nicknames" which replace the 5 initial
+time and date fields, and are prefixed with the '@' character, are
+supported:
+.PP
 .nf
 @reboot    :    Run once after reboot.
 @yearly    :    Run once a year, ie.  "0 0 1 1 *".
@@ -297,13 +306,15 @@ the 5 initial time and date fields, and are prefixed with the '@' character, are
 .fi
 .SH CAVEATS
 .BR crontab
-files have to be regular files or symlinks to regular files, they must not be executable
-or writable for anyone else but the owner.
-This requirement can be overridden by using the \fB-p\fP option on the crond command line.
-If inotify support is in use, changes in the symlinked crontabs are not automatically
-noticed by the cron daemon. The cron daemon must receive a SIGHUP signal to reload the crontabs.
-This is a limitation of the inotify API.
-
+files have to be regular files or symlinks to regular files, they must
+not be executable or writable for anyone else but the owner.  This
+requirement can be overridden by using the
+.B \-p
+option on the crond command line.  If inotify support is in use, changes
+in the symlinked crontabs are not automatically noticed by the cron
+daemon.  The cron daemon must receive a SIGHUP signal to reload the
+crontabs.  This is a limitation of the inotify API.
 .SH AUTHOR
-.nf
-Paul Vixie <vixie@isc.org>
+.MT vixie@isc.org
+Paul Vixie
+.ME
