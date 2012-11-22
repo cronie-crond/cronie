@@ -1,31 +1,42 @@
-.TH ANACRONTAB 5 2009-08-17 "Marcela Mašláňová" "Anacron Users' Manual"
+.TH ANACRONTAB 5 2012-11-22 "cronie" "File Formats"
 .SH NAME
 /etc/anacrontab \- configuration file for Anacron
 .SH DESCRIPTION
 The
 .I /etc/anacrontab
-configuration file describes the jobs controlled by \fBanacron(8)\fR.  It can contain three types of lines:
-job-description lines, environment assignments, or empty lines.
+configuration file describes the jobs controlled by
+.BR anacron (8).
+It can contain three types of lines: job-description lines, environment
+assignments, or empty lines.
 .PP
 Job-description lines can have the following format:
 .PP
    period in days   delay in minutes   job-identifier   command
 .PP
 The
-.I period in days 
-variable specifies the frequency of execution of a job in days.  This variable can be represented by an integer or a macro (@daily, @weekly, @monthly), where @daily denotes the same value as the integer 1, @weekly the same as 7, and @monthly specifies that the job is run once a month, independent on the length of the month.
+.I period in days
+variable specifies the frequency of execution of a job in days.  This
+variable can be represented by an integer or a macro (@daily, @weekly,
+@monthly), where @daily denotes the same value as the integer 1, @weekly
+the same as 7, and @monthly specifies that the job is run once a month,
+independent on the length of the month.
 .PP
 The
-.I delay in minutes 
-variable specifies the number of minutes anacron waits, if necessary, before executing a job.  This variable is represented by an integer where 0 means no delay.
+.I delay in minutes
+variable specifies the number of minutes anacron waits, if necessary,
+before executing a job.  This variable is represented by an integer where
+0 means no delay.
 .PP
 The
 .I job-identifier
 variable specifies a unique name of a job which is used in the log files.
 .PP
 The
-.I command 
-variable specifies the command to execute.  The command can either be a command such as \fBls /proc >> /tmp/proc\fR or a command to execute a custom script. 
+.I command
+variable specifies the command to execute.  The command can either be a
+command such as
+.B ls /proc >> /tmp/proc
+or a command to execute a custom script.
 .PP
 Environment assignment lines can have the following format:
 .PP
@@ -35,41 +46,50 @@ Any spaces around
 .I VAR
 are removed.  No spaces around
 .I VALUE
-are allowed (unless you want them to be part of the value).  The specified assignment
-takes effect from the next line until the end of the file, or to the next
-assignment of the same variable.
+are allowed (unless you want them to be part of the value).  The
+specified assignment takes effect from the next line until the end of the
+file, or to the next assignment of the same variable.
 .PP
 The
 .I START_HOURS_RANGE
-variable defines an interval (in hours) when scheduled jobs can be run.  In case this time interval is missed, for example, due to a power down, then scheduled jobs are not executed that day. 
+variable defines an interval (in hours) when scheduled jobs can be run.
+In case this time interval is missed, for example, due to a power down,
+then scheduled jobs are not executed that day.
 .PP
-The  
+The
 .I RANDOM_DELAY
-variable denotes the maximum number of minutes that will be added to the delay in minutes variable which is specified for each job.  A
-.I RANDOM_DELAY 
-set to 12 would therefore add, randomly, between 0 and 12 minutes to the delay in minutes for each job in that particular anacrontab.  When set to 0, no random delay is added.
+variable denotes the maximum number of minutes that will be added to the
+delay in minutes variable which is specified for each job.  A
+.I RANDOM_DELAY
+set to 12 would therefore add, randomly, between 0 and 12 minutes to the
+delay in minutes for each job in that particular anacrontab.  When set to
+0, no random delay is added.
 .PP
 Empty lines are either blank lines, line containing white spaces only, or
-lines with white spaces followed by a '#' followed by an arbitrary comment.
+lines with white spaces followed by a '#' followed by an arbitrary
+comment.
 .PP
 You can continue a line onto the next line by adding a '\\' at the end of it.
 .PP
 In case you want to disable Anacron, add the
 .I 0anacron
 cron job (which is a part of
-.IR crontabs(4) )
+.BR crontabs (4))
 into the
 .I /etc/cron.hourly/jobs.deny
 directory.
 .SH EXAMPLE
-This example shows how to set up an Anacron job similar in functionality to 
+This example shows how to set up an Anacron job similar in functionality to
 .I /etc/crontab
 which starts all regular jobs
 between 6:00 and 8:00
 .I only.
 A
-.I RANDOM_DELAY 
-which can be 30 minutes at the most is specified.  Jobs will run serialized in a queue where each job is started only after the previous one is finished.
+.I RANDOM_DELAY
+which can be 30 minutes at the most is specified.  Jobs will run
+serialized in a queue where each job is started only after the previous
+one is finished.
+.PP
 .nf
 # environment variables
 SHELL=/bin/sh
@@ -91,8 +111,16 @@ The Anacron
 .I README
 file.
 .SH AUTHOR
-Itai Tzur <itzur@actcom.co.il>
+.MT itzur@\:actcom.\:co.\:il
+Itai Tzur
+.ME
 .PP
-Currently maintained by Pascal Hakim <pasc@(debian.org|redellipse.net)>.
+Currently maintained by
+.MT pasc@\:(debian.\:org|\:redellipse.\:net)
+Pascal Hakim
+.ME .
 .PP
-For Fedora, maintained by Marcela Mašláňová <mmaslano@redhat.com>.
+For Fedora, maintained by
+.MT mmaslano@redhat.com
+Marcela Mašláňová
+.ME .

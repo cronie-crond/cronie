@@ -1,7 +1,7 @@
 .\"/* Copyright 1988,1990,1993,1996 by Paul Vixie
 .\" * All rights reserved
 .\" */
-.\" 
+.\"
 .\" Copyright (c) 2004 by Internet Systems Consortium, Inc. ("ISC")
 .\" Copyright (c) 1997,2000 by Internet Software Consortium, Inc.
 .\"
@@ -21,73 +21,74 @@
 .\" to add clustering support.
 .\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
-.\" 
-.TH CRON "8" "July 2010" "Marcela Mašláňová" "Cronie Users' Manual"
+.\"
+.TH CRON "8" "2012-11-22" "cronie" "System Administration"
 .SH NAME
 crond \- daemon to execute scheduled commands
 .SH SYNOPSIS
 .B crond
 .RB [ -c " | " -h " | " -i " | " -n " | " -p " | " -P " | " -s " | " -m \fP\fI<mail command>\fP ]
-
-.B crond
-.B -x 
-.RB [ext,sch,proc,pars,load,misc,test,bit]
 .br
+.B crond
+.B -x
+.RB [ext,sch,proc,pars,load,misc,test,bit]
 .SH DESCRIPTION
 .I Cron
-is started from 
-.I /etc/rc.d/init.d 
-or 
+is started from
+.I /etc/rc.d/init.d
+or
 .I /etc/init.d
-It returns immediately, thus, there is no need to need to start it with the '&' parameter. 
+It returns immediately, thus, there is no need to need to start it with
+the '&' parameter.
 .PP
 .I Cron
-searches 
-.I /var/spool/cron 
+searches
+.I /var/spool/cron
 for crontab files which are named after accounts in
 .I /etc/passwd;
 The found crontabs are loaded into the memory.
 .I Cron
-also searches for 
+also searches for
 .I /etc/anacrontab
-and any files in the 
-.I /etc/cron.d 
+and any files in the
+.I /etc/cron.d
 directory, which have a different format (see
 .BR crontab (5)).
 .I Cron
 examines all stored crontabs and checks each job to see if it needs to be
-run in the current minute. When executing 
-commands, any output is mailed to the owner of the crontab (or to the user
-specified in the 
-.I MAILTO 
-environment variable in the crontab, if such exists).
-Any job output can also be sent to syslog by using the
+run in the current minute.  When executing commands, any output is mailed
+to the owner of the crontab (or to the user specified in the
+.I MAILTO
+environment variable in the crontab, if such exists).  Any job output can
+also be sent to syslog by using the
 .B "\-s"
 option.
 .PP
-There are two ways how changes in crontables are checked. The first
-method is checking the modtime of a file. The second method is using the inotify support.
-Using of inotify is logged in the 
+There are two ways how changes in crontables are checked.  The first
+method is checking the modtime of a file.  The second method is using the
+inotify support.  Using of inotify is logged in the
 .I /var/log/cron
-log after the daemon is started. The inotify support checks for changes in all crontables and accesses the 
-hard disk only when a change is detected.
+log after the daemon is started.  The inotify support checks for changes
+in all crontables and accesses the hard disk only when a change is
+detected.
 .PP
 When using the modtime option,
 .I Cron
-checks its crontables' modtimes every minute to check for any changes and reloads
-the crontables which have changed. There is no need to restart 
-.I Cron 
-after some of the
-crontables were modified. The modtime option is also used when inotify can not be initialized.
+checks its crontables' modtimes every minute to check for any changes and
+reloads the crontables which have changed.  There is no need to restart
+.I Cron
+after some of the crontables were modified.  The modtime option is also
+used when inotify can not be initialized.
 .PP
 .I Cron
 checks these files and directories:
 .TP
 .IR /etc/crontab
-system crontab. Nowadays the file is empty by default. Originally it was usually used to run daily, weekly,
-monthly jobs. By default these jobs are now run through anacron which reads
+system crontab.  Nowadays the file is empty by default.  Originally it
+was usually used to run daily, weekly, monthly jobs.  By default these
+jobs are now run through anacron which reads
 .IR /etc/anacrontab
-configuration file. See 
+configuration file.  See
 .BR anacrontab (5)
 for more details.
 .TP
@@ -96,7 +97,7 @@ directory that contains system cronjobs stored for different users.
 .TP
 .IR /var/spool/cron
 directory that contains user crontables created by the
-.IR crontab 
+.IR crontab
 command.
 .PP
 Note that the
@@ -105,32 +106,34 @@ command updates the modtime of the spool directory whenever it changes a
 crontab.
 .PP
 .SS Daylight Saving Time and other time changes
-Local time changes of less than three hours, such as those caused
-by the Daylight Saving Time changes, are handled in a special way.
-This only applies to jobs that run at a specific time and jobs that
-run with a granularity greater than one hour. Jobs that run
-more frequently are scheduled normally.
+Local time changes of less than three hours, such as those caused by the
+Daylight Saving Time changes, are handled in a special way.  This only
+applies to jobs that run at a specific time and jobs that run with a
+granularity greater than one hour.  Jobs that run more frequently are
+scheduled normally.
 .PP
-If time was adjusted one hour forward, those jobs that would have run in the
-interval that has been skipped will be run immediately.
-Conversely, if time was adjusted backward, running the same job twice is avoided.
+If time was adjusted one hour forward, those jobs that would have run in
+the interval that has been skipped will be run immediately.  Conversely,
+if time was adjusted backward, running the same job twice is avoided.
 .PP
-Time changes of more than 3 hours are considered to be corrections to
-the clock or the timezone, and the new time is used immediately.
+Time changes of more than 3 hours are considered to be corrections to the
+clock or the timezone, and the new time is used immediately.
 .PP
-It is possible to use different time zones for crontables. See
-.IR crontab (5)
-for more information. 
+It is possible to use different time zones for crontables.  See
+.BR crontab (5)
+for more information.
 .SS PAM Access Control
 .IR Cron
-supports access control with PAM if the system has PAM installed. For more information, see
-.IR pam (8).
-A PAM configuration file for 
-.IR crond 
-is installed in 
+supports access control with PAM if the system has PAM installed.  For
+more information, see
+.BR pam (8).
+A PAM configuration file for
+.IR crond
+is installed in
 .IR /etc/pam.d/crond .
-The daemon loads the PAM environment from the pam_env module. This
-can be overridden by defining specific settings in the appropriate crontab file.
+The daemon loads the PAM environment from the pam_env module.  This can
+be overridden by defining specific settings in the appropriate crontab
+file.
 .SH "OPTIONS"
 .TP
 .B "\-h"
@@ -139,22 +142,23 @@ Prints a help message and exits.
 .B "\-i"
 Disables inotify support.
 .B "\-m"
-This option allows you to specify a shell command to use for sending 
-.I Cron 
+This option allows you to specify a shell command to use for sending
+.I Cron
 mail output instead of using
 .BR sendmail (8)
-This command must accept a fully formatted mail message (with headers) on standard input and send it
-as a mail message to the recipients specified in the mail headers. Specifying
-the string
-.I "off" 
-(i.e. crond -m off)
+This command must accept a fully formatted mail message (with headers) on
+standard input and send it as a mail message to the recipients specified
+in the mail headers.  Specifying the string
+.I "off"
+(i.e., crond -m off)
 will disable the sending of mail.
 .TP
 .B "\-n"
-Tells the daemon to run in the foreground. This can be useful when starting it out of init.
+Tells the daemon to run in the foreground.  This can be useful when
+starting it out of init.
 .TP
 .B "\-p"
-Allows 
+Allows
 .I Cron
 to accept any user set crontables.
 .TP
@@ -165,25 +169,27 @@ Change PATH.
 This option enables clustering support, as described below.
 .TP
 .B "\-s"
-This option will direct 
+This option will direct
 .I Cron
 to send the job output to the system log using
-.IR syslog (3).
+.BR syslog (3).
 This is useful if your system does not have
 .BR sendmail (8),
 installed or if mail is disabled.
 .TP
 .B "\-x"
-This option allows you to set debug flags. 
+This option allows you to set debug flags.
 .TP
 .B "\-P"
 Don't set PATH.  PATH is instead inherited from the environment.
 .SH SIGNALS
-When the \s-2SIGHUP\s+2 is received, the 
-.I Cron 
-daemon will close and reopen its
-log file.  This proves to be useful in scripts which rotate and age log files.  
-Naturally, this is not relevant if 
+When the
+.I SIGHUP
+is received, the
+.I Cron
+daemon will close and reopen its log file.  This proves to be useful in
+scripts which rotate and age log files.  Naturally, this is not relevant
+if
 .I Cron
 was built to use
 .IR syslog (3).
@@ -191,55 +197,70 @@ was built to use
 In this version of
 .IR Cron
 it is possible to use a network-mounted shared
-.I /var/spool/cron 
+.I /var/spool/cron
 across a cluster of hosts and specify that only one of the hosts should
-run the crontab jobs in this directory at any one time. This is done by starting
+run the crontab jobs in this directory at any one time.  This is done by
+starting
 .I Cron
-with the \fB-c\fP option, and have the
+with the
+.B \-c
+option, and have the
 .I /var/spool/cron/.cron.hostname
-file contain just one line, which represents the hostname of whichever host in the
-cluster should run the jobs.  If this file does not exist, or the hostname
-in it does not match that returned by 
-.BR gethostname (2) ,
-then all crontab files in this directory are ignored.  This has no effect on
-cron jobs specified in the
+file contain just one line, which represents the hostname of whichever
+host in the cluster should run the jobs.  If this file does not exist, or
+the hostname in it does not match that returned by
+.BR gethostname (2),
+then all crontab files in this directory are ignored.  This has no effect
+on cron jobs specified in the
 .I /etc/crontab
 file or on files in the
 .I /etc/cron.d
-directory. These files are always run and considered host-specific.
+directory.  These files are always run and considered host-specific.
 .PP
 Rather than editing
 .I /var/spool/cron/.cron.hostname
-directly, use the \fB-n\fP option of
+directly, use the
+.B \-n
+option of
 .BR crontab (1)
 to specify the host.
 .PP
-You should ensure that all hosts in a cluster, and the file server from which
-they mount the shared crontab directory, have closely synchronised clocks,
-e.g. using
-.BR ntpd (8) 
-, otherwise the results will be very unpredictable.
+You should ensure that all hosts in a cluster, and the file server from
+which they mount the shared crontab directory, have closely synchronised
+clocks, e.g., using
+.BR ntpd (8),
+otherwise the results will be very unpredictable.
 .PP
-Using cluster sharing automatically disables inotify support, because inotify cannot be
-relied on with network-mounted shared file systems.
+Using cluster sharing automatically disables inotify support, because
+inotify cannot be relied on with network-mounted shared file systems.
 .SH CAVEATS
 All
 .BR crontab
-files have to be regular files or symlinks to regular files, they must not be executable
-or writable for anyone else but the owner.
-This requirement can be overridden by using the \fB-p\fP option on the crond command line.
-If inotify support is in use, changes in the symlinked crontabs are not automatically
-noticed by the cron daemon. The cron daemon must receive a SIGHUP signal to reload the crontabs.
-This is a limitation of the inotify API.
+files have to be regular files or symlinks to regular files, they must
+not be executable or writable for anyone else but the owner.  This
+requirement can be overridden by using the
+.B \-p
+option on the crond command line.  If inotify support is in use, changes
+in the symlinked crontabs are not automatically noticed by the cron
+daemon.  The cron daemon must receive a SIGHUP signal to reload the
+crontabs.  This is a limitation of the inotify API.
 .PP
-The syslog output will be used instead of mail, when sendmail is not installed.
+The syslog output will be used instead of mail, when sendmail is not
+installed.
 .SH "SEE ALSO"
 .BR crontab (1),
 .BR crontab (5),
 .BR inotify (7),
 .BR pam (8)
 .SH AUTHOR
-.nf
-Paul Vixie <vixie@isc.org>
-Marcela Mašláňová <mmaslano@redhat.com>
-Colin Dean <colin@colin-dean.org>
+.MT vixie@isc.org
+Paul Vixie
+.ME
+.br
+.MT mmaslano@redhat.com
+Marcela Mašláňová
+.ME
+.br
+.MT colin@colin-dean.org
+Colin Dean
+.ME
