@@ -1,3 +1,148 @@
+2012-11-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8, src/cron.c: Documentation improvements based on
+	Michael Lass suggestions.
+
+2012-11-02  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* contrib/cronie.systemd: Add time-sync.target. If synchronization
+	is used, crond will start after sync by ntpd/chrony. rhbz#872516
+
+2012-10-11  Tom Jones <tom@oxix.org>
+
+	* man/cron.8, src/cron.c, src/entry.c, src/globals.h: The sysadmin
+	may want to arrange for the PATH to be correct in the environment
+	from which cron is launched.  This new option tells cron to not
+	overwrite this path for itself or for the child cron jobs.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2012-07-24  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac: The enable-relro erased previously set LDFLAGS.
+
+2012-07-02  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/crontab.5: Fix typo in man page.  rhbz#836292 Thanks to: Dave Allan
+
+2012-06-22  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/global.h, anacron/lock.c, anacron/main.c,
+	anacron/readtab.c: Preferred hour of start of the job. If the hour
+	is missed job will be skipped.
+
+2012-06-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/readtab.c: Range of hours for daily jobs must have
+	lower-higher hour.
+
+2012-06-21  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/crontab.c: Crontab has wrong permission.  Based on rhbz#676081
+
+2012-06-19  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac, src/cron.c, src/database.c: syscrontab, the system
+	crontab, is not mandatory anymore.  Cronie can be build without it. The patch was based on complaints of
+	distribution without /etc/crontab file.  https://fedorahosted.org/cronie/ticket/10
+
+2012-06-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c, src/do_command.c: Sendmail doesn't have to be
+	installed.  The info message should make sense.  https://fedorahosted.org/cronie/ticket/15
+
+2012-06-06  Tim Landscheidt <tim@tim-landscheidt.de>
+
+	* src/cron.c: Previously, crond exited in the signal handler for
+	SIGINT and SIGTERM.  Thus, the Inotify close code in main() was
+	never reached.  This commit introduces a got_sigintterm variable
+	that is set when SIGINT or SIGTERM are received and leads to a clean
+	exit of the main loop.  * src/cron.c: Rename quit() to sigintterm_handler().  Add
+	got_sigintterm variable and set it on SIGINT and SIGTERM.  Shorten
+	sleep and exit main loop on got_sigintterm.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2012-06-06  Tim Landscheidt <tim@tim-landscheidt.de>
+
+	* src/entry.c: 9th bit is overwritten.  Hour bit fields have 24 bits (0..23, 3 bytes). bit_nclear() however
+	in this case is called to clear bits 0..24! Thus, it overwrites the
+	first bit of the following struct member (dom). This is not
+	problematic for normal use as dom is set after hour as are all other
+	fields.  The last field, dow, uses 8 bits so 9 are cleared. This could be the
+	MIN_STAR bit of flags, but as flags is an int, there is probably a
+	padding byte in between; at least I couldn't trigger it to be unset.
+	So this could probably only cause problems on 8-bit systems.  https://fedorahosted.org/cronie/ticket/11 Signed-off-by: Marcela
+	Mašláňová <mmaslano@redhat.com>
+
+2012-06-06  Tim Landscheidt <tim@tim-landscheidt.de>
+
+	* anacron/readtab.c, anacron/runjob.c: Remove unused variables.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2012-06-06  Tim Landscheidt <tim@tim-landscheidt.de>
+
+	* anacron/runjob.c: Fix use of "const char *" in call to putenv().  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2012-04-12  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/do_command.c: The mail header for automatic reply will now
+	contain another field: "Precedence: bulk", which is not compulsory
+	according to RFC3834.  Based on: Harald Reindl request in rhbz#811186
+
+2012-04-12  Sven Vermeulen <swift@gentoo.org>
+
+	* src/security.c: setkeycreatecon is not needed. Users should
+	inherited key context if it was already set for them.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2012-04-11  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* Makefile.am, contrib/cronie.systemd: systemd unit file was added
+	into contrib This unit file is used in Fedora. The systemd-user-sessions.service
+	guarantees everything, what is needed for log in of users, is
+	already running (ypbind, sssd, ldap, ...).
+
+2012-04-11  T.M. Abraham <tabraham@novell.com>
+
+	* man/crontab.5: adjust documentation title to reference "crontab"
+	instead of "anacrontab" Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2011-12-07  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* contrib/0anacron, contrib/0hourly, contrib/dailyjobs, man/cron.8,
+	man/crontab.5: Adjust the documentation to better describe the
+	current situation with crontab and anacrontab.
+
+2011-11-24  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/crontab.1: Add name of file, where can be set PAM
+	configuration.
+
+2011-10-24  Petr Sabata <psabata@redhat.com>
+
+	* cronie.init: Service restart needlessly reports failure.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2011-10-06  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/security.c: Raw context should be used. Especially when
+	mcstransd in older releases is running.
+
+2011-09-20  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c, src/crontab.c: No need to have full path in the
+	ProgramName.
+
+2011-06-29  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* : commit 01a692b123c885c883e7791f0a1833df5edfe327 Author: Tomas
+	Mraz <tmraz@fedoraproject.org> Date:   Wed Jun 29 12:42:27 2011
+	+0200
+
+2011-06-29  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c: Revert "Cronie disables inotify support when the
+	/etc/crontab file does not exist at startup." This reverts commit acdf4ae8456888ed78201906ef528f4c28f54582 as it
+	introduces fd leaks.
+
+2011-06-27  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: Minor release 1.4.8
+
 2011-06-24  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* src/do_command.c: Cron writes job output to syslog incorrectly.
