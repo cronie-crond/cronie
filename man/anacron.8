@@ -182,8 +182,9 @@ file.
 Anacron never removes timestamp files.  Remove unused files manually.
 .PP
 Anacron uses up to two file descriptors for each active job.  It may run
-out of descriptors if there are more than about 125 active jobs (on
-normal kernels).
+out of descriptors if there are lots of active jobs.  See
+.B echo $(($(ulimit -n) / 2))
+for information how many concurent jobs anacron may run.
 .PP
 Mail comments, suggestions and bug reports to
 .MT shaleh@\:(debian.\:org|\:valinux.\:com)
