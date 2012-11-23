@@ -263,9 +263,10 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (access("/usr/sbin/sendmail", X_OK) != 0) {
-		SyslogOutput=1;
-		log_it("CRON", pid, "INFO","Syslog will be used instead of sendmail.", 0);
+	if (!SyslogOutput && (access("/usr/sbin/sendmail", X_OK) != 0 ||
+			MailCmd[0] != '\0')) {
+		SyslogOutput = 1;
+		log_it("CRON", pid, "INFO", "Syslog will be used instead of sendmail.", 0);
 	}
 
 	pid = getpid();
@@ -678,6 +679,8 @@ static void parse_args(int argc, char *argv[]) {
 				break;
 			case 'm':
 				strncpy(MailCmd, optarg, MAX_COMMAND);
+				if (strncmp(MailCmd, "off", 4))
+					SyslogOutput = 1;
 				break;
 			case 'c':
 				EnableClustering = 1;

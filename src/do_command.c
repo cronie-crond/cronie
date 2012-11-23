@@ -67,7 +67,7 @@ void do_command(entry * e, user * u) {
 
 static int child_process(entry * e, user * u, char **jobenv) {
 	int stdin_pipe[2], stdout_pipe[2];
-	char *input_data, *usernm, *mailto, *mailfrom;
+	char *input_data, *usernm, *mailto = NULL, *mailfrom = NULL;
 	int children = 0;
 	pid_t pid = getpid();
 	struct sigaction sa;
@@ -103,8 +103,10 @@ static int child_process(entry * e, user * u, char **jobenv) {
 	/* discover some useful and important environment settings
 	 */
 	usernm = e->pwd->pw_name;
-	mailto = env_get("MAILTO", jobenv);
-	mailfrom = env_get("MAILFROM", e->envp);
+	if (!SyslogOutput) {
+		mailto = env_get("MAILTO", jobenv);
+		mailfrom = env_get("MAILFROM", e->envp);
+	}
 
 	/* create some pipes to talk to our future child
 	 */
@@ -378,7 +380,7 @@ static int child_process(entry * e, user * u, char **jobenv) {
 			/* get sender address.  this is MAILFROM if set (and safe),
 			 * the user account name otherwise.
 			 */
-			if (!mailfrom || !*mailfrom || !safe_p(usernm, mailfrom)) {
+			if (!SyslogOutput && (!mailfrom || !*mailfrom || !safe_p(usernm, mailfrom))) {
 				mailfrom = e->pwd->pw_name;
 			}
 
@@ -388,8 +390,7 @@ static int child_process(entry * e, user * u, char **jobenv) {
 			 */
 
 			/* Also skip it if MailCmd is set to "off" */
-			if (mailto && safe_p(usernm, mailto)
-				&& strncmp(MailCmd,"off",4) && !SyslogOutput) {
+			if (!SyslogOutput && mailto && safe_p(usernm, mailto)) {
 				char **env;
 				char mailcmd[MAX_COMMAND];
 				char hostname[MAXHOSTNAMELEN];
