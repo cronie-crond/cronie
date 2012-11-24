@@ -45,15 +45,6 @@
 #define _PATH_CRON_PID	PIDDIR PIDFILE
 #define REBOOT_LOCK     PIDDIR "cron.reboot"
 
-			/* what editor to use if no EDITOR or VISUAL
-			 * environment variable specified.
-			 */
-#if defined(_PATH_VI)
-# define EDITOR _PATH_VI
-#else
-# define EDITOR "/usr/ucb/vi"
-#endif
-
 #ifndef _PATH_BSHELL
 # define _PATH_BSHELL "/bin/sh"
 #endif
