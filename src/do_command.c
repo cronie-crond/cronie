@@ -50,7 +50,7 @@ void do_command(entry * e, user * u) {
 
 	Debug(DPROC, ("[%ld] do_command(%s, (%s,%ld,%ld))\n",
 			(long) pid, e->cmd, u->name,
-			(long) e->pwd->pw_uid, (long) e->pwd->pw_gid))
+			(long) e->pwd->pw_uid, (long) e->pwd->pw_gid));
 
 		/* fork to become asynchronous -- parent process is done immediately,
 		 * and continues to run the normal cron code, which means return to
@@ -74,14 +74,14 @@ void do_command(entry * e, user * u) {
 		ev = child_process(e, jobenv);
 		cron_close_pam();
 		env_free(jobenv);
-		Debug(DPROC, ("[%ld] child process done, exiting\n", (long) getpid()))
+		Debug(DPROC, ("[%ld] child process done, exiting\n", (long) getpid()));
 		_exit(ev);
 		break;
 	default:
 		/* parent process */
 		break;
 	}
-	Debug(DPROC, ("[%ld] main process returning to work\n", (long) pid))
+	Debug(DPROC, ("[%ld] main process returning to work\n", (long) pid));
 }
 
 static int child_process(entry * e, char **jobenv) {
@@ -106,7 +106,7 @@ static int child_process(entry * e, char **jobenv) {
 	sigaction(SIGCHLD, &sa, NULL);
 
 
-	Debug(DPROC, ("[%ld] child_process('%s')\n", (long) getpid(), e->cmd))
+	Debug(DPROC, ("[%ld] child_process('%s')\n", (long) getpid(), e->cmd));
 #ifdef CAPITALIZE_FOR_PS
 		/* mark ourselves as different to PS command watchers by upshifting
 		 * our program name.  This has no effect on some kernels.
@@ -184,7 +184,7 @@ static int child_process(entry * e, char **jobenv) {
 		return ERROR_EXIT;
 		/*NOTREACHED*/
 	case 0:
-		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n", (long) getpid()))
+		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n", (long) getpid()));
 
 		/* write a log message.  we've waited this long to do it
 		 * because it was not until now that we knew the PID that
@@ -264,7 +264,7 @@ static int child_process(entry * e, char **jobenv) {
 	 * the user's command.
 	 */
 
-	Debug(DPROC, ("[%ld] child continues, closing pipes\n", (long) getpid()))
+	Debug(DPROC, ("[%ld] child continues, closing pipes\n", (long) getpid()));
 
 	/* close the ends of the pipe that will only be referenced in the
 	 * grandchild process...
@@ -290,7 +290,7 @@ static int child_process(entry * e, char **jobenv) {
 		int ch;
 
 		Debug(DPROC, ("[%ld] child2 sending data to grandchild\n",
-				(long) getpid()))
+				(long) getpid()));
 
 		/* reset the SIGPIPE back to default so the child will terminate
 		 * if it tries to write to a closed pipe
@@ -336,7 +336,7 @@ static int child_process(entry * e, char **jobenv) {
 		fclose(out);
 
 		Debug(DPROC, ("[%ld] child2 done sending to grandchild\n",
-				(long) getpid()))
+				(long) getpid()));
 		_exit(0);
 	}
 
@@ -355,7 +355,7 @@ static int child_process(entry * e, char **jobenv) {
 	 */
 
 	Debug(DPROC, ("[%ld] child reading output from grandchild\n",
-			(long) getpid()))
+			(long) getpid()));
 
 	/*local */  {
 		FILE *in = fdopen(stdout_pipe[READ_PIPE], "r");
@@ -376,7 +376,7 @@ static int child_process(entry * e, char **jobenv) {
 
 			Debug(DPROC | DEXT,
 				("[%ld] got data (%x:%c) from grandchild\n",
-					(long) getpid(), ch, ch))
+					(long) getpid(), ch, ch));
 
 				/* get name of recipient.  this is MAILTO if set to a
 				 * valid local username; USER otherwise.
@@ -514,7 +514,7 @@ static int child_process(entry * e, char **jobenv) {
 			 */
 
 			if (mail) {
-				Debug(DPROC, ("[%ld] closing pipe to mail\n", (long) getpid()))
+				Debug(DPROC, ("[%ld] closing pipe to mail\n", (long) getpid()));
 					/* Note: the pclose will probably see
 					 * the termination of the grandchild
 					 * in addition to the mail process, since
@@ -547,7 +547,7 @@ static int child_process(entry * e, char **jobenv) {
 
 		}	/*if data from grandchild */
 
-		Debug(DPROC, ("[%ld] got EOF from grandchild\n", (long) getpid()))
+		Debug(DPROC, ("[%ld] got EOF from grandchild\n", (long) getpid()));
 
 		fclose(in);	/* also closes stdout_pipe[READ_PIPE] */
 	}
@@ -559,19 +559,19 @@ static int child_process(entry * e, char **jobenv) {
 		PID_T child;
 
 		Debug(DPROC, ("[%ld] waiting for grandchild #%d to finish\n",
-				(long) getpid(), children))
+				(long) getpid(), children));
 			while ((child = wait(&waiter)) < OK && errno == EINTR) ;
 		if (child < OK) {
 			Debug(DPROC,
 				("[%ld] no more grandchildren--mail written?\n",
-					(long) getpid()))
+					(long) getpid()));
 				break;
 		}
 		Debug(DPROC, ("[%ld] grandchild #%ld finished, status=%04x",
-				(long) getpid(), (long) child, WEXITSTATUS(waiter)))
+				(long) getpid(), (long) child, WEXITSTATUS(waiter)));
 			if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
-			Debug(DPROC, (", dumped core"))
-				Debug(DPROC, ("\n"))
+			Debug(DPROC, (", dumped core"));
+				Debug(DPROC, ("\n"));
 	}
 	return OK_EXIT;
 }

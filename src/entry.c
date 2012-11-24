@@ -98,7 +98,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 	char envstr[MAX_ENVSTR];
 	char **tenvp;
 
-	Debug(DPARS, ("load_entry()...about to eat comments\n"))
+	Debug(DPARS, ("load_entry()...about to eat comments\n"));
 
 		skip_comments(file);
 
@@ -202,7 +202,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		}
 	}
 	else {
-		Debug(DPARS, ("load_entry()...about to parse numerics\n"))
+		Debug(DPARS, ("load_entry()...about to parse numerics\n"));
 
 		if (ch == '*')
 			e->flags |= MIN_STAR;
@@ -273,10 +273,10 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 	if (!pw) {
 		char *username = cmd;	/* temp buffer */
 
-		Debug(DPARS, ("load_entry()...about to parse username\n"))
+		Debug(DPARS, ("load_entry()...about to parse username\n"));
 			ch = get_string(username, MAX_COMMAND, file, " \t\n");
 
-		Debug(DPARS, ("load_entry()...got %s\n", username))
+		Debug(DPARS, ("load_entry()...got %s\n", username));
 			if (ch == EOF || ch == '\n' || ch == '*') {
 			ecode = e_cmd;
 			goto eof;
@@ -288,7 +288,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 			goto eof;
 		}
 		Debug(DPARS, ("load_entry()...uid %ld, gid %ld\n",
-				(long) pw->pw_uid, (long) pw->pw_gid))
+				(long) pw->pw_uid, (long) pw->pw_gid));
 	}
 
 	if ((e->pwd = pw_dup(pw)) == NULL) {
@@ -361,7 +361,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		log_it("CRON", getpid(), "ERROR", "can't set USER", 0);
 #endif
 
-	Debug(DPARS, ("load_entry()...about to parse command\n"))
+	Debug(DPARS, ("load_entry()...about to parse command\n"));
 
 	/* Everything up to the next \n or EOF is part of the command...
 	 * too bad we don't know in advance how long it will be, since we
@@ -383,7 +383,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		goto eof;
 	}
 
-	Debug(DPARS, ("load_entry()...returning successfully\n"))
+	Debug(DPARS, ("load_entry()...returning successfully\n"));
 
 		/* success, fini, return pointer to the entry we just created...
 		 */
@@ -415,7 +415,7 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 	 * assume the same thing.
 	 */
 
-	Debug(DPARS | DEXT, ("get_list()...entered\n"))
+	Debug(DPARS | DEXT, ("get_list()...entered\n"));
 
 		/* list = range {"," range}
 		 */
@@ -440,7 +440,7 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 	Skip_Nonblanks(ch, file)
 		Skip_Blanks(ch, file)
 
-		Debug(DPARS | DEXT, ("get_list()...exiting w/ %02x\n", ch))
+		Debug(DPARS | DEXT, ("get_list()...exiting w/ %02x\n", ch));
 
 		return (ch);
 }
@@ -454,7 +454,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 
 	int i, num1, num2, num3;
 
-	Debug(DPARS | DEXT, ("get_range()...entering, exit won't show\n"))
+	Debug(DPARS | DEXT, ("get_range()...entering, exit won't show\n"));
 
 		if (ch == '*') {
 		/* '*' means "first-last" but can still be modified by /step
@@ -569,7 +569,7 @@ get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
 		if (len != 0 && strchr(terms, ch)) {
 			for (i = 0; names[i] != NULL; i++) {
 				Debug(DPARS | DEXT,
-					("get_num, compare(%s,%s)\n", names[i], temp))
+					("get_num, compare(%s,%s)\n", names[i], temp));
 					if (!strcasecmp(names[i], temp)) {
 					*numptr = i + low;
 					return (ch);
@@ -584,7 +584,7 @@ get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
 }
 
 static int set_element(bitstr_t * bits, int low, int high, int number) {
-	Debug(DPARS | DEXT, ("set_element(?,%d,%d,%d)\n", low, high, number))
+	Debug(DPARS | DEXT, ("set_element(?,%d,%d,%d)\n", low, high, number));
 
 		if (number < low || number > high)
 		return (EOF);

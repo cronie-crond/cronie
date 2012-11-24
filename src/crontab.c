@@ -365,7 +365,7 @@ static void parse_args(int argc, char *argv[]) {
 	}
 
 	Debug(DMISC, ("user=%s, file=%s, option=%s\n",
-			User, Filename, Options[(int) Option]))
+			User, Filename, Options[(int) Option]));
 }
 
 static void list_cmd(void) {

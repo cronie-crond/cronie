@@ -388,7 +388,7 @@ int main(int argc, char *argv[]) {
 				 * minute until caught up.
 				 */
 				Debug(DSCH, ("[%ld], normal case %d minutes to go\n",
-						(long) pid, timeDiff))
+						(long) pid, timeDiff));
 				do {
 					if (job_runqueue())
 						sleep(10);
@@ -413,7 +413,7 @@ int main(int argc, char *argv[]) {
 				 * housekeeping.
 				 */
 				Debug(DSCH, ("[%ld], DST begins %d minutes to go\n",
-						(long) pid, timeDiff))
+						(long) pid, timeDiff));
 				/* run wildcard jobs for current minute */
 				find_jobs(timeRunning, &database, TRUE, FALSE, GMToff);
 
@@ -440,7 +440,7 @@ int main(int argc, char *argv[]) {
 				 * change until we are caught up.
 				 */
 				Debug(DSCH, ("[%ld], DST ends %d minutes to go\n",
-						(long) pid, timeDiff))
+						(long) pid, timeDiff));
 				find_jobs(timeRunning, &database, TRUE, FALSE, GMToff);
 				break;
 			default:
@@ -448,7 +448,7 @@ int main(int argc, char *argv[]) {
 				 * other: time has changed a *lot*,
 				 * jump virtual time, and run everything
 				 */
-				Debug(DSCH, ("[%ld], clock jumped\n", (long) pid))
+				Debug(DSCH, ("[%ld], clock jumped\n", (long) pid));
 				virtualTime = timeRunning;
 				oldGMToff = GMToff;
 				find_jobs(timeRunning, &database, TRUE, TRUE, GMToff);
@@ -542,7 +542,7 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 
 	Debug(DSCH, ("[%ld] tick(%d,%d,%d,%d,%d) %s %s\n",
 			(long) getpid(), minute, hour, dom, month, dow,
-			doWild ? " " : "No wildcard", doNonWild ? " " : "Wildcard only"))
+			doWild ? " " : "No wildcard", doNonWild ? " " : "Wildcard only"));
 		/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
 		 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
 		 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
@@ -553,7 +553,7 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 		for (e = u->crontab; e != NULL; e = e->next) {
 			Debug(DSCH | DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
 					e->pwd->pw_name, (long) e->pwd->pw_uid,
-					(long) e->pwd->pw_gid, e->cmd))
+					(long) e->pwd->pw_gid, e->cmd));
 				uname = e->pwd->pw_name;
 			/* check if user exists in time of job is being run f.e. ldap */
 			if (getpwnam(uname) != NULL) {
@@ -604,7 +604,7 @@ static void set_time(int initialize) {
 	if (initialize || tm.tm_isdst != isdst) {
 		isdst = tm.tm_isdst;
 		GMToff = get_gmtoff(&StartTime, &tm);
-		Debug(DSCH, ("[%ld] GMToff=%ld\n", (long) getpid(), (long) GMToff))
+		Debug(DSCH, ("[%ld] GMToff=%ld\n", (long) getpid(), (long) GMToff));
 	}
 	clockTime = (StartTime + GMToff) / (time_t) SECONDS_PER_MINUTE;
 }
@@ -620,7 +620,7 @@ static void cron_sleep(int target, cron_db * db) {
 	seconds_to_wait = (int) (target * SECONDS_PER_MINUTE - t1) + 1;
 	Debug(DSCH, ("[%ld] Target time=%ld, sec-to-wait=%d\n",
 			(long) getpid(), (long) target * SECONDS_PER_MINUTE,
-			seconds_to_wait))
+			seconds_to_wait));
 
 	while (seconds_to_wait > 0 && seconds_to_wait < 65) {
 		sleep((unsigned int) seconds_to_wait);
@@ -663,15 +663,15 @@ static void sigchld_reaper(void) {
 		case -1:
 			if (errno == EINTR)
 				continue;
-			Debug(DPROC, ("[%ld] sigchld...no children\n", (long) getpid()))
+			Debug(DPROC, ("[%ld] sigchld...no children\n", (long) getpid()));
 				break;
 		case 0:
-			Debug(DPROC, ("[%ld] sigchld...no dead kids\n", (long) getpid()))
+			Debug(DPROC, ("[%ld] sigchld...no dead kids\n", (long) getpid()));
 				break;
 		default:
 			Debug(DPROC,
 				("[%ld] sigchld...pid #%ld died, stat=%d\n",
-					(long) getpid(), (long) pid, WEXITSTATUS(waiter)))
+					(long) getpid(), (long) pid, WEXITSTATUS(waiter)));
 				break;
 		}
 	} while (pid > 0);
