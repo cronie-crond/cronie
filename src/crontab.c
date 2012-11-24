@@ -57,7 +57,9 @@ static char *getoptargs = "u:lerisnc";
 static char *getoptargs = "u:lerinc";
 # endif
 #endif
+#ifdef WITH_SELINUX
 static char *selinux_context = 0;
+#endif
 
 static PID_T Pid;
 static char User[MAX_UNAME], RealUser[MAX_UNAME];
@@ -206,13 +208,13 @@ static void parse_args(int argc, char *argv[]) {
 				fprintf(stderr, "must be privileged to use -u\n");
 				exit(ERROR_EXIT);
 			}
-
+#ifdef WITH_SELINUX
 			if (crontab_security_access() != 0) {
 				fprintf(stderr,
 					"Access denied by SELinux, must be privileged to use -u\n");
 				exit(ERROR_EXIT);
 			}
-
+#endif
 			if (Option == opt_hostset || Option == opt_hostget) {
 				fprintf(stderr,
 					"cannot use -u with -n or -c\n");

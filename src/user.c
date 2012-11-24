@@ -42,7 +42,9 @@ free_user (user * u) {
 		ne = e->next;
 		free_entry(e);
 	}
+#ifdef WITH_SELINUX
 	free_security_context(&(u->scontext));
+#endif
 	free(u);
 }
 
@@ -89,13 +91,14 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 		goto done;
 	}
 
+#ifdef WITH_SELINUX
 	if (get_security_context(pw == NULL ? NULL : uname,
 		crontab_fd, &u->scontext, tabname) != 0) {
 		free_user (u);
 		u = NULL;
 		goto done;
 	}
-
+#endif
 	/* load the crontab
 	*/
 	while ((status = load_env (envstr, file)) >= OK) {

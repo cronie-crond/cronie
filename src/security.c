@@ -185,18 +185,18 @@ int cron_start_pam(struct passwd *pw) {
 	return retcode;
 }
 
-static int cron_open_pam_session(struct passwd *pw) {
-	int retcode = 0;
-
 #if defined(WITH_PAM)
+static int cron_open_pam_session(struct passwd *pw) {
+	int retcode;
+
 	retcode = pam_open_session(pamh, PAM_SILENT);
 	PAM_FAIL_CHECK;
 	if (retcode == PAM_SUCCESS)
 		pam_session_opened = 1;
-#endif
 
 	return retcode;
 }
+#endif
 
 void cron_close_pam(void) {
 #if defined(WITH_PAM)
@@ -247,9 +247,9 @@ int cron_change_user_permanently(struct passwd *pw, char *homedir) {
 }
 
 
+#ifdef WITH_SELINUX
 static int cron_authorize_context(security_context_t scontext,
 	security_context_t file_context) {
-#ifdef WITH_SELINUX
 	struct av_decision avd;
 	int retval;
 	security_class_t tclass;
@@ -276,13 +276,13 @@ static int cron_authorize_context(security_context_t scontext,
 		tclass, bit, &avd);
 	if (retval || ((bit & avd.allowed) != bit))
 		return 0;
-#endif
 	return 1;
 }
+#endif
 
+#ifdef WITH_SELINUX
 static int cron_authorize_range(security_context_t scontext,
 	security_context_t ucontext) {
-#ifdef WITH_SELINUX
 	struct av_decision avd;
 	int retval;
 	security_class_t tclass;
@@ -309,9 +309,9 @@ static int cron_authorize_range(security_context_t scontext,
 
 	if (retval || ((bit & avd.allowed) != bit))
 		return 0;
-#endif
 	return 1;
 }
+#endif
 
 #if WITH_SELINUX
 /* always uses u->scontext as the default process context, then changes the
@@ -450,10 +450,10 @@ static int cron_change_selinux_range(user * u, security_context_t ucontext) {
 }
 #endif
 
+#ifdef WITH_SELINUX
 int
 get_security_context(const char *name, int crontab_fd,
 	security_context_t * rcontext, const char *tabname) {
-#ifdef WITH_SELINUX
 	security_context_t scontext = NULL;
 	security_context_t file_context = NULL;
 	security_context_t rawcontext=NULL;
@@ -533,21 +533,21 @@ get_security_context(const char *name, int crontab_fd,
 	freecon(file_context);
 
 	*rcontext = scontext;
-#endif
 	return 0;
 }
+#endif
 
-void free_security_context(security_context_t * scontext) {
 #ifdef WITH_SELINUX
+void free_security_context(security_context_t * scontext) {
 	if (*scontext != NULL) {
 		freecon(*scontext);
 		*scontext = 0L;
 	}
-#endif
 }
+#endif
 
-int crontab_security_access(void) {
 #ifdef WITH_SELINUX
+int crontab_security_access(void) {
 	int selinux_check_passwd_access = -1;
 	if (is_selinux_enabled() > 0) {
 		security_context_t user_context;
@@ -587,9 +587,9 @@ int crontab_security_access(void) {
 
 		return selinux_check_passwd_access;
 	}
-#endif
 	return 0;
 }
+#endif
 
 /* Build up the job environment from the PAM environment plus the
 * crontab environment 
