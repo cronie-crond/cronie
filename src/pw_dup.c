@@ -30,7 +30,8 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <config.h>
+#include "config.h"
+
 #include <sys/param.h>
 
 #if !defined(OpenBSD) || OpenBSD < 200105
@@ -39,6 +40,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "funcs.h"
+#include "globals.h"
 
 struct passwd *
 pw_dup(const struct passwd *pw) {

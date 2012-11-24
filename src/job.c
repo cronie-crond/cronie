@@ -19,7 +19,12 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cron.h>
+#include "config.h"
+
+#include <stdlib.h>
+
+#include "funcs.h"
+#include "globals.h"
 
 typedef struct _job {
 	struct _job *next;

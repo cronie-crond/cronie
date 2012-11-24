@@ -19,7 +19,20 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cron.h>
+#include "config.h"
+
+#include <errno.h>
+#include <grp.h>
+#include <pwd.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "funcs.h"
+#include "globals.h"
+
+#ifdef WITH_PAM
+# include <security/pam_appl.h>
+#endif
 
 #ifdef WITH_SELINUX
 # include <selinux/selinux.h>

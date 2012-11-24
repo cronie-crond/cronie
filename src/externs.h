@@ -21,40 +21,8 @@
 
 /* reorder these #include's at your peril */
 
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#ifdef HAVE_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
-#include <sys/file.h>
-/* stat is used even, when --with-inotify */
-#include <sys/stat.h>
-
-#include <bitstring.h>
-#include <ctype.h>
-#ifndef isascii
-#define isascii(c)      ((unsigned)(c)<=0177)
-#endif
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <grp.h>
-#include <locale.h>
-#include <pwd.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-#include <utime.h>
-
-#if defined(SYSLOG)
-# include <syslog.h>
-#endif
+#ifndef CRONIE_EXTERNS_H
+#define CRONIE_EXTERNS_H
 
 #if defined(LOGIN_CAP)
 # include <login_cap.h>
@@ -63,12 +31,6 @@
 #if defined(BSD_AUTH)
 # include <bsd_auth.h>
 #endif /*BSD_AUTH*/
-
-/* include locale stuff for mailer "Content-Type": 
- */
-#include <locale.h>
-#include <nl_types.h>
-#include <langinfo.h>
 
 #define DIR_T	struct dirent
 #define WAIT_T	int
@@ -125,3 +87,5 @@ extern	int		flock(int, int);
 #ifndef WCOREDUMP
 # define WCOREDUMP(st)          (((st) & 0200) != 0)
 #endif
+
+#endif /* CRONIE_EXTERNS_H */

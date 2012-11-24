@@ -29,14 +29,40 @@
  * to add clustering support.
  */
 
+#include "config.h"
+
 #define	MAIN_PROGRAM
 
-#include <cron.h>
+#include <errno.h>
+#include <locale.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <utime.h>
+
+#ifdef WITH_PAM
+# include <security/pam_appl.h>
+#endif
+
 #ifdef WITH_SELINUX
 # include <selinux/selinux.h>
 # include <selinux/context.h>
 # include <selinux/av_permissions.h>
 #endif
+
+#include "bitstring.h"
+#include "externs.h"
+#include "funcs.h"
+#include "globals.h"
+#include "macros.h"
+#include "pathnames.h"
+#include "structs.h"
 
 #define NHEADER_LINES 0
 

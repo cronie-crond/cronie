@@ -26,7 +26,21 @@
  * vix 30dec86 [written]
  */
 
-#include <cron.h>
+#include "config.h"
+
+#include <ctype.h>
+#include <pwd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "bitstring.h"
+#include "funcs.h"
+#include "globals.h"
+#include "macros.h"
+#include "pathnames.h"
 
 typedef enum ecode {
 	e_none, e_minute, e_hour, e_dom, e_month, e_dow,

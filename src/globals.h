@@ -24,6 +24,13 @@
  * to add clustering support.
  */
 
+#ifndef CRONIE_GLOBALS_H
+#define CRONIE_GLOBALS_H
+
+#include <time.h>
+
+#include "macros.h"
+
 #ifdef MAIN_PROGRAM
 # define XTRN
 # define INIT(x) = x
@@ -88,3 +95,5 @@ XTRN const char *DebugFlagNames[]
 #else
 #define	DebugFlags	0
 #endif /* DEBUGGING */
+
+#endif /* CRONIE_GLOBALS_H */

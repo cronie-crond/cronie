@@ -30,11 +30,24 @@
  *
  */
 
+#include "config.h"
+
+#include <errno.h>
+#include <pwd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "funcs.h"
+#include "globals.h"
+#include "macros.h"
+
 #ifdef HAVE_SYS_CDEFS_H
 # include <sys/cdefs.h>
 #endif
 
-#include <cron.h>
 #include <signal.h>
 
 /*

@@ -23,7 +23,22 @@
  * vix 30dec86 [written]
  */
 
-#include <cron.h>
+#include "config.h"
+
+#include "globals.h"
+
+#include <ctype.h>
+#include <errno.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+
+#if defined(SYSLOG)
+# include <syslog.h>
+#endif
+
 #ifdef WITH_AUDIT
 # include <libaudit.h>
 #endif
@@ -37,7 +52,10 @@
 #ifdef HAVE_FLOCK	/* flock(2) */
 # include <sys/file.h>
 #endif
-#include <stdio.h>
+
+#include "funcs.h"
+#include "macros.h"
+#include "pathnames.h"
 
 #if defined(SYSLOG) && defined(LOG_FILE)
 # undef LOG_FILE
@@ -619,7 +637,7 @@ char *first_word(const char *s, const char *t) {
 /* warning:
  *	heavily ascii-dependent.
  */
-void mkprint(char *dst, unsigned char *src, int len) {
+static void mkprint(char *dst, unsigned char *src, int len) {
 /*
  * XXX
  * We know this routine can't overflow the dst buffer because mkprints()

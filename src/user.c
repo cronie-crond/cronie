@@ -22,7 +22,15 @@
 /* vix 26jan87 [log is in RCS file]
  */
 
-#include <cron.h>
+#include "config.h"
+
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "funcs.h"
+#include "globals.h"
 
 static const char *FileName;
 
