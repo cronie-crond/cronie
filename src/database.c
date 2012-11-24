@@ -281,7 +281,7 @@ void check_inotify_database(cron_db * old_db) {
 	DIR *dir;
 	struct timeval time;
 	fd_set rfds;
-	int retval = 0;
+	int retval;
 	char buf[BUF_LEN];
 	pid_t pid = getpid();
 	time.tv_sec = 0;

@@ -43,7 +43,7 @@
 struct passwd *
 pw_dup(const struct passwd *pw) {
 	char		*cp;
-	size_t		 nsize=0, psize=0, gsize=0, dsize=0, ssize=0, total=0;
+	size_t		 nsize=0, psize=0, gsize=0, dsize=0, ssize=0, total;
 	struct passwd	*newpw;
 
 	/* Allocate in one big chunk for easy freeing */

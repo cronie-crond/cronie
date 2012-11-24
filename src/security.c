@@ -596,7 +596,7 @@ int crontab_security_access(void) {
 */
 static char **build_env(char **cronenv) {
 #ifdef WITH_PAM
-	char **jobenv = cronenv;
+	char **jobenv;
 	char **pamenv = pam_getenvlist(pamh);
 	char *cronvar;
 	int count = 0;
