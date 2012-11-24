@@ -63,6 +63,15 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 
 dnl Checking for programs
 
+AC_ARG_WITH([editor],
+  [AC_HELP_STRING([--with-editor=EDITOR], [path to default editor])],
+  [editor_defined="$with_editor"],
+  [editor_defined="no"])
+AS_IF([test "x$editor_defined" = "xno"], [
+  AC_PATH_PROG([editor_defined], [vi], [/usr/bin/vi])
+])
+AC_DEFINE_UNQUOTED([EDITOR], ["$editor_defined"], [default editor])
+
 AC_MSG_CHECKING(username to run under)
 AC_ARG_WITH(daemon_username,
 [AS_HELP_STRING([--with-daemon_username=DAEMON_USERNAME], [Username to run under (default daemon) ])],
