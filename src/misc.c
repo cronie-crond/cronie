@@ -368,7 +368,7 @@ void unget_char(int ch, FILE * file) {
  *      (3) uses get_char() so LineNumber will be accurate
  *      (4) returns EOF or terminating character, whichever
  */
-int get_string(char *string, int size, FILE * file, char *terms) {
+int get_string(char *string, int size, FILE * file, const char *terms) {
 	int ch;
 
 	while (EOF != (ch = get_char(file)) && !strchr(terms, ch)) {
@@ -591,7 +591,7 @@ void log_close(void) {
  *	(1) this routine is fairly slow
  *	(2) it returns a pointer to static storage
  */
-char *first_word(char *s, char *t) {
+char *first_word(const char *s, const char *t) {
 	static char retbuf[2][MAX_TEMPSTR + 1];	/* sure wish C had GC */
 	static int retsel = 0;
 	char *rb, *rp;

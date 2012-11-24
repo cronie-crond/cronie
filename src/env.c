@@ -228,7 +228,7 @@ int load_env(char *envstr, FILE * f) {
 		return (TRUE);
 }
 
-char *env_get(char *name, char **envp) {
+char *env_get(const char *name, char **envp) {
 	int len = strlen(name);
 	char *p, *q;
 

@@ -45,7 +45,7 @@ static void process_crontab(const char *, const char *,
 static int not_a_crontab(DIR_T * dp);
 /* return 1 if we should skip this file */
 
-static void max_mtime(char *dir_name, struct stat *max_st);
+static void max_mtime(const char *dir_name, struct stat *max_st);
 /* record max mtime of any file under dir_name in max_st */
 
 static int
@@ -599,7 +599,7 @@ static int not_a_crontab(DIR_T * dp) {
 	return (0);
 }
 
-static void max_mtime(char *dir_name, struct stat *max_st) {
+static void max_mtime(const char *dir_name, struct stat *max_st) {
 	DIR *dir;
 	DIR_T *dp;
 	struct stat st;

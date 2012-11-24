@@ -51,7 +51,7 @@ int		load_database(cron_db *),
 		job_runqueue(void),
 		set_debug_flags(const char *),
 		get_char(FILE *),
-		get_string(char *, int, FILE *, char *),
+		get_string(char *, int, FILE *, const char *),
 		swap_uids(void),
 		swap_uids_back(void),
 		load_env(char *, FILE *),
@@ -63,10 +63,10 @@ int		load_database(cron_db *),
 
 size_t		strlens(const char *, ...);
 
-char		*env_get(char *, char **),
+char		*env_get(const char *, char **),
 		*arpadate(time_t *),
 		*mkprints(unsigned char *, unsigned int),
-		*first_word(char *, char *),
+		*first_word(const char *, const char *),
 		**env_init(void),
 		**env_copy(char **),
 		**env_set(char **, char *);
