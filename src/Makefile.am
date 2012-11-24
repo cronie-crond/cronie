@@ -26,6 +26,7 @@ LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 # If they are configurable, they are declared in configure script.
 # Depends on this Makefile, because it uses make variables.
 # CCD 2010/09/10 added CRON_HOSTNAME for clustered-cron.
+CLEANFILES = cron-paths.h
 cron-paths.h: Makefile
 	@echo 'creating $@'
 	@sed >$@ 's/ *\\$$//' <<\END #\
