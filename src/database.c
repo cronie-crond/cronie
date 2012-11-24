@@ -49,7 +49,7 @@ static void max_mtime(char *dir_name, struct stat *max_st);
 /* record max mtime of any file under dir_name in max_st */
 
 static int
-check_open(const char *tabname, const char *fname, const char *uname,
+check_open(const char *tabname, const char *uname,
 	struct passwd *pw, time_t * mtime) {
 	struct stat statbuf;
 	int crontab_fd;
@@ -185,7 +185,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		goto next_crontab;
 	}
 
-	if ((crontab_fd = check_open(tabname, fname, uname, pw, &mtime)) == -1)
+	if ((crontab_fd = check_open(tabname, uname, pw, &mtime)) == -1)
 		goto next_crontab;
 
 	Debug(DLOAD, ("\t%s:", fname))

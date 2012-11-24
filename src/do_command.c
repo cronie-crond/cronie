@@ -21,7 +21,7 @@
 
 #include <cron.h>
 
-static int child_process(entry *, user *, char **);
+static int child_process(entry *, char **);
 static int safe_p(const char *, const char *);
 
 void do_command(entry * e, user * u) {
@@ -52,7 +52,7 @@ void do_command(entry * e, user * u) {
 		if (cron_set_job_security_context(e, u, &jobenv) != 0) {
 			_exit(ERROR_EXIT);
 		}
-		ev = child_process(e, u, jobenv);
+		ev = child_process(e, jobenv);
 		cron_close_pam();
 		env_free(jobenv);
 		Debug(DPROC, ("[%ld] child process done, exiting\n", (long) getpid()))
@@ -65,7 +65,7 @@ void do_command(entry * e, user * u) {
 	Debug(DPROC, ("[%ld] main process returning to work\n", (long) pid))
 }
 
-static int child_process(entry * e, user * u, char **jobenv) {
+static int child_process(entry * e, char **jobenv) {
 	int stdin_pipe[2], stdout_pipe[2];
 	char *input_data, *usernm, *mailto, *mailfrom;
 	int children = 0;
