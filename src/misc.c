@@ -155,7 +155,8 @@ int strdtb(char *s) {
 	 */
 	do {
 		x--;
-	} while (x >= s && isspace((unsigned char) *x));
+	}
+	while (x >= s && isspace((unsigned char) *x));
 
 	/* one character beyond where we stopped above is where the null
 	 * goes.
@@ -363,21 +364,20 @@ void acquire_daemonlock(int closeflag) {
 
 /* get_char(file) : like getc() but increment LineNumber on newlines
  */
-int get_char(FILE * file) {
+int get_char(FILE *file) {
 	int ch;
 
 	ch = getc(file);
 	if (ch == '\n')
-		Set_LineNum(LineNumber + 1)
-			return (ch);
+		Set_LineNum(LineNumber + 1) return (ch);
 }
 
 /* unget_char(ch, file) : like ungetc but do LineNumber processing
  */
-void unget_char(int ch, FILE * file) {
+void unget_char(int ch, FILE *file) {
 	ungetc(ch, file);
 	if (ch == '\n')
-		Set_LineNum(LineNumber - 1)
+		Set_LineNum(LineNumber - 1);
 }
 
 /* get_string(str, max, file, termstr) : like fgets() but
@@ -386,7 +386,7 @@ void unget_char(int ch, FILE * file) {
  *      (3) uses get_char() so LineNumber will be accurate
  *      (4) returns EOF or terminating character, whichever
  */
-int get_string(char *string, int size, FILE * file, const char *terms) {
+int get_string(char *string, int size, FILE *file, const char *terms) {
 	int ch;
 
 	while (EOF != (ch = get_char(file)) && !strchr(terms, ch)) {
@@ -404,7 +404,7 @@ int get_string(char *string, int size, FILE * file, const char *terms) {
 
 /* skip_comments(file) : read past comment (if any)
  */
-void skip_comments(FILE * file) {
+void skip_comments(FILE *file) {
 	int ch;
 
 	while (EOF != (ch = get_char(file))) {
@@ -441,7 +441,7 @@ void skip_comments(FILE * file) {
  *	return TRUE if one of the lines in file matches string exactly,
  *	FALSE if no lines match, and error on error.
  */
-static int in_file(const char *string, FILE * file, int error) {
+static int in_file(const char *string, FILE *file, int error) {
 	char line[MAX_TEMPSTR];
 	char *endp;
 
@@ -467,8 +467,7 @@ static int in_file(const char *string, FILE * file, int error) {
  *	or (deny_file exists and user is NOT listed).
  *	root is always allowed.
  */
-int allowed(const char *username, const char *allow_file,
-	const char *deny_file) {
+int allowed(const char *username, const char *allow_file, const char *deny_file) {
 	FILE *fp;
 	int isallowed;
 	char buf[128];
@@ -524,9 +523,7 @@ void log_it(const char *username, PID_T xpid, const char *event,
 	 */
 	msg = malloc(msg_size = (strlen(username)
 			+ strlen(event)
-			+ strlen(detail)
-			+ MAX_TEMPSTR)
-		);
+			+ strlen(detail) + MAX_TEMPSTR));
 	if (msg == NULL) {	/* damn, out of mem and we did not test that before... */
 		fprintf(stderr, "%s: Run OUT OF MEMORY while %s\n",
 			ProgramName, __FUNCTION__);
@@ -549,8 +546,9 @@ void log_it(const char *username, PID_T xpid, const char *event,
 	 */
 	snprintf(msg, msg_size,
 		"%s (%02d/%02d-%02d:%02d:%02d-%d) %s (%s)%s%s\n", username,
-		t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec, pid,
-		event, detail, err != 0 ? ": " : "", err != 0 ? strerror(err) : "");
+		t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec,
+		pid, event, detail, err != 0 ? ": " : "",
+		err != 0 ? strerror(err) : "");
 
 	/* we have to run strlen() because sprintf() returns (char*) on old BSD
 	 */
@@ -579,9 +577,9 @@ void log_it(const char *username, PID_T xpid, const char *event,
 		err != 0 ? ": " : "", err != 0 ? strerror(err) : "");
 
 
-#endif	 /*SYSLOG*/
+#endif /*SYSLOG*/
 #if DEBUGGING
-	if (DebugFlags) {
+		if (DebugFlags) {
 		fprintf(stderr, "log_it: (%s %ld) %s (%s)%s%s\n",
 			username, (long) pid, event, detail,
 			err != 0 ? ": " : "", err != 0 ? strerror(err) : "");
@@ -597,7 +595,7 @@ void log_close(void) {
 #if defined(SYSLOG)
 	closelog();
 	syslog_open = FALSE;
-#endif	 /*SYSLOG*/
+#endif /*SYSLOG*/
 }
 
 /* char *first_word(char *s, char *t)
@@ -686,8 +684,7 @@ char *arpadate(time_t *clock) {
 	struct tm tm = *localtime(&t);
 	long gmtoff = get_gmtoff(&t, &tm);
 	int hours = gmtoff / SECONDS_PER_HOUR;
-	int minutes =
-			(gmtoff - (hours * SECONDS_PER_HOUR)) / SECONDS_PER_MINUTE;
+	int minutes = (gmtoff - (hours * SECONDS_PER_HOUR)) / SECONDS_PER_MINUTE;
 	static char ret[64];	/* zone name might be >3 chars */
 
 	(void) sprintf(ret, "%s, %2d %s %2d %02d:%02d:%02d %.2d%.2d (%s)",
@@ -701,8 +698,8 @@ char *arpadate(time_t *clock) {
 #endif /*MAIL_DATE */
 
 #ifdef HAVE_SAVED_UIDS
-	static uid_t save_euid;
-	static gid_t save_egid;
+static uid_t save_euid;
+static gid_t save_egid;
 
 int swap_uids(void) {
 	save_egid = getegid();
@@ -718,7 +715,7 @@ int swap_uids_back(void) {
 
 int swap_uids(void) {
 	return ((setregid(getegid(), getgid())
-			|| setreuid(geteuid(), getuid())) ? -1 : 0);
+			|| setreuid(geteuid(), getuid()))? -1 : 0);
 }
 
 int swap_uids_back(void) {
@@ -745,7 +742,7 @@ size_t strlens(const char *last, ...) {
  *	If the local pointer is non-NULL it *must* point to a local copy.
  */
 #ifndef HAVE_STRUCT_TM_TM_GMTOFF
-long get_gmtoff(time_t * clock, struct tm *local) {
+long get_gmtoff(time_t *clock, struct tm *local) {
 	struct tm gmt;
 	long offset;
 

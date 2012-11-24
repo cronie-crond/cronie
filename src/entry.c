@@ -66,7 +66,7 @@ get_range(bitstr_t *, int, int, const char *[], int, FILE *),
 get_number(int *, int, const char *[], int, FILE *, const char *),
 set_element(bitstr_t *, int, int, int);
 
-void free_entry(entry * e) {
+void free_entry(entry *e) {
 	free(e->cmd);
 	free(e->pwd);
 	env_free(e->envp);
@@ -76,7 +76,7 @@ void free_entry(entry * e) {
 /* return NULL if eof or syntax error occurs;
  * otherwise return a pointer to a new entry.
  */
-entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
+entry *load_entry(FILE *file, void (*error_func) (), struct passwd *pw,
 	char **envp) {
 	/* this function reads one crontab entry -- the next -- from a file.
 	 * it skips any leading blank lines, ignores comments, and returns
@@ -100,7 +100,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 	Debug(DPARS, ("load_entry()...about to eat comments\n"));
 
-		skip_comments(file);
+	skip_comments(file);
 
 	ch = get_char(file);
 	if (ch == EOF)
@@ -113,17 +113,18 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 	e = (entry *) calloc(sizeof (entry), sizeof (char));
 
-	/* check for '-' as a first character, this option will disable 
-	* writing a syslog message about command getting executed
-	*/
+	/* check for '-' as a first character, this option will disable
+	 * writing a syslog message about command getting executed
+	 */
 	if (ch == '-') {
-	/* if we are editing system crontab or user uid is 0 (root) 
-	* we are allowed to disable logging 
-	*/
+		/* if we are editing system crontab or user uid is 0 (root)
+		 * we are allowed to disable logging
+		 */
 		if (pw == NULL || pw->pw_uid == 0)
 			e->flags |= DONT_LOG;
 		else {
-			log_it("CRON", getpid(), "ERROR", "Only privileged user can disable logging", 0);
+			log_it("CRON", getpid(), "ERROR",
+				"Only privileged user can disable logging", 0);
 			ecode = e_option;
 			goto eof;
 		}
@@ -274,10 +275,10 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		char *username = cmd;	/* temp buffer */
 
 		Debug(DPARS, ("load_entry()...about to parse username\n"));
-			ch = get_string(username, MAX_COMMAND, file, " \t\n");
+		ch = get_string(username, MAX_COMMAND, file, " \t\n");
 
 		Debug(DPARS, ("load_entry()...got %s\n", username));
-			if (ch == EOF || ch == '\n' || ch == '*') {
+		if (ch == EOF || ch == '\n' || ch == '*') {
 			ecode = e_cmd;
 			goto eof;
 		}
@@ -385,9 +386,9 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 	Debug(DPARS, ("load_entry()...returning successfully\n"));
 
-		/* success, fini, return pointer to the entry we just created...
-		 */
-		return (e);
+	/* success, fini, return pointer to the entry we just created...
+	 */
+	return (e);
 
   eof:
 	if (e->envp)
@@ -405,8 +406,8 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 }
 
 static int
-get_list(bitstr_t * bits, int low, int high, const char *names[],
-	int ch, FILE * file) {
+get_list(bitstr_t *bits, int low, int high, const char *names[],
+	int ch, FILE *file) {
 	int done;
 
 	/* we know that we point to a non-blank character here;
@@ -417,11 +418,11 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 
 	Debug(DPARS | DEXT, ("get_list()...entered\n"));
 
-		/* list = range {"," range}
-		 */
-		/* clear the bit string, since the default is 'off'.
-		 */
-		bit_nclear(bits, 0, (high - low));
+	/* list = range {"," range}
+	 */
+	/* clear the bit string, since the default is 'off'.
+	 */
+	bit_nclear(bits, 0, (high - low));
 
 	/* process all ranges
 	 */
@@ -439,16 +440,15 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 	 */
 	Skip_Nonblanks(ch, file)
 		Skip_Blanks(ch, file)
-
 		Debug(DPARS | DEXT, ("get_list()...exiting w/ %02x\n", ch));
 
-		return (ch);
+	return (ch);
 }
 
 
 static int
-get_range(bitstr_t * bits, int low, int high, const char *names[],
-	int ch, FILE * file) {
+get_range(bitstr_t *bits, int low, int high, const char *names[],
+	int ch, FILE *file) {
 	/* range = number | number "-" number [ "/" number ]
 	 */
 
@@ -456,7 +456,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 
 	Debug(DPARS | DEXT, ("get_range()...entering, exit won't show\n"));
 
-		if (ch == '*') {
+	if (ch == '*') {
 		/* '*' means "first-last" but can still be modified by /step
 		 */
 		num1 = low;
@@ -533,7 +533,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 }
 
 static int
-get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
+get_number(int *numptr, int low, const char *names[], int ch, FILE *file,
 	const char *terms) {
 	char temp[MAX_TEMPSTR], *pc;
 	int len, i;
@@ -570,7 +570,7 @@ get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
 			for (i = 0; names[i] != NULL; i++) {
 				Debug(DPARS | DEXT,
 					("get_num, compare(%s,%s)\n", names[i], temp));
-					if (!strcasecmp(names[i], temp)) {
+				if (!strcasecmp(names[i], temp)) {
 					*numptr = i + low;
 					return (ch);
 				}
@@ -583,10 +583,10 @@ get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
 	return (EOF);
 }
 
-static int set_element(bitstr_t * bits, int low, int high, int number) {
+static int set_element(bitstr_t *bits, int low, int high, int number) {
 	Debug(DPARS | DEXT, ("set_element(?,%d,%d,%d)\n", low, high, number));
 
-		if (number < low || number > high)
+	if (number < low || number > high)
 		return (EOF);
 
 	bit_set(bits, (number - low));

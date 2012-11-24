@@ -66,10 +66,13 @@
 
 #define NHEADER_LINES 0
 
-enum opt_t {opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_hostset, opt_hostget};
+enum opt_t { opt_unknown, opt_list, opt_delete, opt_edit, opt_replace,
+	opt_hostset, opt_hostget
+};
 
 #if DEBUGGING
-static const char *Options[] = {"???", "list", "delete", "edit", "replace", "hostset", "hostget"};
+static const char *Options[] =
+	{ "???", "list", "delete", "edit", "replace", "hostset", "hostget" };
 
 # ifdef WITH_SELINUX
 static const char *getoptargs = "u:lerisncx:";
@@ -129,7 +132,7 @@ int main(int argc, char *argv[]) {
 	int exitstatus;
 	const char *n = "-";	/*set the n string to - so we have a valid string to use */
 
-	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
+	if ((ProgramName = strrchr(argv[0], '/')) == NULL) {
 		ProgramName = argv[0];
 	}
 	else {
@@ -146,7 +149,8 @@ int main(int argc, char *argv[]) {
 	setlinebuf(stderr);
 #endif
 	/*should we desire to make changes to behavior later. */
-	if (argv[1] == NULL) {	/* change behavior to allow crontab to take stdin with no '-' */
+	if (argv[1] == NULL) {
+		/* change behavior to allow crontab to take stdin with no '-' */
 		argv[1] = n;
 	}
 	parse_args(argc, argv);	/* sets many globals, opens a file */
@@ -242,8 +246,7 @@ static void parse_args(int argc, char *argv[]) {
 			}
 #endif
 			if (Option == opt_hostset || Option == opt_hostget) {
-				fprintf(stderr,
-					"cannot use -u with -n or -c\n");
+				fprintf(stderr, "cannot use -u with -n or -c\n");
 				exit(ERROR_EXIT);
 			}
 
@@ -276,7 +279,7 @@ static void parse_args(int argc, char *argv[]) {
 			break;
 #ifdef WITH_SELINUX
 		case 's':
-			if (getprevcon((security_context_t *) & (selinux_context))) {
+			if (getprevcon((security_context_t *) &(selinux_context))) {
 				fprintf(stderr, "Cannot obtain SELinux process context\n");
 				exit(ERROR_EXIT);
 			}
@@ -284,15 +287,13 @@ static void parse_args(int argc, char *argv[]) {
 #endif
 		case 'n':
 			if (MY_UID(pw) != ROOT_UID) {
-				fprintf(stderr,
-					"must be privileged to set host with -n\n");
+				fprintf(stderr, "must be privileged to set host with -n\n");
 				exit(ERROR_EXIT);
 			}
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
 			if (strcmp(User, RealUser) != 0) {
-				fprintf(stderr,
-					"cannot use -u with -n or -c\n");
+				fprintf(stderr, "cannot use -u with -n or -c\n");
 				exit(ERROR_EXIT);
 			}
 			Option = opt_hostset;
@@ -301,8 +302,7 @@ static void parse_args(int argc, char *argv[]) {
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
 			if (strcmp(User, RealUser) != 0) {
-				fprintf(stderr,
-					"cannot use -u with -n or -c\n");
+				fprintf(stderr, "cannot use -u with -n or -c\n");
 				exit(ERROR_EXIT);
 			}
 			Option = opt_hostget;
@@ -314,7 +314,7 @@ static void parse_args(int argc, char *argv[]) {
 
 	endpwent();
 
-	if (Option == opt_hostset && argv[optind] != NULL) {            
+	if (Option == opt_hostset && argv[optind] != NULL) {
 		HostSpecified = 1;
 		if (strlen(argv[optind]) >= sizeof Host)
 			usage("hostname too long");
@@ -388,8 +388,7 @@ static void list_cmd(void) {
 
 	/* file is open. copy to stdout, close.
 	 */
-	Set_LineNum(1)
-		while (EOF != (ch = get_char(f)))
+	Set_LineNum(1) while (EOF != (ch = get_char(f)))
 		putchar(ch);
 	fclose(f);
 }
@@ -400,8 +399,7 @@ static void delete_cmd(void) {
 		printf("crontab: really delete %s's crontab? ", User);
 		fflush(stdout);
 		if ((fgets(n, MAX_FNAME - 1, stdin) == 0L)
-			|| ((n[0] != 'Y') && (n[0] != 'y'))
-			)
+			|| ((n[0] != 'Y') && (n[0] != 'y')))
 			exit(0);
 	}
 
@@ -434,8 +432,7 @@ static char *tmp_path() {
 	return tmpdir ? tmpdir : "/tmp";
 }
 
-static char *host_specific_filename(const char *filename, int prefix)
-{
+static char *host_specific_filename(const char *filename, int prefix) {
 	/*
 	 * For cluster-wide use, where there is otherwise risk of the same
 	 * name being generated on more than one host at once, prefix with
@@ -452,7 +449,8 @@ static char *host_specific_filename(const char *filename, int prefix)
 	if (prefix) {
 		if (!glue_strings(safename, sizeof safename, hostname, filename, '.'))
 			return NULL;
-	} else {
+	}
+	else {
 		if (!glue_strings(safename, sizeof safename, filename, hostname, '.'))
 			return NULL;
 	}
@@ -516,7 +514,7 @@ static void edit_cmd(void) {
 	}
 
 	Set_LineNum(1)
-		/* 
+		/*
 		 * NHEADER_LINES processing removed for clarity
 		 * (NHEADER_LINES == 0 in all Red Hat crontabs)
 		 */
@@ -553,10 +551,10 @@ static void edit_cmd(void) {
 		perror(Filename);
 		exit(ERROR_EXIT);
 	}
-        if (swap_uids() == -1) {
-                perror("swapping uids");
-                exit(ERROR_EXIT);
-        }
+	if (swap_uids() == -1) {
+		perror("swapping uids");
+		exit(ERROR_EXIT);
+	}
 	/* Set it to 1970 */
 	utimebuf.actime = 0;
 	utimebuf.modtime = 0;
@@ -647,7 +645,7 @@ static void edit_cmd(void) {
 	(void) signal(SIGINT, SIG_DFL);
 	(void) signal(SIGQUIT, SIG_DFL);
 
-	/* lstat doesn't make any harm, because 
+	/* lstat doesn't make any harm, because
 	 * the file is stat'ed only when crontab is touched
 	 */
 	if (lstat(Filename, &statbuf) < 0) {
@@ -735,7 +733,8 @@ static int replace_cmd(void) {
 
 
 	safename = host_specific_filename("tmp.XXXXXXXXXX", 1);
-	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
+	if (!safename
+		|| !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
 			safename, '/')) {
 		TempFilename[0] = '\0';
 		fprintf(stderr, "path too long\n");
@@ -771,8 +770,7 @@ static int replace_cmd(void) {
 	/* copy the crontab to the tmp
 	 */
 	rewind(NewCrontab);
-	Set_LineNum(1)
-		while (EOF != (ch = get_char(NewCrontab)))
+	Set_LineNum(1) while (EOF != (ch = get_char(NewCrontab)))
 		putc(ch, tmp);
 	if (ftruncate(fileno(tmp), ftell(tmp)) == -1) {
 		fprintf(stderr, "%s: error while writing new crontab to %s\n",
@@ -798,8 +796,7 @@ static int replace_cmd(void) {
 	 * in the file proper -- kludged it by stopping after first error.
 	 *      vix 31mar87
 	 */
-	Set_LineNum(1 - NHEADER_LINES)
-		CheckErrorCount = 0;
+	Set_LineNum(1 - NHEADER_LINES) CheckErrorCount = 0;
 	eof = FALSE;
 
 	envp = env_init();
@@ -838,7 +835,8 @@ static int replace_cmd(void) {
 		goto done;
 	}
 
-	file_owner = (getgid() == geteuid() && getgid() == getegid()) ? ROOT_UID : pw->pw_uid;
+	file_owner = (getgid() == geteuid() &&
+		getgid() == getegid())? ROOT_UID : pw->pw_uid;
 
 #ifdef HAVE_FCHOWN
 	if (fchown(fileno(tmp), file_owner, -1) < OK) {
@@ -896,13 +894,14 @@ static int hostset_cmd(void) {
 	int fd;
 	int error = 0;
 	char *safename;
-	
+
 	if (!HostSpecified)
 		gethostname(Host, sizeof Host);
-	
+
 	safename = host_specific_filename("tmp.XXXXXXXXXX", 1);
-	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
-		safename, '/')) {
+	if (!safename
+		|| !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
+			safename, '/')) {
 		TempFilename[0] = '\0';
 		fprintf(stderr, "path too long\n");
 		return (-2);
@@ -921,7 +920,7 @@ static int hostset_cmd(void) {
 	(void) signal(SIGINT, die);
 	(void) signal(SIGQUIT, die);
 
-	(void) fchmod(fd, 0600); /* not all mkstemp() implementations do this */
+	(void) fchmod(fd, 0600);	/* not all mkstemp() implementations do this */
 
 	if (fprintf(tmp, "%s\n", Host) < 0 || fclose(tmp) == EOF) {
 		fprintf(stderr, "%s: error while writing to %s\n",
@@ -973,7 +972,7 @@ static int hostget_cmd(void) {
 			fprintf(stderr, "File %s not found\n", n);
 		else
 			perror(n);
-			return (-2);
+		return (-2);
 	}
 
 	if (get_string(Host, sizeof Host, f, "\n") == EOF) {

@@ -1,3 +1,13 @@
+-T FILE
+-T bitstr_t
+-T cron_db
+-T entry
+-T off_t
+-T orphan
+-T security_context_t
+-T size_t
+-T time_t
+-T user
 --blank-before-sizeof
 --brace-indent0
 --braces-on-func-def-line

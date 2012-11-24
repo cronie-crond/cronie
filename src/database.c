@@ -68,13 +68,12 @@ static void max_mtime(const char *dir_name, struct stat *max_st);
 
 static int
 check_open(const char *tabname, const char *uname,
-	struct passwd *pw, time_t * mtime) {
+	struct passwd *pw, time_t *mtime) {
 	struct stat statbuf;
 	int crontab_fd;
 	pid_t pid = getpid();
 
-	if ((crontab_fd =
-			open(tabname, O_RDONLY | O_NONBLOCK, 0)) == -1) {
+	if ((crontab_fd = open(tabname, O_RDONLY | O_NONBLOCK, 0)) == -1) {
 		log_it(uname, pid, "CAN'T OPEN", tabname, errno);
 		return (-1);
 	}
@@ -113,16 +112,14 @@ check_open(const char *tabname, const char *uname,
 
 static orphan *orphans;
 
-static void
-free_orphan(orphan *o) {
+static void free_orphan(orphan *o) {
 	free(o->tabname);
 	free(o->fname);
 	free(o->uname);
 	free(o);
 }
 
-void
-check_orphans(cron_db *db) {
+void check_orphans(cron_db *db) {
 	orphan *prev_orphan = NULL;
 	orphan *o = orphans;
 
@@ -132,12 +129,12 @@ check_orphans(cron_db *db) {
 
 			if (prev_orphan == NULL) {
 				orphans = next;
-			} else {
+			}
+			else {
 				prev_orphan->next = next;
 			}
 
-			process_crontab(o->uname, o->fname, o->tabname,
-				db, NULL);
+			process_crontab(o->uname, o->fname, o->tabname, db, NULL);
 
 			/* process_crontab could have added a new orphan */
 			if (prev_orphan == NULL && orphans != next) {
@@ -145,7 +142,8 @@ check_orphans(cron_db *db) {
 			}
 			free_orphan(o);
 			o = next;
-		} else {
+		}
+		else {
 			prev_orphan = o;
 			o = o->next;
 		}
@@ -156,33 +154,33 @@ static void
 add_orphan(const char *uname, const char *fname, const char *tabname) {
 	orphan *o;
 
-	o = calloc(1, sizeof(*o));
+	o = calloc(1, sizeof (*o));
 	if (o == NULL)
 		return;
 
 	if (uname)
-		if ((o->uname=strdup(uname)) == NULL)
+		if ((o->uname = strdup(uname)) == NULL)
 			goto cleanup;
 
 	if (fname)
-		if ((o->fname=strdup(fname)) == NULL)
+		if ((o->fname = strdup(fname)) == NULL)
 			goto cleanup;
 
 	if (tabname)
-		if ((o->tabname=strdup(tabname)) == NULL)
+		if ((o->tabname = strdup(tabname)) == NULL)
 			goto cleanup;
 
 	o->next = orphans;
 	orphans = o;
 	return;
 
-cleanup:
+  cleanup:
 	free_orphan(o);
 }
 
 static void
 process_crontab(const char *uname, const char *fname, const char *tabname,
-	cron_db * new_db, cron_db * old_db) {
+	cron_db *new_db, cron_db *old_db) {
 	struct passwd *pw = NULL;
 	int crontab_fd = -1;
 	user *u = NULL;
@@ -209,7 +207,8 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	Debug(DLOAD, ("\t%s:", fname));
 
 	if (old_db != NULL)
-		u = find_user(old_db, fname, crond_crontab ? tabname : NULL);	/* find user in old_db */
+		/* find user in old_db */
+		u = find_user(old_db, fname, crond_crontab ? tabname : NULL);
 
 	if (u != NULL) {
 		/* if crontab has not changed since we last read it
@@ -217,7 +216,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		 */
 		if (u->mtime == mtime) {
 			Debug(DLOAD, (" [no change, using old data]"));
-				unlink_user(old_db, u);
+			unlink_user(old_db, u);
 			link_user(new_db, u);
 			goto next_crontab;
 		}
@@ -230,13 +229,13 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		 * we finish with the crontab...
 		 */
 		Debug(DLOAD, (" [delete old data]"));
-			unlink_user(old_db, u);
+		unlink_user(old_db, u);
 		free_user(u);
 		log_it(fname, getpid(), "RELOAD", tabname, 0);
 	}
 
 	u = load_user(crontab_fd, pw, uname, fname, tabname);	/* read the file */
-	crontab_fd = -1; /* load_user takes care of closing the file */
+	crontab_fd = -1;	/* load_user takes care of closing the file */
 	if (u != NULL) {
 		u->mtime = mtime;
 		link_user(new_db, u);
@@ -245,14 +244,12 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
   next_crontab:
 	if (crontab_fd != -1) {
 		Debug(DLOAD, (" [done]\n"));
-			close(crontab_fd);
+		close(crontab_fd);
 	}
 }
 
-static int
-cluster_host_is_local(void)
-{
-	char filename[MAXNAMLEN+1];
+static int cluster_host_is_local(void) {
+	char filename[MAXNAMLEN + 1];
 	int is_local;
 	FILE *f;
 	char hostname[MAXHOSTNAMELEN], myhostname[MAXHOSTNAMELEN];
@@ -277,14 +274,16 @@ cluster_host_is_local(void)
 		if ((f = fopen(filename, "r"))) {
 
 			if (EOF != get_string(hostname, MAXHOSTNAMELEN, f, "\n") &&
-			    gethostname(myhostname, MAXHOSTNAMELEN) == 0) {
+				gethostname(myhostname, MAXHOSTNAMELEN) == 0) {
 				is_local = (strcmp(myhostname, hostname) == 0);
-			} else {
+			}
+			else {
 				Debug(DLOAD, ("cluster: hostname comparison error\n"));
 			}
 
 			fclose(f);
-		} else {
+		}
+		else {
 			Debug(DLOAD, ("cluster: file %s not found\n", filename));
 		}
 	}
@@ -293,7 +292,7 @@ cluster_host_is_local(void)
 }
 
 #if defined WITH_INOTIFY
-void check_inotify_database(cron_db * old_db) {
+void check_inotify_database(cron_db *old_db) {
 	cron_db new_db;
 	DIR_T *dp;
 	DIR *dir;
@@ -339,9 +338,9 @@ void check_inotify_database(cron_db * old_db) {
 		set_cron_watched(old_db->ifd);
 
 		/* TODO: parse the events and read only affected files */
-#if defined WITH_SYSCRONTAB
+# if defined WITH_SYSCRONTAB
 		process_crontab("root", NULL, SYSCRONTAB, &new_db, old_db);
-#endif
+# endif
 
 		if (!(dir = opendir(SYS_CROND_DIR))) {
 			log_it("CRON", pid, "OPENDIR FAILED", SYS_CROND_DIR, errno);
@@ -397,14 +396,14 @@ void check_inotify_database(cron_db * old_db) {
 }
 #endif
 
-static void overwrite_database(cron_db * old_db, cron_db * new_db) {
+static void overwrite_database(cron_db *old_db, cron_db *new_db) {
 	user *u, *nu;
 	/* whatever's left in the old database is now junk.
 	 */
 	Debug(DLOAD, ("unlinking old database:\n"));
-		for (u = old_db->head; u != NULL; u = nu) {
+	for (u = old_db->head; u != NULL; u = nu) {
 		Debug(DLOAD, ("\t%s\n", u->name));
-			nu = u->next;
+		nu = u->next;
 		unlink_user(old_db, u);
 		free_user(u);
 	}
@@ -414,7 +413,7 @@ static void overwrite_database(cron_db * old_db, cron_db * new_db) {
 	*old_db = *new_db;
 }
 
-int load_database(cron_db * old_db) {
+int load_database(cron_db *old_db) {
 	struct stat statbuf, syscron_stat, crond_stat;
 	cron_db new_db;
 	DIR_T *dp;
@@ -424,11 +423,11 @@ int load_database(cron_db * old_db) {
 
 	Debug(DLOAD, ("[%ld] load_database()\n", (long) pid));
 
-		/* before we start loading any data, do a stat on SPOOL_DIR
-		 * so that if anything changes as of this moment (i.e., before we've
-		 * cached any of the database), we'll see the changes next time.
-		 */
-		if (stat(SPOOL_DIR, &statbuf) < OK) {
+	/* before we start loading any data, do a stat on SPOOL_DIR
+	 * so that if anything changes as of this moment (i.e., before we've
+	 * cached any of the database), we'll see the changes next time.
+	 */
+	if (stat(SPOOL_DIR, &statbuf) < OK) {
 		log_it("CRON", pid, "STAT FAILED", SPOOL_DIR, errno);
 		statbuf.st_mtime = 0;
 	}
@@ -463,11 +462,10 @@ int load_database(cron_db * old_db) {
 	 * time this function is called.
 	 */
 	if (old_db->mtime == TMAX(crond_stat.st_mtime,
-			TMAX(statbuf.st_mtime, syscron_stat.st_mtime))
-		) {
+			TMAX(statbuf.st_mtime, syscron_stat.st_mtime))) {
 		Debug(DLOAD, ("[%ld] spool dir mtime unch, no load needed.\n",
 				(long) pid));
-			return 0;
+		return 0;
 	}
 
 	/* something's different.  make a new database, moving unchanged
@@ -542,10 +540,10 @@ int load_database(cron_db * old_db) {
 
 	overwrite_database(old_db, &new_db);
 	Debug(DLOAD, ("load_database is done\n"));
-		return 1;
+	return 1;
 }
 
-void link_user(cron_db * db, user * u) {
+void link_user(cron_db *db, user *u) {
 	if (db->head == NULL)
 		db->head = u;
 	if (db->tail)
@@ -555,7 +553,7 @@ void link_user(cron_db * db, user * u) {
 	db->tail = u;
 }
 
-void unlink_user(cron_db * db, user * u) {
+void unlink_user(cron_db *db, user *u) {
 	if (u->prev == NULL)
 		db->head = u->next;
 	else
@@ -567,15 +565,12 @@ void unlink_user(cron_db * db, user * u) {
 		u->next->prev = u->prev;
 }
 
-user *find_user(cron_db * db, const char *name, const char *tabname) {
+user *find_user(cron_db *db, const char *name, const char *tabname) {
 	user *u;
 
 	for (u = db->head; u != NULL; u = u->next)
 		if ((strcmp(u->name, name) == 0)
-			&& ((tabname == NULL)
-				|| (strcmp(tabname, u->tabname) == 0)
-			)
-			)
+			&& ((tabname == NULL) || (strcmp(tabname, u->tabname) == 0)))
 			break;
 	return (u);
 }
@@ -585,7 +580,7 @@ static int not_a_crontab(DIR_T * dp) {
 
 	/* avoid file names beginning with ".".  this is good
 	 * because we would otherwise waste two guaranteed calls
-	 * to getpwnam() for . and .., and there shouldn't be 
+	 * to getpwnam() for . and .., and there shouldn't be
 	 * hidden files in here anyway
 	 */
 	if (dp->d_name[0] == '.')
@@ -597,7 +592,7 @@ static int not_a_crontab(DIR_T * dp) {
 
 	/* ignore CRON_HOSTNAME file (in case doesn't start with ".")  */
 	if (0 == strcmp(dp->d_name, CRON_HOSTNAME))
-		return(1);
+		return (1);
 
 	len = strlen(dp->d_name);
 
@@ -630,7 +625,7 @@ static void max_mtime(const char *dir_name, struct stat *max_st) {
 	while (NULL != (dp = readdir(dir))) {
 		char tabname[MAXNAMLEN + 1];
 
-		if ( not_a_crontab ( dp ) && strcmp(dp->d_name, CRON_HOSTNAME) != 0)
+		if (not_a_crontab(dp) && strcmp(dp->d_name, CRON_HOSTNAME) != 0)
 			continue;
 
 		if (!glue_strings(tabname, sizeof tabname, dir_name, dp->d_name, '/'))

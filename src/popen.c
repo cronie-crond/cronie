@@ -117,7 +117,7 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 		}
 
 		/* reset SIGPIPE to default for the child */
-		memset(&sa, 0, sizeof(sa));
+		memset(&sa, 0, sizeof (sa));
 		sa.sa_handler = SIG_DFL;
 		sigaction(SIGPIPE, &sa, NULL);
 
@@ -152,7 +152,7 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 	return (iop);
 }
 
-int cron_pclose(FILE * iop) {
+int cron_pclose(FILE *iop) {
 	int fdes;
 	sigset_t oset, nset;
 	WAIT_T stat_loc;

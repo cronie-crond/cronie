@@ -84,14 +84,14 @@ static int DisableInotify;
  */
 
 # if defined WITH_SYSCRONTAB
-# 	define NUM_WATCHES 3
+#  	define NUM_WATCHES 3
 
 int wd[NUM_WATCHES];
-const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB};
+const char *watchpaths[NUM_WATCHES] = { SPOOL_DIR, SYS_CROND_DIR, SYSCRONTAB };
 # else
-#	define NUM_WATCHES 2
+#  	define NUM_WATCHES 2
 int wd[NUM_WATCHES];
-const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR};
+const char *watchpaths[NUM_WATCHES] = { SPOOL_DIR, SYS_CROND_DIR };
 # endif
 
 static void reset_watches(void) {
@@ -126,8 +126,9 @@ void set_cron_watched(int fd) {
 		int w;
 
 		w = inotify_add_watch(fd, watchpaths[i],
-			IN_CREATE | IN_CLOSE_WRITE | IN_ATTRIB | IN_MODIFY | IN_MOVED_TO |
-			IN_MOVED_FROM | IN_MOVE_SELF | IN_DELETE | IN_DELETE_SELF);
+			IN_CREATE | IN_CLOSE_WRITE | IN_ATTRIB |
+			IN_MODIFY | IN_MOVED_TO | IN_MOVED_FROM |
+			IN_MOVE_SELF | IN_DELETE | IN_DELETE_SELF);
 		if (w < 0 && errno != ENOENT) {
 			if (wd[i] != -1) {
 				log_it("CRON", pid, "This directory or file can't be watched",
@@ -150,7 +151,7 @@ void set_cron_watched(int fd) {
 }
 #endif
 
-static void handle_signals(cron_db * database) {
+static void handle_signals(cron_db *database) {
 	if (got_sighup) {
 		got_sighup = 0;
 #if defined WITH_INOTIFY
@@ -182,8 +183,7 @@ static void usage(void) {
 		[-P] change PATH \n \
 		[-c] enable clustering support \n \
 		[-s] log into syslog instead of sending mails \n \
-		[-x [",
-		ProgramName);
+		[-x [", ProgramName);
 	for (dflags = DebugFlagNames; *dflags; dflags++)
 		fprintf(stderr, "%s%s", *dflags, dflags[1] ? "," : "]");
 	fprintf(stderr, "] print debug information\n");
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 	pid_t pid = getpid();
 	long oldGMToff;
 
-	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
+	if ((ProgramName = strrchr(argv[0], '/')) == NULL) {
 		ProgramName = argv[0];
 	}
 	else {
@@ -240,24 +240,21 @@ int main(int argc, char *argv[]) {
 
 	if (ChangePath) {
 		if (putenv("PATH=" _PATH_DEFPATH) < 0) {
-			log_it("CRON", pid, "DEATH", "can't putenv PATH",
-				errno);
+			log_it("CRON", pid, "DEATH", "can't putenv PATH", errno);
 			exit(1);
 		}
 	}
 
-	/* Get the default locale character set for the mail 
-	 * "Content-Type: ...; charset=" header
-	 */
+	/* Get the default locale character set for the mail
+	 * "Content-Type: ...; charset=" header */
 	setlocale(LC_ALL, "");	/* set locale to system defaults or to
-							 * that specified by any  LC_* env vars */
+				 * that specified by any  LC_* env vars */
 	if ((cs = nl_langinfo(CODESET)) != 0L)
 		strncpy(cron_default_mail_charset, cs, MAX_ENVSTR);
 	else
 		strcpy(cron_default_mail_charset, "US-ASCII");
 
-	/* if there are no debug flags turned on, fork as a daemon should.
-	 */
+	/* if there are no debug flags turned on, fork as a daemon should. */
 	if (DebugFlags) {
 #if DEBUGGING
 		(void) fprintf(stderr, "[%ld] cron started\n", (long) getpid());
@@ -290,7 +287,8 @@ int main(int argc, char *argv[]) {
 	if (!SyslogOutput && (access("/usr/sbin/sendmail", X_OK) != 0 ||
 			MailCmd[0] != '\0')) {
 		SyslogOutput = 1;
-		log_it("CRON", pid, "INFO", "Syslog will be used instead of sendmail.", 0);
+		log_it("CRON", pid, "INFO", "Syslog will be used instead of sendmail.",
+			0);
 	}
 
 	pid = getpid();
@@ -304,8 +302,8 @@ int main(int argc, char *argv[]) {
 	fd = -1;
 #if defined WITH_INOTIFY
 	if (DisableInotify || EnableClustering) {
-		log_it("CRON", getpid(), "No inotify - daemon runs with -i or -c option", 
-			"", 0);
+		log_it("CRON", getpid(),
+			"No inotify - daemon runs with -i or -c option", "", 0);
 	}
 	else {
 		reset_watches();
@@ -340,7 +338,8 @@ int main(int argc, char *argv[]) {
 		do {
 			cron_sleep(timeRunning + 1, &database);
 			set_time(FALSE);
-		} while (!got_sigintterm && clockTime == timeRunning);
+		}
+		while (!got_sigintterm && clockTime == timeRunning);
 		if (got_sigintterm)
 			break;
 		timeRunning = clockTime;
@@ -394,10 +393,13 @@ int main(int argc, char *argv[]) {
 						sleep(10);
 					virtualTime++;
 					if (virtualTime >= timeRunning)
-						/* always run also the other timezone jobs in the last step */
+						/* always run also the other
+						 * timezone jobs in the last
+						 * step */
 						oldGMToff = GMToff;
 					find_jobs(virtualTime, &database, TRUE, TRUE, oldGMToff);
-				} while (virtualTime < timeRunning);
+				}
+				while (virtualTime < timeRunning);
 				break;
 
 			case medium:
@@ -422,12 +424,15 @@ int main(int argc, char *argv[]) {
 					if (job_runqueue())
 						sleep(10);
 					virtualTime++;
-					if (virtualTime >= timeRunning) 
-						/* always run also the other timezone jobs in the last step */
+					if (virtualTime >= timeRunning)
+						/* always run also the other
+						 * timezone jobs in the last
+						 * step */
 						oldGMToff = GMToff;
 					find_jobs(virtualTime, &database, FALSE, TRUE, oldGMToff);
 					set_time(FALSE);
-				} while (virtualTime < timeRunning && clockTime == timeRunning);
+				}
+				while (virtualTime < timeRunning && clockTime == timeRunning);
 				break;
 
 			case negative:
@@ -474,7 +479,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-static void run_reboot_jobs(cron_db * db) {
+static void run_reboot_jobs(cron_db *db) {
 	user *u;
 	entry *e;
 	int reboot;
@@ -502,7 +507,8 @@ static void run_reboot_jobs(cron_db * db) {
 	(void) job_runqueue();
 }
 
-static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long vGMToff) {
+static void
+find_jobs(int vtime, cron_db *db, int doWild, int doNonWild, long vGMToff) {
 	char *orig_tz, *job_tz;
 	time_t virtualSecond = vtime * SECONDS_PER_MINUTE;
 	time_t virtualGMTSecond = virtualSecond - vGMToff;
@@ -535,7 +541,7 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 	dom = tm->tm_mday -FIRST_DOM; \
 	month = tm->tm_mon +1 /* 0..11 -> 1..12 */ -FIRST_MONTH; \
 	dow = tm->tm_wday -FIRST_DOW; \
-	} while (0)
+} while (0)
 
 	orig_tz = getenv("TZ");
 	maketime(NULL, orig_tz);
@@ -543,18 +549,18 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 	Debug(DSCH, ("[%ld] tick(%d,%d,%d,%d,%d) %s %s\n",
 			(long) getpid(), minute, hour, dom, month, dow,
 			doWild ? " " : "No wildcard", doNonWild ? " " : "Wildcard only"));
-		/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
-		 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
-		 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
-		 * is why we keep 'e->dow_star' and 'e->dom_star'.  yes, it's bizarre.
-		 * like many bizarre things, it's the standard.
-		 */
-		for (u = db->head; u != NULL; u = u->next) {
+	/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
+	 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
+	 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
+	 * is why we keep 'e->dow_star' and 'e->dom_star'.  yes, it's bizarre.
+	 * like many bizarre things, it's the standard.
+	 */
+	for (u = db->head; u != NULL; u = u->next) {
 		for (e = u->crontab; e != NULL; e = e->next) {
 			Debug(DSCH | DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
 					e->pwd->pw_name, (long) e->pwd->pw_uid,
 					(long) e->pwd->pw_gid, e->cmd));
-				uname = e->pwd->pw_name;
+			uname = e->pwd->pw_name;
 			/* check if user exists in time of job is being run f.e. ldap */
 			if (getpwnam(uname) != NULL) {
 				job_tz = env_get("CRON_TZ", e->envp);
@@ -565,19 +571,20 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 					bit_test(e->month, month) &&
 					(((e->flags & DOM_STAR) || (e->flags & DOW_STAR))
 						? (bit_test(e->dow, dow) && bit_test(e->dom, dom))
-						: (bit_test(e->dow, dow) || bit_test(e->dom, dom))
-					)
-					) {
+						: (bit_test(e->dow, dow) || bit_test(e->dom, dom)))) {
 					if (job_tz != NULL && vGMToff != GMToff)
-						/* do not try to run the jobs from different timezones
-						 * during the DST switch of the default timezone.
+						/* do not try to run the jobs
+						 * from different timezones
+						 * during the DST switch of the
+						 * default timezone.
 						 */
 						continue;
 
 					if ((doNonWild &&
 							!(e->flags & (MIN_STAR | HR_STAR))) ||
 						(doWild && (e->flags & (MIN_STAR | HR_STAR))))
-						job_add(e, u);	/*will add job, if it isn't in queue already for NOW. */
+						/*will add job, if it isn't in queue already for NOW. */
+						job_add(e, u);
 				}
 			}
 		}
@@ -612,7 +619,7 @@ static void set_time(int initialize) {
 /*
  * Try to just hit the next minute.
  */
-static void cron_sleep(int target, cron_db * db) {
+static void cron_sleep(int target, cron_db *db) {
 	time_t t1, t2;
 	int seconds_to_wait;
 
@@ -664,17 +671,18 @@ static void sigchld_reaper(void) {
 			if (errno == EINTR)
 				continue;
 			Debug(DPROC, ("[%ld] sigchld...no children\n", (long) getpid()));
-				break;
+			break;
 		case 0:
 			Debug(DPROC, ("[%ld] sigchld...no dead kids\n", (long) getpid()));
-				break;
+			break;
 		default:
 			Debug(DPROC,
 				("[%ld] sigchld...pid #%ld died, stat=%d\n",
 					(long) getpid(), (long) pid, WEXITSTATUS(waiter)));
-				break;
+			break;
 		}
-	} while (pid > 0);
+	}
+	while (pid > 0);
 }
 
 static void parse_args(int argc, char *argv[]) {
@@ -682,37 +690,37 @@ static void parse_args(int argc, char *argv[]) {
 
 	while (-1 != (argch = getopt(argc, argv, "hnpsiPx:m:c"))) {
 		switch (argch) {
-			case 'x':
-				if (!set_debug_flags(optarg))
-					usage();
-				break;
-			case 'n':
-				NoFork = 1;
-				break;
-			case 'p':
-				PermitAnyCrontab = 1;
-				break;
-			case 's':
-				SyslogOutput = 1;
-				break;
-			case 'i':
-				DisableInotify = 1;
-				break;
-			case 'P':
-				ChangePath = 0;
-				break;
-			case 'm':
-				strncpy(MailCmd, optarg, MAX_COMMAND);
-				if (strncmp(MailCmd, "off", 4))
-					SyslogOutput = 1;
-				break;
-			case 'c':
-				EnableClustering = 1;
-				break;
-			case 'h':
-			default:
+		case 'x':
+			if (!set_debug_flags(optarg))
 				usage();
-				break;
+			break;
+		case 'n':
+			NoFork = 1;
+			break;
+		case 'p':
+			PermitAnyCrontab = 1;
+			break;
+		case 's':
+			SyslogOutput = 1;
+			break;
+		case 'i':
+			DisableInotify = 1;
+			break;
+		case 'P':
+			ChangePath = 0;
+			break;
+		case 'm':
+			strncpy(MailCmd, optarg, MAX_COMMAND);
+			if (strncmp(MailCmd, "off", 4))
+				SyslogOutput = 1;
+			break;
+		case 'c':
+			EnableClustering = 1;
+			break;
+		case 'h':
+		default:
+			usage();
+			break;
 		}
 	}
 }

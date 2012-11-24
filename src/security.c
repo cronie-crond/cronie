@@ -1,4 +1,4 @@
-/* security.c 
+/* security.c
  *
  * Implement Red Hat crond security context transitions
  *
@@ -52,23 +52,22 @@ static int pam_session_opened = 0;	//global for open session
 
 static int
 cron_conv(int num_msg, const struct pam_message **msgm,
-        struct pam_response **response, void *appdata_ptr)
-{
-        int i;
+	struct pam_response **response, void *appdata_ptr) {
+	int i;
 
-        for (i = 0; i < num_msg; i++) {
-                switch (msgm[i]->msg_style) {
-                        case PAM_ERROR_MSG:
-                        case PAM_TEXT_INFO:
-                                if (msgm[i]->msg != NULL) {
-                                        log_it("CRON", getpid(), "pam_message", msgm[i]->msg, 0);
-                                }
-                        break;
-                        default:
-                        break;
-                }
-        }
-        return (0);
+	for (i = 0; i < num_msg; i++) {
+		switch (msgm[i]->msg_style) {
+		case PAM_ERROR_MSG:
+		case PAM_TEXT_INFO:
+			if (msgm[i]->msg != NULL) {
+				log_it("CRON", getpid(), "pam_message", msgm[i]->msg, 0);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	return (0);
 }
 
 static const struct pam_conv conv = {
@@ -90,8 +89,8 @@ return(retcode); }
 static char **build_env(char **cronenv);
 
 #ifdef WITH_SELINUX
-static int cron_change_selinux_range(user * u, security_context_t ucontext);
-static int cron_get_job_range(user * u, security_context_t * ucontextp,
+static int cron_change_selinux_range(user *u, security_context_t ucontext);
+static int cron_get_job_range(user *u, security_context_t *ucontextp,
 	char **jobenv);
 #endif
 
@@ -101,14 +100,14 @@ void cron_restore_default_security_context() {
 #endif
 }
 
-int cron_set_job_security_context(entry * e, user * u, char ***jobenv) {
+int cron_set_job_security_context(entry *e, user *u, char ***jobenv) {
 	time_t minutely_time = 0;
 #ifdef WITH_PAM
 	int ret;
 #endif
 
 	if ((e->flags & MIN_STAR) == MIN_STAR) {
-		/* "minute-ly" job: Every minute for given hour/dow/month/dom. 
+		/* "minute-ly" job: Every minute for given hour/dow/month/dom.
 		 * Ensure that these jobs never run in the same minute:
 		 */
 		minutely_time = time(0);
@@ -162,7 +161,7 @@ int cron_set_job_security_context(entry * e, user * u, char ***jobenv) {
 	time_t job_run_time = time(0L);
 
 	if ((minutely_time > 0) && ((job_run_time / 60) != (minutely_time / 60))) {
-		/* if a per-minute job is delayed into the next minute 
+		/* if a per-minute job is delayed into the next minute
 		 * (eg. by network authentication method timeouts), skip it.
 		 */
 		struct tm tmS, tmN;
@@ -261,7 +260,8 @@ int cron_change_user_permanently(struct passwd *pw, char *homedir) {
 
 
 #ifdef WITH_SELINUX
-static int cron_authorize_context(security_context_t scontext,
+static int
+cron_authorize_context(security_context_t scontext,
 	security_context_t file_context) {
 	struct av_decision avd;
 	int retval;
@@ -270,12 +270,14 @@ static int cron_authorize_context(security_context_t scontext,
 
 	tclass = string_to_security_class("file");
 	if (!tclass) {
-		log_it("CRON", getpid(), "ERROR", "Failed to translate security class file", errno);
+		log_it("CRON", getpid(), "ERROR",
+			"Failed to translate security class file", errno);
 		return 0;
 	}
 	bit = string_to_av_perm(tclass, "entrypoint");
 	if (!bit) {
-		log_it("CRON", getpid(), "ERROR", "Failed to translate av perm entrypoint", errno);
+		log_it("CRON", getpid(), "ERROR",
+			"Failed to translate av perm entrypoint", errno);
 		return 0;
 	}
 	/*
@@ -285,8 +287,7 @@ static int cron_authorize_context(security_context_t scontext,
 	 * the user cron job.  It performs an entrypoint
 	 * permission check for this purpose.
 	 */
-	retval = security_compute_av(scontext, file_context,
-		tclass, bit, &avd);
+	retval = security_compute_av(scontext, file_context, tclass, bit, &avd);
 	if (retval || ((bit & avd.allowed) != bit))
 		return 0;
 	return 1;
@@ -294,8 +295,8 @@ static int cron_authorize_context(security_context_t scontext,
 #endif
 
 #ifdef WITH_SELINUX
-static int cron_authorize_range(security_context_t scontext,
-	security_context_t ucontext) {
+static int
+cron_authorize_range(security_context_t scontext, security_context_t ucontext) {
 	struct av_decision avd;
 	int retval;
 	security_class_t tclass;
@@ -303,12 +304,14 @@ static int cron_authorize_range(security_context_t scontext,
 
 	tclass = string_to_security_class("context");
 	if (!tclass) {
-		log_it("CRON", getpid(), "ERROR", "Failed to translate security class context", errno);
+		log_it("CRON", getpid(), "ERROR",
+			"Failed to translate security class context", errno);
 		return 0;
 	}
 	bit = string_to_av_perm(tclass, "contains");
 	if (!bit) {
-		log_it("CRON", getpid(), "ERROR", "Failed to translate av perm contains", errno);
+		log_it("CRON", getpid(), "ERROR",
+			"Failed to translate av perm contains", errno);
 		return 0;
 	}
 
@@ -317,8 +320,7 @@ static int cron_authorize_range(security_context_t scontext,
 	 * so crond must ensure that any user specified range
 	 * falls within the seusers-specified range for that Linux user.
 	 */
-	retval = security_compute_av(scontext, ucontext,
-		tclass, bit, &avd);
+	retval = security_compute_av(scontext, ucontext, tclass, bit, &avd);
 
 	if (retval || ((bit & avd.allowed) != bit))
 		return 0;
@@ -330,7 +332,7 @@ static int cron_authorize_range(security_context_t scontext,
 /* always uses u->scontext as the default process context, then changes the
 	 level, and retuns it in ucontextp (or NULL otherwise) */
 static int
-cron_get_job_range(user * u, security_context_t * ucontextp, char **jobenv) {
+cron_get_job_range(user *u, security_context_t *ucontextp, char **jobenv) {
 	char *range;
 
 	if (is_selinux_enabled() <= 0)
@@ -383,7 +385,7 @@ cron_get_job_range(user * u, security_context_t * ucontextp, char **jobenv) {
 #endif
 
 #ifdef WITH_SELINUX
-static int cron_change_selinux_range(user * u, security_context_t ucontext) {
+static int cron_change_selinux_range(user *u, security_context_t ucontext) {
 	char *msg = NULL;
 
 	if (is_selinux_enabled() <= 0)
@@ -466,10 +468,10 @@ static int cron_change_selinux_range(user * u, security_context_t ucontext) {
 #ifdef WITH_SELINUX
 int
 get_security_context(const char *name, int crontab_fd,
-	security_context_t * rcontext, const char *tabname) {
+	security_context_t *rcontext, const char *tabname) {
 	security_context_t scontext = NULL;
 	security_context_t file_context = NULL;
-	security_context_t rawcontext=NULL;
+	security_context_t rawcontext = NULL;
 	int retval = 0;
 	char *seuser = NULL;
 	char *level = NULL;
@@ -523,12 +525,14 @@ get_security_context(const char *name, int crontab_fd,
 	}
 
 	if (!cron_authorize_context(scontext, file_context)) {
-		char *msg=NULL;
+		char *msg = NULL;
 		if (asprintf(&msg,
-		     "Unauthorized SELinux context=%s file_context=%s", (char *) scontext, file_context) >= 0) {
+				"Unauthorized SELinux context=%s file_context=%s",
+				(char *) scontext, file_context) >= 0) {
 			log_it(name, getpid(), msg, tabname, 0);
 			free(msg);
-		} else {
+		}
+		else {
 			log_it(name, getpid(), "Unauthorized SELinux context", tabname, 0);
 		}
 		freecon(scontext);
@@ -538,8 +542,7 @@ get_security_context(const char *name, int crontab_fd,
 		}
 		else {
 			log_it(name, getpid(),
-				"SELinux in permissive mode, continuing",
-				tabname, 0);
+				"SELinux in permissive mode, continuing", tabname, 0);
 			return 0;
 		}
 	}
@@ -551,7 +554,7 @@ get_security_context(const char *name, int crontab_fd,
 #endif
 
 #ifdef WITH_SELINUX
-void free_security_context(security_context_t * scontext) {
+void free_security_context(security_context_t *scontext) {
 	if (*scontext != NULL) {
 		freecon(*scontext);
 		*scontext = 0L;
@@ -572,22 +575,23 @@ int crontab_security_access(void) {
 
 			passwd_class = string_to_security_class("passwd");
 			if (passwd_class == 0) {
-				fprintf(stderr, "Security class \"passwd\" is not defined in the SELinux policy.\n");
+				fprintf(stderr,
+					"Security class \"passwd\" is not defined in the SELinux policy.\n");
 				retval = -1;
 			}
 
 			if (retval == 0) {
 				crontab_bit = string_to_av_perm(passwd_class, "crontab");
 				if (crontab_bit == 0) {
-					fprintf(stderr, "Security av permission \"crontab\" is not defined in the SELinux policy.\n");
+					fprintf(stderr,
+						"Security av permission \"crontab\" is not defined in the SELinux policy.\n");
 					retval = -1;
 				}
 			}
 
 			if (retval == 0)
 				retval = security_compute_av_raw(user_context,
-					user_context, passwd_class,
-					crontab_bit, &avd);
+					user_context, passwd_class, crontab_bit, &avd);
 
 			if ((retval == 0) && ((crontab_bit & avd.allowed) == crontab_bit)) {
 				selinux_check_passwd_access = 0;
@@ -605,7 +609,7 @@ int crontab_security_access(void) {
 #endif
 
 /* Build up the job environment from the PAM environment plus the
-* crontab environment 
+* crontab environment
 */
 static char **build_env(char **cronenv) {
 #ifdef WITH_PAM

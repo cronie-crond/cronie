@@ -128,7 +128,7 @@ enum env_state {
  *		FALSE = not an env setting (file was repositioned)
  *		TRUE = was an env setting
  */
-int load_env(char *envstr, FILE * f) {
+int load_env(char *envstr, FILE *f) {
 	long filepos;
 	int fileline;
 	enum env_state state;
@@ -143,7 +143,7 @@ int load_env(char *envstr, FILE * f) {
 
 	Debug(DPARS, ("load_env, read <%s>\n", envstr));
 
-		memset(name, 0, sizeof name);
+	memset(name, 0, sizeof name);
 	memset(val, 0, sizeof val);
 	str = name;
 	state = NAMEI;
@@ -213,7 +213,7 @@ int load_env(char *envstr, FILE * f) {
 	}
 	if (state != FINI && !(state == VALUE && !quotechar)) {
 		Debug(DPARS, ("load_env, not an env var, state = %d\n", state));
-			fseek(f, filepos, 0);
+		fseek(f, filepos, 0);
 		Set_LineNum(fileline);
 		return (FALSE);
 	}
@@ -233,7 +233,7 @@ int load_env(char *envstr, FILE * f) {
 	if (!glue_strings(envstr, MAX_ENVSTR, name, val, '='))
 		return (FALSE);
 	Debug(DPARS, ("load_env, <%s> <%s> -> <%s>\n", name, val, envstr));
-		return (TRUE);
+	return (TRUE);
 }
 
 char *env_get(const char *name, char **envp) {

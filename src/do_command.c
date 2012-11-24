@@ -43,7 +43,7 @@
 static int child_process(entry *, char **);
 static int safe_p(const char *, const char *);
 
-void do_command(entry * e, user * u) {
+void do_command(entry *e, user *u) {
 	pid_t pid = getpid();
 	int ev;
 	char **jobenv = 0L;
@@ -52,21 +52,22 @@ void do_command(entry * e, user * u) {
 			(long) pid, e->cmd, u->name,
 			(long) e->pwd->pw_uid, (long) e->pwd->pw_gid));
 
-		/* fork to become asynchronous -- parent process is done immediately,
-		 * and continues to run the normal cron code, which means return to
-		 * tick().  the child and grandchild don't leave this function, alive.
-		 *
-		 * vfork() is unsuitable, since we have much to do, and the parent
-		 * needs to be able to run off and fork other processes.
-		 */
-		switch (fork()) {
+	/* fork to become asynchronous -- parent process is done immediately,
+	 * and continues to run the normal cron code, which means return to
+	 * tick().  the child and grandchild don't leave this function, alive.
+	 *
+	 * vfork() is unsuitable, since we have much to do, and the parent
+	 * needs to be able to run off and fork other processes.
+	 */
+	switch (fork()) {
 	case -1:
 		log_it("CRON", pid, "CAN'T FORK", "do_command", errno);
 		break;
 	case 0:
 		/* child process */
 		acquire_daemonlock(1);
-		/* Set up the Red Hat security context for both mail/minder and job processes:
+		/* Set up the Red Hat security context for both mail/minder and
+		 * job processes:
 		 */
 		if (cron_set_job_security_context(e, u, &jobenv) != 0) {
 			_exit(ERROR_EXIT);
@@ -84,7 +85,7 @@ void do_command(entry * e, user * u) {
 	Debug(DPROC, ("[%ld] main process returning to work\n", (long) pid));
 }
 
-static int child_process(entry * e, char **jobenv) {
+static int child_process(entry *e, char **jobenv) {
 	int stdin_pipe[2], stdout_pipe[2];
 	char *input_data, *usernm, *mailto = NULL, *mailfrom = NULL;
 	int children = 0;
@@ -92,8 +93,8 @@ static int child_process(entry * e, char **jobenv) {
 	struct sigaction sa;
 
 	/* Ignore SIGPIPE as we will be writing to pipes and do not want to terminate
-	   prematurely */
-	memset(&sa, 0, sizeof(sa));
+	 * prematurely */
+	memset(&sa, 0, sizeof (sa));
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, NULL);
 
@@ -108,10 +109,11 @@ static int child_process(entry * e, char **jobenv) {
 
 	Debug(DPROC, ("[%ld] child_process('%s')\n", (long) getpid(), e->cmd));
 #ifdef CAPITALIZE_FOR_PS
-		/* mark ourselves as different to PS command watchers by upshifting
-		 * our program name.  This has no effect on some kernels.
-		 */
-		/*local */  {
+	/* mark ourselves as different to PS command watchers by upshifting
+	 * our program name.  This has no effect on some kernels.
+	 */
+	/*local */
+	{
 		char *pch;
 
 		for (pch = ProgramName; *pch; pch++)
@@ -148,7 +150,8 @@ static int child_process(entry * e, char **jobenv) {
 	 * from it.  Subsequent %'s will be transformed into newlines,
 	 * but that happens later.
 	 */
-	/*local */  {
+	/*local */
+	{
 		int escaped = FALSE;
 		int ch;
 		char *p;
@@ -182,8 +185,7 @@ static int child_process(entry * e, char **jobenv) {
 	case -1:
 		log_it("CRON", pid, "CAN'T FORK", "child_process", errno);
 		return ERROR_EXIT;
-		/*NOTREACHED*/
-	case 0:
+	 /*NOTREACHED*/ case 0:
 		Debug(DPROC, ("[%ld] grandchild process fork()'ed\n", (long) getpid()));
 
 		/* write a log message.  we've waited this long to do it
@@ -357,7 +359,8 @@ static int child_process(entry * e, char **jobenv) {
 	Debug(DPROC, ("[%ld] child reading output from grandchild\n",
 			(long) getpid()));
 
-	/*local */  {
+	/*local */
+	{
 		FILE *in = fdopen(stdout_pipe[READ_PIPE], "r");
 		int ch = getc(in);
 
@@ -378,10 +381,10 @@ static int child_process(entry * e, char **jobenv) {
 				("[%ld] got data (%x:%c) from grandchild\n",
 					(long) getpid(), ch, ch));
 
-				/* get name of recipient.  this is MAILTO if set to a
-				 * valid local username; USER otherwise.
-				 */
-				if (mailto) {
+			/* get name of recipient.  this is MAILTO if set to a
+			 * valid local username; USER otherwise.
+			 */
+			if (mailto) {
 				/* MAILTO was present in the environment
 				 */
 				if (!*mailto) {
@@ -399,7 +402,8 @@ static int child_process(entry * e, char **jobenv) {
 			/* get sender address.  this is MAILFROM if set (and safe),
 			 * the user account name otherwise.
 			 */
-			if (!SyslogOutput && (!mailfrom || !*mailfrom || !safe_p(usernm, mailfrom))) {
+			if (!SyslogOutput && (!mailfrom || !*mailfrom ||
+					!safe_p(usernm, mailfrom))) {
 				mailfrom = e->pwd->pw_name;
 			}
 
@@ -420,8 +424,8 @@ static int child_process(entry * e, char **jobenv) {
 				gethostname(hostname, MAXHOSTNAMELEN);
 
 				if (MailCmd[0] == '\0') {
-					if (snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG, mailfrom)
-						>= sizeof mailcmd) {
+					if (snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG,
+							mailfrom) >= sizeof mailcmd) {
 						fprintf(stderr, "mailcmd too long\n");
 						(void) _exit(ERROR_EXIT);
 					}
@@ -446,16 +450,15 @@ static int child_process(entry * e, char **jobenv) {
 					fprintf(mail, "Content-Type: text/plain; charset=%s\n",
 						cron_default_mail_charset);
 				}
-				else {	/* user specified Content-Type header. 
-						 * disallow new-lines for security reasons 
-						 * (else users could specify arbitrary mail headers!)
-						 */
+				else {	/* user specified Content-Type header.
+					 * disallow new-lines for security reasons
+					 * (else users could specify arbitrary mail headers!)
+					 */
 					char *nl = content_type;
 					size_t ctlen = strlen(content_type);
 					while ((*nl != '\0')
 						&& ((nl = strchr(nl, '\n')) != 0L)
-						&& (nl < (content_type + ctlen))
-						)
+						&& (nl < (content_type + ctlen)))
 						*nl = ' ';
 					fprintf(mail, "Content-Type: %s\n", content_type);
 				}
@@ -464,8 +467,7 @@ static int child_process(entry * e, char **jobenv) {
 					size_t ctlen = strlen(content_transfer_encoding);
 					while ((*nl != '\0')
 						&& ((nl = strchr(nl, '\n')) != 0L)
-						&& (nl < (content_transfer_encoding + ctlen))
-						)
+						&& (nl < (content_transfer_encoding + ctlen)))
 						*nl = ' ';
 					fprintf(mail, "Content-Transfer-Encoding: %s\n",
 						content_transfer_encoding);
@@ -498,9 +500,9 @@ static int child_process(entry * e, char **jobenv) {
 #if defined(SYSLOG)
 				if (SyslogOutput) {
 					logbuf[bufidx++] = ch;
-					if ((ch == '\n') || (bufidx == sizeof(logbuf)-1)) {
+					if ((ch == '\n') || (bufidx == sizeof (logbuf) - 1)) {
 						if (ch == '\n')
-							logbuf[bufidx-1] = '\0';
+							logbuf[bufidx - 1] = '\0';
 						else
 							logbuf[bufidx] = '\0';
 						log_it(usernm, getpid(), "CMDOUT", logbuf, 0);
@@ -515,13 +517,13 @@ static int child_process(entry * e, char **jobenv) {
 
 			if (mail) {
 				Debug(DPROC, ("[%ld] closing pipe to mail\n", (long) getpid()));
-					/* Note: the pclose will probably see
-					 * the termination of the grandchild
-					 * in addition to the mail process, since
-					 * it (the grandchild) is likely to exit
-					 * after closing its stdout.
-					 */
-					status = cron_pclose(mail);
+				/* Note: the pclose will probably see
+				 * the termination of the grandchild
+				 * in addition to the mail process, since
+				 * it (the grandchild) is likely to exit
+				 * after closing its stdout.
+				 */
+				status = cron_pclose(mail);
 			}
 #if defined(SYSLOG)
 			if (SyslogOutput) {
@@ -560,18 +562,18 @@ static int child_process(entry * e, char **jobenv) {
 
 		Debug(DPROC, ("[%ld] waiting for grandchild #%d to finish\n",
 				(long) getpid(), children));
-			while ((child = wait(&waiter)) < OK && errno == EINTR) ;
+		while ((child = wait(&waiter)) < OK && errno == EINTR) ;
 		if (child < OK) {
 			Debug(DPROC,
 				("[%ld] no more grandchildren--mail written?\n",
 					(long) getpid()));
-				break;
+			break;
 		}
 		Debug(DPROC, ("[%ld] grandchild #%ld finished, status=%04x",
 				(long) getpid(), (long) child, WEXITSTATUS(waiter)));
-			if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
+		if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
 			Debug(DPROC, (", dumped core"));
-				Debug(DPROC, ("\n"));
+		Debug(DPROC, ("\n"));
 	}
 	return OK_EXIT;
 }

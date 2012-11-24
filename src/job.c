@@ -34,7 +34,7 @@ typedef struct _job {
 
 static job *jhead = NULL, *jtail = NULL;
 
-void job_add(entry * e, user * u) {
+void job_add(entry *e, user *u) {
 	job *j;
 
 	/* if already on queue, keep going */
