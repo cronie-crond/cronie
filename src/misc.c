@@ -308,7 +308,7 @@ void acquire_daemonlock(int closeflag) {
 		if (trylock_file(fd) < OK) {
 			int save_errno = errno;
 
-			bzero(buf, sizeof (buf));
+			memset(buf, 0, sizeof (buf));
 			if ((num = read(fd, buf, sizeof (buf) - 1)) > 0 &&
 				(otherpid = strtol(buf, &ep, 10)) > 0 &&
 				ep != buf && *ep == '\n' && otherpid != LONG_MAX) {
