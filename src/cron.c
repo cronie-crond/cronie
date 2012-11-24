@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
 	ChangePath = 1;
 	parse_args(argc, argv);
 
-	bzero((char *) &sact, sizeof sact);
+	memset((char *) &sact, 0, sizeof sact);
 	sigemptyset(&sact.sa_mask);
 	sact.sa_flags = 0;
 #ifdef SA_RESTART

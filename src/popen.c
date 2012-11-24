@@ -69,7 +69,7 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 			return (NULL);
 		if (!(pids = (PID_T *) malloc((u_int) (fds * sizeof (PID_T)))))
 			return (NULL);
-		bzero((char *) pids, fds * sizeof (PID_T));
+		memset((char *) pids, 0, fds * sizeof (PID_T));
 	}
 	if (pipe(pdes) < 0)
 		return (NULL);

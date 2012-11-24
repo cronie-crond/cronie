@@ -281,7 +281,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		ecode = e_memory;
 		goto eof;
 	}
-	bzero(e->pwd->pw_passwd, strlen(e->pwd->pw_passwd));
+	memset(e->pwd->pw_passwd, 0, strlen(e->pwd->pw_passwd));
 
 	/* copy and fix up environment.  some variables are just defaults and
 	 * others are overrides.
