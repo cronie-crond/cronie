@@ -19,7 +19,26 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cron.h>
+#include "config.h"
+
+#include <ctype.h>
+#include <errno.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "externs.h"
+#include "funcs.h"
+#include "globals.h"
+#include "structs.h"
+
+#ifndef isascii
+# define isascii(c)	((unsigned)(c)<=0177)
+#endif
 
 static int child_process(entry *, char **);
 static int safe_p(const char *, const char *);

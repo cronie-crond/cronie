@@ -19,6 +19,13 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef CRONIE_STRUCTS_H
+#define CRONIE_STRUCTS_H
+
+#include <time.h>
+#include "macros.h"
+#include "bitstring.h"
+
 typedef	struct _entry {
 	struct _entry	*next;
 	struct passwd	*pwd;
@@ -75,3 +82,5 @@ typedef	struct _cron_db {
 				 * variables for the main program, just
 				 * extern them elsewhere.
 				 */
+
+#endif /* CRONIE_STRUCTS_H */

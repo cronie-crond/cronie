@@ -20,9 +20,16 @@
  */
 
 /* Notes:
- *	This file has to be included by cron.h after data structure defs.
  *	We should reorg this into sections by module.
  */
+
+#ifndef CRONIE_FUNCS_H
+#define CRONIE_FUNCS_H
+
+#include <stdio.h>
+
+#include "externs.h"
+#include "structs.h"
 
 void		set_cron_uid(void),
 		check_spool_dir(void),
@@ -111,3 +118,5 @@ int crontab_security_access(void);
 /* PAM */
 int cron_start_pam(struct passwd *pw);
 void cron_close_pam(void);
+
+#endif /* CRONIE_FUNCS_H */

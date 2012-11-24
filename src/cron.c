@@ -24,9 +24,33 @@
  * to add clustering support.
  */
 
+#include "config.h"
+
 #define	MAIN_PROGRAM
 
-#include <cron.h>
+#include <errno.h>
+#include <langinfo.h>
+#include <locale.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#ifdef WITH_INOTIFY
+# include <sys/inotify.h>
+#endif
+
+#ifdef HAVE_SYS_FCNTL_H
+# include <sys/fcntl.h>
+#endif
+
+#include "funcs.h"
+#include "globals.h"
+#include "pathnames.h"
 
 #if defined WITH_INOTIFY
 int inotify_enabled;

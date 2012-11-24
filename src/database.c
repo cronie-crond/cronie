@@ -27,7 +27,25 @@
  * to add clustering support.
  */
 
-#include <cron.h>
+#include "config.h"
+
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <pwd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#ifdef WITH_INOTIFY
+# include <sys/inotify.h>
+#endif
+
+#include "funcs.h"
+#include "globals.h"
+#include "pathnames.h"
 
 #define TMAX(a,b) ((a)>(b)?(a):(b))
 

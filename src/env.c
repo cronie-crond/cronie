@@ -19,7 +19,15 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cron.h>
+#include "config.h"
+
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "globals.h"
+#include "funcs.h"
 
 char **env_init(void) {
 	char **p = (char **) malloc(sizeof (char *));
