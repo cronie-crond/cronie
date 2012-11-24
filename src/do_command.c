@@ -555,19 +555,19 @@ static int child_process(entry * e, char **jobenv) {
 	 */
 	for (; children > 0; children--) {
 		WAIT_T waiter;
-		PID_T pid;
+		PID_T child;
 
 		Debug(DPROC, ("[%ld] waiting for grandchild #%d to finish\n",
 				(long) getpid(), children))
-			while ((pid = wait(&waiter)) < OK && errno == EINTR) ;
-		if (pid < OK) {
+			while ((child = wait(&waiter)) < OK && errno == EINTR) ;
+		if (child < OK) {
 			Debug(DPROC,
 				("[%ld] no more grandchildren--mail written?\n",
 					(long) getpid()))
 				break;
 		}
 		Debug(DPROC, ("[%ld] grandchild #%ld finished, status=%04x",
-				(long) getpid(), (long) pid, WEXITSTATUS(waiter)))
+				(long) getpid(), (long) child, WEXITSTATUS(waiter)))
 			if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
 			Debug(DPROC, (", dumped core"))
 				Debug(DPROC, ("\n"))
