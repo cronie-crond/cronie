@@ -206,7 +206,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	if ((crontab_fd = check_open(tabname, uname, pw, &mtime)) == -1)
 		goto next_crontab;
 
-	Debug(DLOAD, ("\t%s:", fname))
+	Debug(DLOAD, ("\t%s:", fname));
 
 	if (old_db != NULL)
 		u = find_user(old_db, fname, crond_crontab ? tabname : NULL);	/* find user in old_db */
@@ -216,7 +216,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		 * in, then we can just use our existing entry.
 		 */
 		if (u->mtime == mtime) {
-			Debug(DLOAD, (" [no change, using old data]"))
+			Debug(DLOAD, (" [no change, using old data]"));
 				unlink_user(old_db, u);
 			link_user(new_db, u);
 			goto next_crontab;
@@ -229,7 +229,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		 * users will be deleted from the old database when
 		 * we finish with the crontab...
 		 */
-		Debug(DLOAD, (" [delete old data]"))
+		Debug(DLOAD, (" [delete old data]"));
 			unlink_user(old_db, u);
 		free_user(u);
 		log_it(fname, getpid(), "RELOAD", tabname, 0);
@@ -244,7 +244,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 
   next_crontab:
 	if (crontab_fd != -1) {
-		Debug(DLOAD, (" [done]\n"))
+		Debug(DLOAD, (" [done]\n"));
 			close(crontab_fd);
 	}
 }
@@ -393,7 +393,7 @@ void check_inotify_database(cron_db * old_db) {
 	}
 
 	overwrite_database(old_db, &new_db);
-	Debug(DLOAD, ("check_inotify_database is done\n"))
+	Debug(DLOAD, ("check_inotify_database is done\n"));
 }
 #endif
 
@@ -401,9 +401,9 @@ static void overwrite_database(cron_db * old_db, cron_db * new_db) {
 	user *u, *nu;
 	/* whatever's left in the old database is now junk.
 	 */
-	Debug(DLOAD, ("unlinking old database:\n"))
+	Debug(DLOAD, ("unlinking old database:\n"));
 		for (u = old_db->head; u != NULL; u = nu) {
-		Debug(DLOAD, ("\t%s\n", u->name))
+		Debug(DLOAD, ("\t%s\n", u->name));
 			nu = u->next;
 		unlink_user(old_db, u);
 		free_user(u);
@@ -422,7 +422,7 @@ int load_database(cron_db * old_db) {
 	pid_t pid = getpid();
 	int is_local = 0;
 
-	Debug(DLOAD, ("[%ld] load_database()\n", (long) pid))
+	Debug(DLOAD, ("[%ld] load_database()\n", (long) pid));
 
 		/* before we start loading any data, do a stat on SPOOL_DIR
 		 * so that if anything changes as of this moment (i.e., before we've
@@ -466,7 +466,7 @@ int load_database(cron_db * old_db) {
 			TMAX(statbuf.st_mtime, syscron_stat.st_mtime))
 		) {
 		Debug(DLOAD, ("[%ld] spool dir mtime unch, no load needed.\n",
-				(long) pid))
+				(long) pid));
 			return 0;
 	}
 
@@ -541,7 +541,7 @@ int load_database(cron_db * old_db) {
 	endpwent();
 
 	overwrite_database(old_db, &new_db);
-	Debug(DLOAD, ("load_database is done\n"))
+	Debug(DLOAD, ("load_database is done\n"));
 		return 1;
 }
 

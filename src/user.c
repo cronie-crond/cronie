@@ -74,7 +74,7 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 		return (NULL);
 	}
 
-	Debug(DPARS, ("load_user()\n"))
+	Debug(DPARS, ("load_user()\n"));
 	/* file is open.  build user entry, then read the crontab file.
 	 */
 	if ((u = (user *) malloc (sizeof (user))) == NULL)
@@ -140,7 +140,7 @@ done:
 	if (envp)
 		env_free(envp);
 	fclose(file);
-	Debug(DPARS, ("...load_user() done\n"))
+	Debug(DPARS, ("...load_user() done\n"));
 	errno = save_errno;
 	return (u);
 }

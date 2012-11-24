@@ -86,10 +86,10 @@
 #if DEBUGGING
 # define Debug(mask, message) \
 			if ((DebugFlags & (mask)) != 0) \
-				printf message;
+				printf message
 #else /* !DEBUGGING */
 # define Debug(mask, message) \
-			;
+			()
 #endif /* DEBUGGING */
 
 #define	MkUpper(ch)	(islower(ch) ? toupper(ch) : ch)
