@@ -43,18 +43,18 @@
 enum opt_t {opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_hostset, opt_hostget};
 
 #if DEBUGGING
-static char *Options[] = {"???", "list", "delete", "edit", "replace", "hostset", "hostget"};
+static const char *Options[] = {"???", "list", "delete", "edit", "replace", "hostset", "hostget"};
 
 # ifdef WITH_SELINUX
-static char *getoptargs = "u:lerisncx:";
+static const char *getoptargs = "u:lerisncx:";
 # else
-static char *getoptargs = "u:lerincx:";
+static const char *getoptargs = "u:lerincx:";
 # endif
 #else
 # ifdef WITH_SELINUX
-static char *getoptargs = "u:lerisnc";
+static const char *getoptargs = "u:lerisnc";
 # else
-static char *getoptargs = "u:lerinc";
+static const char *getoptargs = "u:lerinc";
 # endif
 #endif
 #ifdef WITH_SELINUX
@@ -77,7 +77,7 @@ edit_cmd(void),
 poke_daemon(void),
 check_error(const char *), parse_args(int c, char *v[]), die(int);
 static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void);
-static char *host_specific_filename(char *filename, int prefix);
+static char *host_specific_filename(const char *filename, int prefix);
 static char *tmp_path(void);
 
 static void usage(const char *msg) {
@@ -101,7 +101,7 @@ static void usage(const char *msg) {
 
 int main(int argc, char *argv[]) {
 	int exitstatus;
-	char *n = "-";	/*set the n string to - so we have a valid string to use */
+	const char *n = "-";	/*set the n string to - so we have a valid string to use */
 
 	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
 		ProgramName = argv[0];
@@ -400,7 +400,7 @@ static void check_error(const char *msg) {
 }
 
 static char *tmp_path() {
-	char *tmpdir = NULL;
+	const char *tmpdir = NULL;
 
 	if ((getuid() == geteuid()) && (getgid() == getegid())) {
 		tmpdir = getenv("TMPDIR");
@@ -408,7 +408,7 @@ static char *tmp_path() {
 	return tmpdir ? tmpdir : "/tmp";
 }
 
-static char *host_specific_filename(char *filename, int prefix)
+static char *host_specific_filename(const char *filename, int prefix)
 {
 	/*
 	 * For cluster-wide use, where there is otherwise risk of the same
@@ -435,7 +435,8 @@ static char *host_specific_filename(char *filename, int prefix)
 }
 
 static void edit_cmd(void) {
-	char n[MAX_FNAME], q[MAX_TEMPSTR], *editor;
+	char n[MAX_FNAME], q[MAX_TEMPSTR];
+	const char *editor;
 	FILE *f;
 	int ch = '\0', t;
 	struct stat statbuf;
