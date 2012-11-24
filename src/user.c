@@ -67,7 +67,7 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	char **envp = NULL, **tenvp;
 
 	if (!(file = fdopen(crontab_fd, "r")))	{
-		int save_errno = errno;
+		save_errno = errno;
 		log_it(uname, getpid (), "FAILED", "fdopen on crontab_fd in load_user",
 			save_errno);
 		close(crontab_fd);
