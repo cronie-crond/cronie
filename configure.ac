@@ -212,11 +212,11 @@ AC_ARG_WITH(audit,
         fi ]
 )
 
-AC_ARG_WITH(syscrontab,
-	[AS_HELP_STRING([--with-syscrontab], [Build cronie with syscrontab enabled.])],
-	[ if test "x$withval" != xno; then
-		AC_DEFINE(WITH_SYSCRONTAB,1,[Define if you want syscrontab.])
-	fi ]
+AC_ARG_ENABLE(syscrontab,
+	[AS_HELP_STRING([--enable-syscrontab], [Build cronie with system crontab enabled.])],
+	[ if test "x$enableval" != xno; then
+		AC_DEFINE(ENABLE_SYSCRONTAB,1,[Define if you want system crontab.])
+	fi ], [AC_DEFINE(ENABLE_SYSCRONTAB,1,[Define if you want system crontab.])]
 )
 
 dnl CRONIE_VAR_DEFAULT (VAR, DESCRIPTION, DEFAULT)

@@ -59,7 +59,7 @@ static int DisableInotify;
  * clustering enabled.
  */
 
-# if defined WITH_SYSCRONTAB
+# if defined ENABLE_SYSCRONTAB
 # 	define NUM_WATCHES 3
 
 int wd[NUM_WATCHES];

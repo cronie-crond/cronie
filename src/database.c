@@ -321,7 +321,7 @@ void check_inotify_database(cron_db * old_db) {
 		set_cron_watched(old_db->ifd);
 
 		/* TODO: parse the events and read only affected files */
-#if defined WITH_SYSCRONTAB
+#if defined ENABLE_SYSCRONTAB
 		process_crontab("root", NULL, SYSCRONTAB, &new_db, old_db);
 #endif
 
@@ -430,7 +430,7 @@ int load_database(cron_db * old_db) {
 		max_mtime(SYS_CROND_DIR, &crond_stat);
 	}
 
-#if defined WITH_SYSCRONTAB
+#if defined ENABLE_SYSCRONTAB
 	/* track system crontab file
 	 */
 	if (stat(SYSCRONTAB, &syscron_stat) < OK)
@@ -464,7 +464,7 @@ int load_database(cron_db * old_db) {
 	new_db.ifd = old_db->ifd;
 #endif
 
-#if defined WITH_SYSCRONTAB
+#if defined ENABLE_SYSCRONTAB
 	if (syscron_stat.st_mtime)
 		process_crontab("root", NULL, SYSCRONTAB, &new_db, old_db);
 #endif
