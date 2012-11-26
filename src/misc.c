@@ -582,7 +582,7 @@ void log_close(void) {
 #endif	 /*SYSLOG*/
 }
 
-/* char *first_word(char *s, char *t)
+/* char *first_word(const char *s, const char *t)
  *	return pointer to first word
  * parameters:
  *	s - string we want the first word of
