@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (access("/usr/sbin/sendmail", X_OK) != 0) {
+	if (!SyslogOutput && MailCmd[0] == '\0' && access("/usr/sbin/sendmail", X_OK) != 0) {
 		SyslogOutput=1;
 		log_it("CRON", pid, "INFO","Syslog will be used instead of sendmail.", 0);
 	}
