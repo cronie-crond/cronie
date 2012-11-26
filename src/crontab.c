@@ -104,7 +104,7 @@ poke_daemon(void),
 check_error(const char *), parse_args(int c, char *v[]), die(int);
 static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void);
 static char *host_specific_filename(const char *filename, int prefix);
-static char *tmp_path(void);
+static const char *tmp_path(void);
 
 static void usage(const char *msg) {
 	fprintf(stderr, "%s: usage error: %s\n", ProgramName, msg);
@@ -127,7 +127,8 @@ static void usage(const char *msg) {
 
 int main(int argc, char *argv[]) {
 	int exitstatus;
-	const char *n = "-";	/*set the n string to - so we have a valid string to use */
+	char n[] = "-";	/*set the n string to - so we have a valid string to use */
+	char *nargv[] = { argv[0], n, NULL };
 
 	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
 		ProgramName = argv[0];
@@ -147,7 +148,7 @@ int main(int argc, char *argv[]) {
 #endif
 	/*should we desire to make changes to behavior later. */
 	if (argv[1] == NULL) {	/* change behavior to allow crontab to take stdin with no '-' */
-		argv[1] = n;
+		argv = nargv;
 	}
 	parse_args(argc, argv);	/* sets many globals, opens a file */
 	check_spool_dir();
@@ -425,7 +426,7 @@ static void check_error(const char *msg) {
 	fprintf(stderr, "\"%s\":%d: %s\n", Filename, LineNumber - 1, msg);
 }
 
-static char *tmp_path() {
+static const char *tmp_path() {
 	const char *tmpdir = NULL;
 
 	if ((getuid() == geteuid()) && (getgid() == getegid())) {
