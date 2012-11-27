@@ -174,19 +174,23 @@ static void handle_signals(cron_db * database) {
 static void usage(void) {
 	const char **dflags;
 
-	fprintf(stderr, "usage:  %s [-h] print this message \n \
-		[-i] deamon runs without inotify support \n \
-		[-m <mail command>] off or specify prefered client for sending mails \n \
-		[-n] run in foreground \n \
-		[-p] permit any crontab \n \
-		[-P] don't set PATH \n \
-		[-c] enable clustering support \n \
-		[-s] log into syslog instead of sending mails \n \
-		[-x [",
-		ProgramName);
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, " %s [options]\n", ProgramName);
+	fprintf(stderr, "\n");
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, " -h         print this message \n");
+	fprintf(stderr, " -i         deamon runs without inotify support\n");
+	fprintf(stderr, " -m <comm>  off, or specify prefered client for sending mails\n");
+	fprintf(stderr, " -n         run in foreground\n");
+	fprintf(stderr, " -p         permit any crontab\n");
+	fprintf(stderr, " -P         use PATH=\"%s\"\n", _PATH_DEFPATH);
+	fprintf(stderr, " -c         enable clustering support\n");
+	fprintf(stderr, " -s         log into syslog instead of sending mails\n");
+	fprintf(stderr, " -x <flag>  print debug information\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "Debugging flags are: ");
 	for (dflags = DebugFlagNames; *dflags; dflags++)
-		fprintf(stderr, "%s%s", *dflags, dflags[1] ? "," : "]");
-	fprintf(stderr, "] print debug information\n");
+		fprintf(stderr, "%s%s", *dflags, dflags[1] ? "," : "\n");
 	exit(ERROR_EXIT);
 }
 
