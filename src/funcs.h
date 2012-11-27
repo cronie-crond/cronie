@@ -27,6 +27,11 @@
 #define CRONIE_FUNCS_H
 
 #include <stdio.h>
+#include <sys/types.h>
+
+#ifdef WITH_SELINUX
+#include <selinux/selinux.h>
+#endif
 
 #include "externs.h"
 #include "structs.h"

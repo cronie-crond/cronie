@@ -23,6 +23,10 @@
 #define CRONIE_STRUCTS_H
 
 #include <time.h>
+#include <sys/types.h>
+#ifdef WITH_SELINUX
+#include <selinux/selinux.h>
+#endif
 #include "macros.h"
 #include "bitstring.h"
 
