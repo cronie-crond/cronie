@@ -72,7 +72,9 @@ void do_command(entry * e, user * u) {
 			_exit(ERROR_EXIT);
 		}
 		ev = child_process(e, jobenv);
+#ifdef WITH_PAM
 		cron_close_pam();
+#endif
 		env_free(jobenv);
 		Debug(DPROC, ("[%ld] child process done, exiting\n", (long) getpid()));
 		_exit(ev);

@@ -199,7 +199,9 @@ int main(int argc, char *argv[]) {
 	default:
 		abort();
 	}
+#ifdef WITH_PAM
 	cron_close_pam();
+#endif
 	exit(exitstatus);
  /*NOTREACHED*/}
 
