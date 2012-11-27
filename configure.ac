@@ -149,7 +149,7 @@ AC_ARG_WITH(selinux,
                 AC_CHECK_LIB(selinux, setexeccon, [ LIBSELINUX="-lselinux" ],
                     AC_MSG_ERROR(SELinux support requires libselinux library))
                 AC_CHECK_FUNCS(getseuserbyname get_default_context_with_level)
-                LIBS="$saved_LIBS $LIBSELINUX"
+                LIBS="$saved_LIBS"
                 AC_SUBST(LIBSELINUX)
         fi ]
 )
@@ -216,7 +216,7 @@ AC_ARG_WITH(audit,
                 AC_CHECK_HEADER([libaudit.h], ,AC_MSG_ERROR(Audit trails requires libaudit.h header))
                 AC_CHECK_LIB(audit, audit_open, [ LIBAUDIT="-laudit" ],
                     AC_MSG_ERROR(Audit support needs audit libraries.))
-                LIBS="$saved_LIBS $LIBAUDIT"
+                LIBS="$saved_LIBS"
                 AC_SUBST(LIBAUDIT)
         fi ]
 )
