@@ -141,6 +141,7 @@ Prints a help message and exits.
 .TP
 .B "\-i"
 Disables inotify support.
+.TP
 .B "\-m"
 This option allows you to specify a shell command to use for sending
 .I Cron
@@ -163,7 +164,7 @@ Allows
 to accept any user set crontables.
 .TP
 .B "\-P"
-Change PATH.
+Don't set PATH.  PATH is instead inherited from the environment.
 .TP
 .B "\-c"
 This option enables clustering support, as described below.
@@ -179,9 +180,6 @@ installed or if mail is disabled.
 .TP
 .B "\-x"
 This option allows you to set debug flags.
-.TP
-.B "\-P"
-Don't set PATH.  PATH is instead inherited from the environment.
 .SH SIGNALS
 When the
 .I SIGHUP

@@ -179,7 +179,7 @@ static void usage(void) {
 		[-m <mail command>] off or specify prefered client for sending mails \n \
 		[-n] run in foreground \n \
 		[-p] permit any crontab \n \
-		[-P] change PATH \n \
+		[-P] don't set PATH \n \
 		[-c] enable clustering support \n \
 		[-s] log into syslog instead of sending mails \n \
 		[-x [",
