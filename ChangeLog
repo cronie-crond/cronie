@@ -1,3 +1,148 @@
+2012-11-27  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/crontab.c, src/do_command.c, src/funcs.h: Condtionalize pam
+	functions.
+
+2012-11-27  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* configure.ac: Drop duplicate -lselinux -laudit.
+
+2012-11-27  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/funcs.h, src/security.c, src/structs.h: Fix missing includes
+	for selinux and other types.
+
+2012-11-27  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8, src/cron.c: Fix some issues introduced in c58b1d9
+	Documentation improvements based on Michael Lass suggestions.  * give -m an own line in manpage * don't explain -P twice * correct description of -P to what it actually does Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2012-11-26  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/crontab.c: Fix const usage in crontab.
+
+2012-11-22  Sami Kerola <kerolasa@iki.fi>
+
+	* man/anacron.8: docs: anacron fix out dated information about open
+	file limits For quite a while open files limit has defaulted to 1024, but rather
+	than informing what might be the number user should inspect value
+	from own time.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-22  Sami Kerola <kerolasa@iki.fi>
+
+	* man/anacrontab.5: docs: fix reference to other manual There is no crontabs(4).  For user it makes most sense to look
+	crontab(1).  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-22  Sami Kerola <kerolasa@iki.fi>
+
+	* man/anacron.8, man/anacrontab.5, man/cron.8, man/crontab.1,
+	man/crontab.5: docs: fix various groff issues * Add spaces after dots (English spacing).  * Remove use of inline emphasis where possible.  * Use mail and url macros.  * Wrap long and join short lines.  * Remove end of line white spaces.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* configure.ac, src/pathnames.h: build-sys: make ./configure to
+	seach vi path Using "/usr/ucb/vi" as defaut fallback EDITOR is not going to work
+	on most of distributions where this package is installed.  That said
+	it might work somewhere, so searching the vi editor at configure
+	time is the sensible thing to do, if user does not want to define
+	the default.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/cron.c, src/crontab.c, src/database.c, src/do_command.c,
+	src/entry.c, src/env.c, src/macros.h, src/security.c, src/user.c: 
+	debuging: make Debug macro look like function This will make indent(1) program not to think it is a clause.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/do_command.c, src/user.c: declarations: fix shadow
+	declarations user.c:68:7: warning: declaration of 'save_errno' shadows a previous
+	local [-Wshadow] user.c:64:14: warning: shadowed declaration is here
+	[-Wshadow] do_command.c:559:9: warning: declaration of 'pid' shadows a previous
+	local [-Wshadow] do_command.c:91:8: warning: shadowed declaration is
+	here [-Wshadow] Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/Makefile.am, src/cron.c, src/cron.h, src/crontab.c,
+	src/database.c, src/do_command.c, src/entry.c, src/env.c,
+	src/externs.h, src/funcs.h, src/globals.h, src/job.c, src/macros.h,
+	src/misc.c, src/popen.c, src/pw_dup.c, src/security.c,
+	src/structs.h, src/user.c: includes: make inclusions clean This change makes files to include what they need, instead of having
+	generic inclusion headers which will include everything to
+	everywhere.  Also the local headers havee ifndef & define
+	protection, which makes them to be save to include in any file,
+	without one having to think in which order the inclusions happen at
+	compile time.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-26  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/misc.c: Fix up also the const in comment.
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/crontab.c, src/database.c, src/env.c, src/funcs.h, src/misc.c: 
+	variables: use const where ever possible Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/crontab.c, src/security.c, src/user.c: build-sys: reduce
+	selinux and pam compiling scope when possible This will fix following warnings, and makes compiled program to
+	contain less unnecessary references.  crontab.c:60:14: warning: 'selinux_context' defined but not used
+	[-Wunused-variable] security.c:188:12: warning:
+	'cron_open_pam_session' defined but not used [-Wunused-function]
+	security.c:250:12: warning: 'cron_authorize_context' defined but not
+	used [-Wunused-function] security.c:283:12: warning:
+	'cron_authorize_range' defined but not used [-Wunused-function] Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/crontab.c: compliancy: do not mix declarations and code Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/database.c, src/do_command.c: clean up: reduce variable
+	passing when they are not used Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/database.c, src/pw_dup.c, src/security.c: assingments: remove
+	initialization if value is never used The next operation with these variables will overwrite the values
+	set at init.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/cron.c, src/entry.c, src/env.c, src/misc.c, src/popen.c: 
+	compliancy: use memset() rather than bzero() Reference:
+
+	http://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xsh_chap03.htmlSigned-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* src/Makefile.am: build-sys: make clean needs to remove
+	cron-paths.h The file is generated at build time.  This change is needed to make
+	distcheck work without an error.  [...] ERROR: files left in build directory after distclean:
+	./src/cron-paths.h Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-24  Sami Kerola <kerolasa@iki.fi>
+
+	* autogen.sh: build-sys: add autotools helper script The script will help building when source code is checked out from
+	git.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-26  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c: Do not log that syslog will be used instead of
+	sendmail if explicitly requested.
+
+2012-11-26  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* configure.ac, src/cron.c, src/database.c: Enable system crontab by
+	default and use AC_ARG_ENABLE instead of AC_ARG_WITH.
+
+2012-11-22  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: Minor release 1.4.9.
+
 2012-11-13  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* man/cron.8, src/cron.c: Documentation improvements based on
