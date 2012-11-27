@@ -108,20 +108,26 @@ static const char *tmp_path(void);
 
 static void usage(const char *msg) {
 	fprintf(stderr, "%s: usage error: %s\n", ProgramName, msg);
-	fprintf(stderr, "usage:\t%s [-u user] file\n", ProgramName);
-	fprintf(stderr, "\t%s [-u user] [ -e | -l | -r ]\n", ProgramName);
-	fprintf(stderr, "\t%s -n [ hostname ]\n", ProgramName);
-	fprintf(stderr, "\t%s -c\n", ProgramName);
-	fprintf(stderr, "\t\t(default operation is replace, per 1003.2)\n");
-	fprintf(stderr, "\t-e\t(edit user's crontab)\n");
-	fprintf(stderr, "\t-l\t(list user's crontab)\n");
-	fprintf(stderr, "\t-r\t(delete user's crontab)\n");
-	fprintf(stderr, "\t-i\t(prompt before deleting user's crontab)\n");
-	fprintf(stderr, "\t-n\t(set host in cluster to run users' crontabs)\n");
-	fprintf(stderr, "\t-c\t(get host in cluster to run users' crontabs)\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, " %s [options] file\n", ProgramName);
+	fprintf(stderr, " %s [options]\n", ProgramName);
+	fprintf(stderr, " %s -n [hostname]\n", ProgramName);
+	fprintf(stderr, "\n");
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, " -u <user>  define user\n");
+	fprintf(stderr, " -e         edit user's crontab\n");
+	fprintf(stderr, " -l         list user's crontab\n");
+	fprintf(stderr, " -r         delete user's crontab\n");
+	fprintf(stderr, " -i         prompt before deleting\n");
+	fprintf(stderr, " -n         set host in cluster to run users' crontabs\n");
+	fprintf(stderr, " -c         get host in cluster to run users' crontabs\n");
 #ifdef WITH_SELINUX
-	fprintf(stderr, "\t-s\t(selinux context)\n");
+	fprintf(stderr, " -s         selinux context\n");
 #endif
+#ifdef DEBUGGING
+	fprintf(stderr, " -x <mask>  enable debugging\n");
+#endif
+	fprintf(stderr, "\nDefault operation is replace, per 1003.2\n");
 	exit(ERROR_EXIT);
 }
 
