@@ -90,7 +90,7 @@ static char *selinux_context = 0;
 static PID_T Pid;
 static char User[MAX_UNAME], RealUser[MAX_UNAME];
 static char Filename[MAX_FNAME], TempFilename[MAX_FNAME];
-static char Host[MAXHOSTNAMELEN];
+static char *Host;
 static FILE *NewCrontab;
 static int CheckErrorCount;
 static int PromptOnDelete;
@@ -325,9 +325,13 @@ static void parse_args(int argc, char *argv[]) {
 
 	if (Option == opt_hostset && argv[optind] != NULL) {            
 		HostSpecified = 1;
-		if (strlen(argv[optind]) >= sizeof Host)
+		if (strlen(argv[optind]) >= get_hostname_max())
 			usage("hostname too long");
-		(void) strcpy(Host, argv[optind]);
+		Host = strdup(argv[optind]);
+		if (Host == NULL) {
+			fprintf(stderr, "host argument strdup failed\n");
+			exit(ERROR_EXIT);
+		}
 		optind++;
 	}
 
@@ -453,9 +457,9 @@ static char *host_specific_filename(const char *filename, int prefix)
 	 */
 
 	static char safename[MAX_FNAME];
-	char hostname[MAXHOSTNAMELEN];
+	char *hostname = xgethostname();
 
-	if (gethostname(hostname, sizeof hostname) != 0)
+	if (hostname == NULL)
 		return NULL;
 
 	if (prefix) {
@@ -907,7 +911,7 @@ static int hostset_cmd(void) {
 	char *safename;
 	
 	if (!HostSpecified)
-		gethostname(Host, sizeof Host);
+		Host = xgethostname();
 	
 	safename = host_specific_filename("tmp.XXXXXXXXXX", 1);
 	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
@@ -965,6 +969,7 @@ static int hostset_cmd(void) {
 		(void) unlink(TempFilename);
 		TempFilename[0] = '\0';
 	}
+	free(Host);
 	return (error);
 }
 
@@ -972,8 +977,10 @@ static int hostget_cmd(void) {
 	char n[MAX_FNAME];
 	FILE *f;
 
+	Host = xgethostname();
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, CRON_HOSTNAME, '/')) {
 		fprintf(stderr, "path too long\n");
+		free(Host);
 		return (-2);
 	}
 
@@ -982,12 +989,14 @@ static int hostget_cmd(void) {
 			fprintf(stderr, "File %s not found\n", n);
 		else
 			perror(n);
-			return (-2);
+		free(Host);
+		return (-2);
 	}
 
-	if (get_string(Host, sizeof Host, f, "\n") == EOF) {
+	if (get_string(Host, get_hostname_max(), f, "\n") == EOF) {
 		fprintf(stderr, "Error reading from %s\n", n);
 		fclose(f);
+		free(Host);
 		return (-2);
 	}
 
@@ -997,6 +1006,7 @@ static int hostget_cmd(void) {
 	fflush(stdout);
 
 	log_it(RealUser, Pid, "GET HOST", Host, 0);
+	free(Host);
 	return (0);
 }
 

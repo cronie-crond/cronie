@@ -391,7 +391,8 @@ int get_string(char *string, int size, FILE * file, const char *terms) {
 
 	while (EOF != (ch = get_char(file)) && !strchr(terms, ch)) {
 		if (size > 1) {
-			*string++ = (char) ch;
+			*string = (char) ch;
+			string++;
 			size--;
 		}
 	}
@@ -736,6 +737,33 @@ size_t strlens(const char *last, ...) {
 		     ret += strlen(str);
 	va_end(ap);
 	return (ret);
+}
+
+size_t get_hostname_max(void) {
+	long len = sysconf(_SC_HOST_NAME_MAX);
+
+	if (0 < len)
+		return len;
+#ifdef MAXHOSTNAMELEN
+	return MAXHOSTNAMELEN;
+#elif HOST_NAME_MAX
+	return HOST_NAME_MAX;
+#endif
+	return 64;
+}
+
+char *xgethostname(void) {
+	char *name;
+	size_t sz = get_hostname_max() + 1;
+
+	name = malloc(sizeof (char) * sz);
+	if (!name)
+		return NULL;
+	if (gethostname(name, sz) != 0)
+		return NULL;
+
+	name[sz - 1] = '\0';
+	return name;
 }
 
 /* Return the offset from GMT in seconds (algorithm taken from sendmail).

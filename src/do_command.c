@@ -413,12 +413,14 @@ static int child_process(entry * e, char **jobenv) {
 				&& strncmp(MailCmd,"off",4) && !SyslogOutput) {
 				char **env;
 				char mailcmd[MAX_COMMAND];
-				char hostname[MAXHOSTNAMELEN];
+				char *hostname;
 				char *content_type = env_get("CONTENT_TYPE", jobenv),
 					*content_transfer_encoding =
 					env_get("CONTENT_TRANSFER_ENCODING", jobenv);
 
-				gethostname(hostname, MAXHOSTNAMELEN);
+				do
+					hostname = xgethostname();
+				while (hostname == NULL && usleep(1000));
 
 				if (MailCmd[0] == '\0') {
 					if (snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG, mailfrom)
@@ -439,6 +441,7 @@ static int child_process(entry * e, char **jobenv) {
 				fprintf(mail, "To: %s\n", mailto);
 				fprintf(mail, "Subject: Cron <%s@%s> %s\n",
 					usernm, first_word(hostname, "."), e->cmd);
+				free(hostname);
 
 #ifdef MAIL_DATE
 				fprintf(mail, "Date: %s\n", arpadate(&StartTime));

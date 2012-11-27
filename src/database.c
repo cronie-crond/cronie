@@ -255,7 +255,7 @@ cluster_host_is_local(void)
 	char filename[MAXNAMLEN+1];
 	int is_local;
 	FILE *f;
-	char hostname[MAXHOSTNAMELEN], myhostname[MAXHOSTNAMELEN];
+	char *hostname, *myhostname;
 
 	if (!EnableClustering)
 		return (1);
@@ -275,14 +275,18 @@ cluster_host_is_local(void)
 	is_local = 0;
 	if (glue_strings(filename, sizeof filename, SPOOL_DIR, CRON_HOSTNAME, '/')) {
 		if ((f = fopen(filename, "r"))) {
+			hostname = xgethostname();
+			myhostname = xgethostname();
 
-			if (EOF != get_string(hostname, MAXHOSTNAMELEN, f, "\n") &&
-			    gethostname(myhostname, MAXHOSTNAMELEN) == 0) {
+			if (!hostname && !myhostname &&
+			    EOF != get_string(hostname, MAXHOSTNAMELEN, f, "\n")) {
 				is_local = (strcmp(myhostname, hostname) == 0);
 			} else {
 				Debug(DLOAD, ("cluster: hostname comparison error\n"));
 			}
 
+			free(hostname);
+			free(myhostname);
 			fclose(f);
 		} else {
 			Debug(DLOAD, ("cluster: file %s not found\n", filename));
