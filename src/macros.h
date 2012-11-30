@@ -131,7 +131,7 @@
  * we will just have to live without it.  In order for this to be an
  * issue an attacker would have to subvert group CRON_GROUP.
  */
-#ifndef O_NOFOLLOW
+#if (HAVE_WORKING_O_NOFOLLOW == 0)
 #define O_NOFOLLOW	0
 #endif
 
