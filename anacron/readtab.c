@@ -284,8 +284,8 @@ parse_tab_line(char *line)
             r = match_rx("^([[:digit:]]+)$", value, 0);
             if (r != -1) {
                 int i = random();
-                double x = 0;
-                x = (double) i / (double) RAND_MAX * (double) (atoi(value));
+                double x;
+                x = i / RAND_MAX * atoi(value);
                 random_number = (int)x;
                 Debug(("Randomized delay set: %d", random_number));
             }
