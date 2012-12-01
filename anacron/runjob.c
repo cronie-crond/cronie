@@ -85,7 +85,7 @@ file_size(int fd)
 }
 
 static char *
-username()
+username(void)
 {
     struct passwd *ps;
 
@@ -325,7 +325,7 @@ tend_job(job_rec *jr, int status)
 }
 
 void
-tend_children()
+tend_children(void)
 /* This is called whenever we get a SIGCHLD.
  * Takes care of zombie children.
  */
