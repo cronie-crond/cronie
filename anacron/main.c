@@ -36,6 +36,7 @@
 #include <locale.h>
 #include "global.h"
 #include "gregor.h"
+#include "cronie_common.h"
 
 pid_t primary_pid;
 int day_now;
@@ -230,20 +231,20 @@ go_background()
     }
 }
 
-void
-handle_sigalrm()
+static void
+handle_sigalrm(int unused ATTRIBUTE_UNUSED)
 {
     got_sigalrm = 1;
 }
 
-void
-handle_sigchld()
+static void
+handle_sigchld(int unused ATTRIBUTE_UNUSED)
 {
     got_sigchld = 1;
 }
 
-void
-handle_sigusr1()
+static void
+handle_sigusr1(int unused ATTRIBUTE_UNUSED)
 {
     got_sigusr1 = 1;
 }

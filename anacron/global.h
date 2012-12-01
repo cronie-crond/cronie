@@ -44,6 +44,7 @@
 #include <signal.h>
 #include <time.h>
 #include "anacron-paths.h"
+#include "cronie_common.h"
 
 /* Some declarations */
 
@@ -131,8 +132,8 @@ void explain(const char *fmt, ...)PRINTF_FORMAT(1,2);
 void explain_e(const char *fmt, ...)PRINTF_FORMAT(1,2);
 void complain(const char *fmt, ...)PRINTF_FORMAT(1,2);
 void complain_e(const char *fmt, ...)PRINTF_FORMAT(1,2);
-void die(const char *fmt, ...)PRINTF_FORMAT(1,2);
-void die_e(const char *fmt, ...)PRINTF_FORMAT(1,2);
+void die(const char *fmt, ...)PRINTF_FORMAT(1,2) ATTRIBUTE_NORETURN;
+void die_e(const char *fmt, ...)PRINTF_FORMAT(1,2) ATTRIBUTE_NORETURN;
 void xdebug(const char *fmt, ...)PRINTF_FORMAT(1,2);
 void xdebug_e(const char *fmt, ...)PRINTF_FORMAT(1,2);
 void xcloselog(void);
