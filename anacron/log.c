@@ -71,24 +71,24 @@ xcloselog()
 }
 
 static void
-make_msg(const char *fmt, va_list args)
+make_msg(const char *fmt, va_list farcs)
 /* Construct the message string from its parts */
 {
     int len;
 
     /* There's some confusion in the documentation about what vsnprintf
      * returns when the buffer overflows.  Hmmm... */
-    len = vsnprintf(msg, sizeof(msg), fmt, args);
+    len = vsnprintf(msg, sizeof(msg), fmt, farcs);
     if (len >= sizeof(msg) - 1)
 	strcpy(msg + sizeof(msg) - sizeof(truncated), truncated);
 }
 
 static void
-slog(int priority, const char *fmt, va_list args)
-/* Log a message, described by "fmt" and "args", with the specified
+slog(int priority, const char *fmt, va_list farcs)
+/* Log a message, described by "fmt" and "farcs", with the specified
  * "priority". */
 {
-    make_msg(fmt, args);
+    make_msg(fmt, farcs);
     xopenlog();
     syslog(priority, "%s", msg);
     if (!in_background)
@@ -101,14 +101,14 @@ slog(int priority, const char *fmt, va_list args)
 }
 
 static void
-log_e(int priority, const char *fmt, va_list args)
+log_e(int priority, const char *fmt, va_list farcs)
 /* Same as slog(), but also appends an error description corresponding
  * to "errno". */
 {
     int saved_errno;
 
     saved_errno = errno;
-    make_msg(fmt, args);
+    make_msg(fmt, farcs);
     xopenlog();
     syslog(priority, "%s: %s", msg, strerror(saved_errno));
     if (!in_background)
@@ -125,33 +125,33 @@ void
 explain(const char *fmt, ...)
 /* Log an "explain" level message */
 {
-    va_list args;
+    va_list farcs;
 
-    va_start(args, fmt);
-    slog(EXPLAIN_LEVEL, fmt, args);
-    va_end(args);
+    va_start(farcs, fmt);
+    slog(EXPLAIN_LEVEL, fmt, farcs);
+    va_end(farcs);
 }
 
 void
 explain_e(const char *fmt, ...)
 /* Log an "explain" level message, with an error description */
 {
-    va_list args;
+    va_list farcs;
 
-    va_start(args, fmt);
-    log_e(EXPLAIN_LEVEL, fmt, args);
-    va_end(args);
+    va_start(farcs, fmt);
+    log_e(EXPLAIN_LEVEL, fmt, farcs);
+    va_end(farcs);
 }
 
 void
 complain(const char *fmt, ...)
 /* Log a "complain" level message */
 {
-    va_list args;
+    va_list farcs;
 
-    va_start(args, fmt);
-    slog(COMPLAIN_LEVEL, fmt, args);
-    va_end(args);
+    va_start(farcs, fmt);
+    slog(COMPLAIN_LEVEL, fmt, farcs);
+    va_end(farcs);
 
     complaints += 1;
 }
@@ -160,11 +160,11 @@ void
 complain_e(const char *fmt, ...)
 /* Log a "complain" level message, with an error description */
 {
-    va_list args;
+    va_list farcs;
 
-    va_start(args, fmt);
-    log_e(COMPLAIN_LEVEL, fmt, args);
-    va_end(args);
+    va_start(farcs, fmt);
+    log_e(COMPLAIN_LEVEL, fmt, farcs);
+    va_end(farcs);
 
     complaints += 1;
 }
@@ -173,11 +173,11 @@ void
 die(const char *fmt, ...)
 /* Log a "complain" level message, and exit */
 {
-    va_list args;
+    va_list farcs;
 
-    va_start(args, fmt);
-    slog(COMPLAIN_LEVEL, fmt, args);
-    va_end(args);
+    va_start(farcs, fmt);
+    slog(COMPLAIN_LEVEL, fmt, farcs);
+    va_end(farcs);
     if (getpid() == primary_pid) complain("Aborted");
 
     exit(FAILURE_EXIT);
@@ -187,11 +187,11 @@ void
 die_e(const char *fmt, ...)
 /* Log a "complain" level message, with an error description, and exit */
 {
-    va_list args;
+    va_list farcs;
 
-    va_start(args, fmt);
-    log_e(COMPLAIN_LEVEL, fmt, args);
-    va_end(args);
+    va_start(farcs, fmt);
+    log_e(COMPLAIN_LEVEL, fmt, farcs);
+    va_end(farcs);
     if (getpid() == primary_pid) complain("Aborted");
 
     exit(FAILURE_EXIT);
@@ -205,21 +205,21 @@ die_e(const char *fmt, ...)
 void
 xdebug(const char *fmt, ...)
 {
-    va_list args;
+    va_list farcs;
 
-    va_start(args, fmt);
-    slog(DEBUG_LEVEL, fmt, args);
-    va_end(args);
+    va_start(farcs, fmt);
+    slog(DEBUG_LEVEL, fmt, farcs);
+    va_end(farcs);
 }
 
 void
 xdebug_e(const char *fmt, ...)
 {
-    va_list args;
+    va_list farcs;
 
-    va_start(args, fmt);
-    log_e(DEBUG_LEVEL, fmt, args);
-    va_end(args);
+    va_start(farcs, fmt);
+    log_e(DEBUG_LEVEL, fmt, farcs);
+    va_end(farcs);
 }
 
 #endif  /* DEBUG */
