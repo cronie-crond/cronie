@@ -95,7 +95,7 @@ const char *watchpaths[NUM_WATCHES] = {SPOOL_DIR, SYS_CROND_DIR};
 # endif
 
 static void reset_watches(void) {
-	int i;
+	size_t i;
 
 	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
 		wd[i] = -2;
@@ -103,7 +103,7 @@ static void reset_watches(void) {
 }
 
 void set_cron_unwatched(int fd) {
-	int i;
+	size_t i;
 
 	for (i = 0; i < sizeof (wd) / sizeof (wd[0]); ++i) {
 		if (wd[i] > 0) {
@@ -115,7 +115,7 @@ void set_cron_unwatched(int fd) {
 
 void set_cron_watched(int fd) {
 	pid_t pid = getpid();
-	int i;
+	size_t i;
 
 	if (fd < 0) {
 		inotify_enabled = 0;
