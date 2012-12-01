@@ -29,8 +29,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cronie_common.h"
 #include "funcs.h"
 #include "globals.h"
+#include "macros.h"
 
 #ifdef WITH_PAM
 # include <security/pam_appl.h>
@@ -54,7 +56,8 @@ static int pam_session_opened = 0;	//global for open session
 
 static int
 cron_conv(int num_msg, const struct pam_message **msgm,
-        struct pam_response **response, void *appdata_ptr)
+	struct pam_response **response ATTRIBUTE_UNUSED,
+	void *appdata_ptr ATTRIBUTE_UNUSED)
 {
         int i;
 
@@ -103,7 +106,8 @@ void cron_restore_default_security_context(void) {
 #endif
 }
 
-int cron_set_job_security_context(entry * e, user * u, char ***jobenv) {
+int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
+	char ***jobenv) {
 	time_t minutely_time = 0;
 #ifdef WITH_PAM
 	int ret;

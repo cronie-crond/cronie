@@ -48,6 +48,7 @@
 # include <sys/fcntl.h>
 #endif
 
+#include "cronie_common.h"
 #include "funcs.h"
 #include "globals.h"
 #include "pathnames.h"
@@ -60,7 +61,7 @@ int inotify_enabled;
 
 enum timejump { negative, small, medium, large };
 
-static void usage(void),
+static void usage(void) ATTRIBUTE_NORETURN,
 run_reboot_jobs(cron_db *),
 find_jobs(int, cron_db *, int, int, long),
 set_time(int),
