@@ -79,25 +79,22 @@ print_version()
 static void
 print_usage()
 {
-    printf("Usage:  anacron [-s] [-f] [-n] [-d] [-q] [-t anacrontab] [-S spooldir] [job] ...\n"
-	   "        anacron [-S spooldir] -u [job] ...\n"
-	   "        anacron [-V|-h]\n"
-	   "        anacron -T [-t anacrontab]\n"
-	   "\n"
-	   " -s  Serialize execution of jobs\n"
-	   " -f  Force execution of jobs, even before their time\n"
-	   " -n  Run jobs with no delay, implies -s\n"
-	   " -d  Don't fork to the background\n"
-	   " -q  Suppress stderr messages, only applicable with -d\n"
-	   " -u  Update the timestamps without actually running anything\n"
-	   " -t  Use this anacrontab\n"
-	   " -V  Print version information\n"
-	   " -h  Print this message\n"
-	   " -T  Test an anacrontab\n"
-	   " -S  Select a different spool directory\n"
-	   "\n"
-	   "See the manpage for more details.\n"
-	   "\n");
+    printf("Usage:\n");
+    printf(" %s [options] [job] ...\n", program_name);
+    printf(" %s -T [-t anacrontab-file]\n", program_name);
+    printf("\nOptions:\n");
+    printf(" -s         Serialize execution of jobs\n");
+    printf(" -f         Force execution of jobs, even before their time\n");
+    printf(" -n         Run jobs with no delay, implies -s\n");
+    printf(" -d         Don't fork to the background\n");
+    printf(" -q         Suppress stderr messages, only applicable with -d\n");
+    printf(" -u         Update the timestamps without actually running anything\n");
+    printf(" -V         Print version information\n");
+    printf(" -h         Print this message\n");
+    printf(" -t <file>  Use alternative anacrontab\n");
+    printf(" -T         Test an anacrontab\n");
+    printf(" -S <dir>   Select a different spool directory\n");
+    printf("\nSee the anacron(8) manpage for more details.\n");
 }
 
 static void
