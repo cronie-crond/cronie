@@ -65,7 +65,7 @@ int range_stop = -1;
 int preferred_hour = -1;
 
 static void
-print_version()
+print_version(void)
 {
     printf("Anacron \n"
 	   "Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>\n"
@@ -77,7 +77,7 @@ print_version()
 }
 
 static void
-print_usage()
+print_usage(void)
 {
     printf("Usage:\n");
     printf(" %s [options] [job] ...\n", program_name);
@@ -164,7 +164,7 @@ parse_opts(int argc, char *argv[])
 }
 
 pid_t
-xfork()
+xfork(void)
 /* Like fork(), only never returns on failure */
 {
     pid_t pid;
@@ -200,7 +200,7 @@ xclose(int fd)
 }
 
 static void
-go_background()
+go_background(void)
 /* Become a daemon. The foreground process exits successfully. */
 {
     pid_t pid;
@@ -247,7 +247,7 @@ handle_sigusr1(int unused ATTRIBUTE_UNUSED)
 }
 
 static void
-set_signal_handling()
+set_signal_handling(void)
 /* We only use SIGALRM, SIGCHLD and SIGUSR1, and we unblock them only
  * in wait_signal().
  */
@@ -284,7 +284,7 @@ set_signal_handling()
 }
 
 static void
-wait_signal()
+wait_signal(void)
 /* Return after a signal is caught */
 {
     sigset_t ss;
@@ -297,7 +297,7 @@ wait_signal()
 }
 
 static void
-wait_children()
+wait_children(void)
 /* Wait until we have no more children (of any kind) */
 {
     while (running_jobs > 0 || running_mailers > 0)
@@ -311,7 +311,7 @@ wait_children()
 }
 
 static void
-orderly_termination()
+orderly_termination(void)
 /* Execution is diverted here, when we get SIGUSR1 */
 {
     explain("Received SIGUSR1");
@@ -341,7 +341,7 @@ xsleep(unsigned int n)
 }
 
 static void
-wait_jobs()
+wait_jobs(void)
 /* Wait until there are no running jobs,
  * servicing SIGCHLDs and SIGUSR1s in the meantime.
  */
@@ -356,7 +356,7 @@ wait_jobs()
 }
 
 static void
-record_start_time()
+record_start_time(void)
 {
     struct tm *tm_now;
 
@@ -394,7 +394,7 @@ time_till(job_rec *jr)
 }
 
 static void
-fake_jobs()
+fake_jobs(void)
 {
     int j;
 
@@ -409,7 +409,7 @@ fake_jobs()
 }
 
 static void
-explain_intentions()
+explain_intentions(void)
 {
     int j;
 

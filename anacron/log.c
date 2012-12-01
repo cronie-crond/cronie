@@ -54,7 +54,7 @@ static int log_open = 0;
 int complaints = 0;
 
 static void
-xopenlog()
+xopenlog(void)
 {
     if (!log_open)
     {
@@ -64,7 +64,7 @@ xopenlog()
 }
 
 void
-xcloselog()
+xcloselog(void)
 {
     if (log_open) closelog();
     log_open = 0;

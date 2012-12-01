@@ -81,7 +81,7 @@ conv2int(const char *s)
 }
 
 static char *
-read_tab_line ()
+read_tab_line (void)
 /* Read one line and return a pointer to it.
 Return NULL if no more lines.
  */
@@ -380,7 +380,7 @@ execution_order(const job_rec **job1, const job_rec **job2)
 }
 
 void
-arrange_jobs()
+arrange_jobs(void)
 /* Make an array of pointers to jobs that are going to be executed,
  * and arrange them in the order of execution.
  * Also lock these jobs.
