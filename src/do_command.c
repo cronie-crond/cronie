@@ -31,6 +31,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "cronie_common.h"
 #include "externs.h"
 #include "funcs.h"
 #include "globals.h"

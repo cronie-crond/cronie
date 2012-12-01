@@ -739,33 +739,6 @@ size_t strlens(const char *last, ...) {
 	return (ret);
 }
 
-size_t get_hostname_max(void) {
-	long len = sysconf(_SC_HOST_NAME_MAX);
-
-	if (0 < len)
-		return len;
-#ifdef MAXHOSTNAMELEN
-	return MAXHOSTNAMELEN;
-#elif HOST_NAME_MAX
-	return HOST_NAME_MAX;
-#endif
-	return 64;
-}
-
-char *xgethostname(void) {
-	char *name;
-	size_t sz = get_hostname_max() + 1;
-
-	name = malloc(sizeof (char) * sz);
-	if (!name)
-		return NULL;
-	if (gethostname(name, sz) != 0)
-		return NULL;
-
-	name[sz - 1] = '\0';
-	return name;
-}
-
 /* Return the offset from GMT in seconds (algorithm taken from sendmail).
  *
  * warning:

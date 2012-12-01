@@ -43,6 +43,7 @@
 # include <sys/inotify.h>
 #endif
 
+#include "cronie_common.h"
 #include "funcs.h"
 #include "globals.h"
 #include "pathnames.h"

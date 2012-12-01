@@ -36,6 +36,7 @@
 #include "global.h"
 
 #include <langinfo.h>
+#include "cronie_common.h"
 
 static int
 temp_file(job_rec *jr)
@@ -236,13 +237,13 @@ launch_job(job_rec *jr)
 {
     pid_t pid;
     int fd;
-    char hostname[512];
+    char *hostname;
     char *mailto;
 
     /* get hostname */
-    if (gethostname(hostname, 512)) {
-      strcpy (hostname,"unknown machine");
-    }
+    do
+      hostname = xgethostname();
+    while (hostname == NULL && usleep(1000));
 
     setup_env(jr);
    
@@ -276,6 +277,7 @@ launch_job(job_rec *jr)
     xwrite(fd, "' on ");
     xwrite(fd, hostname);
     xwrite(fd, "\n\n");
+    free(hostname);
 
     jr->mail_header_size = file_size(fd);
 

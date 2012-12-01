@@ -73,8 +73,7 @@ int		load_database(cron_db *),
 		allowed(const char * ,const char * ,const char *),
 		strdtb(char *);
 
-size_t		strlens(const char *, ...),
-		get_hostname_max(void);
+size_t		strlens(const char *, ...);
 
 char		*env_get(const char *, char **),
 		*arpadate(time_t *),
@@ -82,8 +81,7 @@ char		*env_get(const char *, char **),
 		*first_word(const char *, const char *),
 		**env_init(void),
 		**env_copy(char **),
-		**env_set(char **, char *),
-		*xgethostname(void);
+		**env_set(char **, char *);
 
 user		*load_user(int, struct passwd *, const char *, const char *, const char *),
 		*find_user(cron_db *, const char *, const char *);
