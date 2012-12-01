@@ -298,7 +298,7 @@ tend_job(job_rec *jr, int status)
 /* Take care of a finished job */
 {
     int mail_output;
-    char *m;
+    const char *m;
 
     update_timestamp(jr);
     unlock(jr);
