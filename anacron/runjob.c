@@ -180,17 +180,17 @@ launch_mailer(job_rec *jr)
 	/* child */
 	in_background = 1;
 	/* set stdin to the job's output */
-	xclose(0);
-	if (dup2(jr->input_fd, 0) != 0) die_e("Can't dup2()");
-	if (lseek(0, 0, SEEK_SET) != 0) die_e("Can't lseek()");
+	xclose(STDIN_FILENO);
+	if (dup2(jr->input_fd, STDIN_FILENO) != 0) die_e("Can't dup2()");
+	if (lseek(STDIN_FILENO, 0, SEEK_SET) != 0) die_e("Can't lseek()");
 	umask(old_umask);
 	if (sigprocmask(SIG_SETMASK, &old_sigmask, NULL))
 	    die_e("sigprocmask error");
 	xcloselog();
 
 	/* Ensure stdout/stderr are sane before exec-ing sendmail */
-	xclose(1); xopen(1, "/dev/null", O_WRONLY);
-	xclose(2); xopen(2, "/dev/null", O_WRONLY);
+	xclose(STDOUT_FILENO); xopen(STDOUT_FILENO, "/dev/null", O_WRONLY);
+	xclose(STDERR_FILENO); xopen(STDERR_FILENO, "/dev/null", O_WRONLY);
 	xclose(jr->output_fd);
 
 	/* Ensure stdin is not appendable ... ? */

@@ -138,10 +138,10 @@ parse_opts(int argc, char *argv[])
 	    break;
 	case 'V':
 	    print_version();
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'h':
 	    print_usage();
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case '?':
 	    fprintf(stderr, "%s: invalid option: %c\n",
 		    program_name, optopt);
@@ -217,7 +217,7 @@ go_background()
     if (pid != 0)
     {
 	/* parent */
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
     else
     {
@@ -318,7 +318,7 @@ orderly_termination()
     got_sigusr1 = 0;
     wait_children();
     explain("Exited");
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 static void
@@ -475,7 +475,7 @@ main(int argc, char *argv[])
     if (sigprocmask(0, NULL, &old_sigmask)) die_e("sigset error");
 
     if (fclose(stdin)) die_e("Can't close stdin");
-    xopen(0, "/dev/null", O_RDONLY);
+    xopen(STDIN_FILENO, "/dev/null", O_RDONLY);
 
     if (!no_daemon && !testing_only)
 	go_background();
@@ -489,15 +489,15 @@ main(int argc, char *argv[])
 
     if (testing_only)
     {
-	if (complaints) exit (1);
+	if (complaints) exit (EXIT_FAILURE);
 	
-	exit (0);
+	exit (EXIT_SUCCESS);
     }
 
     if (update_only)
     {
 	fake_jobs();
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
 
     explain_intentions();
@@ -511,5 +511,5 @@ main(int argc, char *argv[])
     }
     wait_children();
     explain("Normal exit (%d job%s run)", njobs, njobs == 1 ? "" : "s");
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
