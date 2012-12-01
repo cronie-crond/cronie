@@ -56,6 +56,7 @@
 # include <selinux/av_permissions.h>
 #endif
 
+#include "cronie_common.h"
 #include "bitstring.h"
 #include "externs.h"
 #include "funcs.h"
@@ -101,11 +102,12 @@ static void list_cmd(void),
 delete_cmd(void),
 edit_cmd(void),
 poke_daemon(void),
-check_error(const char *), parse_args(int c, char *v[]), die(int);
+check_error(const char *), parse_args(int c, char *v[]), die(int) ATTRIBUTE_NORETURN;
 static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void);
 static char *host_specific_filename(const char *filename, int prefix);
 static const char *tmp_path(void);
 
+static void usage(const char *msg) ATTRIBUTE_NORETURN;
 static void usage(const char *msg) {
 	fprintf(stderr, "%s: usage error: %s\n", ProgramName, msg);
 	fprintf(stderr, "Usage:\n");
