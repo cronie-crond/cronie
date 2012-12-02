@@ -37,13 +37,13 @@ config=/etc/sysconfig/crond
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
 start() {
-    if [ $UID -ne 0 ] ; then
+    if [ $(id -ru) -ne 0 ] ; then
         echo "User has insufficient privilege."
         exit 4
     fi
     [ -x $exec ] || exit 5
     [ -f $config ] || exit 6
-    echo -n $"Starting $prog: "
+    printf "Starting $prog: "
     daemon $prog $CRONDARGS
     retval=$?
     echo
@@ -51,16 +51,16 @@ start() {
 }
 
 stop() {
-    if [ $UID -ne 0 ] ; then
+    if [ $(id -ru) -ne 0 ] ; then
         echo "User has insufficient privilege."
         exit 4
     fi
-    echo -n $"Stopping $prog: "
+    printf "Stopping $prog: "
 	if [ -n "`pidfileofproc $exec`" ]; then
 		killproc $exec
 		RETVAL=3
 	else
-		failure $"Stopping $prog"
+		failure "Stopping $prog"
 	fi
     retval=$?
     echo
@@ -73,11 +73,11 @@ restart() {
 }
 
 reload() {
-	echo -n $"Reloading $prog: "
+	printf "Reloading $prog: "
 	if [ -n "`pidfileofproc $exec`" ]; then
 		killproc $exec -HUP
 	else
-		failure $"Reloading $prog"
+		failure "Reloading $prog"
 	fi
 	retval=$?
 	echo
@@ -125,7 +125,7 @@ case "$1" in
         restart
         ;;
     *)
-        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        echo "Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
         exit 2
 esac
 exit $?
