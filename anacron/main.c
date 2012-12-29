@@ -47,8 +47,8 @@ char *anacrontab;
 char *spooldir;
 int serialize, force, update_only, now,
     no_daemon, quiet, testing_only;            /* command-line options */
-char **args;                       /* vector of "job" command-line arguments */
-int nargs;                                     /* number of these */
+char **job_args;                       	       /* vector of "job" command-line arguments */
+int job_nargs;                                 /* number of these */
 char *defarg = "*";
 int in_background;                             /* are we in the background? */
 int old_umask;                                 /* umask when started */
@@ -153,13 +153,13 @@ parse_opts(int argc, char *argv[])
     if (optind == argc)
     {
 	/* no arguments. Equivalent to: `*' */
-	nargs = 1;
-	args = &defarg;
+	job_nargs = 1;
+	job_args = &defarg;
     }
     else
     {
-	nargs = argc - optind;
-	args = argv + optind;
+	job_nargs = argc - optind;
+	job_args = argv + optind;
     }
 }
 

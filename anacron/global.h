@@ -94,8 +94,8 @@ extern int in_background;
 extern job_rec *first_job_rec;
 extern env_rec *first_env_rec;
 
-extern char **args;
-extern int nargs;
+extern char **job_args;
+extern int job_nargs;
 
 extern int njobs;
 extern job_rec **job_array;

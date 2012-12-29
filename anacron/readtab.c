@@ -116,9 +116,9 @@ job_arg_num(const char *ident)
 {
     int i, r;
 
-    for (i = 0; i < nargs; i++)
+    for (i = 0; i < job_nargs; i++)
     {
-	r = fnmatch(args[i], ident, 0);
+	r = fnmatch(job_args[i], ident, 0);
 	if (r == 0) return i;
 	if (r != FNM_NOMATCH) die("fnmatch() error");
     }
