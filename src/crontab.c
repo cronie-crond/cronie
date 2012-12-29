@@ -436,7 +436,7 @@ static void check_error(const char *msg) {
 	fprintf(stderr, "\"%s\":%d: %s\n", Filename, LineNumber - 1, msg);
 }
 
-static const char *tmp_path() {
+static const char *tmp_path(void) {
 	const char *tmpdir = NULL;
 
 	if ((getuid() == geteuid()) && (getgid() == getegid())) {

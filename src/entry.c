@@ -392,10 +392,8 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
   eof:
 	if (e->envp)
 		env_free(e->envp);
-	if (e->pwd)
-		free(e->pwd);
-	if (e->cmd)
-		free(e->cmd);
+	free(e->pwd);
+	free(e->cmd);
 	free(e);
 	while (ch != '\n' && !feof(file))
 		ch = get_char(file);

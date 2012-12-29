@@ -25,6 +25,7 @@
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
+
 	/* these are really immutable, and are
 	 *   defined for symbolic convenience only
 	 * TRUE, FALSE, and ERR must be distinct
@@ -131,6 +132,7 @@
  * we will just have to live without it.  In order for this to be an
  * issue an attacker would have to subvert group CRON_GROUP.
  */
+#include <fcntl.h>
 #ifndef O_NOFOLLOW
 #define O_NOFOLLOW	0
 #endif
