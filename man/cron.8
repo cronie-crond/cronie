@@ -22,7 +22,7 @@
 .\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
 .\"
-.TH CRON "8" "2012-11-22" "cronie" "System Administration"
+.TH CRON "8" "2013-01-02" "cronie" "System Administration"
 .SH NAME
 crond \- daemon to execute scheduled commands
 .SH SYNOPSIS
@@ -38,7 +38,11 @@ is started from
 .I /etc/rc.d/init.d
 or
 .I /etc/init.d
-It returns immediately, thus, there is no need to need to start it with
+when classical sysvinit scripts are used. In case systemd is enabled, then unit file is installed into
+.I /lib/systemd/system/crond.service
+and daemon is started by
+.I systemctl start crond.service
+command. It returns immediately, thus, there is no need to need to start it with
 the '&' parameter.
 .PP
 .I Cron
