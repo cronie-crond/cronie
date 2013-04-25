@@ -435,7 +435,7 @@ static int child_process(entry * e, char **jobenv) {
 					(void) _exit(ERROR_EXIT);
 				}
 
-				fprintf(mail, "From: %s (Cron Daemon)\n", mailfrom);
+				fprintf(mail, "From: \"(Cron Daemon)\" <%s>\n", mailfrom);
 				fprintf(mail, "To: %s\n", mailto);
 				fprintf(mail, "Subject: Cron <%s@%s> %s\n",
 					usernm, first_word(hostname, "."), e->cmd);
