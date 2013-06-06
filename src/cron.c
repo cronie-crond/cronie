@@ -244,8 +244,8 @@ int main(int argc, char *argv[]) {
 	check_spool_dir();
 
 	if (ChangePath) {
-		if (putenv("PATH=" _PATH_DEFPATH) < 0) {
-			log_it("CRON", pid, "DEATH", "can't putenv PATH",
+		if (setenv("PATH", _PATH_DEFPATH) < 0) {
+			log_it("CRON", pid, "DEATH", "can't setenv PATH",
 				errno);
 			exit(1);
 		}
