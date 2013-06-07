@@ -67,6 +67,7 @@ int		load_database(cron_db *),
 		swap_uids(void),
 		swap_uids_back(void),
 		load_env(char *, FILE *),
+		env_set_from_environ(char ***envpp),
 		cron_pclose(FILE *),
 		glue_strings(char *, size_t, const char *, const char *, char),
 		strcmp_until(const char *, const char *, char),
@@ -81,7 +82,7 @@ char		*env_get(const char *, char **),
 		*first_word(const char *, const char *),
 		**env_init(void),
 		**env_copy(char **),
-		**env_set(char **, char *);
+		**env_set(char **, const char *);
 
 user		*load_user(int, struct passwd *, const char *, const char *, const char *),
 		*find_user(cron_db *, const char *, const char *);

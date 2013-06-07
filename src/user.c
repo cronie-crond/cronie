@@ -63,7 +63,7 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	FILE *file;
 	user *u;
 	entry *e;
-	int status, save_errno = errno;
+	int status = ERR, save_errno = 0;
 	char **envp = NULL, **tenvp;
 
 	if (!(file = fdopen(crontab_fd, "r")))	{
@@ -84,8 +84,6 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	if (((u->name = strdup(fname)) == NULL)
 		|| ((u->tabname = strdup(tabname)) == NULL)) {
 		save_errno = errno;
-		free_user(u);
-		u = NULL;
 		goto done;
 	}
 
@@ -94,16 +92,17 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	*/
 	if ((envp = env_init()) == NULL) {
 		save_errno = errno;
-		free_user(u);
-		u = NULL;
+		goto done;
+	}
+
+	if (env_set_from_environ(&envp) == FALSE) {
+		save_errno = errno;
 		goto done;
 	}
 
 #ifdef WITH_SELINUX
 	if (get_security_context(pw == NULL ? NULL : uname,
 		crontab_fd, &u->scontext, tabname) != 0) {
-		free_user (u);
-		u = NULL;
 		goto done;
 	}
 #endif
@@ -113,8 +112,6 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 		switch (status) {
 			case ERR:
 				save_errno = errno;
-				free_user(u);
-				u = NULL;
 				goto done;
 			case FALSE:
 				FileName = tabname;
@@ -126,9 +123,8 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 				break;
 			case TRUE:
 				if ((tenvp = env_set (envp, envstr)) == NULL) {
+					status = ERR;
 					save_errno = errno;
-					free_user(u);
-					u = NULL;
 					goto done;
 				}
 			envp = tenvp;
@@ -137,6 +133,10 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	}
 
 done:
+	if (status == ERR) {
+		free_user(u);
+		u = NULL;
+	}
 	if (envp)
 		env_free(envp);
 	fclose(file);

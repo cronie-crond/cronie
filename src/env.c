@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "globals.h"
 #include "funcs.h"
@@ -67,7 +68,7 @@ char **env_copy(char **envp) {
 	return (p);
 }
 
-char **env_set(char **envp, char *envstr) {
+char **env_set(char **envp, const char *envstr) {
 	int count, found;
 	char **p, *envtmp;
 
@@ -110,6 +111,47 @@ char **env_set(char **envp, char *envstr) {
 	p[count] = p[count - 1];
 	p[count - 1] = envtmp;
 	return (p);
+}
+
+int env_set_from_environ(char ***envpp) {
+	static const char *names[] = {
+		"LANG",
+		"LC_CTYPE",
+		"LC_NUMERIC",
+		"LC_TIME",
+		"LC_COLLATE",
+		"LC_MONETARY",
+		"LC_MESSAGES",
+		"LC_PAPER",
+		"LC_NAME",
+		"LC_ADDRESS",
+		"LC_TELEPHONE",
+		"LC_MEASUREMENT",
+		"LC_IDENTIFICATION",
+		"LC_ALL",
+		"LANGUAGE",
+		NULL
+	};
+	const char **name;
+	char **procenv;
+
+	for (procenv = environ; *procenv != NULL; ++procenv) {
+		for (name = names; *name != NULL; ++name) {
+			size_t namelen;
+
+			namelen = strlen(*name);
+			if (strncmp(*name, *procenv, namelen) == 0 
+			    && (*procenv)[namelen] == '=') {
+				char **tmpenv;
+
+				tmpenv = env_set(*envpp, *procenv);
+				if (tmpenv == NULL)
+					return FALSE;
+				*envpp = tmpenv;
+			}
+		}
+	}
+	return TRUE;
 }
 
 /* The following states are used by load_env(), traversed in order: */
