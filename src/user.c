@@ -77,8 +77,10 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	Debug(DPARS, ("load_user()\n"));
 	/* file is open.  build user entry, then read the crontab file.
 	 */
-	if ((u = (user *) malloc (sizeof (user))) == NULL)
+	if ((u = (user *) malloc (sizeof (user))) == NULL) {
+		save_errno = errno;
 		goto done;
+	}
 	memset(u, 0, sizeof(*u));
 
 	if (((u->name = strdup(fname)) == NULL)
@@ -129,6 +131,8 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 
 done:
 	if (status == TRUE) {
+		log_it(uname, getpid(), "FAILED", "loading cron table",
+			save_errno);
 		free_user(u);
 		u = NULL;
 	}
