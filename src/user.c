@@ -63,7 +63,7 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	FILE *file;
 	user *u;
 	entry *e;
-	int status = ERR, save_errno = 0;
+	int status = TRUE, save_errno = 0;
 	char **envp = NULL, **tenvp;
 
 	if (!(file = fdopen(crontab_fd, "r")))	{
@@ -87,7 +87,6 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 		goto done;
 	}
 
-
 	/* init environment.  this will be copied/augmented for each entry.
 	*/
 	if ((envp = env_init()) == NULL) {
@@ -110,30 +109,26 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	*/
 	while ((status = load_env (envstr, file)) >= OK) {
 		switch (status) {
-			case ERR:
-				save_errno = errno;
-				goto done;
 			case FALSE:
 				FileName = tabname;
 				e = load_entry(file, log_error, pw, envp);
-		  		if (e) {
+				if (e) {
 					e->next = u->crontab;
 					u->crontab = e;
 				}
 				break;
 			case TRUE:
 				if ((tenvp = env_set (envp, envstr)) == NULL) {
-					status = ERR;
 					save_errno = errno;
 					goto done;
 				}
-			envp = tenvp;
-			break;
+				envp = tenvp;
+				break;
 		}
 	}
 
 done:
-	if (status == ERR) {
+	if (status == TRUE) {
 		free_user(u);
 		u = NULL;
 	}
