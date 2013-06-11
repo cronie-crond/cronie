@@ -41,6 +41,7 @@ typedef	struct _entry {
 	bitstr_t	bit_decl(month,  MONTH_COUNT);
 	bitstr_t	bit_decl(dow,    DOW_COUNT);
 	int		flags;
+	int		delay;
 #define	MIN_STAR	0x01
 #define	HR_STAR		0x02
 #define	DOM_STAR	0x04

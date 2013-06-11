@@ -35,6 +35,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "bitstring.h"
 #include "funcs.h"
@@ -97,6 +98,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 	char cmd[MAX_COMMAND];
 	char envstr[MAX_ENVSTR];
 	char **tenvp;
+	char *p;
 
 	Debug(DPARS, ("load_entry()...about to eat comments\n"));
 
@@ -296,6 +298,20 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		goto eof;
 	}
 	memset(e->pwd->pw_passwd, 0, strlen(e->pwd->pw_passwd));
+
+	p = env_get("RANDOM_DELAY", envp);
+	if (p) {
+		char *endptr;
+		long val;
+
+		errno = 0;    /* To distinguish success/failure after call */
+		val = strtol(p, &endptr, 10);
+		if (errno != 0 || val < 0 || val > 24*60) {
+			log_it("CRON", getpid(), "ERROR", "bad value of RANDOM_DELAY", 0);
+		} else {
+			e->delay = val * RandomScale;
+		}
+	}
 
 	/* copy and fix up environment.  some variables are just defaults and
 	 * others are overrides.

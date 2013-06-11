@@ -143,6 +143,13 @@ specifications of the particular security context.  For more information,
 see
 .BR crontab (1)\ -s\ option.
 .PP
+The
+.I RANDOM_DELAY
+variable allows delaying job startups by random amount of minutes with
+upper limit specified by the variable. The random scaling factor is
+determined during the cron daemon startup so it remains constant for
+the whole run time of the daemon.
+.PP
 The format of a cron command is similar to the V7 standard, with a number
 of upward-compatible extensions.  Each line has five time-and-date fields
 followed by a

@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #ifdef WITH_INOTIFY
 # include <sys/inotify.h>
@@ -202,6 +203,9 @@ int main(int argc, char *argv[]) {
 	char *cs;
 	pid_t pid = getpid();
 	long oldGMToff;
+	struct timeval tv;
+	struct timezone tz;
+	char buf[256];
 
 	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
 		ProgramName = argv[0];
@@ -298,6 +302,15 @@ int main(int argc, char *argv[]) {
 	}
 
 	pid = getpid();
+
+	/* obtain a random scaling factor for RANDOM_DELAY */
+	if (gettimeofday(&tv, &tz) != 0)
+		tv.tv_usec = 0;
+	srandom(pid + tv.tv_usec);
+	RandomScale = random() / (double)RAND_MAX;
+	snprintf(buf, sizeof(buf), "RANDOM_DELAY will be scaled with factor %d%% if used.", (int)(RandomScale*100));
+	log_it("CRON", pid, "INFO", buf, 0);
+
 	acquire_daemonlock(0);
 	database.head = NULL;
 	database.tail = NULL;
@@ -508,8 +521,6 @@ static void run_reboot_jobs(cron_db * db) {
 
 static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long vGMToff) {
 	char *orig_tz, *job_tz;
-	time_t virtualSecond = vtime * SECONDS_PER_MINUTE;
-	time_t virtualGMTSecond = virtualSecond - vGMToff;
 	struct tm *tm;
 	int minute, hour, dom, month, dow;
 	user *u;
@@ -542,11 +553,7 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 	} while (0)
 
 	orig_tz = getenv("TZ");
-	maketime(NULL, orig_tz);
 
-	Debug(DSCH, ("[%ld] tick(%d,%d,%d,%d,%d) %s %s\n",
-			(long) getpid(), minute, hour, dom, month, dow,
-			doWild ? " " : "No wildcard", doNonWild ? " " : "Wildcard only"));
 		/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
 		 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
 		 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
@@ -561,6 +568,8 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 				uname = e->pwd->pw_name;
 			/* check if user exists in time of job is being run f.e. ldap */
 			if (getpwnam(uname) != NULL) {
+				time_t virtualSecond = (vtime - e->delay) * SECONDS_PER_MINUTE;
+				time_t virtualGMTSecond = virtualSecond - vGMToff;
 				job_tz = env_get("CRON_TZ", e->envp);
 				maketime(job_tz, orig_tz);
 				/* here we test whether time is NOW */

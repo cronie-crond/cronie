@@ -130,6 +130,7 @@ int env_set_from_environ(char ***envpp) {
 		"LC_IDENTIFICATION",
 		"LC_ALL",
 		"LANGUAGE",
+		"RANDOM_DELAY",
 		NULL
 	};
 	const char **name;
