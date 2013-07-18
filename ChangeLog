@@ -1,3 +1,139 @@
+2013-06-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/user.c: Log failures in load_user().
+
+2013-06-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* man/crontab.5, src/cron.c, src/entry.c, src/env.c, src/globals.h,
+	src/structs.h: Add support for RANDOM_DELAY of jobs.
+
+2013-06-11  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/user.c: Fixed bug introduced by previous commit and simplified
+	error handling.
+
+2013-06-07  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/env.c, src/funcs.h, src/user.c: Copy some variables from the
+	crond process environment.  Also cleanup error handling in load_env().
+
+2013-06-06  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c: setenv takes 3 arguments
+
+2013-06-06  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/cron.c: Do not use putenv with string literal.
+
+2013-04-25  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/do_command.c: Make From field in mails from crond RFC
+	compliant.
+
+2012-12-30  Sami Kerola <kerolasa@iki.fi>
+
+	* src/crontab.c: cron: clarify usage() print out The -n option needs argument, which was missing from the usage().  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-29  Sami Kerola <kerolasa@iki.fi>
+
+	* anacron/global.h, anacron/main.c, anacron/readtab.c: anacron: fix
+	shadow declarations Change global variables to have more specific name.  This will make
+	warnings about shadowing to go away, and may result to a little more
+	readable code.  log.c:74:35: warning: declaration of 'args' shadows a global
+	declaration [-Wshadow] global.h:97:15: warning: shadowed declaration
+	is here [-Wshadow] Reference:
+
+	http://web.archiveorange.com/archive/v/N6p0RpcfZsIBsaU8B2sE#72jDywyk8NZ3i9gSigned-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-29  Sami Kerola <kerolasa@iki.fi>
+
+	* src/crontab.c, src/entry.c, src/macros.h, src/security.c: smatch
+	scan: fix various warningss found using smatch entry.c:396 load_entry() info: redundant null check on e->pwd
+	calling free() entry.c:398 load_entry() info: redundant null check
+	on e->cmd calling free() /usr/include/bits/fcntl.h:48:10: warning: preprocessor token
+	O_NOFOLLOW redefined macros.h:136:9: this was the original
+	definition security.c:98:44: warning: non-ANSI function declaration of function
+	'cron_restore_default_security_context' crontab.c:439:29: warning:
+	non-ANSI function declaration of function 'tmp_path' Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2013-01-02  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8: Mention systemctl command in man page of crond. Based
+	on rhbz#891160.
+
+2012-12-20  Sami Kerola <kerolasa@iki.fi>
+
+	* contrib/0anacron: contrib: remove bashisms Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-20  Sami Kerola <kerolasa@iki.fi>
+
+	* COPYING.anacron, anacron/global.h, anacron/gregor.c,
+	anacron/gregor.h, anacron/lock.c, anacron/log.c, anacron/main.c,
+	anacron/matchrx.c, anacron/matchrx.h, anacron/readtab.c,
+	anacron/runjob.c: docs: corrections to FSF license files, and postal
+	address The COPYING and file is replaced by files from GNU web site.  http://www.gnu.org/licenses/gpl-2.0.txt Postal addresses to FSF in other files are updated to match with the
+	address in license files.  References:
+
+	http://lists.gnu.org/archive/html/freefont-announce/2005-04/msg00001.htmlSigned-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-02  Sami Kerola <kerolasa@iki.fi>
+
+	* cronie.init: init script: remove bashisms References: https://sourceforge.net/projects/checkbaskisms/
+	Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-01  Sami Kerola <kerolasa@iki.fi>
+
+	* anacron/log.c, anacron/main.c, anacron/readtab.c,
+	anacron/runjob.c: anacron: make function declarations to be ansi
+	compliant Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-01  Sami Kerola <kerolasa@iki.fi>
+
+	* anacron/main.c, anacron/runjob.c: anacron: remove numeric exit and
+	file descriptor values Use symbolic values from standard header instead.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-01  Sami Kerola <kerolasa@iki.fi>
+
+	* anacron/main.c: anacron: clean up usage() output Inform in usage which options will need arguments, and add reference
+	to manual page.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-01  Sami Kerola <kerolasa@iki.fi>
+
+	* anacron/runjob.c: anacron: set end job message string to be
+	constant runjob.c:308:7: warning: assignment discards 'const' qualifier from
+	pointer target type [enabled by default] Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-01  Sami Kerola <kerolasa@iki.fi>
+
+	* anacron/global.h, anacron/main.c: anacron: add function attributes Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-01  Sami Kerola <kerolasa@iki.fi>
+
+	* Makefile.am, cronie_common.h, src/cron.c, src/crontab.c,
+	src/security.c: compile: add function attributes Some of the argument values are not in use, and few functions does
+	not return.  Informing which will make few warning messages
+	disapper, and compiler to generate better binary.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-12-01  Sami Kerola <kerolasa@iki.fi>
+
+	* src/cron.c: compile: fix signed and unsigned warnings cron.c:100:16: warning: comparison between signed and unsigned
+	integer expressions [-Wsign-compare] cron.c:108:16: warning:
+	comparison between signed and unsigned integer expressions
+	[-Wsign-compare] cron.c:125:16: warning: comparison between signed
+	and unsigned integer expressions [-Wsign-compare] Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-27  Sami Kerola <kerolasa@iki.fi>
+
+	* src/cron.c: crond: make usage easier to read Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-27  Sami Kerola <kerolasa@iki.fi>
+
+	* src/crontab.c: crontab: make usage easier to read Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+
+2012-11-27  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: New release 1.4.10.
+
 2012-11-27  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* src/crontab.c, src/do_command.c, src/funcs.h: Condtionalize pam
