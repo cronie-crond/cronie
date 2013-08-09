@@ -75,7 +75,9 @@ static int LogFD = ERR;
 static int syslog_open = FALSE;
 #endif
 
-#if defined(HAVE_FCNTL) && defined(F_SETLK)
+#if defined(HAVE_FLOCK)
+# define trylock_file(fd)      flock((fd), LOCK_EX|LOCK_NB)
+#elif defined(HAVE_FCNTL) && defined(F_SETLK)
 static int trylock_file(int fd) {
 	struct flock fl;
 
@@ -89,8 +91,6 @@ static int trylock_file(int fd) {
 }
 #elif defined(HAVE_LOCKF)
 # define trylock_file(fd)      lockf((fd), F_TLOCK, 0)
-#elif defined(HAVE_FLOCK)
-# define trylock_file(fd)      flock((fd), LOCK_EX|LOCK_NB)
 #endif
 
 /*
@@ -345,6 +345,13 @@ void acquire_daemonlock(int closeflag) {
 		(void) fchmod(fd, 0644);
 		(void) fcntl(fd, F_SETFD, 1);
 	}
+#if !defined(HAVE_FLOCK)
+	else {
+		/* Racy but better than nothing, just hope the parent exits */
+		sleep(0);
+		trylock_file(fd);	
+	}
+#endif
 
 	sprintf(buf, "%ld\n", (long) pid);
 	(void) lseek(fd, (off_t) 0, SEEK_SET);
