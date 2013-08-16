@@ -129,15 +129,13 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 	}
 #endif
 
-	*jobenv = build_env(e->envp);
-
 #ifdef WITH_SELINUX
 	/* we must get the crontab context BEFORE changing user, else
 	 * we'll not be permitted to read the cron spool directory :-)
 	 */
 	security_context_t ucontext = 0;
 
-	if (cron_get_job_range(u, &ucontext, *jobenv) < OK) {
+	if (cron_get_job_range(u, &ucontext, e->envp) < OK) {
 		log_it(e->pwd->pw_name, getpid(), "ERROR",
 			"failed to get SELinux context", 0);
 		return -1;
@@ -164,6 +162,8 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 	if (cron_change_groups(e->pwd) != 0) {
 		return -1;
 	}
+
+	*jobenv = build_env(e->envp);
 
 	time_t job_run_time = time(0L);
 
@@ -615,11 +615,18 @@ int crontab_security_access(void) {
 */
 static char **build_env(char **cronenv) {
 #ifdef WITH_PAM
-	char **jobenv;
-	char **pamenv = pam_getenvlist(pamh);
+	char **jobenv = pam_getenvlist(pamh);
 	char *cronvar;
 	int count = 0;
-	jobenv = env_copy(pamenv);
+
+	if (jobenv == NULL) {
+		jobenv = env_init();
+		if (jobenv == NULL) {
+			log_it("CRON", getpid(),
+				"ERROR", "Initialization of cron environment variables failed", 0);
+			return NULL;
+		}
+	}
 
 	/* Now add the cron environment variables. Since env_set()
 	 * overwrites existing variables, this will let cron's
