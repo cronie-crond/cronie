@@ -9,6 +9,7 @@ common_nodist = anacron-paths.h
 nodist_anacron_SOURCES = $(common_nodist)
 BUILT_SOURCES = $(common_nodist)
 
+AM_CFLAGS = -I$(top_srcdir)
 
 LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 

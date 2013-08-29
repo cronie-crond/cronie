@@ -15,6 +15,7 @@ nodist_crond_SOURCES = $(common_nodist)
 nodist_crontab_SOURCES = $(common_nodist)
 BUILT_SOURCES = $(common_nodist)
 
+AM_CFLAGS = -I$(top_srcdir)
 
 LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 
