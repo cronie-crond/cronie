@@ -34,7 +34,7 @@ config=/etc/sysconfig/crond
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+[ $UID -eq 0 ] && [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
 start() {
     if [ $(id -ru) -ne 0 ] ; then
