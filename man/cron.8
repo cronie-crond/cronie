@@ -22,7 +22,7 @@
 .\"
 .\" $Id: cron.8,v 1.8 2004/01/23 19:03:32 vixie Exp $
 .\"
-.TH CRON "8" "2013-01-02" "cronie" "System Administration"
+.TH CRON "8" "2013-09-26" "cronie" "System Administration"
 .SH NAME
 crond \- daemon to execute scheduled commands
 .SH SYNOPSIS
@@ -160,7 +160,11 @@ will disable the sending of mail.
 .TP
 .B "\-n"
 Tells the daemon to run in the foreground.  This can be useful when
-starting it out of init.
+starting it out of init. With this option is needed to change pam setting.
+.I /etc/pam.d/crond
+must not enable
+.I pam_loginuid.so
+module.
 .TP
 .B "\-p"
 Allows
