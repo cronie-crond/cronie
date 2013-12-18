@@ -327,7 +327,7 @@ void check_inotify_database(cron_db * old_db) {
 
 		if (retval <= 0) {
 			log_it("CRON", pid, "INOTIFY", "read failed", errno);
-			/* something fatal must have occured we have no other reasonable
+			/* something fatal must have occurred we have no other reasonable
 			 * way how to handle this failure than exit.
 			 */
 			(void) exit(ERROR_EXIT);

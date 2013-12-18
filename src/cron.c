@@ -182,7 +182,7 @@ static void usage(void) {
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, " -h         print this message \n");
 	fprintf(stderr, " -i         deamon runs without inotify support\n");
-	fprintf(stderr, " -m <comm>  off, or specify prefered client for sending mails\n");
+	fprintf(stderr, " -m <comm>  off, or specify preferred client for sending mails\n");
 	fprintf(stderr, " -n         run in foreground\n");
 	fprintf(stderr, " -p         permit any crontab\n");
 	fprintf(stderr, " -P         use PATH=\"%s\"\n", _PATH_DEFPATH);

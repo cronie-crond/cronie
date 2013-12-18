@@ -110,7 +110,7 @@ Return NULL if no more lines.
 
 static int
 job_arg_num(const char *ident)
-/* Return the command-line-argument number refering to this job-identifier.
+/* Return the command-line-argument number referring to this job-identifier.
  * If it isn't specified, return -1.
  */
 {
@@ -210,7 +210,7 @@ register_period_job(const char *periods, const char *delays,
     jr = obstack_alloc(&tab_o, sizeof(job_rec));
     if (!strncmp ("@monthly", periods, 8)) {
 		jr->named_period = 1;
-    } else if (!strncmp("@yearly", periods, 7) || !strncmp("@annualy", periods, 8)) {
+    } else if (!strncmp("@yearly", periods, 7) || !strncmp("@annually", periods, 9)) || !strncmp(/* backwards compat misspelling */"@annualy", periods, 8))
 		jr->named_period = 2;
 	} else if (!strncmp ("@daily", periods, 6)) {
 		jr->named_period = 3;

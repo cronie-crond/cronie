@@ -129,7 +129,7 @@ consider_job(job_rec *jr)
 		    period = days_last_month ();
 		    bypass = days_this_month ();
 		    break;
-		case 2: /* yearly, annualy */
+		case 2: /* yearly, annually */
 		    period = days_last_year ();
 		    bypass = days_this_year ();
 		    break;
