@@ -410,7 +410,7 @@ static int child_process(entry * e, char **jobenv) {
 
 			/* Also skip it if MailCmd is set to "off" */
 			if (mailto && safe_p(usernm, mailto)
-				&& strncmp(MailCmd,"off",4) && !SyslogOutput) {
+				&& strncmp(MailCmd,"off",3) && !SyslogOutput) {
 				char **env;
 				char mailcmd[MAX_COMMAND];
 				char hostname[MAXHOSTNAMELEN];
