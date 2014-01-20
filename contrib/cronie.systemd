@@ -1,6 +1,6 @@
 [Unit]
 Description=Command Scheduler
-After=syslog.target auditd.service systemd-user-sessions.service time-sync.target
+After=auditd.service systemd-user-sessions.service time-sync.target
 
 [Service]
 EnvironmentFile=/etc/sysconfig/crond
