@@ -283,19 +283,15 @@ parse_tab_line(char *line)
         }
         if (strncmp(env_var, "RANDOM_DELAY", 12) == 0) {
             r = match_rx("^([[:digit:]]+)$", value, 0);
-            if (r != -1) goto reg_err;
-            if (r)
-            {
-                random_number = 0;
-                if (atoi(value) > 0) {
-                    int i = random();
-                    double x = 0;
-                    x = (double) i / (double) RAND_MAX * (double) (atoi(value));
-                    random_number = (int)x;
-                }
-                    Debug(("Randomized delay set: %d", random_number));
+            if (r == -1) goto reg_err;
+            if (r == 0) goto reg_invalid;
+            if (r != -1) {
+                int i = random();
+                double x = 0;
+                x = (double) i / (double) RAND_MAX * (double) (atoi(value));
+                random_number = (int)x;
+                Debug(("Randomized delay set: %d", random_number));
             }
-            else goto reg_invalid;
         }
         if (strncmp(env_var, "PREFERRED_HOUR", 14) == 0) {
             r = match_rx("^([[:digit:]]+)$", value, 1, &pref_hour);
