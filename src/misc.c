@@ -308,6 +308,9 @@ void acquire_daemonlock(int closeflag) {
 			close(fd);
 			fd = -1;
 		}
+		/* and restore default sig handlers so we don't remove pid file if killed */
+		signal(SIGINT,SIG_DFL);
+		signal(SIGTERM,SIG_DFL);
 		return;
 	}
 
