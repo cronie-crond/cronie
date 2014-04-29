@@ -69,6 +69,7 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 	ssize_t out;
 	char buf[PIPE_BUF];
 	struct sigaction sa;
+	int fd;
 
 #ifdef __GNUC__
 	(void) &iop;	/* Avoid fork clobbering */
@@ -120,6 +121,11 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 		memset(&sa, 0, sizeof(sa));
 		sa.sa_handler = SIG_DFL;
 		sigaction(SIGPIPE, &sa, NULL);
+
+		/* close all unwanted open file descriptors */
+		for (fd = STDERR + 1; fd < fds; fd++) {
+			close(fd);
+		}
 
 		if (cron_change_user_permanently(pw, pw->pw_dir) != 0)
 			_exit(2);
