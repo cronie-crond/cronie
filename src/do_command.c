@@ -238,6 +238,12 @@ static int child_process(entry * e, char **jobenv) {
 		 */
 		{
 			char *shell = env_get("SHELL", jobenv);
+			int fd, fdmax = getdtablesize();
+
+			/* close all unwanted open file descriptors */
+			for(fd = STDERR + 1; fd < fdmax; fd++) {
+				close(fd);
+			}
 
 #if DEBUGGING
 			if (DebugFlags & DTEST) {
