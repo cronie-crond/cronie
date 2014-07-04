@@ -5,6 +5,7 @@ After=auditd.service systemd-user-sessions.service time-sync.target
 [Service]
 EnvironmentFile=/etc/sysconfig/crond
 ExecStart=/usr/sbin/crond -n $CRONDARGS
+ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 
 [Install]
