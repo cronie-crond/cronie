@@ -136,6 +136,8 @@ if test "x$enable_relro" = xyes; then
     LDFLAGS="$LDFLAGS -Wl,-z,relro -Wl,-z,now"
 fi
 
+AC_ARG_ENABLE(bsd, BSD_STRING(--enable-bsd,Build cronie with BSD specific parts))
+
 # Check whether user wants SELinux support
 SELINUX_MSG="no"
 LIBSELINUX=""

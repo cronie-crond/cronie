@@ -30,6 +30,10 @@
 #include "globals.h"
 #include "funcs.h"
 
+#if defined(BSD)
+extern char **environ;
+#endif
+
 char **env_init(void) {
 	char **p = (char **) malloc(sizeof (char *));
 
