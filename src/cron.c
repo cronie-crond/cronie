@@ -593,6 +593,10 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 						job_add(e, u);	/*will add job, if it isn't in queue already for NOW. */
 				}
 			}
+			else {
+				log_it(uname, getpid(), "ERROR", "getpwnam() failed",errno);
+				Debug(DSCH | DEXT, ("%s:%d pid=%d time=%ld getpwnam(%s) failed errno=%d error=%s\n",__FILE__,__LINE__,getpid(),time(NULL),uname,errno,strerror(errno)));
+			}
 		}
 	}
 	if (orig_tz != NULL)
