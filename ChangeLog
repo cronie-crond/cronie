@@ -1,3 +1,114 @@
+2014-09-17  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* contrib/cronie.systemd: Services must be running before starting
+	crond, otherwise many jobs is not running properly for no obvious
+	reason.  nss-user-lookup.target should help when people are authenticated
+	through nss/sssd.  Based on: https://bugzilla.redhat.com/show_bug.cgi?id=1067236
+
+2014-07-30  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/cron.c: More logging when getpwnam fails.  Based on: rhbz#1123984 Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2014-07-25  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* configure.ac, src/env.c: BSD doesn't define environ in unistd.h.
+	Also cronie didn't have option for enabling BSD specifics.  Based on: naota@gentoo.org Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2014-07-25  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/readtab.c: Add missing brackets into anacron readtab.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2014-07-25  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* src/misc.c: Include missing header for signal handlers.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2014-07-04  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* contrib/cronie.systemd: Missing reload definition in unit file was
+	added.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2014-04-30  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* : commit b2c8cbcef8c97b5a175d6e71995249b288707b0f Author: Tomas
+	Mraz <tmraz@fedoraproject.org> Date:   Tue Apr 29 14:08:25 2014
+	+0200
+
+2014-03-31  Martin Poole <mpoole@redhat.com>
+
+	* src/misc.c: crond installs a signal hander for SIGINT & SIGTERM
+	which removes the pid file and exits. This handler is not reset for
+	individual forked sub-processes which results in the condition that
+	if the child receives SIGINT or SIGTERM the pid file is erroneously
+	removed.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2014-02-14  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* anacron/readtab.c: Anacron does not correctly check configuration
+	parameters for validity and can segfault on certain data types. The return code
+	from the match_rx calls in readtab.c are not being checked
+	correctly. Bugfix let to segfaults in downstreams on non intel
+	architectures. All options in anacrontab should be now working
+	correctly.  Based on patch from: Martin Poole
+
+2014-01-20  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* contrib/cronie.systemd: Remove syslog.target according to Fedora
+	and systemd guidelines.  https://fedorahosted.org/fpc/ticket/177#comment:2 Thanks to: Ville Skyttä
+
+2014-01-17  Ville Skyttä <ville.skytta@iki.fi>
+
+	* man/anacron.8: [PATCH] Fix anacron.8 UTF-8 encoding.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2013-12-18  Ville Skyta <ville.skytta@iki.fi>
+
+	* anacron/lock.c, anacron/readtab.c, man/crontab.5, src/cron.c,
+	src/database.c: Spelling fixes.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2013-12-18  Ville Skytta <ville.skytta@iki.fi>
+
+	* anacron/readtab.c, src/do_command.c: strncmp() size fixes.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2013-12-18  Martin Poole <mpoole@redhat.com>
+
+	* anacron/readtab.c: Anacron does not correctly check configuration
+	parameters for validity and can segfault on certain data types. The
+	return code from the match_rx calls in readtab.c are not being
+	checked correctly.  Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+2013-09-26  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* man/cron.8: crond -n must change pam setting.
+
+2013-09-12  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* cronie.init: Non-root user can't read configuration. Init file
+	will fail with proper error message.  rhbz#1006869
+
+2013-08-29  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* : commit 2ec335f9549e8134102ac37665171a40a5407512 Author: Saul
+	Wold <sgw@linux.intel.com> Date:   Mon Aug 26 11:18:27 2013 +0200
+
+2013-08-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/security.c: Pull PAM environment variables also from session
+	modules.  - also fix memory leak of environment returned by pam_getenvlist()
+
+2013-08-13  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* contrib/cronie.systemd: KillMode in systemd unit file will enable
+	to finish jobs executed by cron. Even if cron dies, jobs should
+	continue.  Based on: https://bugzilla.redhat.com/show_bug.cgi?id=919290
+
+2013-08-09  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* src/misc.c: Fcntl locking has different semantics than flock.
+	Prefer flock.
+
+2013-07-18  Marcela Mašláňová <mmaslano@redhat.com>
+
+	* ChangeLog, configure.ac: Release 1.4.11
+
 2013-06-11  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* src/user.c: Log failures in load_user().
