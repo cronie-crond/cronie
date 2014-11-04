@@ -22,6 +22,11 @@
 #include "config.h"
 
 #include <stdlib.h>
+#include <pwd.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "funcs.h"
 #include "globals.h"
@@ -36,11 +41,41 @@ static job *jhead = NULL, *jtail = NULL;
 
 void job_add(entry * e, user * u) {
 	job *j;
+	struct passwd *newpwd;
+	struct passwd *temppwd;
+	const char *uname;
 
 	/* if already on queue, keep going */
 	for (j = jhead; j != NULL; j = j->next)
 		if (j->e == e && j->u == u)
 			return;
+
+	uname = e->pwd->pw_name;
+	/* check if user exists in time of job is being run f.e. ldap */
+	if ((temppwd = getpwnam(uname)) != NULL) {
+		char **tenvp;
+
+		Debug(DSCH | DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
+				e->pwd->pw_name, (long) temppwd->pw_uid,
+				(long) temppwd->pw_gid, e->cmd));
+		if ((newpwd = pw_dup(temppwd)) == NULL) {
+			log_it(uname, getpid(), "ERROR", "memory allocation failed", errno);
+			return;
+		}
+		free(e->pwd);
+		e->pwd = newpwd;
+
+		if ((tenvp = env_update_home(e->envp, e->pwd->pw_dir)) == NULL) {
+			log_it(uname, getpid(), "ERROR", "memory allocation failed", errno);
+			return;
+		}
+		e->envp = tenvp;
+	} else {
+		log_it(uname, getpid(), "ERROR", "getpwnam() failed",errno);
+		Debug(DSCH | DEXT, ("%s:%d pid=%d time=%ld getpwnam(%s) failed errno=%d error=%s\n",
+			__FILE__,__LINE__,getpid(),time(NULL),uname,errno,strerror(errno)));
+		return;
+	}
 
 	/* build a job queue element */
 	if ((j = (job *) malloc(sizeof (job))) == NULL)

@@ -99,6 +99,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 	char envstr[MAX_ENVSTR];
 	char **tenvp;
 	char *p;
+	struct passwd temppw;
 
 	Debug(DPARS, ("load_entry()...about to eat comments\n"));
 
@@ -286,11 +287,15 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 		pw = getpwnam(username);
 		if (pw == NULL) {
-			ecode = e_username;
-			goto eof;
-		}
-		Debug(DPARS, ("load_entry()...uid %ld, gid %ld\n",
+			Debug(DPARS, ("load_entry()...unknown user entry\n"));
+			memset(&temppw, 0, sizeof (temppw));
+			temppw.pw_name = username;
+			temppw.pw_passwd = "";
+			pw = &temppw;
+		} else {
+			Debug(DPARS, ("load_entry()...uid %ld, gid %ld\n",
 				(long) pw->pw_uid, (long) pw->pw_gid));
+		}
 	}
 
 	if ((e->pwd = pw_dup(pw)) == NULL) {
@@ -331,17 +336,11 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		else
 			log_it("CRON", getpid(), "ERROR", "can't set SHELL", 0);
 	}
-	if (!env_get("HOME", e->envp)) {
-		if (glue_strings(envstr, sizeof envstr, "HOME", pw->pw_dir, '=')) {
-			if ((tenvp = env_set(e->envp, envstr)) == NULL) {
-				ecode = e_memory;
-				goto eof;
-			}
-			e->envp = tenvp;
-		}
-		else
-			log_it("CRON", getpid(), "ERROR", "can't set HOME", 0);
+	if ((tenvp = env_update_home(e->envp, pw->pw_dir)) == NULL) {
+		ecode = e_memory;
+		goto eof;
 	}
+	e->envp = tenvp;
 #ifndef LOGIN_CAP
 	/* If login.conf is in used we will get the default PATH later. */
 	if (ChangePath && !env_get("PATH", e->envp)) {

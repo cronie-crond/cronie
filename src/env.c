@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "globals.h"
@@ -294,4 +295,20 @@ char *env_get(const char *name, char **envp) {
 			return (q + 1);
 	}
 	return (NULL);
+}
+
+char **env_update_home(char **envp, const char *dir) {
+	char envstr[MAX_ENVSTR];
+
+	if (dir == NULL || *dir == '\0' || env_get("HOME", envp)) {
+		return envp;
+	}
+
+	if (glue_strings(envstr, sizeof envstr, "HOME", dir, '=')) {
+		envp = env_set(envp, envstr);
+	}			
+	else
+		log_it("CRON", getpid(), "ERROR", "can't set HOME", 0);
+
+	return envp;
 }

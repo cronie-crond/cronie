@@ -525,7 +525,6 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 	int minute, hour, dom, month, dow;
 	user *u;
 	entry *e;
-	const char *uname;
 
 	/* The support for the job-specific timezones is not perfect. There will
 	 * be jobs missed or run twice during the DST change in the job timezone.
@@ -562,40 +561,30 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 		 */
 		for (u = db->head; u != NULL; u = u->next) {
 		for (e = u->crontab; e != NULL; e = e->next) {
-			Debug(DSCH | DEXT, ("user [%s:%ld:%ld:...] cmd=\"%s\"\n",
-					e->pwd->pw_name, (long) e->pwd->pw_uid,
-					(long) e->pwd->pw_gid, e->cmd));
-				uname = e->pwd->pw_name;
-			/* check if user exists in time of job is being run f.e. ldap */
-			if (getpwnam(uname) != NULL) {
-				time_t virtualSecond = (vtime - e->delay) * SECONDS_PER_MINUTE;
-				time_t virtualGMTSecond = virtualSecond - vGMToff;
-				job_tz = env_get("CRON_TZ", e->envp);
-				maketime(job_tz, orig_tz);
-				/* here we test whether time is NOW */
-				if (bit_test(e->minute, minute) &&
-					bit_test(e->hour, hour) &&
-					bit_test(e->month, month) &&
-					(((e->flags & DOM_STAR) || (e->flags & DOW_STAR))
-						? (bit_test(e->dow, dow) && bit_test(e->dom, dom))
-						: (bit_test(e->dow, dow) || bit_test(e->dom, dom))
-					)
-					) {
-					if (job_tz != NULL && vGMToff != GMToff)
-						/* do not try to run the jobs from different timezones
-						 * during the DST switch of the default timezone.
-						 */
-						continue;
+			time_t virtualSecond = (vtime - e->delay) * SECONDS_PER_MINUTE;
+			time_t virtualGMTSecond = virtualSecond - vGMToff;
+			job_tz = env_get("CRON_TZ", e->envp);
+			maketime(job_tz, orig_tz);
 
-					if ((doNonWild &&
-							!(e->flags & (MIN_STAR | HR_STAR))) ||
-						(doWild && (e->flags & (MIN_STAR | HR_STAR))))
-						job_add(e, u);	/*will add job, if it isn't in queue already for NOW. */
-				}
-			}
-			else {
-				log_it(uname, getpid(), "ERROR", "getpwnam() failed",errno);
-				Debug(DSCH | DEXT, ("%s:%d pid=%d time=%ld getpwnam(%s) failed errno=%d error=%s\n",__FILE__,__LINE__,getpid(),time(NULL),uname,errno,strerror(errno)));
+			/* here we test whether time is NOW */
+			if (bit_test(e->minute, minute) &&
+				bit_test(e->hour, hour) &&
+				bit_test(e->month, month) &&
+				(((e->flags & DOM_STAR) || (e->flags & DOW_STAR))
+					? (bit_test(e->dow, dow) && bit_test(e->dom, dom))
+						: (bit_test(e->dow, dow) || bit_test(e->dom, dom))
+				)
+			) {
+				if (job_tz != NULL && vGMToff != GMToff)
+					/* do not try to run the jobs from different timezones
+					 * during the DST switch of the default timezone.
+					 */
+					continue;
+
+				if ((doNonWild &&
+						!(e->flags & (MIN_STAR | HR_STAR))) ||
+					(doWild && (e->flags & (MIN_STAR | HR_STAR))))
+					job_add(e, u);	/*will add job, if it isn't in queue already for NOW. */
 			}
 		}
 	}

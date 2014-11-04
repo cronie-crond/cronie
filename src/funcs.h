@@ -82,7 +82,8 @@ char		*env_get(const char *, char **),
 		*first_word(const char *, const char *),
 		**env_init(void),
 		**env_copy(char **),
-		**env_set(char **, const char *);
+		**env_set(char **, const char *),
+		**env_update_home(char **, const char *);
 
 user		*load_user(int, struct passwd *, const char *, const char *, const char *),
 		*find_user(cron_db *, const char *, const char *);
