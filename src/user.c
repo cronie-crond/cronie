@@ -89,6 +89,8 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 		goto done;
 	}
 
+	u->system = pw == NULL;
+
 	/* init environment.  this will be copied/augmented for each entry.
 	*/
 	if ((envp = env_init()) == NULL) {

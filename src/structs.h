@@ -67,6 +67,7 @@ typedef	struct _user {
 	time_t		mtime;		/* last modtime of crontab */
 	entry		*crontab;	/* this person's crontab */
 	security_context_t	scontext;    /* SELinux security context */
+	int		system;		/* is it a system crontab */
 } user;
 
 typedef	struct _orphan {

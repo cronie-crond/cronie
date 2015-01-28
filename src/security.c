@@ -88,6 +88,7 @@ static int cron_open_pam_session(struct passwd *pw);
 		if (pam_session_opened != 0) \
 			pam_close_session(pamh, PAM_SILENT); \
 		pam_end(pamh, retcode); \
+		pamh = NULL; \
 	} \
 return(retcode); }
 #endif
@@ -122,7 +123,8 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 	}
 
 #ifdef WITH_PAM
-	if ((ret = cron_start_pam(e->pwd)) != 0) {
+	/* PAM is called only for non-root users or non-system crontab */
+	if ((!u->system || e->pwd->pw_uid != 0) && (ret = cron_start_pam(e->pwd)) != 0) {
 		log_it(e->pwd->pw_name, getpid(), "FAILED to authorize user with PAM",
 			pam_strerror(pamh, ret), 0);
 		return -1;
@@ -152,7 +154,7 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 		freecon(ucontext);
 #endif
 #ifdef WITH_PAM
-	if ((ret = cron_open_pam_session(e->pwd)) != 0) {
+	if (pamh != NULL && (ret = cron_open_pam_session(e->pwd)) != 0) {
 		log_it(e->pwd->pw_name, getpid(),
 			"FAILED to open PAM security session", pam_strerror(pamh, ret), 0);
 		return -1;
@@ -223,7 +225,10 @@ void cron_close_pam(void) {
 		pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 		pam_close_session(pamh, PAM_SILENT);
 	}
-	pam_end(pamh, PAM_SUCCESS);
+	if (pamh != NULL) {
+		pam_end(pamh, PAM_SUCCESS);
+		pamh = NULL;
+	}
 #endif
 }
 
@@ -243,7 +248,9 @@ int cron_change_groups(struct passwd *pw) {
 #if defined(WITH_PAM)
 	/* credentials may take form of supplementary groups so reinitialize
 	 * them here */
-	pam_setcred(pamh, PAM_REINITIALIZE_CRED | PAM_SILENT);
+	if (pamh != NULL) {
+		pam_setcred(pamh, PAM_REINITIALIZE_CRED | PAM_SILENT);
+	}
 #endif
 
 	return 0;
@@ -614,18 +621,19 @@ int crontab_security_access(void) {
 * crontab environment 
 */
 static char **build_env(char **cronenv) {
+	char **jobenv;
 #ifdef WITH_PAM
-	char **jobenv = pam_getenvlist(pamh);
 	char *cronvar;
 	int count = 0;
 
-	if (jobenv == NULL) {
-		jobenv = env_init();
-		if (jobenv == NULL) {
+	if (pamh == NULL || (jobenv=pam_getenvlist(pamh)) == NULL) {
+#endif
+		jobenv = env_copy(cronenv);
+		if (jobenv == NULL)
 			log_it("CRON", getpid(),
 				"ERROR", "Initialization of cron environment variables failed", 0);
-			return NULL;
-		}
+		return jobenv;
+#ifdef WITH_PAM
 	}
 
 	/* Now add the cron environment variables. Since env_set()
@@ -640,7 +648,5 @@ static char **build_env(char **cronenv) {
 		}
 	}
 	return jobenv;
-#else
-	return env_copy(cronenv);
 #endif
 }

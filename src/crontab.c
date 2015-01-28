@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
 	}
 
 #if defined(WITH_PAM)
-	if (cron_start_pam(pw) != PAM_SUCCESS) {
+	if (getuid() != 0 && cron_start_pam(pw) != PAM_SUCCESS) {
 		fprintf(stderr,
 			"You (%s) are not allowed to access to (%s) because of pam configuration.\n",
 			User, ProgramName);
