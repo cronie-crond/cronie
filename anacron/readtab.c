@@ -239,6 +239,21 @@ register_period_job(const char *periods, const char *delays,
 	  jr->named_period, jr->delay, jr->ident, jr->command));
 }
 
+static long int
+unbiased_rand(long int max)
+{
+    long int rn;
+    long int divisor;
+
+    divisor = RAND_MAX / (max + 1);
+
+    do {
+        rn = random() / divisor;
+    } while (rn > max);
+
+    return rn;
+}
+
 static void
 parse_tab_line(char *line)
 {
@@ -282,16 +297,11 @@ parse_tab_line(char *line)
             Debug(("Jobs will start in the %02d:00-%02d:00 range.", range_start, range_stop));
         }
         if (strncmp(env_var, "RANDOM_DELAY", 12) == 0) {
-            int i;
-            double x;
-
             r = match_rx("^([[:digit:]]+)$", value, 0);
             if (r == -1) goto reg_err;
             if (r == 0) goto reg_invalid;
 
-            i = random();
-            x = (double) i / (double) RAND_MAX * (double) (atoi(value));
-            random_number = (int)x;
+            random_number = (int)unbiased_rand(atoi(value));
             Debug(("Randomized delay set: %d", random_number));
         }
         if (strncmp(env_var, "PREFERRED_HOUR", 14) == 0) {
