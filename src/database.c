@@ -32,6 +32,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <pwd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -283,7 +284,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 static int
 cluster_host_is_local(void)
 {
-	char filename[MAXNAMLEN+1];
+	char filename[NAME_MAX+1];
 	int is_local;
 	FILE *f;
 	char hostname[MAXHOSTNAMELEN], myhostname[MAXHOSTNAMELEN];
@@ -379,7 +380,7 @@ void check_inotify_database(cron_db * old_db) {
 		}
 		else {
 			while (NULL != (dp = readdir(dir))) {
-				char tabname[MAXNAMLEN + 1];
+				char tabname[NAME_MAX + 1];
 
 				if (not_a_crontab(dp))
 					continue;
@@ -397,12 +398,12 @@ void check_inotify_database(cron_db * old_db) {
 		}
 		else {
 			while (NULL != (dp = readdir(dir))) {
-				char fname[MAXNAMLEN + 1], tabname[MAXNAMLEN + 1];
+				char fname[NAME_MAX + 1], tabname[NAME_MAX + 1];
 
 				if (not_a_crontab(dp))
 					continue;
 
-				strncpy(fname, dp->d_name, MAXNAMLEN);
+				strncpy(fname, dp->d_name, NAME_MAX);
 
 				if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR,
 						dp->d_name, '/'))
@@ -523,7 +524,7 @@ int load_database(cron_db * old_db) {
 	}
 	else {
 		while (NULL != (dp = readdir(dir))) {
-			char tabname[MAXNAMLEN + 1];
+			char tabname[NAME_MAX + 1];
 
 			if (not_a_crontab(dp))
 				continue;
@@ -550,12 +551,12 @@ int load_database(cron_db * old_db) {
 		is_local = cluster_host_is_local();
 
 		while (is_local && NULL != (dp = readdir(dir))) {
-			char fname[MAXNAMLEN + 1], tabname[MAXNAMLEN + 1];
+			char fname[NAME_MAX + 1], tabname[NAME_MAX + 1];
 
 			if (not_a_crontab(dp))
 				continue;
 
-			strncpy(fname, dp->d_name, MAXNAMLEN);
+			strncpy(fname, dp->d_name, NAME_MAX);
 
 			if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
 				continue;	/* XXX log? */
@@ -632,7 +633,7 @@ static int not_a_crontab(DIR_T * dp) {
 
 	len = strlen(dp->d_name);
 
-	if (len >= MAXNAMLEN)
+	if (len >= NAME_MAX)
 		return (1);	/* XXX log? */
 
 	if ((len > 0) && (dp->d_name[len - 1] == '~'))
@@ -659,7 +660,7 @@ static void max_mtime(const char *dir_name, struct stat *max_st) {
 	}
 
 	while (NULL != (dp = readdir(dir))) {
-		char tabname[MAXNAMLEN + 1];
+		char tabname[NAME_MAX + 1];
 
 		if ( not_a_crontab ( dp ) && strcmp(dp->d_name, CRON_HOSTNAME) != 0)
 			continue;
