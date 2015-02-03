@@ -486,6 +486,8 @@ int main(int argc, char *argv[]) {
 		log_it("CRON", pid, "INFO", "Inotify close failed", errno);
 #endif
 
+	log_it("CRON", pid, "INFO", "Shutting down", 0);
+
 	(void) unlink(_PATH_CRON_PID);
 
 	return 0;
