@@ -152,9 +152,40 @@ check_orphans(cron_db *db) {
 	}
 }
 
+static int
+find_orphan(const char *uname, const char *fname, const char *tabname) {
+	orphan *o;
+
+	for (o = orphans; o != NULL; o = o->next) {
+		if (uname && o->uname) {
+			if (strcmp(uname, o->uname) != 0)
+				continue;
+		} else if (uname != o->uname)
+			continue;
+
+		if (fname && o->fname) {
+			if (strcmp(fname, o->fname) != 0)
+				continue;
+		} else if (fname != o->fname)
+			continue;
+
+		if (tabname && o->tabname) {
+			if (strcmp(tabname, o->tabname) != 0)
+				continue;
+		} else if (tabname != o->tabname)
+			continue;
+		return 1;
+	}
+
+	return 0;
+}
+
 static void
 add_orphan(const char *uname, const char *fname, const char *tabname) {
 	orphan *o;
+
+	if (find_orphan(uname, fname, tabname))
+		return;
 
 	o = calloc(1, sizeof(*o));
 	if (o == NULL)
