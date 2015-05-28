@@ -1,3 +1,43 @@
+2015-05-28  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Pass the job environment also when executing the sendmail.
+
+2015-01-31  Felix Janda <felix.janda@posteo.de>
+
+	* database.c: Use POSIX NAME_MAX instead of BSD MAXNAMLEN
+
+2015-04-21  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Prevent adding duplicate orphans on reload.
+
+2015-02-05  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Do not overwrite the last zero-byte.
+
+2015-02-03  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Log the crond shutdown.
+
+2015-01-28  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* No need to call strcmp on already matched variables.
+
+2015-01-28  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Use unbiased random number for RANDOM_DELAY.
+
+2015-01-28  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Call PAM only when it makes sense.
+
+2015-01-28  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix broken test for match_rx() failure.
+
+2014-11-04  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Properly check the existence of the user at the time the job is run.
+
 2014-09-17  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* contrib/cronie.systemd: Services must be running before starting

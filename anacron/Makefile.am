@@ -1,5 +1,7 @@
 # Makefile.am - two binaries crond and crontab
+if ANACRON
 sbin_PROGRAMS = anacron
+endif
 
 anacron_SOURCES = \
   gregor.c lock.c log.c main.c matchrx.c readtab.c runjob.c \
