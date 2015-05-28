@@ -1,4 +1,4 @@
-AC_INIT([cronie],[1.4.11],[mmaslano@redhat.com,tmraz@redhat.com])
+AC_INIT([cronie],[1.4.12],[mmaslano@redhat.com,tmraz@redhat.com])
 AC_CONFIG_HEADER([config.h])
 AC_PREREQ(2.60)
 
