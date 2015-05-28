@@ -28,3 +28,5 @@ src/crontab
 src/cron-paths.h
 *~
 *.tar.*
+*.orig
+*.patch
