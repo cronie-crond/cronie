@@ -436,7 +436,7 @@ static int child_process(entry * e, char **jobenv) {
 				else {
 					strncpy(mailcmd, MailCmd, MAX_COMMAND);
 				}
-				if (!(mail = cron_popen(mailcmd, "w", e->pwd))) {
+				if (!(mail = cron_popen(mailcmd, "w", e->pwd, jobenv))) {
 					perror(mailcmd);
 					(void) _exit(ERROR_EXIT);
 				}

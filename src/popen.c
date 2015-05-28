@@ -60,7 +60,7 @@ static int fds;
 
 #define MAX_ARGS 1024
 
-FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
+FILE *cron_popen(char *program, const char *type, struct passwd *pw, char **jobenv) {
 	char *cp;
 	FILE *iop;
 	int argc, pdes[2];
@@ -127,10 +127,10 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw) {
 			close(fd);
 		}
 
-		if (cron_change_user_permanently(pw, pw->pw_dir) != 0)
+		if (cron_change_user_permanently(pw, env_get("HOME", jobenv)) != 0)
 			_exit(2);
 
-		if (execvp(argv[0], argv) < 0) {
+		if (execvpe(argv[0], argv, jobenv) < 0) {
 			int save_errno = errno;
 
 			log_it("CRON", getpid(), "EXEC FAILED", program, save_errno);

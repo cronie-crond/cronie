@@ -90,7 +90,7 @@ user		*load_user(int, struct passwd *, const char *, const char *, const char *)
 
 entry		*load_entry(FILE *, void (*)(), struct passwd *, char **);
 
-FILE		*cron_popen(char *, const char *, struct passwd *);
+FILE		*cron_popen(char *, const char *, struct passwd *, char **);
 
 struct passwd	*pw_dup(const struct passwd *);
 
