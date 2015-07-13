@@ -104,7 +104,7 @@ edit_cmd(void),
 poke_daemon(void),
 check_error(const char *), parse_args(int c, char *v[]), die(int) ATTRIBUTE_NORETURN;
 static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void);
-static char *host_specific_filename(const char *filename, int prefix);
+static char *host_specific_filename(const char *prefix, const char *suffix);
 static const char *tmp_path(void);
 
 static void usage(const char *msg) ATTRIBUTE_NORETURN;
@@ -445,26 +445,27 @@ static const char *tmp_path(void) {
 	return tmpdir ? tmpdir : "/tmp";
 }
 
-static char *host_specific_filename(const char *filename, int prefix)
+static char *host_specific_filename(const char *prefix, const char *suffix)
 {
 	/*
 	 * For cluster-wide use, where there is otherwise risk of the same
-	 * name being generated on more than one host at once, prefix with
-	 * "hostname." or suffix with ".hostname" as requested, and return
-	 * static buffer or NULL on failure.
+	 * name being generated on more than one host at once, insert hostname
+	 * separated with dots, and return static buffer or NULL on failure.
 	 */
 
 	static char safename[MAX_FNAME];
-	char hostname[MAXHOSTNAMELEN];
+	char hostname[MAX_FNAME];
 
 	if (gethostname(hostname, sizeof hostname) != 0)
 		return NULL;
 
 	if (prefix) {
-		if (!glue_strings(safename, sizeof safename, hostname, filename, '.'))
+		if (!glue_strings(safename, sizeof safename, prefix, hostname, '.'))
 			return NULL;
-	} else {
-		if (!glue_strings(safename, sizeof safename, filename, hostname, '.'))
+		strcpy(hostname, safename);
+	}
+	if (suffix) {
+		if (!glue_strings(safename, sizeof safename, hostname, suffix, '.'))
 			return NULL;
 	}
 
@@ -745,7 +746,7 @@ static int replace_cmd(void) {
 	char *safename;
 
 
-	safename = host_specific_filename("tmp.XXXXXXXXXX", 1);
+	safename = host_specific_filename("#tmp", "XXXXXXXXXX");
 	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
 			safename, '/')) {
 		TempFilename[0] = '\0';
@@ -911,7 +912,7 @@ static int hostset_cmd(void) {
 	if (!HostSpecified)
 		gethostname(Host, sizeof Host);
 	
-	safename = host_specific_filename("tmp.XXXXXXXXXX", 1);
+	safename = host_specific_filename("#tmp", "XXXXXXXXXX");
 	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
 		safename, '/')) {
 		TempFilename[0] = '\0';
