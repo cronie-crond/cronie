@@ -343,8 +343,18 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 	e->envp = tenvp;
 #ifndef LOGIN_CAP
 	/* If login.conf is in used we will get the default PATH later. */
-	if (ChangePath && !env_get("PATH", e->envp)) {
-		if (glue_strings(envstr, sizeof envstr, "PATH", _PATH_DEFPATH, '=')) {
+	if (!env_get("PATH", e->envp)) {
+		char *defpath;
+
+		if (ChangePath)
+			defpath = _PATH_DEFPATH;
+		else {
+			defpath = getenv("PATH");
+			if (defpath == NULL)
+				defpath = _PATH_DEFPATH;
+		}
+
+		if (glue_strings(envstr, sizeof envstr, "PATH", defpath, '=')) {
 			if ((tenvp = env_set(e->envp, envstr)) == NULL) {
 				ecode = e_memory;
 				goto eof;
