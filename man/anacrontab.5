@@ -71,13 +71,11 @@ comment.
 .PP
 You can continue a line onto the next line by adding a '\\' at the end of it.
 .PP
-In case you want to disable Anacron, add the
+In case you want to disable Anacron, add a line with
 .I 0anacron
-cron job (which is a part of
-.BR crontab (1))
-into the
+which is the name of the script running the Anacron into the
 .I /etc/cron.hourly/jobs.deny
-directory.
+file.
 .SH EXAMPLE
 This example shows how to set up an Anacron job similar in functionality to
 .I /etc/crontab
