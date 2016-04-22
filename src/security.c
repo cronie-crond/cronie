@@ -483,7 +483,9 @@ get_security_context(const char *name, int crontab_fd,
 	security_context_t scontext = NULL;
 	security_context_t file_context = NULL;
 	security_context_t rawcontext=NULL;
+	context_t current_context = NULL;
 	int retval;
+	char *current_context_str = NULL;
 	char *seuser = NULL;
 	char *level = NULL;
 
@@ -497,10 +499,29 @@ get_security_context(const char *name, int crontab_fd,
 			log_it(name, getpid(), "getseuserbyname FAILED", name, 0);
 			return security_getenforce() > 0 ? -1 : 0;
 		}
+
+		retval = get_default_context_with_level(seuser, level, NULL, &scontext);
+	}
+	else {
+		if (getcon(&current_context_str) < 0) {
+			log_it(name, getpid(), "getcon FAILED", "", 0);
+			return (security_getenforce() > 0);
+		}
+
+		current_context = context_new(current_context_str);
+		if (current_context == NULL) {
+			log_it(name, getpid(), "context_new FAILED", current_context_str, 0);
+			freecon(current_context_str);
+			return (security_getenforce() > 0);
+		}
+
+		const char *current_user = context_user_get(current_context);
+		retval = get_default_context_with_level(current_user, level, NULL, &scontext);
+
+		freecon(current_context_str);
+		context_free(current_context);
 	}
 
-	retval = get_default_context_with_level(name == NULL ? "system_u" : seuser,
-		level, NULL, &scontext);
 	if (selinux_trans_to_raw_context(scontext, &rawcontext) == 0) {
 		freecon(scontext);
 		scontext = rawcontext;
