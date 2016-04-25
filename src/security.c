@@ -483,7 +483,7 @@ get_security_context(const char *name, int crontab_fd,
 	security_context_t scontext = NULL;
 	security_context_t file_context = NULL;
 	security_context_t rawcontext=NULL;
-	int retval = 0;
+	int retval;
 	char *seuser = NULL;
 	char *level = NULL;
 
@@ -495,7 +495,7 @@ get_security_context(const char *name, int crontab_fd,
 	if (name != NULL) {
 		if (getseuserbyname(name, &seuser, &level) < 0) {
 			log_it(name, getpid(), "getseuserbyname FAILED", name, 0);
-			return (security_getenforce() > 0);
+			return security_getenforce() > 0 ? -1 : 0;
 		}
 	}
 
