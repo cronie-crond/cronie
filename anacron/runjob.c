@@ -88,10 +88,18 @@ static char *
 username(void)
 {
     struct passwd *ps;
+    static char *user;
+
+    if (user)
+	return user;
 
     ps = getpwuid(geteuid());
-    if (ps == NULL) die_e("getpwuid() error");
-    return ps->pw_name;
+    if (ps == NULL || ps->pw_name == NULL) die_e("getpwuid() error");
+
+    user = strdup(ps->pw_name);
+    if (user == NULL) die_e("memory allocation error");
+
+    return user;
 }
 
 static void
@@ -166,6 +174,12 @@ launch_mailer(job_rec *jr)
 {
     pid_t pid;
     struct stat buf;
+
+    if (jr->mailto == NULL)
+    {
+	explain("Empty MAILTO set, not mailing output");
+	return;
+    }
 
     /* Check that we have a way of sending mail. */
     if(stat(SENDMAIL, &buf))
@@ -245,14 +259,12 @@ launch_job(job_rec *jr)
     }
 
     setup_env(jr);
-   
+
     /* Get the destination email address if set, or current user otherwise */
     mailto = getenv("MAILTO");
 
-    if (mailto)
-	    jr->mailto = mailto;
-    else
-	    jr->mailto = username ();
+    if (mailto == NULL)
+	mailto = username();
 
     /* create temporary file for stdout and stderr of the job */
     temp_file(jr); fd = jr->output_fd;
@@ -262,11 +274,7 @@ launch_job(job_rec *jr)
     xwrite(fd, username());
     xwrite(fd, ">\n");
     xwrite(fd, "To: ");
-    if (mailto) {
-       xwrite(fd, mailto);
-    } else {
-       xwrite(fd, username());
-    }
+    xwrite(fd, mailto);
     xwrite(fd, "\n");
     xwrite(fd, "Content-Type: text/plain; charset=\"");
     xwrite(fd, nl_langinfo(CODESET));
@@ -276,6 +284,12 @@ launch_job(job_rec *jr)
     xwrite(fd, "' on ");
     xwrite(fd, hostname);
     xwrite(fd, "\n\n");
+
+    if (*mailto == '\0')
+	jr->mailto = NULL;
+    else
+	/* ugly but works without strdup() */
+	jr->mailto = mailto;
 
     jr->mail_header_size = file_size(fd);
 
