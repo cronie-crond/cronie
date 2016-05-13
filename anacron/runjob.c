@@ -33,6 +33,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include "global.h"
 
 #include <langinfo.h>
@@ -41,30 +42,28 @@ static int
 temp_file(job_rec *jr)
 /* Open a temporary file and return its file descriptor */
 {
-    const int max_retries = 50;
-    char *name;
+    char *dir;
+    char template[PATH_MAX+1];
     int fdin = -1;
-    int fdout, i;
+    int fdout;
+    int len;
 
-    i = 0;
-    name = NULL;
-    do
-    {
-	i++;
-	free(name);
-	name = tempnam(NULL, NULL);
-	if (name == NULL) die("Can't find a unique temporary filename");
-	fdout = open(name, O_WRONLY | O_CREAT | O_EXCL | O_APPEND,
-				S_IRUSR | S_IWUSR);
-	if ( fdout != -1 )
-		fdin = open(name, O_RDONLY, S_IRUSR | S_IWUSR);
-	/* I'm not sure we actually need to be so persistent here */
-    } while (fdout == -1 && errno == EEXIST && i < max_retries);
-    
+    dir = getenv("TMPDIR");
+    if (dir == NULL || *dir == '\0')
+	dir = P_tmpdir;
+
+    len = snprintf(template, sizeof(template), "%s/$anacronXXXXXX", dir);
+    if (len >= sizeof(template))
+	die_e("TMPDIR too long");
+
+    fdout = mkstemp(template);
     if (fdout == -1) die_e("Can't open temporary file for writing");
+
+    fdin = open(template, O_RDONLY, S_IRUSR | S_IWUSR);
     if (fdin == -1) die_e("Can't open temporary file for reading");
-    if (unlink(name)) die_e("Can't unlink temporary file");
-    free(name);
+
+    if (unlink(template)) die_e("Can't unlink temporary file");
+
     fcntl(fdout, F_SETFD, FD_CLOEXEC);    /* set close-on-exec flag */
     fcntl(fdin, F_SETFD, FD_CLOEXEC);    /* set close-on-exec flag */
 
