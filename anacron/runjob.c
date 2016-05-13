@@ -138,7 +138,6 @@ run_job(const job_rec *jr)
     in_background = 0;  /* now, errors will be mailed to the user */
     if (chdir("/")) die_e("Can't chdir to '/'");
 
-    umask(old_umask);
     if (sigprocmask(SIG_SETMASK, &old_sigmask, NULL))
 	die_e("sigprocmask error");
     xcloselog();
@@ -197,7 +196,6 @@ launch_mailer(job_rec *jr)
 	xclose(STDIN_FILENO);
 	if (dup2(jr->input_fd, STDIN_FILENO) != 0) die_e("Can't dup2()");
 	if (lseek(STDIN_FILENO, 0, SEEK_SET) != 0) die_e("Can't lseek()");
-	umask(old_umask);
 	if (sigprocmask(SIG_SETMASK, &old_sigmask, NULL))
 	    die_e("sigprocmask error");
 	xcloselog();

@@ -51,7 +51,6 @@ char **job_args;                       	       /* vector of "job" command-line a
 int job_nargs;                                 /* number of these */
 char *defarg = "*";
 int in_background;                             /* are we in the background? */
-int old_umask;                                 /* umask when started */
 sigset_t old_sigmask;                          /* signal mask when started */
 
 job_rec *first_job_rec;
@@ -469,8 +468,6 @@ main(int argc, char *argv[])
     in_background = 0;
 
     if (chdir(spooldir)) die_e("Can't chdir to %s", spooldir );
-
-    old_umask = umask(0);
 
     if (sigprocmask(0, NULL, &old_sigmask)) die_e("sigset error");
 
