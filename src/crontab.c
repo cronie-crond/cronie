@@ -53,7 +53,6 @@
 #ifdef WITH_SELINUX
 # include <selinux/selinux.h>
 # include <selinux/context.h>
-# include <selinux/av_permissions.h>
 #endif
 
 #include "cronie_common.h"
