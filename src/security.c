@@ -41,8 +41,6 @@
 #ifdef WITH_SELINUX
 # include <selinux/selinux.h>
 # include <selinux/context.h>
-# include <selinux/flask.h>
-# include <selinux/av_permissions.h>
 # include <selinux/get_context_list.h>
 #endif
 
