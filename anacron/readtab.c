@@ -362,7 +362,7 @@ read_tab(int cwd)
     jobs_read = 0;
     line_num = 0;
     /* Open the anacrontab file */
-    fchdir (cwd);
+    if (fchdir(cwd)) die_e("Can't chdir to original cwd");
     tab = fopen(anacrontab, "r");
     if (chdir(spooldir)) die_e("Can't chdir to %s", spooldir);
 
