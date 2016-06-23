@@ -1,3 +1,79 @@
+2016-06-23  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Remove unneeded obsolete SELinux includes.
+
+2016-06-23  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Rename timeval time to tv so time function can be used.
+
+2016-06-23  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix longstanding race condition on crontab modification.
+	  If crontab is modified twice at the same second the crond reads it
+	  which means the timestamp will not change, the latest content will
+	  never be read.
+
+2016-06-10  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix misleading comment in pam configuration file.
+
+2016-05-13  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* anacron: use mkstemp() instead of tempnam()
+	  Although the use of tempnam() seemed to be safeguarded
+	  better to not use it at all.
+
+2016-05-13  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* anacron: Drop potentially unsafe umask setting.
+
+2016-05-13  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* anacron: Do not try to mail to empty address.
+
+2016-04-25  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Clarify the crontab(1) documentation.
+
+2016-04-23  Gary Tierney <gary.tierney@gmx.com>
+
+	* Remove hardcoded "system_u" SELinux user
+	  This gets rid of the hardcoded reference to the ref-policy system_u user
+	  and instead relies on the user that cronie is currently running as.
+
+2016-04-25  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Clarify return value.
+
+2016-03-15  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Correct instructions for disabling Anacron.
+
+2015-11-07  Ville Skyttä <ville.skytta@iki.fi>
+
+	* Man page syntax fixes
+
+2015-11-05  Robert Byrnes <Robert.Byrnes@deshaw.com>
+
+	* Inherit PATH from the crond environment if -P option is used.
+
+2015-07-13  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* In crontab command use a temporary filename that is ignored by crond.
+
+2015-05-28  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Add *.patch and *.orig to .gitignore
+
+2015-05-28  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Add compile to .gitignore.
+
+2015-05-28  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release new version 1.5.0
+	  properly create dist tarball even with anacron and PAM disabled
+
 2015-05-28  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* Pass the job environment also when executing the sendmail.

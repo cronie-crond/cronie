@@ -1,5 +1,14 @@
 cronie NEWS -- history of user-visible changes.
 
+Release 1.5.1
+
+* crontab: Use temporary file name that is ignored by crond.
+* crond: Inherit PATH from the crond environment if -P option is used.
+* crond: Remove hardcoded "system_u" SELinux user, use the SELinux user
+  of the running crond.
+* anacron: Small cleanups and fixes.
+* crond: Fix longstanding race condition on repeated crontab modification.
+
 Release 1.5.0
 
 * First release with NEWS. :)
