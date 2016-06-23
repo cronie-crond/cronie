@@ -49,6 +49,7 @@
 #include "pathnames.h"
 
 #define TMAX(a,b) ((a)>(b)?(a):(b))
+#define TMIN(a,b) ((a)<(b)?(a):(b))
 
 /* size of the event structure, not counting name */
 #define EVENT_SIZE  (sizeof (struct inotify_event))
@@ -238,6 +239,8 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 	if ((crontab_fd = check_open(tabname, uname, pw, &mtime)) == -1)
 		goto next_crontab;
 
+	mtime = TMIN(new_db->mtime, mtime);
+
 	Debug(DLOAD, ("\t%s:", fname));
 
 	if (old_db != NULL)
@@ -262,7 +265,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		 * we finish with the crontab...
 		 */
 		Debug(DLOAD, (" [delete old data]"));
-			unlink_user(old_db, u);
+		unlink_user(old_db, u);
 		free_user(u);
 		log_it(fname, getpid(), "RELOAD", tabname, 0);
 	}
@@ -349,6 +352,7 @@ void check_inotify_database(cron_db * old_db) {
 	else if (FD_ISSET(old_db->ifd, &rfds)) {
 		new_db.head = new_db.tail = NULL;
 		new_db.ifd = old_db->ifd;
+		new_db.mtime = time(NULL) - 1;
 		while ((retval = read(old_db->ifd, buf, sizeof (buf))) == -1 &&
 			errno == EINTR) ;
 
@@ -453,14 +457,17 @@ int load_database(cron_db * old_db) {
 	DIR *dir;
 	pid_t pid = getpid();
 	int is_local = 0;
+	time_t now;
 
 	Debug(DLOAD, ("[%ld] load_database()\n", (long) pid));
 
-		/* before we start loading any data, do a stat on SPOOL_DIR
-		 * so that if anything changes as of this moment (i.e., before we've
-		 * cached any of the database), we'll see the changes next time.
-		 */
-		if (stat(SPOOL_DIR, &statbuf) < OK) {
+	now = time(NULL);
+
+	/* before we start loading any data, do a stat on SPOOL_DIR
+	 * so that if anything changes as of this moment (i.e., before we've
+	 * cached any of the database), we'll see the changes next time.
+	 */
+	if (stat(SPOOL_DIR, &statbuf) < OK) {
 		log_it("CRON", pid, "STAT FAILED", SPOOL_DIR, errno);
 		statbuf.st_mtime = 0;
 	}
@@ -493,13 +500,17 @@ int load_database(cron_db * old_db) {
 	 * Note that old_db->mtime is initialized to 0 in main(), and
 	 * so is guaranteed to be different than the stat() mtime the first
 	 * time this function is called.
+	 *
+	 * We also use now - 1 as the upper bound of timestamp to avoid race,
+	 * when a crontab is updated twice in a single second when we are
+         * just reading it.
 	 */
-	if (old_db->mtime == TMAX(crond_stat.st_mtime,
-			TMAX(statbuf.st_mtime, syscron_stat.st_mtime))
+	if (old_db->mtime == TMIN(now - 1, TMAX(crond_stat.st_mtime,
+			TMAX(statbuf.st_mtime, syscron_stat.st_mtime)))
 		) {
 		Debug(DLOAD, ("[%ld] spool dir mtime unch, no load needed.\n",
 				(long) pid));
-			return 0;
+		return 0;
 	}
 
 	/* something's different.  make a new database, moving unchanged
@@ -507,8 +518,7 @@ int load_database(cron_db * old_db) {
 	 * actually changed.  Whatever is left in the old database when
 	 * we're done is chaff -- crontabs that disappeared.
 	 */
-	new_db.mtime = TMAX(crond_stat.st_mtime,
-		TMAX(statbuf.st_mtime, syscron_stat.st_mtime));
+	new_db.mtime = now - 1;
 	new_db.head = new_db.tail = NULL;
 #if defined WITH_INOTIFY
 	new_db.ifd = old_db->ifd;
