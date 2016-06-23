@@ -332,18 +332,18 @@ void check_inotify_database(cron_db * old_db) {
 	cron_db new_db;
 	DIR_T *dp;
 	DIR *dir;
-	struct timeval time;
+	struct timeval tv;
 	fd_set rfds;
 	int retval;
 	char buf[BUF_LEN];
 	pid_t pid = getpid();
-	time.tv_sec = 0;
-	time.tv_usec = 0;
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
 
 	FD_ZERO(&rfds);
 	FD_SET(old_db->ifd, &rfds);
 
-	retval = select(old_db->ifd + 1, &rfds, NULL, NULL, &time);
+	retval = select(old_db->ifd + 1, &rfds, NULL, NULL, &tv);
 	if (retval == -1) {
 		if (errno != EINTR)
 			log_it("CRON", pid, "INOTIFY", "select failed", errno);
