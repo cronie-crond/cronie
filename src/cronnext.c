@@ -62,7 +62,7 @@ void printentry(entry *e, int system, time_t next) {
 	printf("cmd: %s\n", e->cmd);
 	printflags(e->flags);
 	printf("delay: %d\n", e->delay);
-	printf("next: %d = ", next);
+	printf("next: %ld = ", (long)next);
 	printf("%s", asctime(localtime(&next)));
 }
 
@@ -94,7 +94,6 @@ void printcrontab(user *u) {
  */
 int matchday(entry *e, time_t time) {
 	struct tm current;
-	int d;
 
 	localtime_r(&time, &current);
 
@@ -111,9 +110,7 @@ int matchday(entry *e, time_t time) {
  */
 time_t nextmatch(entry *e, time_t start) {
 	time_t time;
-	time_t nexttime;
 	struct tm current;
-	int res;
 
 	/* maximum match interval is 8 years (<102 months of 28 days):
 	 * crontab has '* * 29 2 *' and we are on 1 March 2096:
@@ -167,7 +164,7 @@ int matchuser(char *user, char *list) {
 	char *pos;
 	int l = strlen(user);
 
-	for (pos = list; pos = strstr(pos, user); pos += l) {
+	for (pos = list; (pos = strstr(pos, user)) != NULL; pos += l) {
 		if ((pos != list) && (*(pos - 1) != ','))
 			continue;
 		if ((pos[l] != '\0') && (pos[l] != ','))
@@ -290,10 +287,10 @@ int main(int argn, char *argv[]) {
 	}
 	else
 		if (verbose)
-			printf("next of all jobs: %d = %s",
-				next, asctime(localtime(&next)));
+			printf("next of all jobs: %ld = %s",
+				(long)next, asctime(localtime(&next)));
 		else
-			printf("%d\n", next);
+			printf("%ld\n", (long)next);
 
 	return EXIT_SUCCESS;
 }
