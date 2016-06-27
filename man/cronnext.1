@@ -1,0 +1,48 @@
+.TH CRONNEXT 1 "Nov 30, 2015"
+.SH NAME
+cronnext \- time of next job cron will execute
+.SH SYNOPSIS
+.TP 9
+.B cronnext
+[-i users] [-e users] [-s] [-t time] [-v] [-h]
+.SH DESCRIPTION
+Determine the time cron will execute the next job.
+Without arguments, it prints that time considering all crontabs,
+in number of seconds since the Epoch.
+This number can be converted into other formats using date(1),
+like 'date --date @43243254'
+.SH OPTIONS
+.TP
+-i user,user,user,...
+consider only the crontabs of these users;
+.br
+use "*system*" for the system crontab
+.TP
+-e user,user,user,...
+do not consider the crontabs of these users
+.TP
+-s
+do not consider the system crontab, usually /etc/crontab;
+.br
+the system crontab usually contains the hourly, daily, weekly and montly
+crontabs, which might be better dealt with anacron(8)
+.TP
+-t time
+determine the next job from this time, instead of now;
+.br
+the time is expressed in number of seconds since the Epoch, as obtained for
+example by 'date +%s --date "now + 2 hours"'
+.TP
+-v
+verbose mode: scanning the crontab is done in verbose mode, and for each user
+and job the next execution time is printed both as number of seconds since the
+Epoch and in the standard format
+.TP
+-h
+summary of options
+.SH AUTHOR
+Marco Migliori <sgerwk@aol.com>
+.SH SEE ALSO
+cron(8), cron(1), crontab(5), crontab(1), anacron(8), anacrontab(5), atq(1),
+date(1)
+

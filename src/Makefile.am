@@ -1,18 +1,22 @@
 # Makefile.am - two binaries crond and crontab
 
 sbin_PROGRAMS = crond
-bin_PROGRAMS = crontab
+bin_PROGRAMS = crontab cronnext
 
 crond_SOURCES = \
 	cron.c database.c user.c job.c do_command.c popen.c \
 	$(common_src)
 crontab_SOURCES = crontab.c $(common_src)
+cronnext_SOURCES = \
+	cronnext.c database.c user.c job.c do_command.c popen.c \
+	$(common_src)
 common_src = entry.c env.c misc.c pw_dup.c security.c \
 	externs.h funcs.h globals.h macros.h pathnames.h structs.h \
 	bitstring.h
 common_nodist = cron-paths.h
 nodist_crond_SOURCES = $(common_nodist)
 nodist_crontab_SOURCES = $(common_nodist)
+nodist_cronnext_SOURCES = $(common_nodist)
 BUILT_SOURCES = $(common_nodist)
 
 AM_CFLAGS = -I$(top_srcdir)
