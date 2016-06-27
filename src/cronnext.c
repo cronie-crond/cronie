@@ -219,15 +219,15 @@ time_t cronnext(time_t start,
 }
 
 void usage() {
-	printf("find the next time of a scheduled cron job\n");
-	printf("usage:\n");
-	printf("\tcronnext [-i users] [-e users] [-s] [-t time] [-v] [-h]\n");
-	printf("\t\t-i users\tinclude only the crontab of these users\n");
-	printf("\t\t-e users\texclude the crontab of these users\n");
-	printf("\t\t-s\t\tdo not include the system crontab\n");
-	printf("\t\t-t time\t\tstart from this time (seconds since epoch)\n");
-	printf("\t\t-v\t\tverbose mode\n");
-	printf("\t\t-h\t\tthis help\n");
+	fprintf(stderr, "Find the time of the next scheduled cron job.\n");
+	fprintf(stderr, "Usage:\n");
+	fprintf(stderr, "\tcronnext [-i users] [-e users] [-s] [-t time] [-v] [-h]\n");
+	fprintf(stderr, "\t\t-i users\tinclude only the crontab of these users\n");
+	fprintf(stderr, "\t\t-e users\texclude the crontab of these users\n");
+	fprintf(stderr, "\t\t-s\t\tdo not include the system crontab\n");
+	fprintf(stderr, "\t\t-t time\t\tstart from this time (seconds since epoch)\n");
+	fprintf(stderr, "\t\t-v\t\tverbose mode\n");
+	fprintf(stderr, "\t\t-h\t\tthis help\n");
 }
 
 /*
@@ -266,7 +266,7 @@ int main(int argn, char *argv[]) {
 			usage();
 			return EXIT_SUCCESS;
 		default:
-			printf("unrecognized option: %s\n",
+			fprintf(stderr, "unrecognized option: %s\n",
 				argv[optind - 1]);
 			usage();
 			exit(EXIT_FAILURE);
@@ -285,12 +285,12 @@ int main(int argn, char *argv[]) {
 	next = cronnext(start, include, exclude, system, verbose);
 	if (next == -1) {
 		if (verbose)
-			printf("no sheduled job\n");
+			printf("no job scheduled\n");
 		return EXIT_FAILURE;
 	}
 	else
 		if (verbose)
-			printf("next of all jobs: %d=%s",
+			printf("next of all jobs: %d = %s",
 				next, asctime(localtime(&next)));
 		else
 			printf("%d\n", next);
