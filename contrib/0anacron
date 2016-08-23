@@ -4,14 +4,11 @@ if test -r /var/spool/anacron/cron.daily; then
     day=`cat /var/spool/anacron/cron.daily`
 fi
 if [ `date +%Y%m%d` = "$day" ]; then
-    exit 0;
+    exit 0
 fi
 
 # Do not run jobs when on battery power
-if test -x /usr/bin/on_ac_power; then
-    /usr/bin/on_ac_power >/dev/null 2>&1
-    if test $? -eq 1; then
+if [ `cat /sys/class/power_supply/AC/online 2>/dev/null`x = 0x ]; then
     exit 0
-    fi
 fi
 /usr/sbin/anacron -s
