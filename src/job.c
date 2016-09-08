@@ -71,7 +71,7 @@ void job_add(entry * e, user * u) {
 		}
 		e->envp = tenvp;
 	} else {
-		log_it(uname, getpid(), "ERROR", "getpwnam() failed",errno);
+		log_it(uname, getpid(), "ERROR", "getpwnam() failed - user unknown",errno);
 		Debug(DSCH | DEXT, ("%s:%d pid=%d time=%ld getpwnam(%s) failed errno=%d error=%s\n",
 			__FILE__,__LINE__,getpid(),time(NULL),uname,errno,strerror(errno)));
 		return;
