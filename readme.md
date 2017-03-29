@@ -16,7 +16,7 @@ User visible changes:
 - anacron: Small cleanups and fixes.
 - crond: Fix longstanding race condition on repeated crontab modification. 
 
-The source can be downloaded from [https://fedorahosted.org/releases/c/r/cronie/]
+The source can be downloaded from [https://github.com/cronie-crond/cronie/releases]
 
 Cronie is packaged by these distributions:
 - Fedora [http://koji.fedoraproject.org/koji/packageinfo?packageID=5724]
