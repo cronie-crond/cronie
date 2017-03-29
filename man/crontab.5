@@ -213,6 +213,10 @@ Names can also be used for the 'month' and 'day of week' fields.  Use the
 first three letters of the particular day or month (case does not
 matter).  Ranges or lists of names are not allowed.
 .PP
+If the UID of the owner is 0 (root), the first character of a crontab
+entry can be "-" character. This will prevent cron from writing a syslog
+message about the command being executed.
+.PP
 The "sixth" field (the rest of the line) specifies the command to be run.
 The entire command portion of the line, up to a newline or a "%"
 character, will be executed by /bin/sh or by the shell specified in the
