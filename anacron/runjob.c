@@ -316,7 +316,7 @@ tend_job(job_rec *jr, int status)
     if (file_size(jr->output_fd) > jr->mail_header_size) mail_output = 1;
     else mail_output = 0;
 
-    m = mail_output ? " (mailing output)" : "";
+    m = mail_output ? " (produced output)" : "";
     if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
 	explain("Job `%s' terminated%s", jr->ident, m);
     else if (WIFEXITED(status))
