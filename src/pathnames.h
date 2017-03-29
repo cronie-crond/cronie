@@ -37,7 +37,7 @@
 			 * (Don't ask why the default is "/etc/".)
 			 */
 #ifdef _PATH_VARRUN
-# define PIDDIR	_PATH_VARRUN
+# define PIDDIR	"/run/"
 #else
 # define PIDDIR SYSCONFDIR "/"
 #endif
