@@ -449,6 +449,7 @@ static int child_process(entry * e, char **jobenv) {
 #ifdef MAIL_DATE
 				fprintf(mail, "Date: %s\n", arpadate(&StartTime));
 #endif /*MAIL_DATE */
+				fprintf(mail, "MIME-Version: 1.0\n");
 				if (content_type == 0L) {
 					fprintf(mail, "Content-Type: text/plain; charset=%s\n",
 						cron_default_mail_charset);
