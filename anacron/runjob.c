@@ -273,6 +273,7 @@ launch_job(job_rec *jr)
     xwrite(fd, "To: ");
     xwrite(fd, mailto);
     xwrite(fd, "\n");
+    xwrite(fd, "MIME-Version: 1.0\n");
     xwrite(fd, "Content-Type: text/plain; charset=\"");
     xwrite(fd, nl_langinfo(CODESET));
     xwrite(fd, "\"\n");
