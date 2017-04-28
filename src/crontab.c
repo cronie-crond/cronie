@@ -984,7 +984,7 @@ static int hostget_cmd(void) {
 			fprintf(stderr, "File %s not found\n", n);
 		else
 			perror(n);
-			return (-2);
+		return (-2);
 	}
 
 	if (get_string(Host, sizeof Host, f, "\n") == EOF) {
