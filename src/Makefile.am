@@ -4,13 +4,13 @@ sbin_PROGRAMS = crond
 bin_PROGRAMS = crontab cronnext
 
 crond_SOURCES = \
-	cron.c database.c user.c job.c do_command.c popen.c \
+	cron.c database.c user.c job.c do_command.c popen.c security.c \
 	$(common_src)
-crontab_SOURCES = crontab.c $(common_src)
+crontab_SOURCES = crontab.c security.c $(common_src)
 cronnext_SOURCES = \
-	cronnext.c database.c user.c job.c do_command.c popen.c \
+	cronnext.c database.c user.c job.c \
 	$(common_src)
-common_src = entry.c env.c misc.c pw_dup.c security.c \
+common_src = entry.c env.c misc.c pw_dup.c \
 	externs.h funcs.h globals.h macros.h pathnames.h structs.h \
 	bitstring.h
 common_nodist = cron-paths.h

@@ -25,6 +25,7 @@ tags
 *.o
 src/crond
 src/crontab
+src/cronnext
 src/cron-paths.h
 *~
 *.tar.*

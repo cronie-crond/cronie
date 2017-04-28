@@ -32,6 +32,36 @@
 #include "funcs.h"
 #include "cron-paths.h"
 
+#ifdef WITH_INOTIFY
+void set_cron_watched(int fd) {
+/* empty stub */
+	(void)fd;
+}
+#endif
+
+void do_command(entry *e, user *u) {
+/* empty stub */
+	(void)e;
+	(void)u;
+}
+
+#ifdef WITH_SELINUX
+int get_security_context(const char *name, int crontab_fd,
+			 security_context_t *rcontext, const char *tabname) {
+/* empty stub */
+	(void)name;
+	(void)crontab_fd;
+	(void)tabname;
+	*rcontext = NULL;
+	return 0;
+}
+
+void free_security_context(security_context_t *scontext) {
+/* empty stub */
+	(void)scontext;
+}
+#endif
+
 /*
  * print entry flags
  */
