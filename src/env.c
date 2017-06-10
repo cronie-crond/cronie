@@ -191,8 +191,9 @@ int load_env(char *envstr, FILE * f) {
 
 	Debug(DPARS, ("load_env, read <%s>\n", envstr));
 
-		memset(name, 0, sizeof name);
+	memset(name, 0, sizeof name);
 	memset(val, 0, sizeof val);
+
 	str = name;
 	state = NAMEI;
 	quotechar = '\0';

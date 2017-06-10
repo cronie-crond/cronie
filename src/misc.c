@@ -315,7 +315,8 @@ void acquire_daemonlock(int closeflag) {
 		return;
 	}
 
-	if(NoFork == 1) return; //move along, nothing to do here...
+	if (NoFork == 1)
+		return; //move along, nothing to do here...
 
 	if (fd == -1) {
 		pidfile = _PATH_CRON_PID;
@@ -382,7 +383,7 @@ int get_char(FILE * file) {
 	ch = getc(file);
 	if (ch == '\n')
 		Set_LineNum(LineNumber + 1)
-			return (ch);
+	return (ch);
 }
 
 /* unget_char(ch, file) : like ungetc but do LineNumber processing
@@ -714,8 +715,8 @@ char *arpadate(time_t *clock) {
 #endif /*MAIL_DATE */
 
 #ifdef HAVE_SAVED_UIDS
-	static uid_t save_euid;
-	static gid_t save_egid;
+static uid_t save_euid;
+static gid_t save_egid;
 
 int swap_uids(void) {
 	save_egid = getegid();

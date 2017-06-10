@@ -57,21 +57,21 @@ cron_conv(int num_msg, const struct pam_message **msgm,
 	struct pam_response **response ATTRIBUTE_UNUSED,
 	void *appdata_ptr ATTRIBUTE_UNUSED)
 {
-        int i;
+	int i;
 
-        for (i = 0; i < num_msg; i++) {
-                switch (msgm[i]->msg_style) {
-                        case PAM_ERROR_MSG:
-                        case PAM_TEXT_INFO:
-                                if (msgm[i]->msg != NULL) {
-                                        log_it("CRON", getpid(), "pam_message", msgm[i]->msg, 0);
-                                }
-                        break;
-                        default:
-                        break;
-                }
-        }
-        return (0);
+	for (i = 0; i < num_msg; i++) {
+		switch (msgm[i]->msg_style) {
+		case PAM_ERROR_MSG:
+		case PAM_TEXT_INFO:
+			if (msgm[i]->msg != NULL) {
+				log_it("CRON", getpid(), "pam_message", msgm[i]->msg, 0);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	return (0);
 }
 
 static const struct pam_conv conv = {

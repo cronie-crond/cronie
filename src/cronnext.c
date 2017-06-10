@@ -315,12 +315,11 @@ int main(int argn, char *argv[]) {
 			printf("no job scheduled\n");
 		return EXIT_FAILURE;
 	}
+	else if (verbose)
+		printf("next of all jobs: %ld = %s",
+			(long) next, asctime(localtime(&next)));
 	else
-		if (verbose)
-			printf("next of all jobs: %ld = %s",
-				(long)next, asctime(localtime(&next)));
-		else
-			printf("%ld\n", (long)next);
+		printf("%ld\n", (long) next);
 
 	return EXIT_SUCCESS;
 }

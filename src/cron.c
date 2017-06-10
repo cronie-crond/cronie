@@ -555,13 +555,13 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 
 	orig_tz = getenv("TZ");
 
-		/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
-		 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
-		 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
-		 * is why we keep 'e->dow_star' and 'e->dom_star'.  yes, it's bizarre.
-		 * like many bizarre things, it's the standard.
-		 */
-		for (u = db->head; u != NULL; u = u->next) {
+	/* the dom/dow situation is odd.  '* * 1,15 * Sun' will run on the
+	 * first and fifteenth AND every Sunday;  '* * * * Sun' will run *only*
+	 * on Sundays;  '* * 1,15 * *' will run *only* the 1st and 15th.  this
+	 * is why we keep 'e->dow_star' and 'e->dom_star'.  yes, it's bizarre.
+	 * like many bizarre things, it's the standard.
+	 */
+	for (u = db->head; u != NULL; u = u->next) {
 		for (e = u->crontab; e != NULL; e = e->next) {
 			time_t virtualSecond = (vtime - e->delay) * SECONDS_PER_MINUTE;
 			time_t virtualGMTSecond = virtualSecond - vGMToff;
@@ -672,15 +672,15 @@ static void sigchld_reaper(void) {
 			if (errno == EINTR)
 				continue;
 			Debug(DPROC, ("[%ld] sigchld...no children\n", (long) getpid()));
-				break;
+			break;
 		case 0:
 			Debug(DPROC, ("[%ld] sigchld...no dead kids\n", (long) getpid()));
-				break;
+			break;
 		default:
 			Debug(DPROC,
 				("[%ld] sigchld...pid #%ld died, stat=%d\n",
 					(long) getpid(), (long) pid, WEXITSTATUS(waiter)));
-				break;
+			break;
 		}
 	} while (pid > 0);
 }
