@@ -103,7 +103,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 	Debug(DPARS, ("load_entry()...about to eat comments\n"));
 
-		skip_comments(file);
+	skip_comments(file);
 
 	ch = get_char(file);
 	if (ch == EOF)
@@ -277,10 +277,10 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		char *username = cmd;	/* temp buffer */
 
 		Debug(DPARS, ("load_entry()...about to parse username\n"));
-			ch = get_string(username, MAX_COMMAND, file, " \t\n");
+		ch = get_string(username, MAX_COMMAND, file, " \t\n");
 
 		Debug(DPARS, ("load_entry()...got %s\n", username));
-			if (ch == EOF || ch == '\n' || ch == '*') {
+		if (ch == EOF || ch == '\n' || ch == '*') {
 			ecode = e_cmd;
 			goto eof;
 		}
@@ -440,11 +440,11 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 
 	Debug(DPARS | DEXT, ("get_list()...entered\n"));
 
-		/* list = range {"," range}
-		 */
-		/* clear the bit string, since the default is 'off'.
-		 */
-		bit_nclear(bits, 0, (high - low));
+	/* list = range {"," range}
+	 */
+	/* clear the bit string, since the default is 'off'.
+	 */
+	bit_nclear(bits, 0, (high - low));
 
 	/* process all ranges
 	 */
@@ -461,11 +461,11 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 	/* exiting.  skip to some blanks, then skip over the blanks.
 	 */
 	Skip_Nonblanks(ch, file)
-		Skip_Blanks(ch, file)
+	Skip_Blanks(ch, file)
 
-		Debug(DPARS | DEXT, ("get_list()...exiting w/ %02x\n", ch));
+	Debug(DPARS | DEXT, ("get_list()...exiting w/ %02x\n", ch));
 
-		return (ch);
+	return (ch);
 }
 
 

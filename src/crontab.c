@@ -564,10 +564,10 @@ static void edit_cmd(void) {
 		perror(Filename);
 		exit(ERROR_EXIT);
 	}
-        if (swap_uids() == -1) {
-                perror("swapping uids");
-                exit(ERROR_EXIT);
-        }
+	if (swap_uids() == -1) {
+		perror("swapping uids");
+		exit(ERROR_EXIT);
+	}
 	/* Set it to 1970 */
 	utimebuf.actime = 0;
 	utimebuf.modtime = 0;
@@ -913,7 +913,7 @@ static int hostset_cmd(void) {
 	
 	safename = host_specific_filename("#tmp", "XXXXXXXXXX");
 	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
-		safename, '/')) {
+			safename, '/')) {
 		TempFilename[0] = '\0';
 		fprintf(stderr, "path too long\n");
 		return (-2);

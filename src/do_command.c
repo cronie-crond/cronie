@@ -110,10 +110,10 @@ static int child_process(entry * e, char **jobenv) {
 
 	Debug(DPROC, ("[%ld] child_process('%s')\n", (long) getpid(), e->cmd));
 #ifdef CAPITALIZE_FOR_PS
-		/* mark ourselves as different to PS command watchers by upshifting
-		 * our program name.  This has no effect on some kernels.
-		 */
-		/*local */  {
+	/* mark ourselves as different to PS command watchers by upshifting
+	 * our program name.  This has no effect on some kernels.
+	 */
+	/*local */  {
 		char *pch;
 
 		for (pch = ProgramName; *pch; pch++)
@@ -568,18 +568,18 @@ static int child_process(entry * e, char **jobenv) {
 
 		Debug(DPROC, ("[%ld] waiting for grandchild #%d to finish\n",
 				(long) getpid(), children));
-			while ((child = wait(&waiter)) < OK && errno == EINTR) ;
+		while ((child = wait(&waiter)) < OK && errno == EINTR) ;
 		if (child < OK) {
 			Debug(DPROC,
 				("[%ld] no more grandchildren--mail written?\n",
 					(long) getpid()));
-				break;
+			break;
 		}
 		Debug(DPROC, ("[%ld] grandchild #%ld finished, status=%04x",
 				(long) getpid(), (long) child, WEXITSTATUS(waiter)));
 			if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
-			Debug(DPROC, (", dumped core"));
-				Debug(DPROC, ("\n"));
+				Debug(DPROC, (", dumped core"));
+			Debug(DPROC, ("\n"));
 	}
 	return OK_EXIT;
 }

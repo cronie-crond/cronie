@@ -252,7 +252,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
 		 */
 		if (u->mtime == mtime) {
 			Debug(DLOAD, (" [no change, using old data]"));
-				unlink_user(old_db, u);
+			unlink_user(old_db, u);
 			link_user(new_db, u);
 			goto next_crontab;
 		}
@@ -280,7 +280,7 @@ process_crontab(const char *uname, const char *fname, const char *tabname,
   next_crontab:
 	if (crontab_fd != -1) {
 		Debug(DLOAD, (" [done]\n"));
-			close(crontab_fd);
+		close(crontab_fd);
 	}
 }
 
@@ -584,7 +584,7 @@ int load_database(cron_db * old_db) {
 
 	overwrite_database(old_db, &new_db);
 	Debug(DLOAD, ("load_database is done\n"));
-		return 1;
+	return 1;
 }
 
 void link_user(cron_db * db, user * u) {
