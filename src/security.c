@@ -187,10 +187,10 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 	return 0;
 }
 
+#if defined(WITH_PAM)
 int cron_start_pam(struct passwd *pw) {
 	int retcode = 0;
 
-#if defined(WITH_PAM)
 	retcode = pam_start("crond", pw->pw_name, &conv, &pamh);
 	PAM_FAIL_CHECK;
 	retcode = pam_set_item(pamh, PAM_TTY, "cron");
@@ -199,10 +199,10 @@ int cron_start_pam(struct passwd *pw) {
 	PAM_FAIL_CHECK;
 	retcode = pam_setcred(pamh, PAM_ESTABLISH_CRED | PAM_SILENT);
 	PAM_FAIL_CHECK;
-#endif
 
 	return retcode;
 }
+#endif
 
 #if defined(WITH_PAM)
 static int cron_open_pam_session(struct passwd *pw) {
