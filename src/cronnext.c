@@ -248,13 +248,15 @@ time_t cronnext(time_t start,
 void usage() {
 	fprintf(stderr, "Find the time of the next scheduled cron job.\n");
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "\tcronnext [-i users] [-e users] [-s] [-t time] [-v] [-h]\n");
-	fprintf(stderr, "\t\t-i users\tinclude only the crontab of these users\n");
-	fprintf(stderr, "\t\t-e users\texclude the crontab of these users\n");
-	fprintf(stderr, "\t\t-s\t\tdo not include the system crontab\n");
-	fprintf(stderr, "\t\t-t time\t\tstart from this time (seconds since epoch)\n");
-	fprintf(stderr, "\t\t-v\t\tverbose mode\n");
-	fprintf(stderr, "\t\t-h\t\tthis help\n");
+	fprintf(stderr, " cronnext [options]\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, " -i users  include only the crontab of these users\n");
+	fprintf(stderr, " -e users  exclude the crontab of these users\n");
+	fprintf(stderr, " -s        do not include the system crontab\n");
+	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
+	fprintf(stderr, " -v        verbose mode\n");
+	fprintf(stderr, " -h        this help\n");
 }
 
 /*
