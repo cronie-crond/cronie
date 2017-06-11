@@ -257,6 +257,7 @@ void usage() {
 	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
 	fprintf(stderr, " -v        verbose mode\n");
 	fprintf(stderr, " -h        this help\n");
+	fprintf(stderr, " -V        print version and exit\n");
 }
 
 /*
@@ -274,7 +275,7 @@ int main(int argn, char *argv[]) {
 	start = time(NULL);
 	verbose = 0;
 
-	while (-1 != (opt = getopt(argn, argv, "i:e:st:vh"))) {
+	while (-1 != (opt = getopt(argn, argv, "i:e:st:vhV"))) {
 		switch (opt) {
 		case 'i':
 			include = optarg;
@@ -293,6 +294,9 @@ int main(int argn, char *argv[]) {
 			break;
 		case 'h':
 			usage();
+			return EXIT_SUCCESS;
+		case 'V':
+			puts(PACKAGE_STRING);
 			return EXIT_SUCCESS;
 		default:
 			fprintf(stderr, "unrecognized option: %s\n",

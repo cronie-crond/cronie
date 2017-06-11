@@ -22,6 +22,7 @@
     `COPYING' that comes with the Anacron source distribution.
 */
 
+#include "config.h"
 
 #include <time.h>
 #include <sys/time.h>
@@ -66,13 +67,13 @@ int preferred_hour = -1;
 static void
 print_version(void)
 {
-    printf("Anacron \n"
+    printf("Anacron from project %s\n"
 	   "Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>\n"
 	   "Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>\n"
 	   "Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>\n"
 	   "\n"
 	   "Mail comments, suggestions and bug reports to <pasc@redellipse.net>."
-	   "\n\n");
+	   "\n\n", PACKAGE_STRING);
 }
 
 static void

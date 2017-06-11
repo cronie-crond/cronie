@@ -188,6 +188,7 @@ static void usage(void) {
 	fprintf(stderr, " -P         use PATH=\"%s\"\n", _PATH_DEFPATH);
 	fprintf(stderr, " -c         enable clustering support\n");
 	fprintf(stderr, " -s         log into syslog instead of sending mails\n");
+	fprintf(stderr, " -V         print version and exit\n");
 	fprintf(stderr, " -x <flag>  print debug information\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "Debugging flags are: ");
@@ -688,7 +689,7 @@ static void sigchld_reaper(void) {
 static void parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "hnpsiPx:m:c"))) {
+	while (-1 != (argch = getopt(argc, argv, "hnpsiPx:m:cV"))) {
 		switch (argch) {
 			case 'x':
 				if (!set_debug_flags(optarg))
@@ -715,6 +716,9 @@ static void parse_args(int argc, char *argv[]) {
 			case 'c':
 				EnableClustering = 1;
 				break;
+			case 'V':
+				puts(PACKAGE_STRING);
+				exit(EXIT_SUCCESS);
 			case 'h':
 			default:
 				usage();

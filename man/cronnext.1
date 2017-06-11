@@ -4,7 +4,7 @@ cronnext \- time of next job cron will execute
 .SH SYNOPSIS
 .TP 9
 .B cronnext
-[-i users] [-e users] [-s] [-t time] [-v] [-h]
+[-i users] [-e users] [-s] [-t time] [-v] [-h] [-V]
 .SH DESCRIPTION
 Determine the time cron will execute the next job.
 Without arguments, it prints that time considering all crontabs,
@@ -40,6 +40,9 @@ Epoch and in the standard format
 .TP
 -h
 summary of options
+.TP
+-V
+Print version and exit.
 .SH AUTHOR
 Marco Migliori <sgerwk@aol.com>
 .SH SEE ALSO

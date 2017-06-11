@@ -32,6 +32,9 @@ crond \- daemon to execute scheduled commands
 .B crond
 .B -x
 .RB [ext,sch,proc,pars,load,misc,test,bit]
+.br
+.B crond
+.B -V
 .SH DESCRIPTION
 .I Cron
 is started from
@@ -188,6 +191,9 @@ installed or if mail is disabled.
 .TP
 .B "\-x"
 This option allows you to set debug flags.
+.TP
+.B "\-V"
+Print version and exit.
 .SH SIGNALS
 When the
 .I SIGHUP
