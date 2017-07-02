@@ -190,11 +190,11 @@ time_t nextmatch(entry *e, time_t start) {
 /*
  * match a user against a list
  */
-int matchuser(char *user, char *list) {
+int matchuser(char *name, char *list) {
 	char *pos;
-	int l = strlen(user);
+	int l = strlen(name);
 
-	for (pos = list; (pos = strstr(pos, user)) != NULL; pos += l) {
+	for (pos = list; (pos = strstr(pos, name)) != NULL; pos += l) {
 		if ((pos != list) && (*(pos - 1) != ','))
 			continue;
 		if ((pos[l] != '\0') && (pos[l] != ','))
