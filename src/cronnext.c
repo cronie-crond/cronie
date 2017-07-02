@@ -75,7 +75,7 @@ char *flagname[]= {
 };
 
 void printflags(int flags) {
-	int f;
+	size_t f;
 	printf("flags: 0x%d = ", flags);
 	for (f = 1; f < sizeof(flagname);  f = f << 1)
 		if (flags & f)
