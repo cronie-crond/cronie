@@ -120,7 +120,7 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 		/* "minute-ly" job: Every minute for given hour/dow/month/dom. 
 		 * Ensure that these jobs never run in the same minute:
 		 */
-		minutely_time = time(0);
+		minutely_time = time(NULL);
 		Debug(DSCH, ("Minute-ly job. Recording time %lu\n", minutely_time));
 	}
 
@@ -169,7 +169,7 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 
 	*jobenv = build_env(e->envp);
 
-	time_t job_run_time = time(0L);
+	time_t job_run_time = time(NULL);
 
 	if ((minutely_time > 0) && ((job_run_time / 60) != (minutely_time / 60))) {
 		/* if a per-minute job is delayed into the next minute 

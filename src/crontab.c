@@ -413,7 +413,7 @@ static void delete_cmd(void) {
 	if (PromptOnDelete == 1) {
 		printf("crontab: really delete %s's crontab? ", User);
 		fflush(stdout);
-		if ((fgets(n, MAX_FNAME - 1, stdin) == 0L)
+		if ((fgets(n, MAX_FNAME - 1, stdin) == NULL)
 			|| ((n[0] != 'Y') && (n[0] != 'y'))
 			)
 			exit(0);
@@ -694,7 +694,7 @@ static void edit_cmd(void) {
 		perror("swapping uids back");
 		exit(ERROR_EXIT);
 	}
-	if (NewCrontab == 0L) {
+	if (NewCrontab == NULL) {
 		perror("fopen");
 		goto fatal;
 	}
@@ -706,7 +706,7 @@ static void edit_cmd(void) {
 			printf("Do you want to retry the same edit? ");
 			fflush(stdout);
 			q[0] = '\0';
-			if (fgets(q, sizeof q, stdin) == 0L)
+			if (fgets(q, sizeof q, stdin) == NULL)
 				continue;
 			switch (q[0]) {
 			case 'y':

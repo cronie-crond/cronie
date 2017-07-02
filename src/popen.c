@@ -168,7 +168,7 @@ int cron_pclose(FILE * iop) {
 	 * pclose returns -1 if stream is not associated with a
 	 * `popened' command, or, if already `pclosed'.
 	 */
-	if (pids == 0 || pids[fdes = fileno(iop)] == 0)
+	if (pids == NULL || pids[fdes = fileno(iop)] == 0L)
 		return (-1);
 	(void) fclose(iop);
 
