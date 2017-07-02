@@ -1014,7 +1014,7 @@ static void poke_daemon(void) {
 	}
 }
 
-static void die(int x) {
+static void die(int x ATTRIBUTE_UNUSED) {
 	if (TempFilename[0])
 		(void) unlink(TempFilename);
 	_exit(ERROR_EXIT);
