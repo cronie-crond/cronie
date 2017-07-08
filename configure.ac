@@ -2,7 +2,7 @@ AC_INIT([cronie],[1.5.1],[mmaslano@redhat.com,tmraz@fedoraproject.org])
 AC_CONFIG_HEADER([config.h])
 AC_PREREQ(2.60)
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])],
 			    [AC_SUBST([AM_DEFAULT_VERBOSITY], [1])])
@@ -260,6 +260,6 @@ if test "$enable_anacron" != no; then
 	ANACRON_CONF_VAR([ANACRONTAB],[The anacron table for regular jobs.],[${sysconfdir}/anacrontab])
 fi
 
-AC_CONFIG_FILES([Makefile src/Makefile man/Makefile anacron/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 

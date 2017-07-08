@@ -1,9 +1,16 @@
-SUBDIRS = src man anacron
+AM_CFLAGS = -I$(top_srcdir)
+
+BUILT_SOURCES =
+CLEANFILES =
+EXTRA_DIST =
+bin_PROGRAMS =
+common_nodist =
+sbin_PROGRAMS =
 
 dist_noinst_HEADERS = \
 	cronie_common.h
 
-EXTRA_DIST = \
+EXTRA_DIST += \
 	cronie.init \
 	crond.sysconfig \
 	contrib/anacrontab \
@@ -19,3 +26,7 @@ dist_pam_DATA = pam/crond
 else
 EXTRA_DIST += pam/crond
 endif
+
+include anacron/Makemodule.am
+include man/Makemodule.am
+include src/Makemodule.am
