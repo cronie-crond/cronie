@@ -253,7 +253,7 @@ CRONIE_CONF_VAR([SYSCRONTAB], [the current working directory of the running daem
 CRONIE_CONF_VAR([SYS_CROND_DIR], [the current working directory of the running daemon], [${sysconfdir}/cron.d])
 CRONIE_CONF_VAR([SPOOL_DIR], [the directory where all the user cron tabs reside], [${localstatedir}/spool/cron])
 
-AC_ARG_ENABLE([anacron], [AS_HELP_STRING([--enable-anacron], [Build also anacron.])])
+AC_ARG_ENABLE([anacron], [AS_HELP_STRING([--disable-anacron], [Do not build anacron.])], [], [enable_anacron=yes])
 AM_CONDITIONAL([ANACRON], [test "$enable_anacron" = yes])
 if test "$enable_anacron" != no; then
 	ANACRON_CONF_VAR([ANACRON_SPOOL_DIR],[The path for anacron locks.],[${localstatedir}/spool/anacron])
