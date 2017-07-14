@@ -101,7 +101,11 @@ static int cron_get_job_range(user * u, security_context_t * ucontextp,
 
 void cron_restore_default_security_context(void) {
 #ifdef WITH_SELINUX
-	setexeccon(NULL);
+	if (is_selinux_enabled() <= 0)
+		return;
+	if (setexeccon(NULL) < 0)
+		log_it("CRON", getpid(), "ERROR",
+			"failed to restore SELinux context", 0);
 #endif
 }
 
