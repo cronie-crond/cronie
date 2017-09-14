@@ -289,13 +289,14 @@ int main(int argc, char *argv[]) {
 				if (fd != STDERR)
 					(void) close(fd);
 			}
-			log_it("CRON", getpid(), "STARTUP", PACKAGE_VERSION, 0);
 			break;
 		default:
 			/* parent process should just die */
 			_exit(0);
 		}
 	}
+
+	log_it("CRON", getpid(), "STARTUP", PACKAGE_VERSION, 0);
 
 	if (!SyslogOutput && MailCmd[0] == '\0' && access("/usr/sbin/sendmail", X_OK) != 0) {
 		SyslogOutput=1;
