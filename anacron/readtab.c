@@ -77,7 +77,7 @@ conv2int(const char *s)
     l = strtol(s, NULL, 10);
     /* we use negative as error, so I am really returning unsigned int */
     if (errno == ERANGE || l < 0 || l > INT_MAX) return - 1;
-    return l;
+    return (int)l;
 }
 
 static char *
@@ -94,11 +94,11 @@ Return NULL if no more lines.
 	c = getc(tab);
 	if ((c == '\n' && prev != '\\') || c == EOF)
 	{
-	    if (0 != prev) obstack_1grow(&input_o, prev);
+	    if (0 != prev) obstack_1grow(&input_o, (char)prev);
 	    break;
 	}
 
-	if ('\\' != prev && 0 != prev && '\n' != prev) obstack_1grow(&input_o, prev);
+	if ('\\' != prev && 0 != prev && '\n' != prev) obstack_1grow(&input_o, (char)prev);
 	else if ('\n' == prev) obstack_1grow(&input_o, ' ');
 
 	prev = c;
@@ -132,8 +132,8 @@ register_env(const char *env_var, const char *value)
     env_rec *er;
     int var_len, val_len;
 
-    var_len = strlen(env_var);
-    val_len = strlen(value);
+    var_len = (int)strlen(env_var);
+    val_len = (int)strlen(value);
     er = obstack_alloc(&tab_o, sizeof(env_rec));
     er->assign = obstack_alloc(&tab_o, var_len + 1 + val_len + 1);
     strcpy(er->assign, env_var);
@@ -155,8 +155,8 @@ register_job(const char *periods, const char *delays,
     job_rec *jr;
     int ident_len, command_len;
 
-    ident_len = strlen(ident);
-    command_len = strlen(command);
+    ident_len = (int)strlen(ident);
+    command_len = (int)strlen(command);
     jobs_read++;
     period = conv2int(periods);
     delay = conv2int(delays);
@@ -196,8 +196,8 @@ register_period_job(const char *periods, const char *delays,
     job_rec *jr;
     int ident_len, command_len;
 
-    ident_len = strlen(ident);
-    command_len = strlen(command);
+    ident_len = (int)strlen(ident);
+    command_len = (int)strlen(command);
     jobs_read++;
     delay = conv2int(delays);
     if (delay < 0)
@@ -417,6 +417,6 @@ arrange_jobs(void)
     job_array = obstack_finish(&tab_o);
 
     /* sort the jobs */
-    qsort(job_array, njobs, sizeof(*job_array),
+    qsort(job_array, (size_t)njobs, sizeof(*job_array),
 	  (int (*)(const void *, const void *))execution_order);
 }

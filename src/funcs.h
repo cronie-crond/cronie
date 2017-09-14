@@ -71,14 +71,14 @@ int		load_database(cron_db *),
 		cron_pclose(FILE *),
 		glue_strings(char *, size_t, const char *, const char *, char),
 		strcmp_until(const char *, const char *, char),
-		allowed(const char * ,const char * ,const char *),
-		strdtb(char *);
+		allowed(const char * ,const char * ,const char *);
 
-size_t		strlens(const char *, ...);
+size_t		strlens(const char *, ...),
+		strdtb(char *);
 
 char		*env_get(const char *, char **),
 		*arpadate(time_t *),
-		*mkprints(unsigned char *, unsigned int),
+		*mkprints(unsigned char *, size_t),
 		*first_word(const char *, const char *),
 		**env_init(void),
 		**env_copy(char **),

@@ -314,7 +314,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		if (errno != 0 || val < 0 || val > 24*60) {
 			log_it("CRON", getpid(), "ERROR", "bad value of RANDOM_DELAY", 0);
 		} else {
-			e->delay = val * RandomScale;
+			e->delay = (int)((double)val * RandomScale);
 		}
 	}
 
@@ -568,7 +568,7 @@ get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
 	while (isdigit((unsigned char) ch)) {
 		if (++len >= MAX_TEMPSTR)
 			goto bad;
-		*pc++ = ch;
+		*pc++ = (char)ch;
 		ch = get_char(file);
 	}
 	*pc = '\0';
@@ -585,7 +585,7 @@ get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
 		while (isalpha((unsigned char) ch)) {
 			if (++len >= MAX_TEMPSTR)
 				goto bad;
-			*pc++ = ch;
+			*pc++ = (char)ch;
 			ch = get_char(file);
 		}
 		*pc = '\0';

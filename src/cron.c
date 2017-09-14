@@ -308,8 +308,8 @@ int main(int argc, char *argv[]) {
 	/* obtain a random scaling factor for RANDOM_DELAY */
 	if (gettimeofday(&tv, &tz) != 0)
 		tv.tv_usec = 0;
-	srandom(pid + tv.tv_usec);
-	RandomScale = random() / (double)RAND_MAX;
+	srandom((unsigned int)(pid + tv.tv_usec));
+	RandomScale = (double)random() / (double)RAND_MAX;
 	snprintf(buf, sizeof(buf), "RANDOM_DELAY will be scaled with factor %d%% if used.", (int)(RandomScale*100));
 	log_it("CRON", pid, "INFO", buf, 0);
 
@@ -565,7 +565,7 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 	 */
 	for (u = db->head; u != NULL; u = u->next) {
 		for (e = u->crontab; e != NULL; e = e->next) {
-			time_t virtualSecond = (vtime - e->delay) * SECONDS_PER_MINUTE;
+			time_t virtualSecond = (time_t)(vtime - e->delay) * (time_t)SECONDS_PER_MINUTE;
 			time_t virtualGMTSecond = virtualSecond - vGMToff;
 			job_tz = env_get("CRON_TZ", e->envp);
 			maketime(job_tz, orig_tz);
@@ -616,7 +616,7 @@ static void set_time(int initialize) {
 		GMToff = get_gmtoff(&StartTime, &tm);
 		Debug(DSCH, ("[%ld] GMToff=%ld\n", (long) getpid(), (long) GMToff));
 	}
-	clockTime = (StartTime + GMToff) / (time_t) SECONDS_PER_MINUTE;
+	clockTime = (int)((StartTime + GMToff) / (time_t) SECONDS_PER_MINUTE);
 }
 
 /*

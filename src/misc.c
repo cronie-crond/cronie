@@ -143,7 +143,7 @@ int strcmp_until(const char *left, const char *right, char until) {
 
 /* strdtb(s) - delete trailing blanks in string 's' and return new length
  */
-int strdtb(char *s) {
+size_t strdtb(char *s) {
 	char *x = s;
 
 	/* scan forward to the null
@@ -166,7 +166,7 @@ int strdtb(char *s) {
 	/* the difference between the position of the null character and
 	 * the position of the first character of the string is the length.
 	 */
-	return (x - s);
+	return ((size_t)(x - s));
 }
 
 int set_debug_flags(const char *flags) {
@@ -362,8 +362,8 @@ void acquire_daemonlock(int closeflag) {
 
 	sprintf(buf, "%ld\n", (long) pid);
 	(void) lseek(fd, (off_t) 0, SEEK_SET);
-	len = strlen(buf);
-	if ((num = write(fd, buf, len)) != len)
+	len = (ssize_t)strlen(buf);
+	if ((num = write(fd, buf, (size_t)len)) != len)
 		log_it("CRON", pid, "ERROR", "write() failed", errno);
 	else {
 		if (ftruncate(fd, num) == -1)
@@ -651,7 +651,7 @@ char *first_word(const char *s, const char *t) {
 /* warning:
  *	heavily ascii-dependent.
  */
-static void mkprint(char *dst, unsigned char *src, int len) {
+static void mkprint(char *dst, unsigned char *src, size_t len) {
 /*
  * XXX
  * We know this routine can't overflow the dst buffer because mkprints()
@@ -662,10 +662,10 @@ static void mkprint(char *dst, unsigned char *src, int len) {
 
 		if (ch < ' ') {	/* control character */
 			*dst++ = '^';
-			*dst++ = ch + '@';
+			*dst++ = (char)(ch + '@');
 		}
 		else if (ch < 0177) {	/* printable */
-			*dst++ = ch;
+			*dst++ = (char)ch;
 		}
 		else if (ch == 0177) {	/* delete/rubout */
 			*dst++ = '^';
@@ -682,7 +682,7 @@ static void mkprint(char *dst, unsigned char *src, int len) {
 /* warning:
  *	returns a pointer to malloc'd storage, you must call free yourself.
  */
-char *mkprints(unsigned char *src, unsigned int len) {
+char *mkprints(unsigned char *src, size_t len) {
 	char *dst = malloc(len * 4 + 1);
 
 	if (dst)

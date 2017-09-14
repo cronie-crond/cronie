@@ -68,11 +68,11 @@ typedef	unsigned char bitstr_t;
 
 				/* set bit N of bitstring name */
 #define	bit_set(name, bit) \
-	(name)[_bit_byte(bit)] |= _bit_mask(bit)
+	(name)[_bit_byte(bit)] |= (bitstr_t)_bit_mask(bit)
 
 				/* clear bit N of bitstring name */
 #define	bit_clear(name, bit) \
-	(name)[_bit_byte(bit)] &= ~_bit_mask(bit)
+	(name)[_bit_byte(bit)] &= (bitstr_t)~_bit_mask(bit)
 
 				/* clear bits start ... stop in bitstring */
 #define	bit_nclear(name, start, stop) { \
@@ -81,13 +81,13 @@ typedef	unsigned char bitstr_t;
 	register int _startbyte = _bit_byte(_start); \
 	register int _stopbyte = _bit_byte(_stop); \
 	if (_startbyte == _stopbyte) { \
-		_name[_startbyte] &= ((0xff >> (8 - (_start&0x7))) | \
+		_name[_startbyte] &= (bitstr_t)((0xff >> (8 - (_start&0x7))) | \
 				      (0xff << ((_stop&0x7) + 1))); \
 	} else { \
-		_name[_startbyte] &= 0xff >> (8 - (_start&0x7)); \
+		_name[_startbyte] &= (bitstr_t)(0xff >> (8 - (_start&0x7))); \
 		while (++_startbyte < _stopbyte) \
 			_name[_startbyte] = 0; \
-		_name[_stopbyte] &= 0xff << ((_stop&0x7) + 1); \
+		_name[_stopbyte] &= (bitstr_t)(0xff << ((_stop&0x7) + 1)); \
 	} \
 }
 
@@ -98,13 +98,13 @@ typedef	unsigned char bitstr_t;
 	register int _startbyte = _bit_byte(_start); \
 	register int _stopbyte = _bit_byte(_stop); \
 	if (_startbyte == _stopbyte) { \
-		_name[_startbyte] |= ((0xff << (_start&0x7)) & \
+		_name[_startbyte] |= (bitstr_t)((0xff << (_start&0x7)) & \
 				    (0xff >> (7 - (_stop&0x7)))); \
 	} else { \
-		_name[_startbyte] |= 0xff << ((_start)&0x7); \
+		_name[_startbyte] |= (bitstr_t)(0xff << ((_start)&0x7)); \
 		while (++_startbyte < _stopbyte) \
 	    		_name[_startbyte] = 0xff; \
-		_name[_stopbyte] |= 0xff >> (7 - (_stop&0x7)); \
+		_name[_stopbyte] |= (bitstr_t)(0xff >> (7 - (_stop&0x7))); \
 	} \
 }
 

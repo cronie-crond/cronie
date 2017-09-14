@@ -68,7 +68,7 @@ struct job_rec1 {
    int timestamp_fd;
    int input_fd;
    int output_fd;
-   int mail_header_size;
+   off_t mail_header_size;
    pid_t job_pid;
    pid_t mailer_pid;
    int drop_job;

@@ -81,9 +81,9 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw, char **jobe
 	if (!pids) {
 		if ((fds = getdtablesize()) <= 0)
 			return (NULL);
-		if (!(pids = (PID_T *) malloc((u_int) (fds * sizeof (PID_T)))))
+		if (!(pids = (PID_T *) malloc((u_int) ((size_t)fds * sizeof (PID_T)))))
 			return (NULL);
-		memset((char *) pids, 0, fds * sizeof (PID_T));
+		memset((char *) pids, 0, (size_t)fds * sizeof (PID_T));
 	}
 	if (pipe(pdes) < 0)
 		return (NULL);

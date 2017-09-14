@@ -192,7 +192,7 @@ time_t nextmatch(entry *e, time_t start) {
  */
 int matchuser(char *user, char *list) {
 	char *pos;
-	int l = strlen(user);
+	size_t l = strlen(user);
 
 	for (pos = list; (pos = strstr(pos, user)) != NULL; pos += l) {
 		if ((pos != list) && (*(pos - 1) != ','))

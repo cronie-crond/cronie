@@ -52,7 +52,8 @@ void env_free(char **envp) {
 }
 
 char **env_copy(char **envp) {
-	int count, i, save_errno;
+	int save_errno;
+	size_t count, i;
 	char **p;
 
 	for (count = 0; envp[count] != NULL; count++) ;
@@ -74,21 +75,21 @@ char **env_copy(char **envp) {
 }
 
 char **env_set(char **envp, const char *envstr) {
-	int count, found;
+	size_t count, found;
 	char **p, *envtmp;
 
 	/*
 	 * count the number of elements, including the null pointer;
 	 * also set 'found' to -1 or index of entry if already in here.
 	 */
-	found = -1;
+	found = (size_t)-1;
 	for (count = 0; envp[count] != NULL; count++) {
 		if (!strcmp_until(envp[count], envstr, '='))
 			found = count;
 	}
 	count++;	/* for the NULL */
 
-	if (found != -1) {
+	if (found != (size_t)-1) {
 		/*
 		 * it exists already, so just free the existing setting,
 		 * save our new one there, and return the existing array.
@@ -108,7 +109,7 @@ char **env_set(char **envp, const char *envstr) {
 	if ((envtmp = strdup(envstr)) == NULL)
 		return (NULL);
 	p = (char **) realloc((void *) envp,
-		(size_t) ((count + 1) * sizeof (char *)));
+		(count + 1) * sizeof (char *));
 	if (p == NULL) {
 		free(envtmp);
 		return (NULL);
@@ -286,7 +287,7 @@ int load_env(char *envstr, FILE * f) {
 }
 
 char *env_get(const char *name, char **envp) {
-	int len = strlen(name);
+	size_t len = strlen(name);
 	char *p, *q;
 
 	while ((p = *envp++) != NULL) {

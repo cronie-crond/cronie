@@ -353,7 +353,7 @@ void check_inotify_database(cron_db * old_db) {
 		new_db.head = new_db.tail = NULL;
 		new_db.ifd = old_db->ifd;
 		new_db.mtime = time(NULL) - 1;
-		while ((retval = read(old_db->ifd, buf, sizeof (buf))) == -1 &&
+		while ((retval = (int)read(old_db->ifd, buf, sizeof (buf))) == -1 &&
 			errno == EINTR) ;
 
 		if (retval == 0) {
@@ -623,7 +623,7 @@ user *find_user(cron_db * db, const char *name, const char *tabname) {
 }
 
 static int not_a_crontab(DIR_T * dp) {
-	int len;
+	size_t len;
 
 	/* avoid file names beginning with ".".  this is good
 	 * because we would otherwise waste two guaranteed calls
@@ -643,10 +643,10 @@ static int not_a_crontab(DIR_T * dp) {
 
 	len = strlen(dp->d_name);
 
-	if (len >= NAME_MAX)
-		return (1);	/* XXX log? */
+	if (len >= NAME_MAX || len == 0)
+		return (1);
 
-	if ((len > 0) && (dp->d_name[len - 1] == '~'))
+	if (dp->d_name[len - 1] == '~')
 		return (1);
 
 	if ((len > 8) && (strncmp(dp->d_name + len - 8, ".rpmsave", 8) == 0))

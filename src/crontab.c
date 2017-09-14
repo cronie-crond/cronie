@@ -856,14 +856,14 @@ static int replace_cmd(void) {
 	file_owner = (getgid() == geteuid() && getgid() == getegid()) ? ROOT_UID : pw->pw_uid;
 
 #ifdef HAVE_FCHOWN
-	if (fchown(fileno(tmp), file_owner, -1) < OK) {
+	if (fchown(fileno(tmp), file_owner, (gid_t)-1) < OK) {
 		perror("fchown");
 		fclose(tmp);
 		error = -2;
 		goto done;
 	}
 #else
-	if (chown(TempFilename, file_owner, -1) < OK) {
+	if (chown(TempFilename, file_owner, (gid_t)-1) < OK) {
 		perror("chown");
 		fclose(tmp);
 		error = -2;

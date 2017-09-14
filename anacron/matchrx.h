@@ -23,4 +23,4 @@
 
 
 int match_rx(const char *rx, char *string,
-	     int n_sub, /* char **substrings */...);
+	     unsigned int n_sub, /* char **substrings */...);

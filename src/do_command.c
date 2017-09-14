@@ -117,7 +117,7 @@ static int child_process(entry * e, char **jobenv) {
 		char *pch;
 
 		for (pch = ProgramName; *pch; pch++)
-			*pch = MkUpper(*pch);
+			*pch = (char)MkUpper(*pch);
 	}
 #endif /* CAPITALIZE_FOR_PS */
 
@@ -156,10 +156,10 @@ static int child_process(entry * e, char **jobenv) {
 		for (input_data = p = e->cmd;
 			(ch = *input_data) != '\0'; input_data++, p++) {
 			if (p != input_data)
-				*p = ch;
+				*p = (char)ch;
 			if (escaped) {
 				if (ch == '%')
-					*--p = ch;
+					*--p = (char)ch;
 				escaped = FALSE;
 				continue;
 			}
@@ -376,7 +376,7 @@ static int child_process(entry * e, char **jobenv) {
 			int bufidx = 0;
 			if (SyslogOutput) {
 				if (ch != '\n')
-					logbuf[bufidx++] = ch;
+					logbuf[bufidx++] = (char)ch;
 			}
 #endif
 
@@ -505,7 +505,7 @@ static int child_process(entry * e, char **jobenv) {
 					putc(ch, mail);
 #if defined(SYSLOG)
 				if (SyslogOutput) {
-					logbuf[bufidx++] = ch;
+					logbuf[bufidx++] = (char)ch;
 					if ((ch == '\n') || (bufidx == sizeof(logbuf)-1)) {
 						if (ch == '\n')
 							logbuf[bufidx-1] = '\0';

@@ -30,7 +30,7 @@
 #include "matchrx.h"
 
 int
-match_rx(const char *rx, char *string, int n_sub,  /* char **substrings */...)
+match_rx(const char *rx, char *string, unsigned int n_sub,  /* char **substrings */...)
 /* Return 1 if the regular expression "*rx" matches the string "*string",
  * 0 if not, -1 on error.
  * "Extended" regular expressions are used.

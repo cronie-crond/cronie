@@ -372,17 +372,17 @@ record_start_time(void)
 		year, month, day_of_month);
 }
 
-static int
+static unsigned int
 time_till(job_rec *jr)
 /* Return the number of seconds that we have to wait until it's time
  * to start job jr.
  */
 {
-    unsigned int tj, tn;
+    time_t tj, tn;
 
     if (now) return 0;
     tn = time(NULL);
-    tj = start_sec + jr->delay * 60;
+    tj = start_sec + (time_t)jr->delay * 60;
     if (tj < tn) return 0;
     if (tj - tn > 3600*24)
     {
@@ -390,7 +390,7 @@ time_till(job_rec *jr)
 	    jr->ident);
 	return 0;
     }
-    return tj - tn;
+    return (unsigned int)(tj - tn);
 }
 
 static void
@@ -447,7 +447,7 @@ main(int argc, char *argv[])
     if (gettimeofday(&tv, &tz) != 0)
         explain("Can't get exact time, failure.");
 
-    srandom(getpid()+tv.tv_usec);
+    srandom((unsigned int)(getpid() + tv.tv_usec));
 
     if((program_name = strrchr(argv[0], '/')) == NULL)
 	program_name = argv[0];
