@@ -250,7 +250,7 @@ cron_db database(char *additional) {
 	struct passwd pw;
 	int fd;
 	user *u;
-	char *pos, *saveptr = NULL;
+	char *pos, *saveptr;
 
 	load_database(&db);
 
@@ -306,7 +306,7 @@ int main(int argn, char *argv[]) {
 	exclude = NULL;
 	system = 1;
 	start = time(NULL);
-	char *additional;
+	char *additional = "";
 	verbose = 0;
 
 	cron_db db;
