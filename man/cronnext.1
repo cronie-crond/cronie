@@ -4,7 +4,9 @@ cronnext \- time of next job cron will execute
 .SH SYNOPSIS
 .TP 9
 .B cronnext
-[\fB-i \fIusers\fR] [\fB-e \fIusers\fR] [\fB-s\fR] [\fB-t \fItime\fR]
+[\fB-i \fIusers\fR] [\fB-e \fIusers\fR] [\fB-s\fR]
+[\fB-a \fIfiles\fR]
+[\fB-t \fItime\fR]
 [\fB-v\fR] [\fB-h\fR] [\fB-V\fR]
 .SH DESCRIPTION
 Determine the time cron will execute the next job.  Without arguments, it
@@ -24,11 +26,17 @@ for the system crontab.
 Do not consider the crontabs of the specified users.
 .TP
 .B \-s
-Do not consider the system crontab, usually
+Do not consider the system crontab, usually the
 .I /etc/crontab
 file.  The system crontab usually contains the hourly, daily, weekly and
 montly crontabs, which might be better dealt with
 .BR anacron (8).
+.TP
+.BI "\-a " file,file,file,...
+Read additional crontabs from given files. Each file is considered the crontab
+of a user whose name is the same as the file name. For example, the command to
+analyze the crontab from file "crtab.txt" and not the others is
+.B crontab -a crtab.txt -i crtab.txt
 .TP
 .BI "\-t " time
 Determine the next job from this time, instead of now.  The time is

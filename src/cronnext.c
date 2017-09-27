@@ -207,16 +207,13 @@ int matchuser(char *user, char *list) {
 /*
  * find next sheduled job
  */
-time_t cronnext(time_t start,
+time_t cronnext(cron_db database,
+		time_t start,
 		char *include, char *exclude, int system,
 		int verbose) {
 	time_t closest, next;
-	static cron_db database = {NULL, NULL, (time_t) 0};
 	user *u;
 	entry *e;
-
-	/* load crontabs */
-	load_database(&database);
 
 	/* find next sheduled time */
 	closest = -1;
@@ -245,6 +242,41 @@ time_t cronnext(time_t start,
 	return closest;
 }
 
+/*
+ * load database with additional crontab files
+ */
+cron_db database(char *additional) {
+	cron_db db = {NULL, NULL, (time_t) 0};
+	struct passwd pw;
+	int fd;
+	user *u;
+	char *pos, *saveptr = NULL;
+
+	load_database(&db);
+
+	for (pos = strtok_r(additional, ",", &saveptr);
+	     pos;
+	     pos = strtok_r(NULL, ",", &saveptr)) {
+		fd = open(pos, O_RDONLY);
+		if (fd == -1) {
+			perror(pos);
+			continue;
+		}
+		memset(&pw, 0, sizeof(pw));
+		pw.pw_name = pos;
+		pw.pw_passwd = "";
+		pw.pw_dir = ".";
+		u = load_user(fd, &pw, pos, pos, pos);
+		if (u == NULL) {
+			printf("cannot load crontab %s\n", pos);
+			continue;
+		}
+		link_user(&db, u);
+	}
+
+	return db;
+}
+
 void usage() {
 	fprintf(stderr, "Find the time of the next scheduled cron job.\n");
 	fprintf(stderr, "Usage:\n");
@@ -254,6 +286,7 @@ void usage() {
 	fprintf(stderr, " -i users  include only the crontab of these users\n");
 	fprintf(stderr, " -e users  exclude the crontab of these users\n");
 	fprintf(stderr, " -s        do not include the system crontab\n");
+	fprintf(stderr, " -a files  additional crontab files\n");
 	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
 	fprintf(stderr, " -v        verbose mode\n");
 	fprintf(stderr, " -h        this help\n");
@@ -273,15 +306,21 @@ int main(int argn, char *argv[]) {
 	exclude = NULL;
 	system = 1;
 	start = time(NULL);
+	char *additional;
 	verbose = 0;
 
-	while (-1 != (opt = getopt(argn, argv, "i:e:st:vhV"))) {
+	cron_db db;
+
+	while (-1 != (opt = getopt(argn, argv, "i:e:a:st:vhV"))) {
 		switch (opt) {
 		case 'i':
 			include = optarg;
 			break;
 		case 'e':
 			exclude = optarg;
+			break;
+		case 'a':
+			additional = optarg;
 			break;
 		case 's':
 			system = 0;
@@ -314,8 +353,11 @@ int main(int argn, char *argv[]) {
 	/* "load,pars" for debugging loading and parsing, "" for nothing
 	   see globals.h for symbolic names and macros.h for meaning */
 
+	/* load database */
+	db = database(strdup(additional));
+
 	/* print time of next scheduled command */
-	next = cronnext(start, include, exclude, system, verbose);
+	next = cronnext(db, start, include, exclude, system, verbose);
 	if (next == -1) {
 		if (verbose)
 			printf("no job scheduled\n");
