@@ -243,32 +243,30 @@ time_t cronnext(cron_db database,
 }
 
 /*
- * load database with additional crontab files
+ * load installed crontabs and/or crontab files
  */
-cron_db database(char *additional) {
+cron_db database(int installed, char **additional) {
 	cron_db db = {NULL, NULL, (time_t) 0};
 	struct passwd pw;
 	int fd;
 	user *u;
-	char *pos, *saveptr;
 
-	load_database(&db);
+	if (installed)
+		load_database(&db);
 
-	for (pos = strtok_r(additional, ",", &saveptr);
-	     pos;
-	     pos = strtok_r(NULL, ",", &saveptr)) {
-		fd = open(pos, O_RDONLY);
+	for ( ; *additional != NULL; additional++) {
+		fd = open(*additional, O_RDONLY);
 		if (fd == -1) {
-			perror(pos);
+			perror(*additional);
 			continue;
 		}
 		memset(&pw, 0, sizeof(pw));
-		pw.pw_name = pos;
+		pw.pw_name = *additional;
 		pw.pw_passwd = "";
 		pw.pw_dir = ".";
-		u = load_user(fd, &pw, pos, pos, pos);
+		u = load_user(fd, &pw, *additional, *additional, *additional);
 		if (u == NULL) {
-			printf("cannot load crontab %s\n", pos);
+			printf("cannot load crontab %s\n", *additional);
 			continue;
 		}
 		link_user(&db, u);
@@ -280,13 +278,13 @@ cron_db database(char *additional) {
 void usage() {
 	fprintf(stderr, "Find the time of the next scheduled cron job.\n");
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, " cronnext [options]\n");
+	fprintf(stderr, " cronnext [options] [file ...]\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, " -i users  include only the crontab of these users\n");
 	fprintf(stderr, " -e users  exclude the crontab of these users\n");
 	fprintf(stderr, " -s        do not include the system crontab\n");
-	fprintf(stderr, " -a files  additional crontab files\n");
+	fprintf(stderr, " -a        examine installed crontabs even if files are given\n");
 	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
 	fprintf(stderr, " -v        verbose mode\n");
 	fprintf(stderr, " -h        this help\n");
@@ -306,12 +304,12 @@ int main(int argn, char *argv[]) {
 	exclude = NULL;
 	system = 1;
 	start = time(NULL);
-	char *additional = "";
+	int installed = 0;
 	verbose = 0;
 
 	cron_db db;
 
-	while (-1 != (opt = getopt(argn, argv, "i:e:a:st:vhV"))) {
+	while (-1 != (opt = getopt(argn, argv, "i:e:ast:vhV"))) {
 		switch (opt) {
 		case 'i':
 			include = optarg;
@@ -320,7 +318,7 @@ int main(int argn, char *argv[]) {
 			exclude = optarg;
 			break;
 		case 'a':
-			additional = optarg;
+			installed = 1;
 			break;
 		case 's':
 			system = 0;
@@ -354,7 +352,7 @@ int main(int argn, char *argv[]) {
 	   see globals.h for symbolic names and macros.h for meaning */
 
 	/* load database */
-	db = database(strdup(additional));
+	db = database(installed || argv[optind] == NULL, argv + optind);
 
 	/* print time of next scheduled command */
 	next = cronnext(db, start, include, exclude, system, verbose);
