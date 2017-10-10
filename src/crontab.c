@@ -272,18 +272,16 @@ static void parse_args(int argc, char *argv[]) {
 				usage("only one operation permitted");
 			Option = opt_list;
 			break;
-		case 'r':
+        case 'r': 
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
-			Option = opt_delete;
+			PromptOnDelete = 1; 
+            Option = opt_delete;
 			break;
 		case 'e':
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
 			Option = opt_edit;
-			break;
-		case 'i':
-			PromptOnDelete = 1;
 			break;
 #ifdef WITH_SELINUX
 		case 's':

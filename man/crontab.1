@@ -33,7 +33,7 @@ crontab \- maintains crontab files for individual users
 .B crontab
 .RB [ -u
 .IR user ]
-.RB [ -l " | " -r " | " -e ]\ [ -i ]
+.RB [ -l " | " -r " | " -e ]
 .RB [ -s ]
 .br
 .B crontab
@@ -123,7 +123,7 @@ command is used under his username.
 Displays the current crontab on standard output.
 .TP
 .B "\-r"
-Removes the current crontab.
+Removes the current crontab with an interactive prompt.
 .TP
 .B "\-e"
 Edits the current crontab using the editor specified by the
@@ -132,12 +132,6 @@ or
 .I EDITOR
 environment variables.  After you exit from the editor, the modified
 crontab will be installed automatically.
-.TP
-.B "\-i"
-This option modifies the
-.B "\-r"
-option to prompt the user for a 'y/Y' response before actually removing
-the crontab.
 .TP
 .B "\-s"
 Appends the current SELinux security context string as an MLS_LEVEL
