@@ -118,7 +118,7 @@ static void usage(const char *msg) {
 	fprintf(stderr, " -u <user>  define user\n");
 	fprintf(stderr, " -e         edit user's crontab\n");
 	fprintf(stderr, " -l         list user's crontab\n");
-	fprintf(stderr, " -r         delete user's crontab\n");
+	fprintf(stderr, " -d         delete user's crontab\n");
 	fprintf(stderr, " -i         prompt before deleting\n");
 	fprintf(stderr, " -n <host>  set host in cluster to run users' crontabs\n");
 	fprintf(stderr, " -c         get host in cluster to run users' crontabs\n");
@@ -272,18 +272,16 @@ static void parse_args(int argc, char *argv[]) {
 				usage("only one operation permitted");
 			Option = opt_list;
 			break;
-		case 'r':
+        case 'r': 
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
-			Option = opt_delete;
+			PromptOnDelete = 1; 
+            Option = opt_delete;
 			break;
 		case 'e':
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
 			Option = opt_edit;
-			break;
-		case 'i':
-			PromptOnDelete = 1;
 			break;
 #ifdef WITH_SELINUX
 		case 's':
