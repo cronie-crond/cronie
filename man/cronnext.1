@@ -4,8 +4,9 @@ cronnext \- time of next job cron will execute
 .SH SYNOPSIS
 .TP 9
 .B cronnext
-[\fB-i \fIusers\fR] [\fB-e \fIusers\fR] [\fB-s\fR] [\fB-t \fItime\fR]
-[\fB-v\fR] [\fB-h\fR] [\fB-V\fR]
+[\fB-i \fIusers\fR] [\fB-e \fIusers\fR] [\fB-s\fR]
+[\fB-t \fItime\fR] [\fB-q \fItime\fR]
+[\fB-l\fR] [\fB-v\fR] [\fB-h\fR] [\fB-V\fR]
 .SH DESCRIPTION
 Determine the time cron will execute the next job.  Without arguments, it
 prints that time considering all crontabs, in number of seconds since the
@@ -34,6 +35,14 @@ montly crontabs, which might be better dealt with
 Determine the next job from this time, instead of now.  The time is
 expressed in number of seconds since the Epoch, as obtained for example by
 .BR "date +%s --date \(dqnow + 2 hours\(dq" .
+.TP
+.BI "\-q " time
+Do not check jobs over this time, expressed in number of seconds since the
+Epoch.
+.TP
+.B \-l
+Print the whole entries of the jobs that are the next to be executed by cron.
+The default is to only print their next time of execution.
 .TP
 .B \-v
 Scanning of the crontab is done in verbose mode.  Each user and job the next
