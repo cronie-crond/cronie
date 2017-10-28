@@ -7,7 +7,7 @@ cronnext \- time of next job cron will execute
 [\fB-i \fIusers\fR] [\fB-e \fIusers\fR] [\fB-s\fR]
 [\fB-a\fR]
 [\fB-t \fItime\fR] [\fB-q \fItime\fR]
-[\fB-l\fR] [\fB-v\fR] [\fB-h\fR] [\fB-V\fR]
+[\fB-l\fR] [\fB-c\fR] [\fB-f\fR] [\fB-h\fR] [\fB-V\fR]
 [file]...
 .SH DESCRIPTION
 Determine the time cron will execute the next job.  Without arguments, it
@@ -54,10 +54,12 @@ Epoch.
 Print the whole entries of the jobs that are the next to be executed by cron.
 The default is to only print their next time of execution.
 .TP
-.B \-v
-Scanning of the crontab is done in verbose mode.  Each user and job the next
-execution time is printed both as number of seconds since the Epoch and in
-the standard format.
+.B \-c
+Print every entry in every crontab with the next time it is executed.
+.TP
+.B \-f
+Print all jobs that are executed in the given interval. Requires option
+\fB-q\fR.
 .TP
 .B \-h
 Print usage output and exit.
