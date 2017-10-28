@@ -327,7 +327,7 @@ int main(int argn, char *argv[]) {
 	flags = SYSTEM;
 	endtime = 0;
 	printjobs = 0;
-	start = time(NULL);
+	start = time(NULL) / 60 * 60;
 	int installed = 0;
 
 	cron_db db;
@@ -347,10 +347,10 @@ int main(int argn, char *argv[]) {
 			flags &= ~SYSTEM;
 			break;
 		case 't':
-			start = atoi(optarg);
+			start = atoi(optarg) / 60 * 60;
 			break;
 		case 'q':
-			end = atoi(optarg);
+			end = atoi(optarg) / 60 * 60;
 			endtime = 1;
 			break;
 		case 'l':

@@ -12,7 +12,8 @@ cronnext \- time of next job cron will execute
 .SH DESCRIPTION
 Determine the time cron will execute the next job.  Without arguments, it
 prints that time considering all crontabs, in number of seconds since the
-Epoch.  This number can be converted into other formats using
+Epoch, rounded to the minute. This number can be converted into other formats
+using
 .BR date (1),
 like
 .B date --date @43243254
@@ -44,11 +45,12 @@ file arguments. This is implicit if no file is passed.
 .BI "\-t " time
 Determine the next job from this time, instead of now.  The time is
 expressed in number of seconds since the Epoch, as obtained for example by
-.BR "date +%s --date \(dqnow + 2 hours\(dq" .
+.BR "date +%s --date \(dqnow + 2 hours\(dq" ,
+and is internally rounded to the minute.
 .TP
 .BI "\-q " time
-Do not check jobs over this time, expressed in number of seconds since the
-Epoch.
+Do not check jobs over this time, expressed in the same way as in option
+.BR -t .
 .TP
 .B \-l
 Print the whole entries of the jobs that are the next to be executed by cron.
