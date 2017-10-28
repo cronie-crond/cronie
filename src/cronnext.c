@@ -78,11 +78,11 @@ char *flagname[]= {
 	[DONT_LOG] =	"DONT_LOG"
 };
 
-void printflags(int flags) {
+void printflags(char *indent, int flags) {
 	int f;
 	int first = 1;
 
-	printf("flags: 0x%d = ", flags);
+	printf("%s    flagnames:", indent);
 	for (f = 1; f < sizeof(flagname);  f = f << 1)
 		if (flags & f) {
 			printf("%s%s", first ? " " : "|", flagname[f]);
@@ -94,13 +94,14 @@ void printflags(int flags) {
 /*
  * print a crontab entry
  */
-void printentry(entry *e, int system, time_t next) {
-	if (system)
-		printf("entry user: %s\n", e->pwd->pw_name);
-	printf("cmd: %s\n", e->cmd);
-	printflags(e->flags);
-	printf("delay: %d\n", e->delay);
-	printf("next: %ld = ", (long)next);
+void printentry(char *indent, entry *e, time_t next) {
+	printf("%s  - user: %s\n", indent, e->pwd->pw_name);
+	printf("%s    cmd: \"%s\"\n", indent, e->cmd);
+	printf("%s    flags: 0x%02X\n", indent, e->flags);
+	printflags(indent, e->flags);
+	printf("%s    delay: %d\n", indent, e->delay);
+	printf("%s    next: %ld\n", indent, (long)next);
+	printf("%s    nextstring: ", indent);
 	printf("%s", asctime(localtime(&next)));
 }
 
@@ -108,10 +109,10 @@ void printentry(entry *e, int system, time_t next) {
  * print a crontab data
  */
 void printcrontab(user *u) {
-	printf("==========================\n");
-	printf("user: %s\n", u->name);
-	printf("crontab: %s\n", u->tabname);
-	printf("system: %d\n", u->system);
+	printf("  - user: \"%s\"\n", u->name);
+	printf("    crontab: %s\n", u->tabname);
+	printf("    system: %d\n", u->system);
+	printf("    entries:\n");
 }
 
 /*
@@ -218,6 +219,12 @@ time_t cronnext(cron_db database,
 	time_t closest, next;
 	user *u;
 	entry *e;
+	char *indent = "";
+
+	if (verbose & CRONTABS) {
+		printf("crontabs:\n");
+		indent = "    ";
+	}
 
 	/* find next sheduled time */
 	closest = -1;
@@ -239,7 +246,7 @@ time_t cronnext(cron_db database,
 			if ((closest < 0) || (next < closest))
 				closest = next;
 			if (verbose & ENTRIES)
-				printentry(e, u->system, next);
+				printentry(indent, e, next);
 		}
 	}
 
@@ -366,8 +373,8 @@ int main(int argn, char *argv[]) {
 
 	/* debug cron */
 	if (verbose) {
-		printf("SPOOL_DIR=%s\n", SPOOL_DIR);
-		set_debug_flags("load");
+		printf("spool: %s\n", SPOOL_DIR);
+		set_debug_flags("");
 	}
 	/* "load,pars" for debugging loading and parsing, "" for nothing
 	   see globals.h for symbolic names and macros.h for meaning */
@@ -383,7 +390,7 @@ int main(int argn, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 	else if (verbose || printjobs) {
-		printf("next jobs:\n");
+		printf("nextjobs:\n");
 		cronnext(db, next, next, include, exclude, system, ENTRIES);
 	}
 	else
