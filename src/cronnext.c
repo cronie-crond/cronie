@@ -142,15 +142,11 @@ int matchday(entry *e, time_t time) {
 /*
  * next time matching a crontab entry
  */
-time_t nextmatch(entry *e, time_t start) {
+time_t nextmatch(entry *e, time_t start, time_t end) {
 	time_t time;
 	struct tm current;
 
-	/* maximum match interval is 8 years (<102 months of 28 days):
-	 * crontab has '* * 29 2 *' and we are on 1 March 2096:
-	 * next matching time will be 29 February 2104 */
-
-	for (time = start; time < start + 102 * 28 * 24 * 60 * 60; ) {
+	for (time = start; time <= end; ) {
 		localtime_r(&time, &current);
 
 		/* month doesn't match: move to 1st of next month */
@@ -211,7 +207,7 @@ int matchuser(char *user, char *list) {
 /*
  * find next sheduled job
  */
-time_t cronnext(time_t start,
+time_t cronnext(time_t start, time_t end,
 		char *include, char *exclude, int system,
 		int verbose) {
 	time_t closest, next;
@@ -236,7 +232,7 @@ time_t cronnext(time_t start,
 			printcrontab(u);
 
 		for (e = u->crontab; e; e = e->next) {
-			next = nextmatch(e, start);
+			next = nextmatch(e, start, end);
 			if (next < 0)
 				continue;
 			if ((closest < 0) || (next < closest))
@@ -259,6 +255,7 @@ void usage() {
 	fprintf(stderr, " -e users  exclude the crontab of these users\n");
 	fprintf(stderr, " -s        do not include the system crontab\n");
 	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
+	fprintf(stderr, " -q time   end check at this time (seconds since epoch)\n");
 	fprintf(stderr, " -v        verbose mode\n");
 	fprintf(stderr, " -h        this help\n");
 	fprintf(stderr, " -V        print version and exit\n");
@@ -270,12 +267,13 @@ void usage() {
 int main(int argn, char *argv[]) {
 	int opt;
 	char *include, *exclude;
-	int system, verbose;
-	time_t start, next;
+	int system, verbose, endtime;
+	time_t start, end, next;
 
 	include = NULL;
 	exclude = NULL;
 	system = 1;
+	endtime = 0;
 	start = time(NULL);
 	verbose = 0;
 
@@ -293,6 +291,10 @@ int main(int argn, char *argv[]) {
 		case 't':
 			start = atoi(optarg);
 			break;
+		case 'q':
+			end = atoi(optarg);
+			endtime = 1;
+			break;
 		case 'v':
 			verbose = 1;
 			break;
@@ -309,6 +311,12 @@ int main(int argn, char *argv[]) {
 			exit(EXIT_FAILURE);
 		}
 	}
+
+	/* maximum match interval is 8 years:
+	 * crontab has '* * 29 2 *' and we are on 1 March 2096:
+	 * next matching time will be 29 February 2104 */
+	if (!endtime)
+		end = start + 8 * 12 * 31 * 24 * 60 * 60;
 
 	/* debug cron */
 	if (verbose) {
