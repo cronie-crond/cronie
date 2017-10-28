@@ -142,15 +142,11 @@ int matchday(entry *e, time_t time) {
 /*
  * next time matching a crontab entry
  */
-time_t nextmatch(entry *e, time_t start) {
+time_t nextmatch(entry *e, time_t start, time_t end) {
 	time_t time;
 	struct tm current;
 
-	/* maximum match interval is 8 years (<102 months of 28 days):
-	 * crontab has '* * 29 2 *' and we are on 1 March 2096:
-	 * next matching time will be 29 February 2104 */
-
-	for (time = start; time < start + 102 * 28 * 24 * 60 * 60; ) {
+	for (time = start; time <= end; ) {
 		localtime_r(&time, &current);
 
 		/* month doesn't match: move to 1st of next month */
@@ -212,7 +208,7 @@ int matchuser(char *user, char *list) {
  * find next sheduled job
  */
 time_t cronnext(cron_db database,
-		time_t start,
+		time_t start, time_t end,
 		char *include, char *exclude, int system,
 		int verbose) {
 	time_t closest, next;
@@ -233,7 +229,7 @@ time_t cronnext(cron_db database,
 			printcrontab(u);
 
 		for (e = u->crontab; e; e = e->next) {
-			next = nextmatch(e, start);
+			next = nextmatch(e, start, end);
 			if (next < 0)
 				continue;
 			if ((closest < 0) || (next < closest))
@@ -290,6 +286,7 @@ void usage() {
 	fprintf(stderr, " -s        do not include the system crontab\n");
 	fprintf(stderr, " -a        examine installed crontabs even if files are given\n");
 	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
+	fprintf(stderr, " -q time   end check at this time (seconds since epoch)\n");
 	fprintf(stderr, " -v        verbose mode\n");
 	fprintf(stderr, " -h        this help\n");
 	fprintf(stderr, " -V        print version and exit\n");
@@ -301,19 +298,20 @@ void usage() {
 int main(int argn, char *argv[]) {
 	int opt;
 	char *include, *exclude;
-	int system, verbose;
-	time_t start, next;
+	int system, verbose, endtime;
+	time_t start, end, next;
 
 	include = NULL;
 	exclude = NULL;
 	system = 1;
+	endtime = 0;
 	start = time(NULL);
 	int installed = 0;
 	verbose = 0;
 
 	cron_db db;
 
-	while (-1 != (opt = getopt(argn, argv, "i:e:ast:vhV"))) {
+	while (-1 != (opt = getopt(argn, argv, "i:e:ast:q:vhV"))) {
 		switch (opt) {
 		case 'i':
 			include = optarg;
@@ -329,6 +327,10 @@ int main(int argn, char *argv[]) {
 			break;
 		case 't':
 			start = atoi(optarg);
+			break;
+		case 'q':
+			end = atoi(optarg);
+			endtime = 1;
 			break;
 		case 'v':
 			verbose = 1;
@@ -347,6 +349,12 @@ int main(int argn, char *argv[]) {
 		}
 	}
 
+	/* maximum match interval is 8 years:
+	 * crontab has '* * 29 2 *' and we are on 1 March 2096:
+	 * next matching time will be 29 February 2104 */
+	if (!endtime)
+		end = start + 8 * 12 * 31 * 24 * 60 * 60;
+
 	/* debug cron */
 	if (verbose) {
 		printf("SPOOL_DIR=%s\n", SPOOL_DIR);
@@ -359,7 +367,7 @@ int main(int argn, char *argv[]) {
 	db = database(installed || argv[optind] == NULL, argv + optind);
 
 	/* print time of next scheduled command */
-	next = cronnext(db, start, include, exclude, system, verbose);
+	next = cronnext(db, start, end, include, exclude, system, verbose);
 	if (next == -1) {
 		if (verbose)
 			printf("no job scheduled\n");
