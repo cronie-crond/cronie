@@ -32,6 +32,10 @@
 #include "funcs.h"
 #include "cron-paths.h"
 
+/* what to print: entries, crontabs, both */
+#define ENTRIES  0x01
+#define CRONTABS 0x02
+
 #ifdef WITH_INOTIFY
 void set_cron_watched(int fd) {
 /* empty stub */
@@ -225,7 +229,7 @@ time_t cronnext(cron_db database,
 		if (!system && u->system)
 			continue;
 
-		if (verbose)
+		if (verbose & CRONTABS)
 			printcrontab(u);
 
 		for (e = u->crontab; e; e = e->next) {
@@ -234,7 +238,7 @@ time_t cronnext(cron_db database,
 				continue;
 			if ((closest < 0) || (next < closest))
 				closest = next;
-			if (verbose)
+			if (verbose & ENTRIES)
 				printentry(e, u->system, next);
 		}
 	}
@@ -287,6 +291,7 @@ void usage() {
 	fprintf(stderr, " -a        examine installed crontabs even if files are given\n");
 	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
 	fprintf(stderr, " -q time   end check at this time (seconds since epoch)\n");
+	fprintf(stderr, " -l        print next jobs to be executed\n");
 	fprintf(stderr, " -v        verbose mode\n");
 	fprintf(stderr, " -h        this help\n");
 	fprintf(stderr, " -V        print version and exit\n");
@@ -298,13 +303,14 @@ void usage() {
 int main(int argn, char *argv[]) {
 	int opt;
 	char *include, *exclude;
-	int system, verbose, endtime;
+	int system, verbose, endtime, printjobs;
 	time_t start, end, next;
 
 	include = NULL;
 	exclude = NULL;
 	system = 1;
 	endtime = 0;
+	printjobs = 0;
 	start = time(NULL);
 	int installed = 0;
 	verbose = 0;
@@ -332,8 +338,11 @@ int main(int argn, char *argv[]) {
 			end = atoi(optarg);
 			endtime = 1;
 			break;
+		case 'l':
+			printjobs = 1;
+			break;
 		case 'v':
-			verbose = 1;
+			verbose = ENTRIES | CRONTABS;
 			break;
 		case 'h':
 			usage();
@@ -373,9 +382,10 @@ int main(int argn, char *argv[]) {
 			printf("no job scheduled\n");
 		return EXIT_FAILURE;
 	}
-	else if (verbose)
-		printf("next of all jobs: %ld = %s",
-			(long) next, asctime(localtime(&next)));
+	else if (verbose || printjobs) {
+		printf("next jobs:\n");
+		cronnext(db, next, next, include, exclude, system, ENTRIES);
+	}
 	else
 		printf("%ld\n", (long) next);
 
