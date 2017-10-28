@@ -297,7 +297,7 @@ int main(int argn, char *argv[]) {
 	flags = SYSTEM;
 	endtime = 0;
 	printjobs = 0;
-	start = time(NULL);
+	start = time(NULL) / 60 * 60;
 	verbose = 0;
 
 	while (-1 != (opt = getopt(argn, argv, "i:e:ast:q:lcfhV"))) {
@@ -312,10 +312,10 @@ int main(int argn, char *argv[]) {
 			flags &= ~SYSTEM;
 			break;
 		case 't':
-			start = atoi(optarg);
+			start = atoi(optarg) / 60 * 60;
 			break;
 		case 'q':
-			end = atoi(optarg);
+			end = atoi(optarg) / 60 * 60;
 			endtime = 1;
 			break;
 		case 'l':
