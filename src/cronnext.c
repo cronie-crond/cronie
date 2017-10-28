@@ -76,10 +76,14 @@ char *flagname[]= {
 
 void printflags(int flags) {
 	int f;
+	int first = 1;
+
 	printf("flags: 0x%d = ", flags);
 	for (f = 1; f < sizeof(flagname);  f = f << 1)
-		if (flags & f)
-			printf("%s ", flagname[f]);
+		if (flags & f) {
+			printf("%s%s", first ? " " : "|", flagname[f]);
+			first = 0;
+		}
 	printf("\n");
 }
 
