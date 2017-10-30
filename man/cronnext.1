@@ -4,15 +4,23 @@ cronnext \- time of next job cron will execute
 .SH SYNOPSIS
 .TP 9
 .B cronnext
-[\fB-i \fIusers\fR] [\fB-e \fIusers\fR] [\fB-s\fR] [\fB-t \fItime\fR]
-[\fB-v\fR] [\fB-h\fR] [\fB-V\fR]
+[\fB-i \fIusers\fR] [\fB-e \fIusers\fR] [\fB-s\fR]
+[\fB-a\fR]
+[\fB-t \fItime\fR] [\fB-q \fItime\fR]
+[\fB-l\fR] [\fB-c\fR] [\fB-f\fR] [\fB-h\fR] [\fB-V\fR]
+[\fIfile\fR]...
 .SH DESCRIPTION
 Determine the time cron will execute the next job.  Without arguments, it
 prints that time considering all crontabs, in number of seconds since the
-Epoch.  This number can be converted into other formats using
+Epoch, rounded to the minute. This number can be converted into other formats
+using
 .BR date (1),
 like
 .B date --date @43243254
+
+The file arguments are optional. If provided,
+.I cronnext
+uses them as crontabs instead of the ones installed in the system.
 .SH OPTIONS
 .TP
 .BI "\-i " user,user,user,...
@@ -24,21 +32,36 @@ for the system crontab.
 Do not consider the crontabs of the specified users.
 .TP
 .B \-s
-Do not consider the system crontab, usually
+Do not consider the system crontab, usually the
 .I /etc/crontab
 file.  The system crontab usually contains the hourly, daily, weekly and
 montly crontabs, which might be better dealt with
 .BR anacron (8).
 .TP
+.BI \-a
+Use the crontabs installed in the system in addition to the ones passed as
+file arguments. This is implicit if no file is passed.
+.TP
 .BI "\-t " time
 Determine the next job from this time, instead of now.  The time is
 expressed in number of seconds since the Epoch, as obtained for example by
-.BR "date +%s --date \(dqnow + 2 hours\(dq" .
+.BR "date +%s --date \(dqnow + 2 hours\(dq" ,
+and is internally rounded to the minute.
 .TP
-.B \-v
-Scanning of the crontab is done in verbose mode.  Each user and job the next
-execution time is printed both as number of seconds since the Epoch and in
-the standard format.
+.BI "\-q " time
+Do not check jobs over this time, expressed in the same way as in option
+.BR -t .
+.TP
+.B \-l
+Print the whole entries of the jobs that are the next to be executed by cron.
+The default is to only print their next time of execution.
+.TP
+.B \-c
+Print every entry in every crontab with the next time it is executed.
+.TP
+.B \-f
+Print all jobs that are executed in the given interval. Requires option
+\fB-q\fR.
 .TP
 .B \-h
 Print usage output and exit.
