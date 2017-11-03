@@ -32,6 +32,12 @@
 #include "funcs.h"
 #include "cron-paths.h"
 
+/* flags to crontab search */
+#define ENTRIES  0x01			// print entries
+#define CRONTABS 0x02			// print crontabs
+#define SYSTEM   0x04			// include system crontab
+#define ALLJOBS  0x08			// print all jobs in interval
+
 #ifdef WITH_INOTIFY
 void set_cron_watched(int fd) {
 /* empty stub */
@@ -74,25 +80,30 @@ char *flagname[]= {
 	[DONT_LOG] =	"DONT_LOG"
 };
 
-void printflags(int flags) {
+void printflags(char *indent, int flags) {
 	int f;
-	printf("flags: 0x%d = ", flags);
+	int first = 1;
+
+	printf("%s    flagnames:", indent);
 	for (f = 1; f < sizeof(flagname);  f = f << 1)
-		if (flags & f)
-			printf("%s ", flagname[f]);
+		if (flags & f) {
+			printf("%s%s", first ? " " : "|", flagname[f]);
+			first = 0;
+		}
 	printf("\n");
 }
 
 /*
  * print a crontab entry
  */
-void printentry(entry *e, int system, time_t next) {
-	if (system)
-		printf("entry user: %s\n", e->pwd->pw_name);
-	printf("cmd: %s\n", e->cmd);
-	printflags(e->flags);
-	printf("delay: %d\n", e->delay);
-	printf("next: %ld = ", (long)next);
+void printentry(char *indent, entry *e, time_t next) {
+	printf("%s  - user: %s\n", indent, e->pwd->pw_name);
+	printf("%s    cmd: \"%s\"\n", indent, e->cmd);
+	printf("%s    flags: 0x%02X\n", indent, e->flags);
+	printflags(indent, e->flags);
+	printf("%s    delay: %d\n", indent, e->delay);
+	printf("%s    next: %ld\n", indent, (long)next);
+	printf("%s    nextstring: ", indent);
 	printf("%s", asctime(localtime(&next)));
 }
 
@@ -100,10 +111,10 @@ void printentry(entry *e, int system, time_t next) {
  * print a crontab data
  */
 void printcrontab(user *u) {
-	printf("==========================\n");
-	printf("user: %s\n", u->name);
-	printf("crontab: %s\n", u->tabname);
-	printf("system: %d\n", u->system);
+	printf("  - user: \"%s\"\n", u->name);
+	printf("    crontab: %s\n", u->tabname);
+	printf("    system: %d\n", u->system);
+	printf("    entries:\n");
 }
 
 /*
@@ -138,15 +149,11 @@ int matchday(entry *e, time_t time) {
 /*
  * next time matching a crontab entry
  */
-time_t nextmatch(entry *e, time_t start) {
+time_t nextmatch(entry *e, time_t start, time_t end) {
 	time_t time;
 	struct tm current;
 
-	/* maximum match interval is 8 years (<102 months of 28 days):
-	 * crontab has '* * 29 2 *' and we are on 1 March 2096:
-	 * next matching time will be 29 February 2104 */
-
-	for (time = start; time < start + 102 * 28 * 24 * 60 * 60; ) {
+	for (time = start; time <= end; ) {
 		localtime_r(&time, &current);
 
 		/* month doesn't match: move to 1st of next month */
@@ -208,12 +215,20 @@ int matchuser(char *user, char *list) {
  * find next sheduled job
  */
 time_t cronnext(cron_db database,
-		time_t start,
+		time_t start, time_t end,
 		char *include, char *exclude, int system,
 		int verbose) {
 	time_t closest, next;
 	user *u;
 	entry *e;
+	char *indent = "";
+
+	if (flags & CRONTABS) {
+		printf("crontabs:\n");
+		indent = "    ";
+	}
+	else if (flags & ALLJOBS)
+		printf("jobs:\n");
 
 	/* find next sheduled time */
 	closest = -1;
@@ -222,21 +237,25 @@ time_t cronnext(cron_db database,
 			continue;
 		if (exclude && matchuser(u->name, exclude))
 			continue;
-		if (!system && u->system)
+		if (!(flags & SYSTEM) && u->system)
 			continue;
 
-		if (verbose)
+		if (flags & CRONTABS)
 			printcrontab(u);
 
-		for (e = u->crontab; e; e = e->next) {
-			next = nextmatch(e, start);
-			if (next < 0)
-				continue;
-			if ((closest < 0) || (next < closest))
-				closest = next;
-			if (verbose)
-				printentry(e, u->system, next);
-		}
+		for (e = u->crontab; e; e = e->next)
+			for (next = nextmatch(e, start, end);
+			     next <= end;
+			     next = nextmatch(e, next + 60, end)) {
+				if (next < 0)
+					break;
+				if (closest < 0 || next < closest)
+					closest = next;
+				if (flags & ENTRIES)
+					printentry(indent, e, next);
+				if (! (flags & ALLJOBS))
+					break;
+			}
 	}
 
 	return closest;
@@ -286,7 +305,10 @@ void usage() {
 	fprintf(stderr, " -s        do not include the system crontab\n");
 	fprintf(stderr, " -a        examine installed crontabs even if files are given\n");
 	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
-	fprintf(stderr, " -v        verbose mode\n");
+	fprintf(stderr, " -q time   end check at this time (seconds since epoch)\n");
+	fprintf(stderr, " -l        print next jobs to be executed\n");
+	fprintf(stderr, " -c        print next execution of each job\n");
+	fprintf(stderr, " -f        print all jobs executed in the given interval\n");
 	fprintf(stderr, " -h        this help\n");
 	fprintf(stderr, " -V        print version and exit\n");
 }
@@ -297,19 +319,20 @@ void usage() {
 int main(int argn, char *argv[]) {
 	int opt;
 	char *include, *exclude;
-	int system, verbose;
-	time_t start, next;
+	int flags;
+	time_t start, end, next;
+	int endtime, printjobs;
+  int installed = 0;
+	cron_db db;
 
 	include = NULL;
 	exclude = NULL;
-	system = 1;
-	start = time(NULL);
-	int installed = 0;
-	verbose = 0;
+	flags = SYSTEM;
+	endtime = 0;
+	printjobs = 0;
+	start = time(NULL) / 60 * 60;
 
-	cron_db db;
-
-	while (-1 != (opt = getopt(argn, argv, "i:e:ast:vhV"))) {
+	while (-1 != (opt = getopt(argn, argv, "i:e:ast:q:lcfhV"))) {
 		switch (opt) {
 		case 'i':
 			include = optarg;
@@ -321,13 +344,23 @@ int main(int argn, char *argv[]) {
 			installed = 1;
 			break;
 		case 's':
-			system = 0;
+			flags &= ~SYSTEM;
 			break;
 		case 't':
-			start = atoi(optarg);
+			start = atoi(optarg) / 60 * 60;
 			break;
-		case 'v':
-			verbose = 1;
+		case 'q':
+			end = atoi(optarg) / 60 * 60;
+			endtime = 1;
+			break;
+		case 'l':
+			printjobs = 1;
+			break;
+		case 'c':
+			flags |= ENTRIES | CRONTABS;
+			break;
+		case 'f':
+			flags |= ALLJOBS | ENTRIES;
 			break;
 		case 'h':
 			usage();
@@ -343,29 +376,43 @@ int main(int argn, char *argv[]) {
 		}
 	}
 
+	if (flags & ALLJOBS && !endtime) {
+		fprintf(stderr, "no ending time specified: -f requires -q\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	/* maximum match interval is 8 years:
+	 * crontab has '* * 29 2 *' and we are on 1 March 2096:
+	 * next matching time will be 29 February 2104 */
+	if (!endtime)
+		end = start + 8 * 12 * 31 * 24 * 60 * 60;
+
 	/* debug cron */
-	if (verbose) {
-		printf("SPOOL_DIR=%s\n", SPOOL_DIR);
-		set_debug_flags("load");
+	if (flags & CRONTABS) {
+		printf("spool: %s\n", SPOOL_DIR);
+		set_debug_flags("");
 	}
 	/* "load,pars" for debugging loading and parsing, "" for nothing
 	   see globals.h for symbolic names and macros.h for meaning */
 
-	/* load database */
+  /* load database */
 	db = database(installed || argv[optind] == NULL, argv + optind);
 
-	/* print time of next scheduled command */
-	next = cronnext(db, start, include, exclude, system, verbose);
-	if (next == -1) {
-		if (verbose)
-			printf("no job scheduled\n");
+	/* find time of next scheduled command */
+	next = cronnext(start, end, include, exclude, flags);
+
+	/* print time */
+	if (next == -1)
 		return EXIT_FAILURE;
-	}
-	else if (verbose)
-		printf("next of all jobs: %ld = %s",
-			(long) next, asctime(localtime(&next)));
 	else
-		printf("%ld\n", (long) next);
+		printf("next: %ld\n", (long) next);
+
+	/* print next jobs */
+	if (printjobs) {
+		printf("nextjobs:\n");
+		cronnext(db, next, next, include, exclude, (flags & SYSTEM) | ENTRIES);
+	}
 
 	return EXIT_SUCCESS;
 }
