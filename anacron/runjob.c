@@ -249,6 +249,7 @@ launch_job(job_rec *jr)
     int fd;
     char hostname[512];
     char *mailto;
+    char *mailfrom;
 
     /* get hostname */
     if (gethostname(hostname, 512)) {
@@ -263,12 +264,17 @@ launch_job(job_rec *jr)
     if (mailto == NULL)
 	mailto = username();
 
+    /* Get the source email address if set, or current user otherwise */
+    mailfrom = getenv("MAILFROM");
+    if (mailfrom == NULL)
+	mailfrom = username();
+
     /* create temporary file for stdout and stderr of the job */
     temp_file(jr); fd = jr->output_fd;
     /* write mail header */
     xwrite(fd, "From: ");
     xwrite(fd, "Anacron <");
-    xwrite(fd, username());
+    xwrite(fd, mailfrom);
     xwrite(fd, ">\n");
     xwrite(fd, "To: ");
     xwrite(fd, mailto);
