@@ -319,7 +319,7 @@ int main(int argn, char *argv[]) {
 	int opt;
 	char *include, *exclude;
 	int flags;
-	time_t start, end, next;
+	time_t start, next, end = 0;
 	int endtime, printjobs;
 	cron_db db;
 	int installed = 0;
