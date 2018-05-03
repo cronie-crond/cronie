@@ -362,6 +362,7 @@ static void parse_args(int argc, char *argv[]) {
 			 * Arnt Gulbrandsen <agulbra@pvv.unit.no> for spotting
 			 * the race.
 			 */
+			struct stat sb;
 
 			if (swap_uids() < OK) {
 				perror("swapping uids");
@@ -369,6 +370,17 @@ static void parse_args(int argc, char *argv[]) {
 			}
 			if (!(NewCrontab = fopen(Filename, "r"))) {
 				perror(Filename);
+				exit(ERROR_EXIT);
+			}
+			if (fstat(fileno(NewCrontab), &sb) < 0) {
+				perror(Filename);
+				exit(ERROR_EXIT);
+			}
+			if ((sb.st_mode & S_IFMT) == S_IFDIR) {
+				fprintf(stderr,
+					"cannot replace crontab with a directory: %s\n",
+					Filename);
+				fclose(NewCrontab);
 				exit(ERROR_EXIT);
 			}
 			if (swap_uids_back() < OK) {
