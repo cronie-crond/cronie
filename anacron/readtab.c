@@ -134,7 +134,7 @@ register_env(const char *env_var, const char *value)
 
     var_len = (int)strlen(env_var);
     val_len = (int)strlen(value);
-    if (!var_len || !val_len) {
+    if (!var_len) {
         return;
     }
 
@@ -145,7 +145,6 @@ register_env(const char *env_var, const char *value)
 
     er->assign = obstack_alloc(&tab_o, var_len + 1 + val_len + 1);
     if (er->assign == NULL) {
-        obstack_free(&tab_o, er);
         die_e("Cannot allocate memory.");
     }
     strcpy(er->assign, env_var);
@@ -189,13 +188,13 @@ register_job(const char *periods, const char *delays,
     jr->tab_line = line_num;
     jr->ident = obstack_alloc(&tab_o, ident_len + 1);
     if (jr->ident == NULL) {
-        goto error;
+        die_e("Cannot allocate memory.");
     }
     strcpy(jr->ident, ident);
     jr->arg_num = job_arg_num(ident);
     jr->command = obstack_alloc(&tab_o, command_len + 1);
     if (jr->command == NULL) {
-        goto error;
+        die_e("Cannot allocate memory.");
     }
     strcpy(jr->command, command);
     jr->job_pid = jr->mailer_pid = 0;
@@ -206,11 +205,6 @@ register_job(const char *periods, const char *delays,
     jr->next = NULL;
     Debug(("Read job - period=%d, delay=%d, ident=%s, command=%s",
 	   jr->period, jr->delay, jr->ident, jr->command));
-
-    return;
-error:
-    obstack_free(&tab_o, jr);
-    die_e("Cannot allocate memory.");
 }
 
 static void
@@ -255,13 +249,13 @@ register_period_job(const char *periods, const char *delays,
     jr->tab_line = line_num;
     jr->ident = obstack_alloc(&tab_o, ident_len + 1);
     if (jr->ident == NULL) {
-        goto error;
+        die_e("Cannot allocate memory.");
     }
     strcpy(jr->ident, ident);
     jr->arg_num = job_arg_num(ident);
     jr->command = obstack_alloc(&tab_o, command_len + 1);
     if (jr->command == NULL) {
-        goto error;
+        die_e("Cannot allocate memory.");
     }
     strcpy(jr->command, command);
     jr->job_pid = jr->mailer_pid = 0;
@@ -272,12 +266,6 @@ register_period_job(const char *periods, const char *delays,
     jr->next = NULL;
     Debug(("Read job - period %d, delay=%d, ident%s, command=%s",
 	  jr->named_period, jr->delay, jr->ident, jr->command));
-
-    return;
-
-error:
-    obstack_free(&tab_o, jr);
-    die_e("Cannot allocate memory.");
 }
 
 static long int
