@@ -104,9 +104,53 @@ username(void)
 static void
 xputenv(const char *s)
 {
-    char *copy = strdup (s);
-    if (!copy) die_e("Not enough memory to set the environment");
-    if (putenv(copy)) die_e("Can't set the environment");
+    char *name = NULL, *val = NULL;
+    char *retval;
+    const char *errmsg;
+    size_t eq_sign;
+
+    if (s == NULL) {
+        errmsg = "Invalid environment string";
+        goto err;
+    }
+
+    retval = strchr(s, '=');
+    if (retval == NULL) {
+        errmsg = "Invalid environment string";
+        goto err;
+    }
+
+    eq_sign = (size_t) (retval - s);
+
+    name = malloc((eq_sign + 1) * sizeof(char));
+    if (name == NULL) {
+        errmsg = "Not enough memory to set the environment";
+        goto err;
+    }
+
+    val = malloc((strlen(s) - eq_sign) * sizeof(char));
+    if (val == NULL) {
+        errmsg = "Not enough memory to set the environment";
+        goto err;
+    }
+
+    strncpy(name, s, eq_sign - 1);
+    name[eq_sign] = '\0';
+    strcpy(val, &s[eq_sign+1]);
+
+    if (setenv(name, val, 1)) {
+        errmsg = "Can't set the environment";
+        goto err;
+    }
+
+    free(name);
+    free(val);
+    return;
+
+err:
+    free(name);
+    free(val);
+    die_e("%s", errmsg);
 }
 
 static void

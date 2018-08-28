@@ -134,8 +134,20 @@ register_env(const char *env_var, const char *value)
 
     var_len = (int)strlen(env_var);
     val_len = (int)strlen(value);
+    if (!var_len || !val_len) {
+        return;
+    }
+
     er = obstack_alloc(&tab_o, sizeof(env_rec));
+    if (er == NULL) {
+        die_e("Cannot allocate memory.");
+    }
+
     er->assign = obstack_alloc(&tab_o, var_len + 1 + val_len + 1);
+    if (er->assign == NULL) {
+        obstack_free(&tab_o, er);
+        die_e("Cannot allocate memory.");
+    }
     strcpy(er->assign, env_var);
     er->assign[var_len] = '=';
     strcpy(er->assign + var_len + 1, value);
@@ -167,15 +179,24 @@ register_job(const char *periods, const char *delays,
 	return;
     }
     jr = obstack_alloc(&tab_o, sizeof(job_rec));
+    if (jr == NULL) {
+        die_e("Cannot allocate memory.");
+    }
     jr->period = period;
     jr->named_period = 0;
     delay += random_number;
     jr->delay = delay;
     jr->tab_line = line_num;
     jr->ident = obstack_alloc(&tab_o, ident_len + 1);
+    if (jr->ident == NULL) {
+        goto error;
+    }
     strcpy(jr->ident, ident);
     jr->arg_num = job_arg_num(ident);
     jr->command = obstack_alloc(&tab_o, command_len + 1);
+    if (jr->command == NULL) {
+        goto error;
+    }
     strcpy(jr->command, command);
     jr->job_pid = jr->mailer_pid = 0;
     if (last_job_rec != NULL) last_job_rec->next = jr;
@@ -185,6 +206,11 @@ register_job(const char *periods, const char *delays,
     jr->next = NULL;
     Debug(("Read job - period=%d, delay=%d, ident=%s, command=%s",
 	   jr->period, jr->delay, jr->ident, jr->command));
+
+    return;
+error:
+    obstack_free(&tab_o, jr);
+    die_e("Cannot allocate memory.");
 }
 
 static void
@@ -208,6 +234,9 @@ register_period_job(const char *periods, const char *delays,
     }
 
     jr = obstack_alloc(&tab_o, sizeof(job_rec));
+    if (jr == NULL) {
+        die_e("Cannot allocate memory.");
+    }
     if (!strncmp ("@monthly", periods, 8)) {
 		jr->named_period = 1;
     } else if (!strncmp("@yearly", periods, 7) || !strncmp("@annually", periods, 9) || !strncmp(/* backwards compat misspelling */"@annualy", periods, 8)) {
@@ -225,9 +254,15 @@ register_period_job(const char *periods, const char *delays,
     jr->delay = delay;
     jr->tab_line = line_num;
     jr->ident = obstack_alloc(&tab_o, ident_len + 1);
+    if (jr->ident == NULL) {
+        goto error;
+    }
     strcpy(jr->ident, ident);
     jr->arg_num = job_arg_num(ident);
     jr->command = obstack_alloc(&tab_o, command_len + 1);
+    if (jr->command == NULL) {
+        goto error;
+    }
     strcpy(jr->command, command);
     jr->job_pid = jr->mailer_pid = 0;
     if (last_job_rec != NULL) last_job_rec->next = jr;
@@ -237,6 +272,12 @@ register_period_job(const char *periods, const char *delays,
     jr->next = NULL;
     Debug(("Read job - period %d, delay=%d, ident%s, command=%s",
 	  jr->named_period, jr->delay, jr->ident, jr->command));
+
+    return;
+
+error:
+    obstack_free(&tab_o, jr);
+    die_e("Cannot allocate memory.");
 }
 
 static long int
