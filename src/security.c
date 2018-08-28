@@ -417,7 +417,7 @@ static int cron_change_selinux_range(user * u, security_context_t ucontext) {
 		}
 	}
 
-	if (strcmp(u->scontext, ucontext)) {
+	if (!ucontext || strcmp(u->scontext, ucontext)) {
 		if (!cron_authorize_range(u->scontext, ucontext)) {
 			if (security_getenforce() > 0) {
 # ifdef WITH_AUDIT

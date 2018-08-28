@@ -77,7 +77,7 @@ XTRN int	SyslogOutput;
 XTRN time_t	StartTime;
 XTRN int	NoFork;
 XTRN int        PermitAnyCrontab;
-XTRN char       MailCmd[MAX_COMMAND];
+XTRN char       MailCmd[MAX_COMMAND+1]; // +1 for terminator
 XTRN char       cron_default_mail_charset[MAX_ENVSTR];
 XTRN int        EnableClustering;
 XTRN int	ChangePath;

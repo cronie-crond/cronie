@@ -71,22 +71,21 @@ void free_security_context(security_context_t *scontext) {
 /*
  * print entry flags
  */
-char *flagname[]= {
-	[MIN_STAR] =	"MIN_STAR",
-	[HR_STAR] =	"HR_STAR",
-	[DOM_STAR] =	"DOM_STAR",
-	[DOW_STAR] =	"DOW_STAR",
-	[WHEN_REBOOT] =	"WHEN_REBOOT",
-	[DONT_LOG] =	"DONT_LOG"
+const char *flagname[]= {
+	"MIN_STAR",
+	"HR_STAR",
+	"DOM_STAR",
+	"DOW_STAR",
+	"WHEN_REBOOT",
+	"DONT_LOG"
 };
 
 void printflags(char *indent, int flags) {
-	int f;
 	int first = 1;
 
 	printf("%s    flagnames:", indent);
-	for (f = 1; f < sizeof(flagname);  f = f << 1)
-		if (flags & f) {
+	for (int f = 0; sizeof(flagname)/sizeof(char *);  f++)
+		if (flags & (int)1 << f) {
 			printf("%s%s", first ? " " : "|", flagname[f]);
 			first = 0;
 		}
