@@ -44,9 +44,9 @@ void
 free_user (user * u) {
 	entry *e, *ne;
 
-    if (!u) {
-        return;
-    }
+	if (!u) {
+		return;
+	}
 
 	free(u->name);
 	free(u->tabname);

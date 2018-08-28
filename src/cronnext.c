@@ -81,10 +81,11 @@ const char *flagname[]= {
 };
 
 void printflags(char *indent, int flags) {
+	int f;
 	int first = 1;
 
 	printf("%s    flagnames:", indent);
-	for (int f = 0; sizeof(flagname)/sizeof(char *);  f++)
+	for (f = 0; f < sizeof(flagname)/sizeof(char *);  f++)
 		if (flags & (int)1 << f) {
 			printf("%s%s", first ? " " : "|", flagname[f]);
 			first = 0;

@@ -418,7 +418,7 @@ static int child_process(entry * e, char **jobenv) {
 			if (mailto && safe_p(usernm, mailto)
 				&& strncmp(MailCmd,"off",3) && !SyslogOutput) {
 				char **env;
-				char mailcmd[MAX_COMMAND];
+				char mailcmd[MAX_COMMAND+1]; /* +1 for terminator */
 				char hostname[MAXHOSTNAMELEN];
 				char *content_type = env_get("CONTENT_TYPE", jobenv),
 					*content_transfer_encoding =
@@ -434,7 +434,7 @@ static int child_process(entry * e, char **jobenv) {
 					}
 				}
 				else {
-					strncpy(mailcmd, MailCmd, MAX_COMMAND);
+					strncpy(mailcmd, MailCmd, MAX_COMMAND+1);
 				}
 				if (!(mail = cron_popen(mailcmd, "w", e->pwd, jobenv))) {
 					perror(mailcmd);
