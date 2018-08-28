@@ -44,6 +44,10 @@ void
 free_user (user * u) {
 	entry *e, *ne;
 
+	if (!u) {
+		return;
+	}
+
 	free(u->name);
 	free(u->tabname);
 	for (e = u->crontab; e != NULL; e = ne)	{

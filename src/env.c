@@ -63,7 +63,7 @@ char **env_copy(char **envp) {
 		for (i = 0; i < count; i++)
 			if ((p[i] = strdup(envp[i])) == NULL) {
 				save_errno = errno;
-				while (--i >= 0)
+				while (i-- > 0)
 					free(p[i]);
 				free(p);
 				errno = save_errno;
@@ -263,7 +263,9 @@ int load_env(char *envstr, FILE * f) {
 	}
 	if (state != FINI && state != EQ2 && !(state == VALUE && !quotechar)) {
 		Debug(DPARS, ("load_env, not an env var, state = %d\n", state));
-			fseek(f, filepos, 0);
+			if (fseek(f, filepos, 0)) {
+                return ERR;
+           }
 		Set_LineNum(fileline);
 		return (FALSE);
 	}
