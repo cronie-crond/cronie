@@ -131,8 +131,10 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 			goto eof;
 		}
 		ch = get_char(file);
-		if (ch == EOF)
+		if (ch == EOF) {
+			free(e);
 			return NULL;
+		}
 	}
 
 	if (ch == '@') {
