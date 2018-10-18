@@ -505,6 +505,7 @@ get_security_context(const char *name, int crontab_fd,
 		retval = get_default_context_with_level(seuser, level, NULL, &scontext);
 	}
 	else {
+		const char *current_user, *current_role;
 		if (getcon(&current_context_str) < 0) {
 			log_it(name, getpid(), "getcon FAILED", "", 0);
 			return (security_getenforce() > 0);
@@ -517,8 +518,9 @@ get_security_context(const char *name, int crontab_fd,
 			return (security_getenforce() > 0);
 		}
 
-		const char *current_user = context_user_get(current_context);
-		retval = get_default_context_with_level(current_user, level, NULL, &scontext);
+		current_user = context_user_get(current_context);
+		current_role = context_role_get(current_context);
+		retval = get_default_context_with_rolelevel(current_user, current_role, level, NULL, &scontext);
 
 		freecon(current_context_str);
 		context_free(current_context);
