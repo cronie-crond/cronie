@@ -23,7 +23,7 @@ Cronie is packaged by these distributions:
 - Mandriva [http://sophie.zarb.org/srpm/Mandriva,cooker,/cronie/history]
 - Gentoo [http://packages.gentoo.org/package/sys-process/cronie]
 - Source Mage [http://dbg.download.sourcemage.org/grimoire/codex/stable/utils/cronie/]
-- OpenSUSE replacement of default with cronie [http://lists.suse.com/opensuse-features/2010-09/msg00217.html]
+- openSUSE [https://software.opensuse.org/package/cronie]
 - Arch Linux [https://www.archlinux.org/packages/core/x86_64/cronie/]
 
 # Contact
