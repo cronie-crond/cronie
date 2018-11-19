@@ -7,7 +7,7 @@ SELinux.
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 # Download
-Latest released version is 1.5.1.
+Latest released version is 1.5.2.
 
 User visible changes:
 - crontab: Use temporary file name that is ignored by crond.
@@ -19,7 +19,7 @@ User visible changes:
 The source can be downloaded from [https://github.com/cronie-crond/cronie/releases]
 
 Cronie is packaged by these distributions:
-- Fedora [http://koji.fedoraproject.org/koji/packageinfo?packageID=5724]
+- Fedora [https://apps.fedoraproject.org/packages/cronie]
 - Mandriva [http://sophie.zarb.org/srpm/Mandriva,cooker,/cronie/history]
 - Gentoo [http://packages.gentoo.org/package/sys-process/cronie]
 - Source Mage [http://dbg.download.sourcemage.org/grimoire/codex/stable/utils/cronie/]
