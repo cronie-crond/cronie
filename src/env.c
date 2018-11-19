@@ -181,8 +181,7 @@ int load_env(char *envstr, FILE * f) {
 	long filepos;
 	int fileline;
 	enum env_state state;
-	char name[MAX_ENVSTR], val[MAX_ENVSTR];
-	char quotechar, *c, *str;
+	char quotechar, *c, *str, *val;
 
 	filepos = ftell(f);
 	fileline = LineNumber;
@@ -192,10 +191,7 @@ int load_env(char *envstr, FILE * f) {
 
 	Debug(DPARS, ("load_env, read <%s>\n", envstr));
 
-	memset(name, 0, sizeof name);
-	memset(val, 0, sizeof val);
-
-	str = name;
+	str = envstr;
 	state = NAMEI;
 	quotechar = '\0';
 	c = envstr;
@@ -239,8 +235,9 @@ int load_env(char *envstr, FILE * f) {
 		case EQ1:
 			if (*c == '=') {
 				state++;
-				str = val;
 				quotechar = '\0';
+				*str++ = *c;
+				val = str;
 			}
 			else {
 				if (!isspace((unsigned char) *c))
@@ -263,29 +260,19 @@ int load_env(char *envstr, FILE * f) {
 	}
 	if (state != FINI && state != EQ2 && !(state == VALUE && !quotechar)) {
 		Debug(DPARS, ("load_env, not an env var, state = %d\n", state));
-			if (fseek(f, filepos, 0)) {
-                return ERR;
-           }
+		if (fseek(f, filepos, 0)) {
+			return ERR;
+		}
 		Set_LineNum(fileline);
 		return (FALSE);
 	}
+	*str = '\0';
 	if (state == VALUE) {
 		/* End of unquoted value: trim trailing whitespace */
-		c = val + strlen(val);
-		while (c > val && isspace((unsigned char) c[-1]))
-			*(--c) = '\0';
+		while (str > val && isspace((unsigned char)str[-1]))
+			*(--str) = '\0';
 	}
-
-	/* 2 fields from parser; looks like an env setting */
-
-	/*
-	 * This can't overflow because get_string() limited the size of the
-	 * name and val fields.  Still, it doesn't hurt to be careful...
-	 */
-	if (!glue_strings(envstr, MAX_ENVSTR, name, val, '='))
-		return (FALSE);
-	Debug(DPARS, ("load_env, <%s> <%s> -> <%s>\n", name, val, envstr));
-		return (TRUE);
+	return TRUE;
 }
 
 char *env_get(const char *name, char **envp) {
