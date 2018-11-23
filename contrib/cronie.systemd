@@ -8,7 +8,7 @@ ExecStart=/usr/sbin/crond -n $CRONDARGS
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
-RestartSec=1s
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target
