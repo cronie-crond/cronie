@@ -7,6 +7,8 @@ EnvironmentFile=/etc/sysconfig/crond
 ExecStart=/usr/sbin/crond -n $CRONDARGS
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
+Restart=on-failure
+RestartSec=1s
 
 [Install]
 WantedBy=multi-user.target
