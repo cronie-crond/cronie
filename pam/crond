@@ -4,8 +4,8 @@
 #
 # Although no PAM authentication is called, auth modules
 # are used for credential setting
-auth       include    password-auth
+auth       include    system-auth
 account    required   pam_access.so
-account    include    password-auth
+account    include    system-auth
 session    required   pam_loginuid.so
-session    include    password-auth
+session    include    system-auth
