@@ -135,8 +135,6 @@ static void usage(const char *msg) {
 
 int main(int argc, char *argv[]) {
 	int exitstatus;
-	char n[] = "-";	/*set the n string to - so we have a valid string to use */
-	char *nargv[] = { argv[0], n, NULL };
 
 	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
 		ProgramName = argv[0];
@@ -154,10 +152,6 @@ int main(int argc, char *argv[]) {
 #if defined(BSD)
 	setlinebuf(stderr);
 #endif
-	/*should we desire to make changes to behavior later. */
-	if (argv[1] == NULL) {	/* change behavior to allow crontab to take stdin with no '-' */
-		argv = nargv;
-	}
 	parse_args(argc, argv);	/* sets many globals, opens a file */
 	check_spool_dir();
 	if (!allowed(RealUser, CRON_ALLOW, CRON_DENY)) {
@@ -328,7 +322,7 @@ static void parse_args(int argc, char *argv[]) {
 
 	endpwent();
 
-	if (Option == opt_hostset && argv[optind] != NULL) {            
+	if (Option == opt_hostset && argv[optind] != NULL) {
 		HostSpecified = 1;
 		if (strlen(argv[optind]) >= sizeof Host)
 			usage("hostname too long");
@@ -342,13 +336,14 @@ static void parse_args(int argc, char *argv[]) {
 	}
 	else {
 		if (argv[optind] != NULL) {
+			fprintf(stderr, "optind argv[optind]:%d %s\n", optind, argv[optind]);
 			Option = opt_replace;
 			if (strlen(argv[optind]) >= sizeof Filename)
 				usage("filename too long");
 			(void) strcpy(Filename, argv[optind]);
 		}
 		else
-			usage("file name must be specified for replace");
+			usage("file name or - (for stdin) must be specified for replace");
 	}
 
 	if (Option == opt_replace) {
