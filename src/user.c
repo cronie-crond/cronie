@@ -69,6 +69,7 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	entry *e;
 	int status = TRUE, save_errno = 0;
 	char **envp = NULL, **tenvp;
+	int envs = 0, entries = 0;
 
 	if (!(file = fdopen(crontab_fd, "r")))	{
 		save_errno = errno;
@@ -115,9 +116,20 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 #endif
 	/* load the crontab
 	*/
-	while ((status = load_env (envstr, file)) >= OK) {
+	while (status >= TRUE) {
+		if (!skip_comments(file) && !u->system) {
+			log_error("too many garbage characters");
+			break;
+		}
+		status = load_env (envstr, file);
 		switch (status) {
 			case FALSE:
+				++entries;
+				if (!u->system && entries > MAX_USER_ENTRIES) {
+					log_error("too many entries");
+					status = TRUE;
+					goto done;
+				}
 				FileName = tabname;
 				e = load_entry(file, log_error, pw, envp);
 				if (e) {
@@ -126,6 +138,11 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 				}
 				break;
 			case TRUE:
+				++envs;
+				if (!u->system && envs > MAX_USER_ENVS) {
+					log_error("too many environment variables");
+					goto done;
+				}
 				if ((tenvp = env_set (envp, envstr)) == NULL) {
 					save_errno = errno;
 					goto done;

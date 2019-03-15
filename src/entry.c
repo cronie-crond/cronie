@@ -93,17 +93,16 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 	 */
 
 	ecode_e ecode = e_none;
-	entry *e;
+	entry *e = NULL;
 	int ch;
 	char cmd[MAX_COMMAND];
 	char envstr[MAX_ENVSTR];
 	char **tenvp;
 	char *p;
 	struct passwd temppw;
+	int i;
 
 	Debug(DPARS, ("load_entry()...about to eat comments\n"));
-
-	skip_comments(file);
 
 	ch = get_char(file);
 	if (ch == EOF)
@@ -115,6 +114,10 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 	 */
 
 	e = (entry *) calloc(sizeof (entry), sizeof (char));
+	if (e == NULL) {
+		ecode = e_memory;
+		goto eof;
+	}
 
 	/* check for '-' as a first character, this option will disable 
 	* writing a syslog message about command getting executed
@@ -412,17 +415,19 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 	Debug(DPARS, ("load_entry()...returning successfully\n"));
 
-		/* success, fini, return pointer to the entry we just created...
-		 */
-		return (e);
+	/* success, fini, return pointer to the entry we just created...
+	 */
+	return (e);
 
   eof:
-	if (e->envp)
-		env_free(e->envp);
-	free(e->pwd);
-	free(e->cmd);
-	free(e);
-	while (ch != '\n' && !feof(file))
+	if (e) {
+		if (e->envp)
+			env_free(e->envp);
+		free(e->pwd);
+		free(e->cmd);
+		free(e);
+	}
+	for (i = 0; i < MAX_COMMAND && ch != '\n' && !feof(file); i++)
 		ch = get_char(file);
 	if (ecode != e_none && error_func)
 		(*error_func) (ecodes[(int) ecode]);

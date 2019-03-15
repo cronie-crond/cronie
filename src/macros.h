@@ -58,6 +58,9 @@
 #define	MAX_UNAME	256	/* max length of username  */
 #define	ROOT_UID	0	/* don't change this, it really must be root */
 #define	ROOT_USER	"root"	/* ditto */
+#define MAX_USER_ENVS	1000	/* maximum environment variables in user's crontab */
+#define MAX_USER_ENTRIES 1000	/* maximum crontab entries in user's crontab */
+#define MAX_GARBAGE	32768	/* max num of chars of comments and whitespaces between entries */
 
 				/* NOTE: these correspond to DebugFlagNames,
 				 *	defined below.

@@ -753,6 +753,7 @@ static int replace_cmd(void) {
 	uid_t file_owner;
 	char **envp;
 	char *safename;
+	int envs = 0, entries = 0;
 
 
 	safename = host_specific_filename("#tmp", "XXXXXXXXXX");
@@ -832,6 +833,10 @@ static int replace_cmd(void) {
 	}
 
 	while (!CheckErrorCount && !eof) {
+		if (!skip_comments(tmp)) {
+			check_error("too many garbage characters");
+			break;
+		}
 		switch (load_env(envstr, tmp)) {
 		case ERR:
 			/* check for data before the EOF */
@@ -843,14 +848,30 @@ static int replace_cmd(void) {
 			break;
 		case FALSE:
 			e = load_entry(tmp, check_error, pw, envp);
-			if (e)
+			if (e) {
+				++entries;
 				free_entry(e);
+			}
 			break;
 		case TRUE:
+			++envs;
 			break;
 		}
 	}
 	env_free(envp);
+	if (envs > MAX_USER_ENVS) {
+		fprintf(stderr, "More than %d environment variables in crontab file, can't install.\n", MAX_USER_ENVS);
+		fclose(tmp);
+		error = -1;
+		goto done;
+	}
+
+	if (entries > MAX_USER_ENTRIES) {
+		fprintf(stderr, "More than %d entries in crontab file, can't install.\n", MAX_USER_ENTRIES);
+		fclose(tmp);
+		error = -1;
+		goto done;
+	}
 
 	if (CheckErrorCount != 0) {
 		fprintf(stderr, "errors in crontab file, can't install.\n");

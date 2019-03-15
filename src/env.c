@@ -185,7 +185,6 @@ int load_env(char *envstr, FILE * f) {
 
 	filepos = ftell(f);
 	fileline = LineNumber;
-	skip_comments(f);
 	if (EOF == get_string(envstr, MAX_ENVSTR, f, "\n"))
 		return (ERR);
 

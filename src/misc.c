@@ -418,14 +418,20 @@ int get_string(char *string, int size, FILE * file, const char *terms) {
 
 /* skip_comments(file) : read past comment (if any)
  */
-void skip_comments(FILE * file) {
+int skip_comments(FILE * file) {
 	int ch;
+	int n = 0;
 
 	while (EOF != (ch = get_char(file))) {
 		/* ch is now the first character of a line.
 		 */
-		while (ch == ' ' || ch == '\t')
+		if (++n > MAX_GARBAGE)
+			return FALSE;
+		while (ch == ' ' || ch == '\t') {
 			ch = get_char(file);
+			if (++n > MAX_GARBAGE)
+				return FALSE;
+		}
 
 		if (ch == EOF)
 			break;
@@ -440,15 +446,18 @@ void skip_comments(FILE * file) {
 		 * character on a line.
 		 */
 
-		while (ch != '\n' && ch != EOF)
+		while (ch != '\n' && ch != EOF) {
 			ch = get_char(file);
-
+			if (++n > MAX_GARBAGE)
+				return FALSE;
+		}
 		/* ch is now the newline of a line which we're going to
 		 * ignore.
 		 */
 	}
 	if (ch != EOF)
 		unget_char(ch, file);
+	return TRUE;
 }
 
 /* int in_file(const char *string, FILE *file, int error)
