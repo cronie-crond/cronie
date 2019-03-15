@@ -1,3 +1,63 @@
+2019-03-15  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix warnings in anacron and crond code.
+
+2019-03-15  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix CVE-2019-9704 and CVE-2019-9705
+
+2019-03-15  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Remove leftover debugging message.
+
+2019-03-11  Marcel Plch <mplch@redhat.com>
+
+	* Make crond run after autofs mounts
+
+2019-02-15  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* crontab: Make crontab without arguments fail.
+
+2018-12-07  Marcel Plch <mplch@redhat.com>
+
+	* Use system-auth instead of password-auth for PAM authentication (#25)
+
+2018-11-23  Marcel Plch <mplch@redhat.com>
+
+	* Restart crond if it fails
+
+2018-11-19  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* load_env: parse the environment variables in-place
+
+2018-11-19  Tomáš Mráz <t8m@users.noreply.github.com>
+
+	* Update readme.md with the latest release and better link to Fedora
+
+2018-11-18  Oliver Kurz <okurz@suse.de>
+
+	* readme.md: Replace dead link to openSUSE ML with package link
+
+2018-10-18  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Use the role from the crond context for system job contexts.
+
+2018-08-28  Marcel Plch <mplch@redhat.com>
+
+	* Fix unsafe code
+
+2018-08-28  Marcel Plch <mplch@redhat.com>
+
+	* Fix possible memory leaks
+
+2018-05-03  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release new version 1.5.2
+
+2018-05-03  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Silence may be used uninitialized warning.
+
 2018-05-03  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* crontab: do not try to replace the crontab with a directory

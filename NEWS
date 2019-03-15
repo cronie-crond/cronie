@@ -1,5 +1,13 @@
 cronie NEWS -- history of user-visible changes.
 
+Release 1.5.3
+* Fix CVE-2019-9704 and CVE-2019-9705 to avoid local DoS of the crond.
+* crontab: Make crontab without arguments fail.
+* crond: In PAM configuration include system-auth instead of password-auth.
+* crond: In the systemd service file restart crond if it fails.
+* crond: Use the role from the crond context for system job contexts.
+* Multiple small cleanups and fixes.
+
 Release 1.5.2
 
 * cronnext: New useful utility to find out time of the next job run.
