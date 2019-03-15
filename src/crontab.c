@@ -336,7 +336,6 @@ static void parse_args(int argc, char *argv[]) {
 	}
 	else {
 		if (argv[optind] != NULL) {
-			fprintf(stderr, "optind argv[optind]:%d %s\n", optind, argv[optind]);
 			Option = opt_replace;
 			if (strlen(argv[optind]) >= sizeof Filename)
 				usage("filename too long");
