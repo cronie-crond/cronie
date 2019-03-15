@@ -106,7 +106,6 @@ xputenv(const char *s)
 {
     char *name = NULL, *val = NULL;
     char *eq_ptr;
-    const char *errmsg;
     size_t eq_index;
 
     if (s == NULL) {
