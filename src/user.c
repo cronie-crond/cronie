@@ -116,9 +116,10 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 #endif
 	/* load the crontab
 	*/
-	while (status >= TRUE) {
+	while (status >= OK) {
 		if (!skip_comments(file) && !u->system) {
 			log_error("too many garbage characters");
+                        status = TRUE;
 			break;
 		}
 		status = load_env (envstr, file);
@@ -135,7 +136,6 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 				if (e) {
 					e->next = u->crontab;
 					u->crontab = e;
-					status = TRUE;
 				}
 				break;
 			case TRUE:
