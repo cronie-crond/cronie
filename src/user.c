@@ -135,6 +135,7 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 				if (e) {
 					e->next = u->crontab;
 					u->crontab = e;
+					status = TRUE;
 				}
 				break;
 			case TRUE:
