@@ -1,3 +1,12 @@
+2019-03-18  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* crond: Fix regression from last release
+	  Only first job from a crontab was being run.
+
+2019-03-15  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release new version 1.5.3
+
 2019-03-15  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* Fix warnings in anacron and crond code.
