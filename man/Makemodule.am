@@ -1,0 +1,16 @@
+dist_man_MANS = \
+	man/cron.8 \
+	man/crond.8 \
+	man/cronnext.1 \
+	man/crontab.1 \
+	man/crontab.5
+
+anacron_man = \
+	man/anacrontab.5 \
+	man/anacron.8
+
+EXTRA_DIST += $(anacron_man)
+
+if ANACRON
+dist_man_MANS += $(anacron_man)
+endif
