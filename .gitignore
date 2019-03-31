@@ -1,7 +1,7 @@
 Makefile.in
 Makefile
 anacron/anacron
-anacron/anacron-paths.h
+anacron-paths.h
 anacron/Makefile
 anacron/Makefile.in
 aclocal.m4
@@ -26,8 +26,9 @@ tags
 src/crond
 src/crontab
 src/cronnext
-src/cron-paths.h
+cron-paths.h
 *~
 *.tar.*
 *.orig
 *.patch
+.dirstamp

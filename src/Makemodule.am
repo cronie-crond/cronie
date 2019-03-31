@@ -1,27 +1,55 @@
 # Makefile.am - two binaries crond and crontab
 
-sbin_PROGRAMS = crond
-bin_PROGRAMS = crontab cronnext
+sbin_PROGRAMS += \
+	src/crond
 
-crond_SOURCES = \
-	cron.c database.c user.c job.c do_command.c popen.c security.c \
+bin_PROGRAMS += \
+	src/cronnext \
+	src/crontab
+
+src_crond_SOURCES = \
+	src/cron.c \
+	src/database.c \
+	src/do_command.c \
+	src/job.c \
+	src/popen.c \
+	src/security.c \
+	src/user.c \
 	$(common_src)
-crontab_SOURCES = crontab.c security.c $(common_src)
-cronnext_SOURCES = \
-	cronnext.c database.c user.c job.c \
+
+src_crontab_SOURCES = \
+	src/crontab.c \
+	src/security.c \
 	$(common_src)
-common_src = entry.c env.c misc.c pw_dup.c \
-	externs.h funcs.h globals.h macros.h pathnames.h structs.h \
-	bitstring.h
-common_nodist = cron-paths.h
-nodist_crond_SOURCES = $(common_nodist)
-nodist_crontab_SOURCES = $(common_nodist)
-nodist_cronnext_SOURCES = $(common_nodist)
-BUILT_SOURCES = $(common_nodist)
 
-AM_CFLAGS = -I$(top_srcdir)
+src_cronnext_SOURCES = \
+	src/cronnext.c \
+	src/database.c \
+	src/job.c \
+	src/user.c \
+	$(common_src)
 
-LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
+common_src = \
+	src/bitstring.h \
+	src/entry.c \
+	src/env.c \
+	src/externs.h \
+	src/funcs.h \
+	src/globals.h \
+	src/macros.h \
+	src/misc.c \
+	src/pathnames.h \
+	src/pw_dup.c \
+	src/structs.h
+
+common_nodist += cron-paths.h
+nodist_src_crond_SOURCES = $(common_nodist)
+nodist_src_crontab_SOURCES = $(common_nodist)
+nodist_src_cronnext_SOURCES = $(common_nodist)
+BUILT_SOURCES += $(common_nodist)
+
+src_crond_LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
+src_crontab_LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 
 ## if DEBUG
 ## noinst_PROGRAMS = debug
@@ -31,7 +59,7 @@ LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 # If they are configurable, they are declared in configure script.
 # Depends on this Makefile, because it uses make variables.
 # CCD 2010/09/10 added CRON_HOSTNAME for clustered-cron.
-CLEANFILES = cron-paths.h
+CLEANFILES += cron-paths.h
 cron-paths.h: Makefile
 	@echo 'creating $@'
 	@sed >$@ 's/ *\\$$//' <<\END #\
