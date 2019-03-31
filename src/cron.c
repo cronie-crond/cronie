@@ -68,8 +68,9 @@ find_jobs(int, cron_db *, int, int, long),
 set_time(int),
 cron_sleep(int, cron_db *),
 sigchld_handler(int),
-sighup_handler(int),
-sigchld_reaper(void), sigintterm_handler(int), parse_args(int c, char *v[]);
+sighup_handler(int ATTRIBUTE_UNUSED),
+sigchld_reaper(void),
+sigintterm_handler(int ATTRIBUTE_UNUSED), parse_args(int c, char *v[]);
 
 static volatile sig_atomic_t got_sighup, got_sigchld, got_sigintterm;
 static int timeRunning, virtualTime, clockTime;
@@ -651,15 +652,15 @@ static void cron_sleep(int target, cron_db * db) {
 	}
 }
 
-static void sighup_handler(int x) {
+static void sighup_handler(int x ATTRIBUTE_UNUSED) {
 	got_sighup = 1;
 }
 
-static void sigchld_handler(int x) {
+static void sigchld_handler(int x ATTRIBUTE_UNUSED) {
 	got_sigchld = 1;
 }
 
-static void sigintterm_handler(int x) {
+static void sigintterm_handler(int x ATTRIBUTE_UNUSED) {
 	got_sigintterm = 1;
 }
 
