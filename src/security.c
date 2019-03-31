@@ -120,7 +120,7 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 		/* "minute-ly" job: Every minute for given hour/dow/month/dom. 
 		 * Ensure that these jobs never run in the same minute:
 		 */
-		minutely_time = time(0);
+		minutely_time = time(NULL);
 		Debug(DSCH, ("Minute-ly job. Recording time %lu\n", minutely_time));
 	}
 
@@ -169,7 +169,7 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 
 	*jobenv = build_env(e->envp);
 
-	time_t job_run_time = time(0L);
+	time_t job_run_time = time(NULL);
 
 	if ((minutely_time > 0) && ((job_run_time / 60) != (minutely_time / 60))) {
 		/* if a per-minute job is delayed into the next minute 
@@ -350,12 +350,12 @@ cron_get_job_range(user * u, security_context_t * ucontextp, char **jobenv) {
 
 	if (is_selinux_enabled() <= 0)
 		return 0;
-	if (ucontextp == 0L)
+	if (ucontextp == NULL)
 		return -1;
 
-	*ucontextp = 0L;
+	*ucontextp = NULL;
 
-	if ((range = env_get("MLS_LEVEL", jobenv)) != 0L) {
+	if ((range = env_get("MLS_LEVEL", jobenv)) != NULL) {
 		context_t ccon;
 		if (!(ccon = context_new(u->scontext))) {
 			log_it(u->name, getpid(), "context_new FAILED for MLS_LEVEL",
@@ -404,7 +404,7 @@ static int cron_change_selinux_range(user * u, security_context_t ucontext) {
 	if (is_selinux_enabled() <= 0)
 		return 0;
 
-	if (u->scontext == 0L) {
+	if (u->scontext == NULL) {
 		if (security_getenforce() > 0) {
 			log_it(u->name, getpid(), "NULL security context for user", "", 0);
 			return -1;
@@ -592,7 +592,7 @@ get_security_context(const char *name, int crontab_fd,
 void free_security_context(security_context_t * scontext) {
 	if (*scontext != NULL) {
 		freecon(*scontext);
-		*scontext = 0L;
+		*scontext = NULL;
 	}
 }
 #endif

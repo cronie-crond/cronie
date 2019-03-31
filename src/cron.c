@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
 	 */
 	setlocale(LC_ALL, "");	/* set locale to system defaults or to
 							 * that specified by any  LC_* env vars */
-	if ((cs = nl_langinfo(CODESET)) != 0L)
+	if ((cs = nl_langinfo(CODESET)) != NULL)
 		strncpy(cron_default_mail_charset, cs, MAX_ENVSTR-1);
 	else
 		strcpy(cron_default_mail_charset, "US-ASCII");

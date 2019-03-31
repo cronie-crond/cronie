@@ -46,7 +46,7 @@ static int safe_p(const char *, const char *);
 void do_command(entry * e, user * u) {
 	pid_t pid = getpid();
 	int ev;
-	char **jobenv = 0L;
+	char **jobenv = NULL;
 
 	Debug(DPROC, ("[%ld] do_command(%s, (%s,%ld,%ld))\n",
 			(long) pid, e->cmd, u->name,
@@ -450,7 +450,7 @@ static int child_process(entry * e, char **jobenv) {
 				fprintf(mail, "Date: %s\n", arpadate(&StartTime));
 #endif /*MAIL_DATE */
 				fprintf(mail, "MIME-Version: 1.0\n");
-				if (content_type == 0L) {
+				if (content_type == NULL) {
 					fprintf(mail, "Content-Type: text/plain; charset=%s\n",
 						cron_default_mail_charset);
 				}
@@ -461,17 +461,17 @@ static int child_process(entry * e, char **jobenv) {
 					char *nl = content_type;
 					size_t ctlen = strlen(content_type);
 					while ((*nl != '\0')
-						&& ((nl = strchr(nl, '\n')) != 0L)
+						&& ((nl = strchr(nl, '\n')) != NULL)
 						&& (nl < (content_type + ctlen))
 						)
 						*nl = ' ';
 					fprintf(mail, "Content-Type: %s\n", content_type);
 				}
-				if (content_transfer_encoding != 0L) {
+				if (content_transfer_encoding != NULL) {
 					char *nl = content_transfer_encoding;
 					size_t ctlen = strlen(content_transfer_encoding);
 					while ((*nl != '\0')
-						&& ((nl = strchr(nl, '\n')) != 0L)
+						&& ((nl = strchr(nl, '\n')) != NULL)
 						&& (nl < (content_transfer_encoding + ctlen))
 						)
 						*nl = ' ';
