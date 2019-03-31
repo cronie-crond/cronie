@@ -81,7 +81,7 @@ const char *flagname[]= {
 };
 
 void printflags(char *indent, int flags) {
-	int f;
+	size_t f;
 	int first = 1;
 
 	printf("%s    flagnames:", indent);
