@@ -6,7 +6,7 @@ cronnext \- time of next job cron will execute
 .B cronnext
 [\fB-i \fIusers\fR] [\fB-e \fIusers\fR] [\fB-s\fR]
 [\fB-a\fR]
-[\fB-t \fItime\fR] [\fB-q \fItime\fR]
+[\fB-t \fItime\fR] [\fB-q \fItime\fR] [\fB-j \fIcommand\fR]
 [\fB-l\fR] [\fB-c\fR] [\fB-f\fR] [\fB-h\fR] [\fB-V\fR]
 [file]...
 .SH DESCRIPTION
@@ -51,6 +51,9 @@ and is internally rounded to the minute.
 .BI "\-q " time
 Do not check jobs over this time, expressed in the same way as in option
 .BR -t .
+.TP
+.BI "\-j " command
+Only look for jobs that contain \fIcommand\fP as a substring.
 .TP
 .B \-l
 Print the whole entries of the jobs that are the next to be executed by cron.

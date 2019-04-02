@@ -216,7 +216,7 @@ int matchuser(char *user, char *list) {
  */
 time_t cronnext(cron_db database,
 		time_t start, time_t end,
-		char *include, char *exclude, int flags) {
+		char *include, char *exclude, char *command, int flags) {
 	time_t closest, next;
 	user *u;
 	entry *e;
@@ -242,7 +242,9 @@ time_t cronnext(cron_db database,
 		if (flags & CRONTABS)
 			printcrontab(u);
 
-		for (e = u->crontab; e; e = e->next)
+		for (e = u->crontab; e; e = e->next) {
+			if (command && strstr(e->cmd, command) == NULL)
+				continue;
 			for (next = nextmatch(e, start, end);
 			     next <= end;
 			     next = nextmatch(e, next + 60, end)) {
@@ -255,6 +257,7 @@ time_t cronnext(cron_db database,
 				if (! (flags & ALLJOBS))
 					break;
 			}
+		}
 	}
 
 	return closest;
@@ -305,6 +308,7 @@ void usage() {
 	fprintf(stderr, " -a        examine installed crontabs even if files are given\n");
 	fprintf(stderr, " -t time   start from this time (seconds since epoch)\n");
 	fprintf(stderr, " -q time   end check at this time (seconds since epoch)\n");
+	fprintf(stderr, " -j cmd    only check jobs that contain cmd as a substring\n");
 	fprintf(stderr, " -l        print next jobs to be executed\n");
 	fprintf(stderr, " -c        print next execution of each job\n");
 	fprintf(stderr, " -f        print all jobs executed in the given interval\n");
@@ -317,7 +321,7 @@ void usage() {
  */
 int main(int argn, char *argv[]) {
 	int opt;
-	char *include, *exclude;
+	char *include, *exclude, *command;
 	int flags;
 	time_t start, next, end = 0;
 	int endtime, printjobs;
@@ -326,12 +330,13 @@ int main(int argn, char *argv[]) {
 
 	include = NULL;
 	exclude = NULL;
+	command = NULL;
 	flags = SYSTEM;
 	endtime = 0;
 	printjobs = 0;
 	start = time(NULL) / 60 * 60;
 
-	while (-1 != (opt = getopt(argn, argv, "i:e:ast:q:lcfhV"))) {
+	while (-1 != (opt = getopt(argn, argv, "i:e:ast:q:j:lcfhV"))) {
 		switch (opt) {
 		case 'i':
 			include = optarg;
@@ -351,6 +356,9 @@ int main(int argn, char *argv[]) {
 		case 'q':
 			end = atoi(optarg) / 60 * 60;
 			endtime = 1;
+			break;
+		case 'j':
+			command = optarg;
 			break;
 		case 'l':
 			printjobs = 1;
@@ -399,7 +407,7 @@ int main(int argn, char *argv[]) {
 	db = database(installed || argv[optind] == NULL, argv + optind);
 
 	/* find time of next scheduled command */
-	next = cronnext(db, start, end, include, exclude, flags);
+	next = cronnext(db, start, end, include, exclude, command, flags);
 
 	/* print time */
 	if (next == -1)
@@ -410,7 +418,7 @@ int main(int argn, char *argv[]) {
 	/* print next jobs */
 	if (printjobs) {
 		printf("nextjobs:\n");
-		cronnext(db, next, next, include, exclude, (flags & SYSTEM) | ENTRIES);
+		cronnext(db, next, next, include, exclude, command, (flags & SYSTEM) | ENTRIES);
 	}
 
 	return EXIT_SUCCESS;
