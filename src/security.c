@@ -675,3 +675,74 @@ static char **build_env(char **cronenv) {
 	return jobenv;
 #endif
 }
+
+/* int in_file(const char *string, FILE *file, int error)
+ *	return TRUE if one of the lines in file matches string exactly,
+ *	FALSE if no lines match, and error on error.
+ */
+static int in_file(const char *string, FILE * file, int error) {
+	char line[MAX_TEMPSTR];
+	char *endp;
+
+	if (fseek(file, 0L, SEEK_SET))
+		return (error);
+	while (fgets(line, MAX_TEMPSTR, file)) {
+		if (line[0] != '\0') {
+			endp = &line[strlen(line) - 1];
+			if (*endp != '\n')
+				return (error);
+			*endp = '\0';
+			if (0 == strcmp(line, string))
+				return (TRUE);
+		}
+	}
+	if (ferror(file))
+		return (error);
+	return (FALSE);
+}
+
+/* int allowed(const char *username, const char *allow_file, const char *deny_file)
+ *	returns TRUE if (allow_file exists and user is listed)
+ *	or (deny_file exists and user is NOT listed).
+ *	root is always allowed.
+ */
+int allowed(const char *username, const char *allow_file,
+	const char *deny_file) {
+	FILE *fp;
+	int isallowed;
+	char buf[128];
+
+	if (getuid() == 0)
+		return TRUE;
+	isallowed = FALSE;
+	if ((fp = fopen(allow_file, "r")) != NULL) {
+		isallowed = in_file(username, fp, FALSE);
+		fclose(fp);
+		if ((getuid() == 0) && (!isallowed)) {
+			snprintf(buf, sizeof (buf),
+				"root used -u for user %s not in cron.allow", username);
+			log_it("crontab", getpid(), "warning", buf, 0);
+			isallowed = TRUE;
+		}
+	}
+	else if ((fp = fopen(deny_file, "r")) != NULL) {
+		isallowed = !in_file(username, fp, FALSE);
+		fclose(fp);
+		if ((getuid() == 0) && (!isallowed)) {
+			snprintf(buf, sizeof (buf),
+				"root used -u for user %s in cron.deny", username);
+			log_it("crontab", getpid(), "warning", buf, 0);
+			isallowed = TRUE;
+		}
+	}
+#ifdef WITH_AUDIT
+	if (isallowed == FALSE) {
+		int audit_fd = audit_open();
+		audit_log_user_message(audit_fd, AUDIT_USER_START, "cron deny",
+			NULL, NULL, NULL, 0);
+		close(audit_fd);
+	}
+#endif
+	return (isallowed);
+}
+
