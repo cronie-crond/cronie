@@ -7,14 +7,21 @@ SELinux.
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 # Download
-Latest released version is 1.5.2.
+Latest released version is 1.5.4.
 
 User visible changes:
-- crontab: Use temporary file name that is ignored by crond.
-- crond: Inherit PATH from the crond environment if -P option is used.
-- crond: Remove hardcoded "system_u" SELinux user, use the SELinux user of the running crond.
-- anacron: Small cleanups and fixes.
-- crond: Fix longstanding race condition on repeated crontab modification. 
+
+Release 1.5.4
+- crond: Fix regression from previous release. Only first job from a crontab
+  was being run.
+
+Release 1.5.3
+- Fix CVE-2019-9704 and CVE-2019-9705 to avoid local DoS of the crond.
+- crontab: Make crontab without arguments fail.
+- crond: In PAM configuration include system-auth instead of password-auth.
+- crond: In the systemd service file restart crond if it fails.
+- crond: Use the role from the crond context for system job contexts.
+- Multiple small cleanups and fixes.
 
 The source can be downloaded from [https://github.com/cronie-crond/cronie/releases]
 
