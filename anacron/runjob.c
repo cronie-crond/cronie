@@ -53,7 +53,9 @@ temp_file(job_rec *jr)
 	dir = P_tmpdir;
 
     len = snprintf(template, sizeof(template), "%s/$anacronXXXXXX", dir);
-    if (len >= sizeof(template))
+    if (len < 0)
+        die_e("vsnprintf failed");
+    if ((size_t) len >= sizeof(template))
 	die_e("TMPDIR too long");
 
     fdout = mkstemp(template);

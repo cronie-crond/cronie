@@ -23,6 +23,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -279,9 +280,14 @@ char *env_get(const char *name, char **envp) {
 	char *p, *q;
 
 	while ((p = *envp++) != NULL) {
+		ptrdiff_t diff;
+
 		if (!(q = strchr(p, '=')))
 			continue;
-		if ((q - p) == len && !strncmp(p, name, len))
+		diff = q - p;
+		if (diff < 0)
+			return (NULL);
+		if ((size_t) diff == len && !strncmp(p, name, len))
 			return (q + 1);
 	}
 	return (NULL);

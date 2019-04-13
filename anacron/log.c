@@ -79,7 +79,11 @@ make_msg(const char *fmt, va_list args)
     /* There's some confusion in the documentation about what vsnprintf
      * returns when the buffer overflows.  Hmmm... */
     len = vsnprintf(msg, sizeof(msg), fmt, args);
-    if (len >= sizeof(msg) - 1)
+    if (len < 0) {
+        fprintf(stderr, "vsnprintf failed: %s\n", msg);
+        return;
+    }
+    if ((size_t) len >= sizeof(msg) - 1)
 	strcpy(msg + sizeof(msg) - sizeof(truncated), truncated);
 }
 
