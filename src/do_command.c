@@ -427,8 +427,14 @@ static int child_process(entry * e, char **jobenv) {
 				gethostname(hostname, MAXHOSTNAMELEN);
 
 				if (MailCmd[0] == '\0') {
-					if (snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG, mailfrom)
-						>= sizeof mailcmd) {
+					int len;
+
+					len = snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG, mailfrom);
+					if (len < 0) {
+						fprintf(stderr, "mailcmd snprintf failed\n");
+						(void) _exit(ERROR_EXIT);
+					}
+					if (sizeof mailcmd <= (size_t) len) {
 						fprintf(stderr, "mailcmd too long\n");
 						(void) _exit(ERROR_EXIT);
 					}

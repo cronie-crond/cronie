@@ -42,11 +42,13 @@ match_rx(const char *rx, char *string, unsigned int n_sub,  /* char **substrings
  * This is not the most efficient, or elegant way of doing this.
  */
 {
-	int r, n;
+	int r;
+	unsigned int n;
 	regex_t crx;
 	va_list va;
 	char **substring;
 	regmatch_t *sub_offsets;
+
 	sub_offsets = malloc(sizeof(regmatch_t) * (n_sub + 1));
 	if (sub_offsets == NULL)
 	    return -1;
