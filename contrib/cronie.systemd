@@ -4,11 +4,13 @@ After=auditd.service nss-user-lookup.target systemd-user-sessions.service time-s
 
 [Service]
 EnvironmentFile=/etc/sysconfig/crond
-ExecStart=/usr/sbin/crond -n $CRONDARGS
+ExecStart=/usr/sbin/crond $CRONDARGS
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
 RestartSec=30s
+PIDFile=/var/run/cron.pid
+Type=forking
 
 [Install]
 WantedBy=multi-user.target
