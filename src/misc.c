@@ -315,9 +315,6 @@ void acquire_daemonlock(int closeflag) {
 		return;
 	}
 
-	if (NoFork == 1)
-		return; //move along, nothing to do here...
-
 	if (fd == -1) {
 		pidfile = _PATH_CRON_PID;
 		/* Initial mode is 0600 to prevent flock() race/DoS. */
