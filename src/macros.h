@@ -61,6 +61,7 @@
 #define MAX_USER_ENVS	1000	/* maximum environment variables in user's crontab */
 #define MAX_USER_ENTRIES 1000	/* maximum crontab entries in user's crontab */
 #define MAX_GARBAGE	32768	/* max num of chars of comments and whitespaces between entries */
+#define MAX_CLOSE_FD	10000	/* max fd num to close when spawning a child process */
 
 				/* NOTE: these correspond to DebugFlagNames,
 				 *	defined below.
@@ -128,6 +129,9 @@
 #define	FIRST_DOW	0
 #define	LAST_DOW	7
 #define	DOW_COUNT	(LAST_DOW - FIRST_DOW + 1)
+
+#define TMAX(a,b) ((a)>(b)?(a):(b))
+#define TMIN(a,b) ((a)<(b)?(a):(b))
 
 /*
  * Because crontab/at files may be owned by their respective users we

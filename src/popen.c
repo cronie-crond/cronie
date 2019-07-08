@@ -81,12 +81,19 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw, char **jobe
 	if (!pids) {
 		if ((fds = getdtablesize()) <= 0)
 			return (NULL);
+		if (fds > MAX_CLOSE_FD)
+			fds = MAX_CLOSE_FD; /* avoid allocating too much memory */
 		if (!(pids = (PID_T *) malloc((u_int) ((size_t)fds * sizeof (PID_T)))))
 			return (NULL);
 		memset((char *) pids, 0, (size_t)fds * sizeof (PID_T));
 	}
 	if (pipe(pdes) < 0)
 		return (NULL);
+	if (pdes[0] >= fds || pdes[1] >= fds) {
+		(void) close(pdes[0]);
+		(void) close(pdes[1]);
+		return NULL;
+	}
 
 	/* break up string into pieces */
 	for (argc = 0, cp = program; argc < MAX_ARGS; cp = NULL)
@@ -145,14 +152,16 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw, char **jobe
 	}
 	/* parent; assume fdopen can't fail...  */
 	if (*type == 'r') {
+		fd = pdes[0];
 		iop = fdopen(pdes[0], type);
 		(void) close(pdes[1]);
 	}
 	else {
+		fd = pdes[1];
 		iop = fdopen(pdes[1], type);
 		(void) close(pdes[0]);
 	}
-	pids[fileno(iop)] = pid;
+	pids[fd] = pid;
 
   pfree:
 	return (iop);
@@ -168,7 +177,8 @@ int cron_pclose(FILE * iop) {
 	 * pclose returns -1 if stream is not associated with a
 	 * `popened' command, or, if already `pclosed'.
 	 */
-	if (pids == NULL || pids[fdes = fileno(iop)] == 0L)
+	fdes = fileno(iop);
+	if (pids == NULL || fdes >= fds || pids[fdes] == 0L)
 		return (-1);
 	(void) fclose(iop);
 

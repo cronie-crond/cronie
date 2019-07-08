@@ -48,9 +48,6 @@
 #include "globals.h"
 #include "pathnames.h"
 
-#define TMAX(a,b) ((a)>(b)?(a):(b))
-#define TMIN(a,b) ((a)<(b)?(a):(b))
-
 /* size of the event structure, not counting name */
 #define EVENT_SIZE  (sizeof (struct inotify_event))
 
