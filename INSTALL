@@ -6,6 +6,9 @@ Run the usual autotools combination of:
 make
 make install
 
+If no "configure" script is present, generate it by:
+./autogen.sh
+
 The executable files will be installed in /usr/local/* by default.
 
 Configure Options
