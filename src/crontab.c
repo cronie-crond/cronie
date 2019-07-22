@@ -66,6 +66,9 @@
 
 #define NHEADER_LINES 0
 
+#define COMMENT_COLOR  "\x1B[34m"
+#define RESET_COLOR "\033[0m"
+
 enum opt_t {opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_hostset, opt_hostget};
 
 #if DEBUGGING
@@ -392,6 +395,8 @@ static void list_cmd(void) {
 	char n[MAX_FNAME];
 	FILE *f;
 	int ch;
+	const int is_tty = isatty(STDOUT);
+	int new_line = 1;
 
 	log_it(RealUser, Pid, "LIST", User, 0);
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, User, '/')) {
@@ -409,8 +414,18 @@ static void list_cmd(void) {
 	/* file is open. copy to stdout, close.
 	 */
 	Set_LineNum(1)
-		while (EOF != (ch = get_char(f)))
+	while (EOF != (ch = get_char(f))) {
+		if (is_tty && new_line) {
+			if (ch == '#') {
+				fputs(COMMENT_COLOR, stdout);
+			}
+			else {
+				fputs(RESET_COLOR, stdout);
+			}
+		}
 		putchar(ch);
+		new_line = ch == '\n';
+	}
 	fclose(f);
 }
 
