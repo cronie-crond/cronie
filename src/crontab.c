@@ -395,6 +395,7 @@ static void list_cmd(void) {
 	char n[MAX_FNAME];
 	FILE *f;
 	int ch;
+	const int is_tty = isatty(STDOUT);
 	int new_line = 1;
 
 	log_it(RealUser, Pid, "LIST", User, 0);
@@ -414,8 +415,8 @@ static void list_cmd(void) {
 	 */
 	Set_LineNum(1)
 	while (EOF != (ch = get_char(f))) {
-		if (new_line) {
-			if (ch == '#' && isatty(STDOUT)) {
+		if (is_tty && new_line) {
+			if (ch == '#') {
 				fputs(COMMENT_COLOR, stdout);
 			}
 			else {
