@@ -416,10 +416,10 @@ static void list_cmd(void) {
 	while (EOF != (ch = get_char(f))) {
 		if (new_line) {
 			if (ch == '#' && isatty(STDOUT)) {
-				printf(COMMENT_COLOR);
+				fputs(COMMENT_COLOR, stdout);
 			}
 			else {
-				printf(RESET_COLOR);
+				fputs(RESET_COLOR, stdout);
 			}
 		}
 		putchar(ch);
