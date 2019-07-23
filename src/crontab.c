@@ -413,11 +413,12 @@ static void list_cmd(void) {
 	/* file is open. copy to stdout, close.
 	 */
 	Set_LineNum(1)
-	while (EOF != (ch = get_char(f))){
-		if(new_line){
-			if(ch == '#' && isatty(STDOUT)){
+	while (EOF != (ch = get_char(f))) {
+		if (new_line) {
+			if (ch == '#' && isatty(STDOUT)) {
 				printf(COMMENT_COLOR);
-			}else{
+			}
+			else {
 				printf(RESET_COLOR);
 			}
 		}
