@@ -25,6 +25,8 @@
 #define MAIN_PROGRAM
 
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <pwd.h>
 
@@ -270,6 +272,7 @@ cron_db database(int installed, char **additional) {
 	cron_db db = {NULL, NULL, (time_t) 0};
 	struct passwd pw;
 	int fd;
+	struct stat ss;
 	user *u;
 
 	if (installed)
@@ -279,6 +282,12 @@ cron_db database(int installed, char **additional) {
 		fd = open(*additional, O_RDONLY);
 		if (fd == -1) {
 			perror(*additional);
+			continue;
+		}
+		fstat(fd, &ss);
+		if (S_ISDIR(ss.st_mode)) {
+			fprintf(stderr, "%s is a directory - skipping\n", *additional);
+			close(fd);
 			continue;
 		}
 		memset(&pw, 0, sizeof(pw));
