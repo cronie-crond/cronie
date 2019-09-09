@@ -506,6 +506,8 @@ static int child_process(entry * e, char **jobenv) {
 			 */
 
 			while (EOF != (ch = getc(in))) {
+				if (ch == '\r')
+					continue;
 				bytes++;
 				if (mail)
 					putc(ch, mail);
