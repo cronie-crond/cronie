@@ -22,7 +22,7 @@
 .\"
 .\" $Id: crontab.1,v 1.7 2004/01/23 19:03:32 vixie Exp $
 .\"
-.TH CRONTAB 1 "2012-11-22" "cronie" "User Commands"
+.TH CRONTAB 1 "2019-10-29" "cronie" "User Commands"
 .SH NAME
 crontab \- maintains crontab files for individual users
 .SH SYNOPSIS
@@ -67,18 +67,21 @@ it is possible to use a network-mounted shared
 across a cluster of hosts and specify that only one of the hosts should
 run the crontab jobs in the particular directory at any one time.  You
 may also use
-.BR crontab (1)
+.BR crontab
 from any of these hosts to edit the same shared set of crontab files, and
 to set and query which host should run the crontab jobs.
 .PP
-Running cron jobs can be allowed or disallowed for different users.  For
-this purpose, use the
+Scheduling cron jobs with
+.BR crontab
+can be allowed or disallowed for different users.  For this purpose, use the
 .I cron.allow
 and
 .I cron.deny
 files.  If the
 .I cron.allow
-file exists, a user must be listed in it to be allowed to use cron If the
+file exists, a user must be listed in it to be allowed to use
+.BR crontab .
+If the
 .I cron.allow
 file does not exist but the
 .I cron.deny
@@ -86,12 +89,17 @@ file does exist, then a user must
 .I not
 be listed in the
 .I cron.deny
-file in order to use cron.  If neither of these files exists, only the
-super user is allowed to use cron.  Another way to restrict access to
-cron is to use PAM authentication in
+file in order to use
+.BR crontab.
+If neither of these files exist, then only the super user is allowed to use
+.BR crontab .
+.PP
+Another way to restrict the scheduling of cron jobs beyond
+.BR crontab
+is to use PAM authentication in
 .I /etc/security/access.conf
 to set up users, which are allowed or disallowed to use
-.I crontab
+.BR crontab
 or modify system cron jobs in the
 .IR /etc/cron.d/
 directory.
@@ -106,12 +114,12 @@ directory is used.
 .B "\-u"
 Specifies the name of the user whose crontab is to be modified.  If this
 option is not used,
-.I crontab
+.BR crontab
 examines "your" crontab, i.e., the crontab of the person executing the
 command. If no crontab exists for a particular user, it is created for
-him the first time the
+them the first time the
 .B crontab -u
-command is used under his username.
+command is used under their username.
 .TP
 .B "\-l"
 Displays the current crontab on standard output.
@@ -178,6 +186,27 @@ option.
 .TP
 .B "\-V"
 Print version and exit.
+.SH CAVEATS
+The files
+.I cron.allow
+and
+.I cron.deny
+cannot be used to restrict the execution of cron jobs; they only restrict the
+use of
+.BR crontab .
+In particular, restricting access to
+.BR crontab
+has no effect on an existing
+.I crontab
+of a user. Its jobs will continue to be executed until the crontab is removed.
+.PP
+The files
+.I cron.allow
+and
+.I cron.deny
+must be readable by the user invoking
+.BR crontab .
+If this is not the case, then they are treated as non-existent.
 .SH "SEE ALSO"
 .BR crontab (5),
 .BR cron (8)
