@@ -724,7 +724,7 @@ static void edit_cmd(void) {
 		break;
 	case -1:
 		for (;;) {
-			printf("Do you want to retry the same edit? ");
+			printf("Do you want to retry the same edit? (Y/N) ");
 			fflush(stdout);
 			q[0] = '\0';
 			if (fgets(q, sizeof q, stdin) == NULL)
