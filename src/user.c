@@ -124,6 +124,16 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 		}
 		status = load_env (envstr, file);
 		switch (status) {
+			case ERR:
+				 /* If envstr has content, we reached EOF
+				 * without a newline, and the line will be
+				 * ignored.
+				 */
+				if (envstr[0] != '\0') {
+					FileName = tabname;
+					log_error("missing newline before EOF");
+				}
+				break;
 			case FALSE:
 				++entries;
 				if (!u->system && entries > MAX_USER_ENTRIES) {

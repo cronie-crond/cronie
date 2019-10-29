@@ -326,6 +326,11 @@ option on the crond command line.  If inotify support is in use, changes
 in the symlinked crontabs are not automatically noticed by the cron
 daemon.  The cron daemon must receive a SIGHUP signal to reload the
 crontabs.  This is a limitation of the inotify API.
+.PP
+cron requires that each entry in a crontab end in a newline character.  If the
+last entry in a crontab is missing a newline (i.e.\& terminated by EOF),
+cron will consider the crontab (at least partially) broken.
+A warning will be written to syslog.
 .SH AUTHOR
 .MT vixie@isc.org
 Paul Vixie
