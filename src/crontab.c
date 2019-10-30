@@ -818,15 +818,14 @@ static int replace_cmd(void) {
 		error = -2;
 		goto done;
 	}
-	fflush(tmp);
-	rewind(tmp);
-	if (ferror(tmp)) {
+	if (ferror(tmp) || fflush(tmp) || fsync(fileno(tmp))) {
 		fprintf(stderr, "%s: error while writing new crontab to %s\n",
 			ProgramName, TempFilename);
 		fclose(tmp);
 		error = -2;
 		goto done;
 	}
+	rewind(tmp);
 
 	/* check the syntax of the file being installed.
 	 */
