@@ -548,6 +548,13 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 		num3 = 1;
 	}
 
+	/* num1 (through i) will be validated by set_element() below, but num2
+	 * and num3 are merely used as loop condition and increment, and must
+	 * be validated separately.
+	 */
+	if (num2 < low || num2 > high || num3 > high)
+		return (EOF);
+
 	/* range. set all elements from num1 to num2, stepping
 	 * by num3.  (the step is a downward-compatible extension
 	 * proposed conceptually by bob@acornrc, syntactically
