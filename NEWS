@@ -1,10 +1,24 @@
 cronie NEWS -- history of user-visible changes.
 
+Release 1.5.5
+
+* Explicitly validate upper end of range and step to disallow entries
+  such as: 1-234/5678 * * * * ....
+* crond: Report missing newline before EOF in syslog so the line is not
+  completely silently ignored.
+* crontab -l colors comment lines in a different color.
+* crond: Revert "Avoid creating pid files when crond doesn't fork".
+* anacron is built by default.
+* Use non-recursive build.
+* cronnext: Allow to optionally select jobs by substring.
+
 Release 1.5.4
+
 * crond: Fix regression from previous release. Only first job from a crontab
   was being run.
 
 Release 1.5.3
+
 * Fix CVE-2019-9704 and CVE-2019-9705 to avoid local DoS of the crond.
 * crontab: Make crontab without arguments fail.
 * crond: In PAM configuration include system-auth instead of password-auth.

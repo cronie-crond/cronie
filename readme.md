@@ -1,15 +1,26 @@
 # Cronie
 Cronie contains the standard UNIX daemon crond that runs specified programs at
-scheduled times and related tools. It is based on the original cron and
-has security and configuration enhancements like the ability to use pam and
+scheduled times and related tools. The source is based on the original vixie-cron
+and has security and configuration enhancements like the ability to use pam and
 SELinux.
 
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 # Download
-Latest released version is 1.5.4.
+Latest released version is 1.5.5.
 
 User visible changes:
+
+Release 1.5.5
+- Explicitly validate upper end of range and step to disallow entries
+  such as: 1-234/5678 * * * * ....
+- crond: Report missing newline before EOF in syslog so the line is not
+  completely silently ignored.
+- crontab -l colors comment lines in a different color.
+- crond: Revert "Avoid creating pid files when crond doesn't fork".
+- anacron is built by default.
+- Use non-recursive build.
+- cronnext: Allow to optionally select jobs by substring.
 
 Release 1.5.4
 - crond: Fix regression from previous release. Only first job from a crontab

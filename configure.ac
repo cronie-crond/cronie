@@ -1,4 +1,4 @@
-AC_INIT([cronie],[1.5.4],[mmaslano@redhat.com,tmraz@fedoraproject.org])
+AC_INIT([cronie],[1.5.5],[mmaslano@redhat.com,tmraz@fedoraproject.org])
 AC_CONFIG_HEADER([config.h])
 AC_PREREQ(2.60)
 

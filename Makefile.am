@@ -11,6 +11,8 @@ dist_noinst_HEADERS = \
 	cronie_common.h
 
 EXTRA_DIST += \
+	README.anacron \
+	COPYING.anacron \
 	cronie.init \
 	crond.sysconfig \
 	contrib/anacrontab \
