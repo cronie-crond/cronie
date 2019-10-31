@@ -80,8 +80,8 @@ make_msg(const char *fmt, va_list args)
      * returns when the buffer overflows.  Hmmm... */
     len = vsnprintf(msg, sizeof(msg), fmt, args);
     if (len < 0) {
-        msg[0] = '\0';
-        strncat(msg, "(vsnprintf failed)", sizeof(msg));
+        strncpy(msg, "(vsnprintf failed)", sizeof(msg));
+        msg[sizeof(msg) - 1] = '\0';
         return;
     }
     if ((size_t) len >= sizeof(msg) - 1)
