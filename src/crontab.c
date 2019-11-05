@@ -426,6 +426,7 @@ static void list_cmd(void) {
 		putchar(ch);
 		new_line = ch == '\n';
 	}
+	fputs(RESET_COLOR, stdout);
 	fclose(f);
 }
 
