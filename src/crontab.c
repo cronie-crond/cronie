@@ -66,8 +66,9 @@
 
 #define NHEADER_LINES 0
 
-#define COMMENT_COLOR  "\x1B[34m"
-#define RESET_COLOR "\033[0m"
+#define COMMENT_COLOR "\x1B[34m"
+#define ERROR_COLOR "\x1B[31m"
+#define RESET_COLOR "\x1B[0m"
 
 enum opt_t {opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_hostset, opt_hostget};
 
@@ -397,6 +398,7 @@ static void list_cmd(void) {
 	int ch;
 	const int is_tty = isatty(STDOUT);
 	int new_line = 1;
+	int in_comment = 0;
 
 	log_it(RealUser, Pid, "LIST", User, 0);
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, User, '/')) {
@@ -415,16 +417,25 @@ static void list_cmd(void) {
 	 */
 	Set_LineNum(1)
 	while (EOF != (ch = get_char(f))) {
-		if (is_tty && new_line) {
-			if (ch == '#') {
+		if (is_tty) {
+			if (!in_comment && new_line && ch == '#') {
+				in_comment = 1;
 				fputs(COMMENT_COLOR, stdout);
 			}
-			else {
+			if (in_comment && ch == '\n') {
+				in_comment = 0;
 				fputs(RESET_COLOR, stdout);
 			}
 		}
 		putchar(ch);
 		new_line = ch == '\n';
+	}
+	/* no new line at EOF */
+	if (is_tty && !new_line) {
+		putchar('\n');
+		fputs(ERROR_COLOR "No end-of-line character at the end of file"
+		      RESET_COLOR, stdout);
+		putchar('\n');
 	}
 	fclose(f);
 }
