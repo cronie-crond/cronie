@@ -40,13 +40,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <fcntl.h>
 
 #ifdef WITH_INOTIFY
 # include <sys/inotify.h>
-#endif
-
-#ifdef HAVE_SYS_FCNTL_H
-# include <sys/fcntl.h>
 #endif
 
 #include "cronie_common.h"
