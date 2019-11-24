@@ -38,7 +38,6 @@ AC_CHECK_HEADERS( \
         sys/timers.h \
         sys/types.h \
         sys/cdefs.h \
-        sys/fcntl.h \
         time.h \
         unistd.h \
         util.h \
