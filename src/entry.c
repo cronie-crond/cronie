@@ -179,7 +179,7 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 			bit_nset(e->dom, 0, LAST_DOM - FIRST_DOM);
 			bit_nset(e->month, 0, LAST_MONTH - FIRST_MONTH);
 			bit_set(e->dow, 0);
-			e->flags |= DOW_STAR;
+			e->flags |= DOM_STAR;
 		}
 		else if (!strcmp("daily", cmd) || !strcmp("midnight", cmd)) {
 			bit_set(e->minute, 0);
