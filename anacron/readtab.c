@@ -98,7 +98,7 @@ Return NULL if no more lines.
 	    break;
 	}
 
-	if ('\\' != prev && 0 != prev && '\n' != prev) obstack_1grow(&input_o, (char)prev);
+	if (('\\' != prev || c != '\n') && 0 != prev && '\n' != prev) obstack_1grow(&input_o, (char)prev);
 	else if ('\n' == prev) obstack_1grow(&input_o, ' ');
 
 	prev = c;
