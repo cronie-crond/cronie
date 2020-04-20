@@ -592,7 +592,7 @@ static int child_process(entry * e, char **jobenv) {
 	if ((e->flags & DONT_LOG) == 0) {
 		char *x = mkprints((u_char *) e->cmd, strlen(e->cmd));
 
-		log_it(usernm, getpid(), "CMDEND", x, 0);
+		log_it(usernm, getpid(), "CMDEND", x ? x : "Unknown command" , 0);
 		free(x);
 	}
 	return OK_EXIT;
