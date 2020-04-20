@@ -581,14 +581,6 @@ static int child_process(entry * e, char **jobenv) {
 			Debug(DPROC,
 				("[%ld] no more grandchildren--mail written?\n",
 					(long) getpid()));
-
-			if ((e->flags & DONT_LOG) == 0) {
-				char *x = mkprints((u_char *) e->cmd, strlen(e->cmd));
-
-				log_it(usernm, getpid(), "CMDEND", x, 0);
-				free(x);
-			}
-
 			break;
 		}
 		Debug(DPROC, ("[%ld] grandchild #%ld finished, status=%04x",
@@ -596,6 +588,12 @@ static int child_process(entry * e, char **jobenv) {
 			if (WIFSIGNALED(waiter) && WCOREDUMP(waiter))
 				Debug(DPROC, (", dumped core"));
 			Debug(DPROC, ("\n"));
+	}
+	if ((e->flags & DONT_LOG) == 0) {
+		char *x = mkprints((u_char *) e->cmd, strlen(e->cmd));
+
+		log_it(usernm, getpid(), "CMDEND", x, 0);
+		free(x);
 	}
 	return OK_EXIT;
 }
