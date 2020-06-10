@@ -6,7 +6,7 @@
 Summary:   Cron daemon for executing programs at set times
 Name:      cronie
 Version:   1.5.5
-Release:   2%{?dist}
+Release:   0packit%{?dist}
 License:   MIT and BSD and ISC and GPLv2+
 URL:       https://github.com/cronie-crond/cronie
 Source0:   https://github.com/cronie-crond/cronie/releases/download/cronie-%{version}/cronie-%{version}.tar.gz
@@ -25,9 +25,12 @@ Buildrequires: pam-devel >= 1.0.1
 Buildrequires: audit-libs-devel >= 1.4.1
 %endif
 
-BuildRequires:    gcc
-BuildRequires:    systemd
-Obsoletes:        %{name}-sysvinit
+# Necessary for packit
+BuildRequires: autoconf, automake, libtool
+
+BuildRequires: gcc
+BuildRequires: systemd
+Obsoletes:     %{name}-sysvinit
 
 Requires(post):   coreutils sed
 
@@ -78,6 +81,8 @@ extra features.
 %setup -q
 
 %build
+./autogen.sh
+
 %configure \
 %if %{with pam}
 --with-pam \
@@ -204,8 +209,8 @@ exit 0
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/cron.d/dailyjobs
 
 %changelog
-* Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+* Tue Jan 28 2020 Packit <packit@packit.dev> - 1.5.5-0packit
+- Packit build
 
 * Thu Oct 31 2019 Tomáš Mráz <tmraz@redhat.com> - 1.5.5-1
 - new upstream release 1.5.5 with multiple bug fixes and improvements
