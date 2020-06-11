@@ -70,14 +70,14 @@
 #define ERROR_COLOR "\x1B[31m"
 #define RESET_COLOR "\x1B[0m"
 
-enum opt_t { opt_unknown, opt_list, opt_delete, opt_edit, opt_replace,
-	opt_hostset, opt_hostget, opt_test
+enum opt_t {
+	opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_hostset,
+	opt_hostget, opt_test
 };
 
 #if DEBUGGING
-static const char *Options[] =
-	{ "???", "list", "delete", "edit", "replace", "hostset", "hostget",
-	"test"
+static const char *Options[] = {
+	"???", "list", "delete", "edit", "replace", "hostset", "hostget", "test"
 };
 
 # ifdef WITH_SELINUX
@@ -112,14 +112,14 @@ edit_cmd(void),
 poke_daemon(void),
 check_error(const char *), parse_args(int c, char *v[]),
 die(int) ATTRIBUTE_NORETURN;
-	 static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void),
-	test_cmd(void), check_syntax(FILE *);
-	 static char *host_specific_filename(const char *prefix,
-	const char *suffix);
-	 static const char *tmp_path(void);
+static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void),
+test_cmd(void), check_syntax(FILE *);
+static char *host_specific_filename(const char *prefix,
+const char *suffix);
+static const char *tmp_path(void);
 
-	 static void usage(const char *msg) ATTRIBUTE_NORETURN;
-	 static void usage(const char *msg) {
+static void usage(const char *msg) ATTRIBUTE_NORETURN;
+static void usage(const char *msg) {
 	fprintf(stderr, "%s: usage error: %s\n", ProgramName, msg);
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, " %s [options] file\n", ProgramName);
@@ -144,7 +144,7 @@ die(int) ATTRIBUTE_NORETURN;
 #endif
 	fprintf(stderr, "\nDefault operation is replace, per 1003.2\n");
 	exit(ERROR_EXIT);
-	 }
+}
 
 int main(int argc, char *argv[]) {
 	int exitstatus;
@@ -872,17 +872,17 @@ static int replace_cmd(void) {
 	}
 
 	file_owner = (getgid() == geteuid() &&
-		getgid() == getegid())? ROOT_UID : pw->pw_uid;
+		getgid() == getegid()) ? ROOT_UID : pw->pw_uid;
 
 #ifdef HAVE_FCHOWN
-	if (fchown(fileno(tmp), file_owner, (gid_t) - 1) < OK) {
+	if (fchown(fileno(tmp), file_owner, (gid_t)-1) < OK) {
 		perror("fchown");
 		fclose(tmp);
 		error = -2;
 		goto done;
 	}
 #else
-	if (chown(TempFilename, file_owner, (gid_t) - 1) < OK) {
+	if (chown(TempFilename, file_owner, (gid_t)-1) < OK) {
 		perror("chown");
 		fclose(tmp);
 		error = -2;
@@ -935,8 +935,8 @@ static int check_syntax(FILE * crontab_file) {
 	char **envp = env_init();
 	int eof = FALSE;
 	int envs = 0, entries = 0;
+	
 	CheckErrorCount = 0;
-
 	Set_LineNum(1 - NHEADER_LINES);
 
 	if (envp == NULL) {
