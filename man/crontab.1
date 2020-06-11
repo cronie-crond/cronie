@@ -33,6 +33,11 @@ crontab \- maintains crontab files for individual users
 .RB | \ - >
 .br
 .B crontab
+.RB [ -T ]
+.RI < "file"
+.RB | \ - >
+.br
+.B crontab
 .RB [ -u
 .IR user ]
 .RB < -l " | " -r " | " -e >\ [ -i ]
@@ -120,6 +125,10 @@ command. If no crontab exists for a particular user, it is created for
 them the first time the
 .B crontab -u
 command is used under their username.
+.TP
+.B "\-T"
+Test the crontab file syntax without installing it. 
+Once an issue is found, the validation is interrupted, so this will not return all the existing issues at the same execution.
 .TP
 .B "\-l"
 Displays the current crontab on standard output.

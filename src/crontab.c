@@ -70,21 +70,26 @@
 #define ERROR_COLOR "\x1B[31m"
 #define RESET_COLOR "\x1B[0m"
 
-enum opt_t {opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_hostset, opt_hostget};
+enum opt_t {
+	opt_unknown, opt_list, opt_delete, opt_edit, opt_replace, opt_hostset,
+	opt_hostget, opt_test
+};
 
 #if DEBUGGING
-static const char *Options[] = {"???", "list", "delete", "edit", "replace", "hostset", "hostget"};
+static const char *Options[] = {
+	"???", "list", "delete", "edit", "replace", "hostset", "hostget", "test"
+};
 
 # ifdef WITH_SELINUX
-static const char *getoptargs = "u:lerisncx:V";
+static const char *getoptargs = "u:lerisncx:VT";
 # else
-static const char *getoptargs = "u:lerincx:V";
+static const char *getoptargs = "u:lerincx:VT";
 # endif
 #else
 # ifdef WITH_SELINUX
-static const char *getoptargs = "u:lerisncV";
+static const char *getoptargs = "u:lerisncVT";
 # else
-static const char *getoptargs = "u:lerincV";
+static const char *getoptargs = "u:lerincVT";
 # endif
 #endif
 #ifdef WITH_SELINUX
@@ -105,9 +110,12 @@ static void list_cmd(void),
 delete_cmd(void),
 edit_cmd(void),
 poke_daemon(void),
-check_error(const char *), parse_args(int c, char *v[]), die(int) ATTRIBUTE_NORETURN;
-static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void);
-static char *host_specific_filename(const char *prefix, const char *suffix);
+check_error(const char *), parse_args(int c, char *v[]),
+die(int) ATTRIBUTE_NORETURN;
+static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void),
+test_cmd(void), check_syntax(FILE *);
+static char *host_specific_filename(const char *prefix,
+const char *suffix);
 static const char *tmp_path(void);
 
 static void usage(const char *msg) ATTRIBUTE_NORETURN;
@@ -126,6 +134,7 @@ static void usage(const char *msg) {
 	fprintf(stderr, " -i         prompt before deleting\n");
 	fprintf(stderr, " -n <host>  set host in cluster to run users' crontabs\n");
 	fprintf(stderr, " -c         get host in cluster to run users' crontabs\n");
+	fprintf(stderr, " -T <file>  test a crontab file syntax\n");
 #ifdef WITH_SELINUX
 	fprintf(stderr, " -s         selinux context\n");
 #endif
@@ -140,7 +149,7 @@ static void usage(const char *msg) {
 int main(int argc, char *argv[]) {
 	int exitstatus;
 
-	if ((ProgramName=strrchr(argv[0], '/')) == NULL) {
+	if ((ProgramName = strrchr(argv[0], '/')) == NULL) {
 		ProgramName = argv[0];
 	}
 	else {
@@ -202,6 +211,10 @@ int main(int argc, char *argv[]) {
 		if (hostget_cmd() < 0)
 			exitstatus = ERROR_EXIT;
 		break;
+	case opt_test:
+		if (test_cmd() < 0)
+			exitstatus = ERROR_EXIT;
+		break;
 	default:
 		abort();
 	}
@@ -250,9 +263,9 @@ static void parse_args(int argc, char *argv[]) {
 				exit(ERROR_EXIT);
 			}
 #endif
-			if (Option == opt_hostset || Option == opt_hostget) {
-				fprintf(stderr,
-					"cannot use -u with -n or -c\n");
+			if (Option == opt_hostset || Option == opt_hostget ||
+				Option == opt_test) {
+				fprintf(stderr, "cannot use -u with -n, -c or -T\n");
 				exit(ERROR_EXIT);
 			}
 
@@ -280,6 +293,11 @@ static void parse_args(int argc, char *argv[]) {
 				usage("only one operation permitted");
 			Option = opt_edit;
 			break;
+		case 'T':
+			if (Option != opt_unknown)
+				usage("only one operation permitted");
+			Option = opt_test;
+			break;
 		case 'i':
 			PromptOnDelete = 1;
 			break;
@@ -293,15 +311,13 @@ static void parse_args(int argc, char *argv[]) {
 #endif
 		case 'n':
 			if (MY_UID(pw) != ROOT_UID) {
-				fprintf(stderr,
-					"must be privileged to set host with -n\n");
+				fprintf(stderr, "must be privileged to set host with -n\n");
 				exit(ERROR_EXIT);
 			}
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
 			if (strcmp(User, RealUser) != 0) {
-				fprintf(stderr,
-					"cannot use -u with -n or -c\n");
+				fprintf(stderr, "cannot use -u with -n or -c\n");
 				exit(ERROR_EXIT);
 			}
 			Option = opt_hostset;
@@ -310,8 +326,7 @@ static void parse_args(int argc, char *argv[]) {
 			if (Option != opt_unknown)
 				usage("only one operation permitted");
 			if (strcmp(User, RealUser) != 0) {
-				fprintf(stderr,
-					"cannot use -u with -n or -c\n");
+				fprintf(stderr, "cannot use -u with -n or -c\n");
 				exit(ERROR_EXIT);
 			}
 			Option = opt_hostget;
@@ -334,22 +349,27 @@ static void parse_args(int argc, char *argv[]) {
 		optind++;
 	}
 
-	if (Option != opt_unknown) {
-		if (argv[optind] != NULL)
-			usage("no arguments permitted after this option");
+	if (Option == opt_unknown) {
+		/* replace is the default option */
+		Option = opt_replace;
 	}
-	else {
+
+	if (Option == opt_replace || Option == opt_test) {
 		if (argv[optind] != NULL) {
-			Option = opt_replace;
 			if (strlen(argv[optind]) >= sizeof Filename)
 				usage("filename too long");
 			(void) strcpy(Filename, argv[optind]);
+			optind++;
 		}
 		else
-			usage("file name or - (for stdin) must be specified for replace");
+			usage("file name or - (for stdin) must be specified");
 	}
 
-	if (Option == opt_replace) {
+	if (Option != opt_unknown && argv[optind] != NULL) {
+		usage("no arguments permitted after this option");
+	}
+
+	if (Filename[0] != '\0') {
 		if (!strcmp(Filename, "-"))
 			NewCrontab = stdin;
 		else {
@@ -376,8 +396,7 @@ static void parse_args(int argc, char *argv[]) {
 			}
 			if ((sb.st_mode & S_IFMT) == S_IFDIR) {
 				fprintf(stderr,
-					"cannot replace crontab with a directory: %s\n",
-					Filename);
+					"invalid crontab file: '%s' is a directory\n", Filename);
 				fclose(NewCrontab);
 				exit(ERROR_EXIT);
 			}
@@ -415,7 +434,7 @@ static void list_cmd(void) {
 
 	/* file is open. copy to stdout, close.
 	 */
-	Set_LineNum(1)
+	Set_LineNum(1);
 	while (EOF != (ch = get_char(f))) {
 		if (is_tty) {
 			if (!in_comment && new_line && ch == '#') {
@@ -434,7 +453,7 @@ static void list_cmd(void) {
 	if (is_tty && !new_line) {
 		putchar('\n');
 		fputs(ERROR_COLOR "No end-of-line character at the end of file"
-		      RESET_COLOR, stdout);
+			RESET_COLOR, stdout);
 		putchar('\n');
 	}
 	fclose(f);
@@ -480,8 +499,7 @@ static const char *tmp_path(void) {
 	return tmpdir ? tmpdir : "/tmp";
 }
 
-static char *host_specific_filename(const char *prefix, const char *suffix)
-{
+static char *host_specific_filename(const char *prefix, const char *suffix) {
 	/*
 	 * For cluster-wide use, where there is otherwise risk of the same
 	 * name being generated on more than one host at once, insert hostname
@@ -562,14 +580,14 @@ static void edit_cmd(void) {
 		goto fatal;
 	}
 
-	Set_LineNum(1)
-		/* 
-		 * NHEADER_LINES processing removed for clarity
-		 * (NHEADER_LINES == 0 in all Red Hat crontabs)
-		 */
-		/* copy the rest of the crontab (if any) to the temp file.
-		 */
-		if (EOF != ch)
+	Set_LineNum(1);
+	/* 
+	 * NHEADER_LINES processing removed for clarity
+	 * (NHEADER_LINES == 0 in all Red Hat crontabs)
+	 */
+	/* copy the rest of the crontab (if any) to the temp file.
+	 */
+	if (EOF != ch)
 		while (EOF != (ch = get_char(f)))
 			putc(ch, NewCrontab);
 
@@ -766,21 +784,31 @@ static void edit_cmd(void) {
 	log_it(RealUser, Pid, "END EDIT", User, 0);
 }
 
+/*
+* Check if crontab file can be installed or not 
+*/
+static int test_cmd(void) {
+	if (check_syntax(NewCrontab) < 0) {
+		fprintf(stderr, "Invalid crontab file. Syntax issues were found.\n");
+		return (-2);
+	}
+	else {
+		fprintf(stderr, "No syntax issues were found in the crontab file.\n");
+	}
+	return (0);
+}
+
 /* returns	0	on success
  *		-1	on syntax error
  *		-2	on install error
  */
 static int replace_cmd(void) {
-	char n[MAX_FNAME], envstr[MAX_ENVSTR];
+	char n[MAX_FNAME];
 	FILE *tmp;
-	int ch, eof, fd;
+	int ch, fd;
 	int error = 0;
-	entry *e;
 	uid_t file_owner;
-	char **envp;
 	char *safename;
-	int envs = 0, entries = 0;
-
 
 	safename = host_specific_filename("#tmp", "XXXXXXXXXX");
 	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
@@ -819,8 +847,8 @@ static int replace_cmd(void) {
 	/* copy the crontab to the tmp
 	 */
 	rewind(NewCrontab);
-	Set_LineNum(1)
-		while (EOF != (ch = get_char(NewCrontab)))
+	Set_LineNum(1);
+	while (EOF != (ch = get_char(NewCrontab)))
 		putc(ch, tmp);
 	if (ftruncate(fileno(tmp), ftell(tmp)) == -1) {
 		fprintf(stderr, "%s: error while writing new crontab to %s\n",
@@ -838,74 +866,13 @@ static int replace_cmd(void) {
 	}
 	rewind(tmp);
 
-	/* check the syntax of the file being installed.
-	 */
-
-	/* BUG: was reporting errors after the EOF if there were any errors
-	 * in the file proper -- kludged it by stopping after first error.
-	 *      vix 31mar87
-	 */
-	Set_LineNum(1 - NHEADER_LINES)
-		CheckErrorCount = 0;
-	eof = FALSE;
-
-	envp = env_init();
-	if (envp == NULL) {
-		fprintf(stderr, "%s: Cannot allocate memory.\n", ProgramName);
-		fclose(tmp);
-		error = -2;
+	if ((error = check_syntax(tmp)) < 0) {
+		fprintf(stderr, "Invalid crontab file, can't install.\n");
 		goto done;
 	}
 
-	while (!CheckErrorCount && !eof) {
-		if (!skip_comments(tmp)) {
-			check_error("too many garbage characters");
-			break;
-		}
-		switch (load_env(envstr, tmp)) {
-		case ERR:
-			/* check for data before the EOF */
-			if (envstr[0] != '\0') {
-				Set_LineNum(LineNumber + 1);
-				check_error("premature EOF");
-			}
-			eof = TRUE;
-			break;
-		case FALSE:
-			e = load_entry(tmp, check_error, pw, envp);
-			if (e) {
-				++entries;
-				free_entry(e);
-			}
-			break;
-		case TRUE:
-			++envs;
-			break;
-		}
-	}
-	env_free(envp);
-	if (envs > MAX_USER_ENVS) {
-		fprintf(stderr, "More than %d environment variables in crontab file, can't install.\n", MAX_USER_ENVS);
-		fclose(tmp);
-		error = -1;
-		goto done;
-	}
-
-	if (entries > MAX_USER_ENTRIES) {
-		fprintf(stderr, "More than %d entries in crontab file, can't install.\n", MAX_USER_ENTRIES);
-		fclose(tmp);
-		error = -1;
-		goto done;
-	}
-
-	if (CheckErrorCount != 0) {
-		fprintf(stderr, "errors in crontab file, can't install.\n");
-		fclose(tmp);
-		error = -1;
-		goto done;
-	}
-
-	file_owner = (getgid() == geteuid() && getgid() == getegid()) ? ROOT_UID : pw->pw_uid;
+	file_owner = (getgid() == geteuid() &&
+		getgid() == getegid()) ? ROOT_UID : pw->pw_uid;
 
 #ifdef HAVE_FCHOWN
 	if (fchown(fileno(tmp), file_owner, (gid_t)-1) < OK) {
@@ -957,16 +924,90 @@ static int replace_cmd(void) {
 	return (error);
 }
 
+/*
+ * Check the syntax of a crontab file
+ * Returns:
+ *   0 no syntax issues
+ *  -1 syntax issue (can be fixed by user)
+ *  -2 any other error, which can not be fixed by user
+ */
+static int check_syntax(FILE * crontab_file) {
+	char **envp = env_init();
+	int eof = FALSE;
+	int envs = 0, entries = 0;
+	
+	CheckErrorCount = 0;
+	Set_LineNum(1 - NHEADER_LINES);
+
+	if (envp == NULL) {
+		fprintf(stderr, "%s: Cannot allocate memory.\n", ProgramName);
+		return (-2);
+	}
+
+	while (!CheckErrorCount && !eof) {
+		char envstr[MAX_ENVSTR];
+		entry *e;
+
+		if (!skip_comments(crontab_file)) {
+			check_error
+				("too much non-parseable content (comments, empty lines, spaces)");
+			break;
+		}
+
+		switch (load_env(envstr, crontab_file)) {
+		case ERR:
+			/* check for data before the EOF */
+			if (envstr[0] != '\0') {
+				Set_LineNum(LineNumber + 1);
+				check_error("premature EOF");
+			}
+			eof = TRUE;
+			break;
+		case FALSE:
+			e = load_entry(crontab_file, check_error, pw, envp);
+			if (e) {
+				++entries;
+				free_entry(e);
+			}
+			break;
+		case TRUE:
+			++envs;
+			break;
+		}
+	}
+	env_free(envp);
+
+	if (envs > MAX_USER_ENVS) {
+		fprintf(stderr,
+			"There are too many environment variables in the crontab file. Limit: %d\n",
+			MAX_USER_ENVS);
+		return (-1);
+	}
+
+	if (entries > MAX_USER_ENTRIES) {
+		fprintf(stderr,
+			"There are too many entries in the crontab file. Limit: %d\n",
+			MAX_USER_ENTRIES);
+		return (-1);
+	}
+
+	if (CheckErrorCount != 0) {
+		return (-1);
+	}
+
+	return 0;
+}
+
 static int hostset_cmd(void) {
 	char n[MAX_FNAME];
 	FILE *tmp;
 	int fd;
 	int error = 0;
 	char *safename;
-	
+
 	if (!HostSpecified)
 		gethostname(Host, sizeof Host);
-	
+
 	safename = host_specific_filename("#tmp", "XXXXXXXXXX");
 	if (!safename || !glue_strings(TempFilename, sizeof TempFilename, SPOOL_DIR,
 			safename, '/')) {
@@ -988,7 +1029,7 @@ static int hostset_cmd(void) {
 	(void) signal(SIGINT, die);
 	(void) signal(SIGQUIT, die);
 
-	(void) fchmod(fd, 0600); /* not all mkstemp() implementations do this */
+	(void) fchmod(fd, 0600);	/* not all mkstemp() implementations do this */
 
 	if (fprintf(tmp, "%s\n", Host) < 0 || fclose(tmp) == EOF) {
 		fprintf(stderr, "%s: error while writing to %s\n",

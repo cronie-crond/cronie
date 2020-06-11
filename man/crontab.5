@@ -235,6 +235,10 @@ field matches the current time.  For example,
 .br
 "30 4 1,15 * 5" would cause a command to be run at 4:30 am on the 1st and
 15th of each month, plus every Friday.
+.PP
+A crontab file syntax can be tested before an install using the -T option. See
+.BR crontab (1)
+for details.
 .SH EXAMPLE CRON FILE
 .nf
 # use /bin/sh to run commands, no matter what /etc/passwd says
