@@ -62,6 +62,7 @@
 #define MAX_USER_ENTRIES 1000	/* maximum crontab entries in user's crontab */
 #define MAX_GARBAGE	32768	/* max num of chars of comments and whitespaces between entries */
 #define MAX_CLOSE_FD	10000	/* max fd num to close when spawning a child process */
+#define MAX_EMAILSTR	255		/* max length of email address strings (254 + \0) */
 
 				/* NOTE: these correspond to DebugFlagNames,
 				 *	defined below.

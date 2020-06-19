@@ -28,6 +28,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <wordexp.h>
 
 #include "globals.h"
 #include "funcs.h"
@@ -302,4 +303,21 @@ char **env_update_home(char **envp, const char *dir) {
 		log_it("CRON", getpid(), "ERROR", "can't set HOME", 0);
 
 	return envp;
+}
+
+/* Expand env variables in 'source' arg and save to 'result'
+ */
+void expand_env_variable(const char *source, char *result) {
+	wordexp_t p;
+	
+	// do not substitute commands
+	// consider unknown variable as error
+	int flags = WRDE_NOCMD | WRDE_UNDEF;
+	
+	if (wordexp(source, &p, flags) == EXIT_SUCCESS) {
+		strcpy(result, p.we_wordv[0]);
+		wordfree(&p);
+	}
+	else
+		strcpy(result, source);
 }

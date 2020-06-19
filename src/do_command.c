@@ -89,6 +89,8 @@ void do_command(entry * e, user * u) {
 static int child_process(entry * e, char **jobenv) {
 	int stdin_pipe[2], stdout_pipe[2];
 	char *input_data, *usernm, *mailto, *mailfrom;
+	char mailto_expanded[MAX_EMAILSTR];
+	char mailfrom_expanded[MAX_EMAILSTR];
 	int children = 0;
 	pid_t pid = getpid();
 	struct sigaction sa;
@@ -126,6 +128,16 @@ static int child_process(entry * e, char **jobenv) {
 	usernm = e->pwd->pw_name;
 	mailto = env_get("MAILTO", jobenv);
 	mailfrom = env_get("MAILFROM", e->envp);
+	
+	if (mailto != NULL) {
+		expand_env_variable(mailto, mailto_expanded);
+		mailto = mailto_expanded;
+	}
+	
+	if (mailfrom != NULL) {
+		expand_env_variable(mailfrom, mailfrom_expanded);
+		mailfrom = mailfrom_expanded;
+	}
 
 	/* create some pipes to talk to our future child
 	 */

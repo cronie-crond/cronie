@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <wordexp.h>
 #include "global.h"
 
 #include <langinfo.h>
@@ -286,6 +287,8 @@ launch_job(job_rec *jr)
     char hostname[512];
     char *mailto;
     char *mailfrom;
+    char mailto_expanded[MAX_EMAILSTR];
+    char mailfrom_expanded[MAX_EMAILSTR];
 
     /* get hostname */
     if (gethostname(hostname, 512)) {
@@ -296,14 +299,23 @@ launch_job(job_rec *jr)
 
     /* Get the destination email address if set, or current user otherwise */
     mailto = getenv("MAILTO");
-
-    if (mailto == NULL)
-	mailto = username();
+    if (mailto == NULL) {
+        mailto = username();
+    }
+    else {
+        expand_env_variable(mailto, mailto_expanded);
+        mailto = mailto_expanded;
+    }
 
     /* Get the source email address if set, or current user otherwise */
     mailfrom = getenv("MAILFROM");
-    if (mailfrom == NULL)
-	mailfrom = username();
+    if (mailfrom == NULL) {
+        mailfrom = username();
+    }
+    else {
+        expand_env_variable(mailfrom, mailfrom_expanded);
+        mailfrom = mailfrom_expanded;
+    }
 
     /* create temporary file for stdout and stderr of the job */
     temp_file(jr); fd = jr->output_fd;
@@ -398,4 +410,21 @@ tend_children(void)
 	    tend_job(job_array[j], status);
 	j++;
     }
+}
+
+/* Expand env variables in 'source' arg and save to 'result'
+ */
+void expand_env_variable(const char *source, char *result) {
+    wordexp_t p;
+    
+    // do not substitute commands
+    // consider unknown variable as error
+    int flags = WRDE_NOCMD | WRDE_UNDEF;
+    
+    if (wordexp(source, &p, flags) == EXIT_SUCCESS) {
+        strcpy(result, p.we_wordv[0]);
+        wordfree(&p);
+    }
+    else
+        strcpy(result, source);
 }
