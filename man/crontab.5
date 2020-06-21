@@ -99,6 +99,12 @@ aliasing and UUCP usually does not read its mail.  If
 .I MAILFROM
 is defined (and non-empty), it is used as the envelope sender address,
 otherwise, ``root'' is used.
+.PP 
+(Note: Both 
+.I MAILFROM
+and 
+.I MAILTO 
+variables are expanded, so setting them as in the following example works as expected: MAILFROM=cron-$USER@cron.com ($USER is replaced by the system user) ) 
 .PP
 By default, cron sends a mail using the 'Content-Type:' header
 of 'text/plain' with the 'charset=' parameter set to the 'charmap/codeset'
