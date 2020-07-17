@@ -130,12 +130,12 @@ static int child_process(entry * e, char **jobenv) {
 	mailfrom = env_get("MAILFROM", e->envp);
 	
 	if (mailto != NULL) {
-		expand_env_variable(mailto, mailto_expanded);
+		expand_envvar(mailto, mailto_expanded, MAX_EMAILSTR);
 		mailto = mailto_expanded;
 	}
 	
 	if (mailfrom != NULL) {
-		expand_env_variable(mailfrom, mailfrom_expanded);
+		expand_envvar(mailfrom, mailfrom_expanded, MAX_EMAILSTR);
 		mailfrom = mailfrom_expanded;
 	}
 

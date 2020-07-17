@@ -160,6 +160,7 @@ void fake_job(job_rec *jr);
 /* runjob.c */
 void tend_children();
 void launch_job(job_rec *jr);
-void expand_env_variable(const char *, char *);
+void expand_envvar(const char *, char *, int);
+int find_envvar(const char *, const char **, int *);
 
 #endif
