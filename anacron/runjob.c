@@ -34,8 +34,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
-#include <ctype.h>
 #include "global.h"
+#include "cronie_common.h"
 
 #include <langinfo.h>
 
@@ -303,8 +303,9 @@ launch_job(job_rec *jr)
         mailto = username();
     }
     else {
-        expand_envvar(mailto, mailto_expanded, MAX_EMAILSTR);
-        mailto = mailto_expanded;
+        if (!expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
+            mailto = mailto_expanded; 
+        }     
     }
 
     /* Get the source email address if set, or current user otherwise */
@@ -313,8 +314,9 @@ launch_job(job_rec *jr)
         mailfrom = username();
     }
     else {
-        expand_envvar(mailfrom, mailfrom_expanded, MAX_EMAILSTR);
-        mailfrom = mailfrom_expanded;
+        if (!expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
+            mailfrom = mailfrom_expanded;
+        }
     }
 
     /* create temporary file for stdout and stderr of the job */
@@ -410,135 +412,4 @@ tend_children(void)
 	    tend_job(job_array[j], status);
 	j++;
     }
-}
-
-/* Expand env variables in 'source' arg and save to 'result'*/
-void expand_envvar(const char *source, char *result, const int max_size) {
-    const char *envvar_p;
-    int envvar_name_size = 0;
-
-    *result = '\0';
-
-    while (find_envvar(source, &envvar_p, &envvar_name_size)) {
-        char *envvar_name, *envvar_value;
-        int prefix_size;
-        
-        /* Copy content before env var name */
-        prefix_size = envvar_p - source;
-        
-        if (prefix_size > 0) {
-            if ((strlen(result) + prefix_size + 1) > max_size) {
-                goto too_big;
-            }
-            strncat(result, source, prefix_size);
-        }
-        
-        /* skip envvar name */
-        source = envvar_p + envvar_name_size;
-        
-        /* copy envvar name, ignoring $, { and } chars*/
-        envvar_p++; 
-        envvar_name_size--;
-      
-        if (*envvar_p == '{') {
-            envvar_p++;
-            envvar_name_size = envvar_name_size - 2;
-        }
-
-        envvar_name = malloc(sizeof(char) * (envvar_name_size + 1));
-        strncpy(envvar_name, envvar_p, envvar_name_size);
-        envvar_name[envvar_name_size] = '\0';
-
-        /* Copy envvar value to result */
-        envvar_value = getenv(envvar_name);
-        free(envvar_name);
-        
-        if (envvar_value != NULL) {
-            if ((strlen(result) + strlen(envvar_value) + 1) > max_size) {
-                goto too_big;
-            }
-            strncat(result, envvar_value, strlen(envvar_value));
-        }
-    }
-
-    /* Copy any character left in the source string */
-    if (*source != '\0') {
-        if ((strlen(result) + strlen(source) + 1) > max_size) {
-            goto too_big;
-        }
-        strncat(result, source, max_size);
-    }
-    
-    return;
-    too_big:
-        die_e("Environment variable expansion failed. Expanded value is bigger than allocated memory.");
-}
-
-/* Return:
- * 0 - Not found
- * 1 - Found */
-int find_envvar(const char *source, const char **start_pos, int *length) {
-    const char *reader;
-    int size = 1;
-    int waiting_close = 0;
-    int has_non_digit = 0;
-    
-    *length = 0;
-    *start_pos = NULL;
-
-    if (source == NULL || *source == '\0') {
-        return 0;
-    }
-
-    *start_pos = strchr(source, '$');
-
-    if (*start_pos == NULL) {
-        return 0;
-    }
-    /* Skip $, since all envvars start with this char */
-    reader = *start_pos + 1;
-    
-    while (*reader != '\0') {
-        if (*reader == '_' || isalnum(*reader)) {
-            if (size <= 2 && isdigit(*reader)) {
-                goto not_found;
-            }
-            size++;
-        } 
-        else if (*reader == '{') {
-            if (size != 1) {
-                goto not_found;
-            }
-            size++;
-            waiting_close = 1;
-        } 
-        else if (*reader == '}') {
-            if ((waiting_close && size == 2) || size == 1) {
-                goto not_found;
-            }
-            
-            if (waiting_close) {
-                size++;
-            }
-            
-            waiting_close = 0;
-            break;
-        } 
-        else
-            break;
-
-        reader++;
-    }
-
-    if (waiting_close) {
-        goto not_found;
-    }
-
-    *length = size;
-    return 1;
-
-    not_found:
-        *length = 0;
-        *start_pos = NULL;
-        return 0;
 }

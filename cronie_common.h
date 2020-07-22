@@ -34,4 +34,10 @@
 # define ATTRIBUTE_UNUSED __attribute__ ((__unused__))
 #endif
 
+#ifndef MAX_EMAILSTR
+#define MAX_EMAILSTR	255		/* max length of email address strings (254 + \0) */
+#endif
+
+int expand_envvar(const char *, char *, size_t);
+
 #endif /* CRONIE_COMMON_H */

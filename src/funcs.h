@@ -51,8 +51,7 @@ void		set_cron_uid(void),
 		acquire_daemonlock(int),
 		log_it(const char *, PID_T, const char *, const char *, int),
 		log_close(void),
-		check_orphans(cron_db *),
-        expand_envvar(const char *, char *, int);
+		check_orphans(cron_db *);
 #if defined WITH_INOTIFY
 void 		set_cron_watched(int ),
 		set_cron_unwatched(int ),
@@ -72,8 +71,7 @@ int		load_database(cron_db *),
 		glue_strings(char *, size_t, const char *, const char *, char),
 		strcmp_until(const char *, const char *, char),
 		skip_comments(FILE *),
-		allowed(const char * ,const char * ,const char *),
-		find_envvar(const char *, const char **, int *);
+		allowed(const char * ,const char * ,const char *);
 
 size_t		strlens(const char *, ...),
 		strdtb(char *);

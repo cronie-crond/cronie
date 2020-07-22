@@ -35,6 +35,7 @@
 #include "funcs.h"
 #include "globals.h"
 #include "structs.h"
+#include "cronie_common.h"
 
 #ifndef isascii
 # define isascii(c)	((unsigned)(c)<=0177)
@@ -129,14 +130,12 @@ static int child_process(entry * e, char **jobenv) {
 	mailto = env_get("MAILTO", jobenv);
 	mailfrom = env_get("MAILFROM", e->envp);
 	
-	if (mailto != NULL) {
-		expand_envvar(mailto, mailto_expanded, MAX_EMAILSTR);
-		mailto = mailto_expanded;
+	if (mailto != NULL && !expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
+        mailto = mailto_expanded;
 	}
 	
-	if (mailfrom != NULL) {
-		expand_envvar(mailfrom, mailfrom_expanded, MAX_EMAILSTR);
-		mailfrom = mailfrom_expanded;
+	if (mailfrom != NULL && !expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
+        mailfrom = mailfrom_expanded;
 	}
 
 	/* create some pipes to talk to our future child

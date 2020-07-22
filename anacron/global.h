@@ -40,7 +40,6 @@
 
 #define FAILURE_EXIT 1
 #define MAX_MSG 150
-#define MAX_EMAILSTR 255		/* max length of email address strings (254 + \0) */
 
 #include <signal.h>
 #include <time.h>
@@ -160,7 +159,5 @@ void fake_job(job_rec *jr);
 /* runjob.c */
 void tend_children();
 void launch_job(job_rec *jr);
-void expand_envvar(const char *, char *, int);
-int find_envvar(const char *, const char **, int *);
 
 #endif
