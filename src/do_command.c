@@ -35,6 +35,7 @@
 #include "funcs.h"
 #include "globals.h"
 #include "structs.h"
+#include "cronie_common.h"
 
 #ifndef isascii
 # define isascii(c)	((unsigned)(c)<=0177)
@@ -89,6 +90,8 @@ void do_command(entry * e, user * u) {
 static int child_process(entry * e, char **jobenv) {
 	int stdin_pipe[2], stdout_pipe[2];
 	char *input_data, *usernm, *mailto, *mailfrom;
+	char mailto_expanded[MAX_EMAILSTR];
+	char mailfrom_expanded[MAX_EMAILSTR];
 	int children = 0;
 	pid_t pid = getpid();
 	struct sigaction sa;
@@ -126,6 +129,24 @@ static int child_process(entry * e, char **jobenv) {
 	usernm = e->pwd->pw_name;
 	mailto = env_get("MAILTO", jobenv);
 	mailfrom = env_get("MAILFROM", e->envp);
+	
+	if (mailto != NULL) {
+		if (expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
+			mailto = mailto_expanded;
+		}
+		else {
+			log_it("CRON", pid, "WARNING", "The environment variable 'MAILTO' could not be expanded. The non-expanded value will be used." , 0);
+		}
+	}
+	
+	if (mailfrom != NULL) {
+		if (expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
+			mailfrom = mailfrom_expanded;
+		}
+		else {
+			log_it("CRON", pid, "WARNING", "The environment variable 'MAILFROM' could not be expanded. The non-expanded value will be used." , 0);
+		}
+	}
 
 	/* create some pipes to talk to our future child
 	 */

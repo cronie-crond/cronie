@@ -12,7 +12,8 @@ anacron_anacron_SOURCES = \
 	anacron/matchrx.c \
 	anacron/matchrx.h \
 	anacron/readtab.c \
-	anacron/runjob.c
+	anacron/runjob.c \
+	cronie_common.c
 common_nodist += anacron-paths.h
 nodist_anacron_anacron_SOURCES = $(common_nodist)
 BUILT_SOURCES += $(common_nodist)

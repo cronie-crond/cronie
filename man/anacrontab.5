@@ -65,6 +65,23 @@ set to 12 would therefore add, randomly, between 0 and 12 minutes to the
 delay in minutes for each job in that particular anacrontab.  When set to
 0, no random delay is added.
 .PP
+If 
+.I MAILTO
+is defined (and non-empty), mail is sent to the specified address,
+otherwise, system user is used.
+.PP
+If
+.I MAILFROM
+is defined (and non-empty), it is used as the envelope sender address,
+otherwise, system user is used.
+.PP 
+(Note: Both 
+.I MAILFROM
+and 
+.I MAILTO 
+variables are expanded, so setting them as in the following example works as expected: MAILFROM=cron-$USER@cron.com ($USER is replaced by the system user) ) 
+.PP
+.PP
 Empty lines are either blank lines, line containing white spaces only, or
 lines with white spaces followed by a '#' followed by an arbitrary
 comment.

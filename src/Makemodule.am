@@ -15,6 +15,7 @@ src_crond_SOURCES = \
 	src/popen.c \
 	src/security.c \
 	src/user.c \
+	cronie_common.c \
 	$(common_src)
 
 src_crontab_SOURCES = \
