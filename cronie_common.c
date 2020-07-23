@@ -73,8 +73,8 @@ not_found:
 
 /* Expand env variables in 'source' arg and save to 'result'
  *  Return:
- * 0 - Success
- * 1 - Fail */
+ * 1 - Success
+ * 0 - Fail */
 int expand_envvar(const char *source, char *result, size_t max_size) {
     const char *envvar_p;
     size_t envvar_name_size = 0;
@@ -131,8 +131,8 @@ int expand_envvar(const char *source, char *result, size_t max_size) {
         strcat(result, source);
     }
     
-    return 0;
+    return 1;
     
 too_big:
-    return 1;
+    return 0;
 }

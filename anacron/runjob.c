@@ -303,8 +303,11 @@ launch_job(job_rec *jr)
         mailto = username();
     }
     else {
-        if (!expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
+        if (expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
             mailto = mailto_expanded; 
+        }
+        else {
+            complain("The environment variable 'MAILTO' could not be expanded. The non-expanded value will be used.");
         }     
     }
 
@@ -314,9 +317,12 @@ launch_job(job_rec *jr)
         mailfrom = username();
     }
     else {
-        if (!expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
+        if (expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
             mailfrom = mailfrom_expanded;
         }
+        else {
+            complain("The environment variable 'MAILFROM' could not be expanded. The non-expanded value will be used.");
+        }   
     }
 
     /* create temporary file for stdout and stderr of the job */

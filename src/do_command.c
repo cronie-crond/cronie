@@ -130,12 +130,22 @@ static int child_process(entry * e, char **jobenv) {
 	mailto = env_get("MAILTO", jobenv);
 	mailfrom = env_get("MAILFROM", e->envp);
 	
-	if (mailto != NULL && !expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
-        mailto = mailto_expanded;
+	if (mailto != NULL) {
+		if (expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
+			mailto = mailto_expanded;
+		}
+		else {
+			log_it("CRON", pid, "WARNING", "The environment variable 'MAILTO' could not be expanded. The non-expanded value will be used." , 0);
+		}
 	}
 	
-	if (mailfrom != NULL && !expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
-        mailfrom = mailfrom_expanded;
+	if (mailfrom != NULL) {
+		if (expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
+			mailfrom = mailfrom_expanded;
+		}
+		else {
+			log_it("CRON", pid, "WARNING", "The environment variable 'MAILFROM' could not be expanded. The non-expanded value will be used." , 0);
+		}
 	}
 
 	/* create some pipes to talk to our future child
