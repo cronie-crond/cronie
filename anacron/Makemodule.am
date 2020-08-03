@@ -18,6 +18,10 @@ common_nodist += anacron-paths.h
 nodist_anacron_anacron_SOURCES = $(common_nodist)
 BUILT_SOURCES += $(common_nodist)
 
+if NEED_OBSTACK
+anacron_anacron_SOURCES += obstack/obstack.c
+endif
+
 anacron_anacron_LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 
 # This header contains all the paths.

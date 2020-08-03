@@ -257,6 +257,14 @@ AM_CONDITIONAL([ANACRON], [test "$enable_anacron" = yes])
 if test "$enable_anacron" != no; then
 	ANACRON_CONF_VAR([ANACRON_SPOOL_DIR],[The path for anacron locks.],[${localstatedir}/spool/anacron])
 	ANACRON_CONF_VAR([ANACRONTAB],[The anacron table for regular jobs.],[${sysconfdir}/anacrontab])
+
+	dnl obstack.h is part of GLIBC and may not be present on other systems,
+	dnl eg. musl and AIX. There, we static link in our own copy.
+	AC_CHECK_HEADER(obstack.h, [have_obstack=yes], [have_obstack=no], [])
+	AM_CONDITIONAL([NEED_OBSTACK], [test "$have_obstack" = no])
+	if test "$have_obstack" = no; then
+		CPPFLAGS="$CPPFLAGS -I\$(top_srcdir)/obstack"
+	fi
 fi
 
 AC_CONFIG_FILES([Makefile])
