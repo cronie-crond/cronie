@@ -497,7 +497,10 @@ static int child_process(entry * e, char **jobenv) {
 						*nl = ' ';
 					fprintf(mail, "Content-Type: %s\n", content_type);
 				}
-				if (content_transfer_encoding != NULL) {
+				if (content_transfer_encoding == NULL) {
+					fprintf(mail, "Content-Transfer-Encoding: 8bit\n");
+				}
+				else {
 					char *nl = content_transfer_encoding;
 					size_t ctlen = strlen(content_transfer_encoding);
 					while ((*nl != '\0')

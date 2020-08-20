@@ -339,6 +339,7 @@ launch_job(job_rec *jr)
     xwrite(fd, "Content-Type: text/plain; charset=\"");
     xwrite(fd, nl_langinfo(CODESET));
     xwrite(fd, "\"\n");
+    xwrite(fd, "Content-Transfer-Encoding: 8bit\n");
     xwrite(fd, "Subject: Anacron job '");
     xwrite(fd, jr->ident);
     xwrite(fd, "' on ");
