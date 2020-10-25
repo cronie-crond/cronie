@@ -43,6 +43,7 @@ Cronie is packaged by these distributions:
 - Source Mage [http://dbg.download.sourcemage.org/grimoire/codex/stable/utils/cronie/]
 - openSUSE [https://software.opensuse.org/package/cronie]
 - Arch Linux [https://www.archlinux.org/packages/core/x86_64/cronie/]
+- Void Linux [https://github.com/void-linux/void-packages/tree/master/srcpkgs/cronie]
 
 # Contact
 
