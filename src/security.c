@@ -121,7 +121,7 @@ int cron_set_job_security_context(entry *e, user *u ATTRIBUTE_UNUSED,
 		 * Ensure that these jobs never run in the same minute:
 		 */
 		minutely_time = time(NULL);
-		Debug(DSCH, ("Minute-ly job. Recording time %lu\n", minutely_time));
+		Debug(DSCH, ("Minute-ly job. Recording time %lld\n", (long long)minutely_time));
 	}
 
 #ifdef WITH_PAM
