@@ -312,11 +312,6 @@ int main(int argc, char *argv[]) {
 	log_it("CRON", pid, "INFO", buf, 0);
 
 	acquire_daemonlock(0);
-	database.head = NULL;
-	database.tail = NULL;
-	database.mtime = (time_t) 0;
-
-	load_database(&database);
 
 	fd = -1;
 #if defined WITH_INOTIFY
@@ -333,6 +328,12 @@ int main(int argc, char *argv[]) {
 		set_cron_watched(fd);
 	}
 #endif
+
+	database.head = NULL;
+	database.tail = NULL;
+	database.mtime = (time_t) 0;
+
+	load_database(&database);
 
 	set_time(TRUE);
 	run_reboot_jobs(&database);
