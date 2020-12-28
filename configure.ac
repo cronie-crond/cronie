@@ -1,6 +1,6 @@
 AC_INIT([cronie],[1.5.5])
-AC_CONFIG_HEADER([config.h])
-AC_PREREQ(2.60)
+AC_CONFIG_HEADERS([config.h])
+AC_PREREQ([2.64])
 
 AM_INIT_AUTOMAKE([subdir-objects])
 
@@ -54,7 +54,6 @@ AC_CHECK_FUNCS( \
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
-AC_TYPE_SIGNAL
 AC_TYPE_UID_T
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
@@ -66,7 +65,7 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 dnl Checking for programs
 
 AC_ARG_WITH([editor],
-  [AC_HELP_STRING([--with-editor=EDITOR], [path to default editor])],
+  [AS_HELP_STRING([--with-editor=EDITOR],[path to default editor])],
   [editor_defined="$with_editor"],
   [editor_defined="no"])
 AS_IF([test "x$editor_defined" = "xno"], [
