@@ -9,7 +9,6 @@ static int find_envvar(const char *source, const char **start_pos, size_t *lengt
     const char *reader;
     size_t size = 1;
     int waiting_close = 0;
-    int has_non_digit = 0;
     
     *length = 0;
     *start_pos = NULL;
