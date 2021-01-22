@@ -469,10 +469,6 @@ int load_database(cron_db * old_db) {
 		statbuf.st_mtime = 0;
 	}
 	else {
-		/* As pointed out in Red Hat bugzilla 198019, with modern Linux it
-		 * is possible to modify a file without modifying the mtime of the
-		 * containing directory. Hence, we must check the mtime of each file:
-		 */
 		max_mtime(SPOOL_DIR, &statbuf);
 	}
 
@@ -494,16 +490,16 @@ int load_database(cron_db * old_db) {
 	/* if spooldir's mtime has not changed, we don't need to fiddle with
 	 * the database.
 	 *
-	 * Note that old_db->mtime is initialized to 0 in main(), and
-	 * so is guaranteed to be different than the stat() mtime the first
-	 * time this function is called.
+	 * Note that old_db->mtime is initialized to 0 in main().
 	 *
 	 * We also use now - 1 as the upper bound of timestamp to avoid race,
 	 * when a crontab is updated twice in a single second when we are
          * just reading it.
 	 */
-	if (old_db->mtime == TMIN(now - 1, TMAX(crond_stat.st_mtime,
-			TMAX(statbuf.st_mtime, syscron_stat.st_mtime)))
+	if (old_db->mtime != 0
+	    && old_db->mtime == TMIN(now - 1,
+				     TMAX(crond_stat.st_mtime,
+					  TMAX(statbuf.st_mtime, syscron_stat.st_mtime)))
 		) {
 		Debug(DLOAD, ("[%ld] spool dir mtime unch, no load needed.\n",
 				(long) pid));
