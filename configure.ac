@@ -260,11 +260,11 @@ if test "$enable_anacron" != no; then
 	dnl obstack.h is part of GLIBC and may not be present on other systems,
 	dnl eg. musl and AIX. There, we static link in our own copy.
 	AC_CHECK_HEADER(obstack.h, [have_obstack=yes], [have_obstack=no], [])
-	AM_CONDITIONAL([NEED_OBSTACK], [test "$have_obstack" = no])
-	if test "$have_obstack" = no; then
-		CPPFLAGS="$CPPFLAGS -I\$(top_srcdir)/obstack"
-	fi
 fi
+AM_CONDITIONAL([NEED_OBSTACK], [test "$have_obstack" = no])
+AS_IF([test "$enable_anacron" != no && test "$have_obstack" = no], [
+	CPPFLAGS="$CPPFLAGS -I\$(top_srcdir)/obstack"
+])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
