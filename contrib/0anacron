@@ -9,11 +9,9 @@ fi
 
 # Do not run jobs when on battery power
 online=1
-for psupply in AC ADP{0..9} ; do
-    sysfile="/sys/class/power_supply/$psupply/online"
-
-    if [ -f $sysfile ] ; then
-        if [ `cat $sysfile 2>/dev/null`x = 1x ]; then
+for psupply in /sys/class/power_supply/* ; do
+    if [ -f "$psupply/online" ]; then
+        if [ `cat "$psupply/online" 2>/dev/null`x = 1x ]; then
             online=1
             break
         else
