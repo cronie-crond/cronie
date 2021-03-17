@@ -361,8 +361,12 @@ static void parse_args(int argc, char *argv[]) {
 			(void) strcpy(Filename, argv[optind]);
 			optind++;
 		}
-		else
+		else if (isatty(STDIN_FILENO)) {
 			usage("file name or - (for stdin) must be specified");
+		}
+		else {
+			strcpy(Filename, "-");
+		}
 	}
 
 	if (Option != opt_unknown && argv[optind] != NULL) {
