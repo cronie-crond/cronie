@@ -1,5 +1,12 @@
 cronie NEWS -- history of user-visible changes.
 
+Release 1.5.6
+
+* crontab: crontab without arguments now works if stdin is not a TTY
+* crond: Fix various issues on loading the crontab databases on startup
+* anacron: Expand MAILTO and MAILFROM environment variables
+* crontab: New option to test crontab file syntax without installing it
+
 Release 1.5.5
 
 * Explicitly validate upper end of range and step to disallow entries

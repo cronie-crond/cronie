@@ -1,3 +1,121 @@
+2021-03-17  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release new version 1.5.6
+
+2021-03-17  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Partially revert the behavior of crontab command without arguments
+	  If the stdin is not a TTY we behave as required in the POSIX spec.
+	  This still prevents mistakes from simply running crontab without
+	  arguments in a terminal.
+
+2021-03-17  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Any online power supply indicates that the system is on mains
+
+2021-01-22  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix some compilation warnings
+
+2021-01-22  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Always load database on startup even if all files have st_mtime == 0
+
+2020-11-28  Mark Hills <mark@xwax.org>
+
+	* Fix compiler warnings on 32-bit systems
+
+2020-12-28  Sami Kerola <kerolasa@iki.fi>
+
+	* build-sys: update to autoconf 2.70
+
+2020-12-24  Hyunsoo Choe <hytgbn@gmail.com>
+
+	* Fix race condition between file update and load_database
+	  Issue: https://github.com/cronie-crond/cronie/issues/73
+
+2020-11-02  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* configure.ac: Drop the bug report e-mail from AC_INIT()
+	  Fixes #70
+
+2020-10-25  Wayne Van Son <waynevanson@gmail.com>
+
+	* docs(readme): adds Void Linux to packaged distributions
+
+2020-08-20  Björn Persson <Bjorn@Rombobjörn.se>
+
+	* Add missing Content-Transfer-Encoding.
+
+2020-08-03  Kevin Adler <kadler@us.ibm.com>
+
+	* Fix anacron build when obstack not available
+
+2020-07-23  Fernando Cappi <3818944+fcappi@users.noreply.github.com>
+
+	* Expand MAILTO and MAILFROM environment variables
+
+2020-07-13  J. Paul Reed <preed@release-approaches.com>
+
+	* Fix crontab.5 man page, wrt verbiage regarding named lists/ranges for crontab entries.
+	  See https://github.com/cronie-crond/cronie/issues/62 for more info.
+
+2020-06-11  Fernando Cappi <3818944+fcappi@users.noreply.github.com>
+
+	* Add new option to test a crontab file syntax without installing it
+	  Co-authored-by: Fernando Cappi <fcappi@motorola.com>
+
+2020-06-10  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Update packit configuration for latest Fedora versions
+
+2020-06-10  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix the .spec for packit
+
+2020-04-21  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Sync cronie.spec with Fedora
+
+2019-11-11  Dominika Hodovska <dhodovsk@redhat.com>
+
+	* Enable copr builds and add packit config
+
+2020-04-21  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Handle out-of-memory condition from mkprints() call
+
+2020-04-20  John Horne <john.horne@plymouth.ac.uk>
+
+	* Ensure the command name is not null before logging it.
+
+2020-04-20  John Horne <john.horne@plymouth.ac.uk>
+
+	* Moved CMDEND code to outside for for loop.
+
+2020-04-20  John Horne <john.horne@plymouth.ac.uk>
+
+	* Add CMDEND log entry to log when cron jobs end.
+
+2020-03-02  Ian2020 <Ian2020@users.noreply.github.com>
+
+	* Allow backslashes when not part of a line continuation
+
+2019-12-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix incorrect flag set for @weekly jobs.
+	  Fixes #52
+
+2019-11-24  Josef Schlehofer <pepe.schlehofer@gmail.com>
+
+	* Fix incorrect include of fcntl.h
+
+2019-11-06  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* crontab: Fix coloring when crontab ends with comment
+	  Also emphasize a missing EOL at EOF by red warning text
+	  Fixes #45
+
 2019-10-31  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* Release new version 1.5.5

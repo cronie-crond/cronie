@@ -13,6 +13,8 @@ dist_noinst_HEADERS = \
 EXTRA_DIST += \
 	README.anacron \
 	COPYING.anacron \
+	COPYING.obstack \
+	obstack/obstack.h \
 	cronie.init \
 	crond.sysconfig \
 	contrib/anacrontab \

@@ -3,8 +3,8 @@ jobs:
 - job: copr_build
   metadata:
     targets:
-    - fedora-31-x86_64
     - fedora-32-x86_64
+    - fedora-33-x86_64
     - fedora-rawhide-x86_64
   trigger: pull_request
 specfile_path: cronie.spec
