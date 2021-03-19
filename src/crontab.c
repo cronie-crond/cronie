@@ -419,7 +419,7 @@ static void list_cmd(void) {
 	char n[MAX_FNAME];
 	FILE *f;
 	int ch;
-	const int is_tty = isatty(STDOUT);
+	const int colorize = isatty(STDOUT) && getenv("NO_COLOR") == NULL;
 	int new_line = 1;
 	int in_comment = 0;
 
@@ -440,7 +440,7 @@ static void list_cmd(void) {
 	 */
 	Set_LineNum(1);
 	while (EOF != (ch = get_char(f))) {
-		if (is_tty) {
+		if (colorize) {
 			if (!in_comment && new_line && ch == '#') {
 				in_comment = 1;
 				fputs(COMMENT_COLOR, stdout);
@@ -454,7 +454,7 @@ static void list_cmd(void) {
 		new_line = ch == '\n';
 	}
 	/* no new line at EOF */
-	if (is_tty && !new_line) {
+	if (colorize && !new_line) {
 		putchar('\n');
 		fputs(ERROR_COLOR "No end-of-line character at the end of file"
 			RESET_COLOR, stdout);
