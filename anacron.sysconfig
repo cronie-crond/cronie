@@ -1,0 +1,11 @@
+# Settings for anacron
+
+# ENABLE_ON_BATTERY defines the behavior of anacron when the system is
+# on battery power.  If no power supply is online, the anacron by
+# default will not run.
+# 
+# ENABLE_ON_BATTERY=no  - default, do not run anacron jobs if no power
+#                         supply is online
+# ENABLE_ON_BATTERY=yes - run anacron jobs even if all power supplies
+#                         are offline
+ENABLE_ON_BATERY=no

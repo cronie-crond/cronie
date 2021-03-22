@@ -1,4 +1,5 @@
 #!/bin/sh
+source /etc/sysconfig/anacron
 # Check whether 0anacron was run today already
 if test -r /var/spool/anacron/cron.daily; then
     day=`cat /var/spool/anacron/cron.daily`
@@ -7,19 +8,24 @@ if [ `date +%Y%m%d` = "$day" ]; then
     exit 0
 fi
 
-# Do not run jobs when on battery power
-online=1
-for psupply in /sys/class/power_supply/* ; do
-    if [ -f "$psupply/online" ]; then
-        if [ `cat "$psupply/online" 2>/dev/null`x = 1x ]; then
-            online=1
-            break
-        else
-            online=0
+# Do not run jobs when on battery power unless specified
+if [ "${ENABLE_ON_BATTERY}" != "yes" ] ; then
+    online=1
+    for psupply in /sys/class/power_supply/* ; do
+        psupply_type=`cat "$psupply/type" 2>/dev/null`x
+        if [ "$psupply_type" != "Batteryx" ] ; then
+            if [ -f "$psupply/online" ]; then
+                if [ `cat "$psupply/online" 2>/dev/null`x = 1x ]; then
+                    online=1
+                    break
+                else
+                    online=0
+                fi
+            fi
         fi
+    done
+    if [ $online = 0 ]; then
+        exit 0
     fi
-done
-if [ $online = 0 ]; then
-    exit 0
 fi
 /usr/sbin/anacron -s

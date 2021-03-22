@@ -111,6 +111,7 @@ mkdir -pm755 $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/
     rm -f $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/crond
 %endif
 install -m 644 crond.sysconfig $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/crond
+install -m 644 anacron.sysconfig $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/anacron
 touch $RPM_BUILD_ROOT%{_sysconfdir}/cron.deny
 install -m 644 contrib/anacrontab $RPM_BUILD_ROOT%{_sysconfdir}/anacrontab
 install -c -m755 contrib/0hourly $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/0hourly
@@ -190,6 +191,7 @@ exit 0
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/pam.d/crond
 %endif
 %config(noreplace) %{_sysconfdir}/sysconfig/crond
+%config(noreplace) %{_sysconfdir}/sysconfig/anacron
 %config(noreplace) %{_sysconfdir}/cron.deny
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/cron.d/0hourly
 %attr(0644,root,root) /lib/systemd/system/crond.service
