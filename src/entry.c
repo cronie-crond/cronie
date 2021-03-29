@@ -301,6 +301,17 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 			Debug(DPARS, ("load_entry()...uid %ld, gid %ld\n",
 				(long) pw->pw_uid, (long) pw->pw_gid));
 		}
+		/* Advance past whitespace before command. */
+		Skip_Blanks(ch, file);
+
+		/* check for permature EOL or EOF */
+		if (ch == EOF || ch == '\n') {
+			ecode = e_cmd;
+			goto eof;
+		}
+
+		/* ch is the first character of a command */
+		unget_char(ch, file);
 	}
 
 	if ((e->pwd = pw_dup(pw)) == NULL) {
@@ -486,7 +497,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 
 	Debug(DPARS | DEXT, ("get_range()...entering, exit won't show\n"));
 
-		if (ch == '*') {
+	if (ch == '*') {
 		/* '*' means "first-last" but can still be modified by /step
 		 */
 		num1 = low;
@@ -607,7 +618,7 @@ get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
 			for (i = 0; names[i] != NULL; i++) {
 				Debug(DPARS | DEXT,
 					("get_num, compare(%s,%s)\n", names[i], temp));
-					if (!strcasecmp(names[i], temp)) {
+				if (!strcasecmp(names[i], temp)) {
 					*numptr = i + low;
 					return (ch);
 				}
@@ -623,7 +634,7 @@ get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
 static int set_element(bitstr_t * bits, int low, int high, int number) {
 	Debug(DPARS | DEXT, ("set_element(?,%d,%d,%d)\n", low, high, number));
 
-		if (number < low || number > high)
+	if (number < low || number > high)
 		return (EOF);
 
 	bit_set(bits, (number - low));
