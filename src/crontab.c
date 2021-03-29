@@ -66,8 +66,8 @@
 
 #define NHEADER_LINES 0
 
-#define COMMENT_COLOR "\x1B[34m"
-#define ERROR_COLOR "\x1B[31m"
+#define COMMENT_COLOR "\x1B[34;1m"
+#define ERROR_COLOR "\x1B[31;1m"
 #define RESET_COLOR "\x1B[0m"
 
 enum opt_t {
