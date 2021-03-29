@@ -7,9 +7,14 @@ SELinux.
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 # Download
-Latest released version is 1.5.6.
+Latest released version is 1.5.7.
 
 User visible changes:
+
+Release 1.5.7
+
+- anacron: Fix problem of anacron not being started on some desktops
+- crontab: switch off colors if NO_COLOR is set
 
 Release 1.5.6
 

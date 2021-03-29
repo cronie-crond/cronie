@@ -1,5 +1,10 @@
 cronie NEWS -- history of user-visible changes.
 
+Release 1.5.7
+
+* anacron: Fix problem of anacron not being started on some desktops
+* crontab: switch off colors if NO_COLOR is set
+
 Release 1.5.6
 
 * crontab: crontab without arguments now works if stdin is not a TTY

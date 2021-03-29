@@ -1,3 +1,28 @@
+2021-03-29  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release new version 1.5.7
+
+2021-03-29  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* crond: Skip blanks between user name and command
+
+2021-03-29  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* 0anacron: Check only Mains type power_supply for status
+
+2021-03-22  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* 0anacron: Ignore Battery type power supply devices
+
+2021-03-19  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* crontab: switch off colors if NO_COLOR is set
+
+2021-03-17  Lars Wendler <polynomial-c@gentoo.org>
+
+	* configure.ac: Don't use AM_CONDITIONAL inside an if statement
+	  or else configure might break:
+
 2021-03-17  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* Release new version 1.5.6
