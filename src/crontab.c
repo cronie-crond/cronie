@@ -872,6 +872,7 @@ static int replace_cmd(void) {
 
 	if ((error = check_syntax(tmp)) < 0) {
 		fprintf(stderr, "Invalid crontab file, can't install.\n");
+		fclose(tmp);
 		goto done;
 	}
 

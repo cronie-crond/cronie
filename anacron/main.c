@@ -44,8 +44,8 @@ int day_now;
 int year, month, day_of_month;                 /* date anacron started */
 
 char *program_name;
-char *anacrontab;
-char *spooldir;
+char *anacrontab = NULL;
+char *spooldir = NULL;
 int serialize, force, update_only, now,
     no_daemon, quiet, testing_only;            /* command-line options */
 char **job_args;                       	       /* vector of "job" command-line arguments */
@@ -128,12 +128,14 @@ parse_opts(int argc, char *argv[])
 	    quiet = 1;
 	    break;
 	case 't':
+	    free(anacrontab);
 	    anacrontab = strdup(optarg);
 	    break;
 	case 'T':
 	    testing_only = 1;
 	    break;
 	case 'S':
+	    free(spooldir);
 	    spooldir = strdup(optarg);
 	    break;
 	case 'V':
@@ -208,9 +210,11 @@ go_background(void)
     /* stdin is already closed */
 
     if (fclose(stdout)) die_e("Can't close stdout");
+    /* coverity[leaked_handle] – fd 1 closed automatically */
     xopen(1, "/dev/null", O_WRONLY);
 
     if (fclose(stderr)) die_e("Can't close stderr");
+    /* coverity[leaked_handle] – fd 2 closed automatically */
     xopen(2, "/dev/null", O_WRONLY);
 
     pid = xfork();

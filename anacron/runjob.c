@@ -237,7 +237,9 @@ launch_mailer(job_rec *jr)
 	xcloselog();
 
 	/* Ensure stdout/stderr are sane before exec-ing sendmail */
+	/* coverity[leaked_handle] – STDOUT closed automatically */
 	xclose(STDOUT_FILENO); xopen(STDOUT_FILENO, "/dev/null", O_WRONLY);
+	/* coverity[leaked_handle] – STDERR closed automatically */
 	xclose(STDERR_FILENO); xopen(STDERR_FILENO, "/dev/null", O_WRONLY);
 	xclose(jr->output_fd);
 

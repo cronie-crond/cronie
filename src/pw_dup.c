@@ -121,6 +121,7 @@ pw_dup(const struct passwd *pw) {
 		cp += ssize;
 	}
 
+	/* cppcheck-suppress[memleak symbolName=cp] memory originally pointed to by cp returned via newpw */
 	return (newpw);
 }
 
