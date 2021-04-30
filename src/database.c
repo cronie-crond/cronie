@@ -559,7 +559,8 @@ int load_database(cron_db * old_db) {
 			if (not_a_crontab(dp))
 				continue;
 
-			strncpy(fname, dp->d_name, NAME_MAX); fname[NAME_MAX] = '\0';
+			strncpy(fname, dp->d_name, NAME_MAX);
+			fname[NAME_MAX] = '\0';
 
 			if (!glue_strings(tabname, sizeof tabname, SPOOL_DIR, fname, '/'))
 				continue;	/* XXX log? */
