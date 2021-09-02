@@ -183,7 +183,8 @@ static void usage(void) {
 	fprintf(stderr, " -m <comm>  off, or specify preferred client for sending mails\n");
 	fprintf(stderr, " -n         run in foreground\n");
 	fprintf(stderr, " -p         permit any crontab\n");
-	fprintf(stderr, " -P         use PATH=\"%s\"\n", _PATH_DEFPATH);
+	fprintf(stderr, " -P         inherit PATH from environment instead of using default value");
+	fprintf(stderr, "            of \"%s\"\n", _PATH_DEFPATH);
 	fprintf(stderr, " -c         enable clustering support\n");
 	fprintf(stderr, " -s         log into syslog instead of sending mails\n");
 	fprintf(stderr, " -V         print version and exit\n");
