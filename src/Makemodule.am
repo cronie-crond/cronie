@@ -96,6 +96,9 @@ cron-paths.h: Makefile
 	#define	CRON_ALLOW	"$(sysconfdir)/cron.allow" \
 	#define	CRON_DENY	"$(sysconfdir)/cron.deny" \
 	\
+			/* directory of cron pid file */ \
+	#define CRON_PID_DIR    "$(runstatedir)" \
+	\
 			/* 4.3BSD-style crontab f.e. /etc/crontab */ \
 	#define SYSCRONTAB	"$(SYSCRONTAB)" \
 	\
