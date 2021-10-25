@@ -36,10 +36,14 @@
 			 * PIDDIR must end in '/'.
 			 * (Don't ask why the default is "/etc/".)
 			 */
-#ifdef _PATH_VARRUN
-# define PIDDIR	_PATH_VARRUN
+#ifdef CRON_PID_DIR
+# define PIDDIR CRON_PID_DIR "/"
 #else
-# define PIDDIR SYSCONFDIR "/"
+# ifdef _PATH_VARRUN
+#  define PIDDIR	_PATH_VARRUN
+# else
+#  define PIDDIR SYSCONFDIR "/"
+# endif
 #endif
 #define PIDFILE		"crond.pid"
 #define _PATH_CRON_PID	PIDDIR PIDFILE
