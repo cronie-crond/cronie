@@ -266,6 +266,8 @@ AS_IF([test "$enable_anacron" != no && test "$have_obstack" = no], [
 	CPPFLAGS="$CPPFLAGS -I\$(top_srcdir)/obstack"
 ])
 
+AM_CONDITIONAL(HAS_RUNSTATE, [test x$runstatedir != x])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
