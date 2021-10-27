@@ -61,6 +61,13 @@ src_crontab_LDADD = $(LIBSELINUX) $(LIBPAM) $(LIBAUDIT)
 # Depends on this Makefile, because it uses make variables.
 # CCD 2010/09/10 added CRON_HOSTNAME for clustered-cron.
 CLEANFILES += cron-paths.h
+if HAS_RUNSTATE
+cronpidcomment=/* directory of cron pid file */
+cronpiddir=\#define CRON_PID_DIR "$(runstatedir)"
+else
+cronpidcomment=
+cronpiddir=
+endif
 cron-paths.h: Makefile
 	@echo 'creating $@'
 	@sed >$@ 's/ *\\$$//' <<\END #\
@@ -96,8 +103,8 @@ cron-paths.h: Makefile
 	#define	CRON_ALLOW	"$(sysconfdir)/cron.allow" \
 	#define	CRON_DENY	"$(sysconfdir)/cron.deny" \
 	\
-			/* directory of cron pid file */ \
-	#define CRON_PID_DIR    "$(runstatedir)" \
+			$(cronpidcomment) \
+	$(cronpiddir) \
 	\
 			/* 4.3BSD-style crontab f.e. /etc/crontab */ \
 	#define SYSCRONTAB	"$(SYSCRONTAB)" \
