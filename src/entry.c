@@ -502,7 +502,7 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 	return (ch);
 }
 
-inline static int is_range_term(int ch) {
+inline static int is_separator(int ch) {
 	switch(ch) {
 		case '\t':
 		case '\n':
@@ -556,7 +556,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 					state = R_STEP;
 					break;
 				}
-				if (is_range_term(ch)) {
+				if (is_separator(ch)) {
 					state = R_FINISH;
 					break;
 				}
@@ -570,7 +570,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 				return (EOF);
 
 			case R_TERMS:
-				if (is_range_term(ch)) {
+				if (is_separator(ch)) {
 					state = R_FINISH;
 					break;
 				}
@@ -585,7 +585,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 					state = R_RANDOM;
 					break;
 				}
-				if (is_range_term(ch)) {
+				if (is_separator(ch)) {
 					num2 = num1;
 					state = R_FINISH;
 					break;
@@ -604,14 +604,14 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 					state = R_STEP;
 					break;
 				}
-				if (is_range_term(ch)) {
+				if (is_separator(ch)) {
 					state = R_FINISH;
 					break;
 				}
 				return (EOF);
 
 			case R_RANDOM:
-				if (is_range_term(ch)) {
+				if (is_separator(ch)) {
 					num2 = high;
 					state = R_FINISH;
 				}
