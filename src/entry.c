@@ -481,7 +481,7 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 	 */
 	done = FALSE;
 	/* unget ch to allow get_range() to process it properly 
-	 * */
+	 */
 	unget_char(ch, file);
 	while (!done) {
 		if (EOF == (ch = get_range(bits, low, high, names, file)))
@@ -526,7 +526,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 	int ch, i, num1, num2, num3;
 
 	/* default value for step
-	 * */
+	 */
 	num3 = 1;
 	range_state_t state = R_START;
 
@@ -620,7 +620,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 					state = R_TERMS;
 				}
 				/* fail if couldn't find match on previous term
-				 * */
+				 */
 				else
 					return (EOF);
 
@@ -629,14 +629,14 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 					num1 = num2 = -1;
 
 				/* select random number in range <num1, num2>
-				 * */
+				 */
 				num1 = num2 = random() % (num2 - num1 + 1) + num1;
 				break;
 
 
 			default:
 				/* We should never get here
-				 * */
+				 */
 				return (EOF);
 		}
 	}
