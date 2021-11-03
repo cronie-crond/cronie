@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
 	if (gettimeofday(&tv, &tz) != 0)
 		tv.tv_usec = 0;
 	srandom((unsigned int)(pid + tv.tv_usec));
-	RandomScale = (double)random() / (double)RAND_MAX;
+	RandomScale = (double)random() / (double)(1lu << 31);
 	snprintf(buf, sizeof(buf), "RANDOM_DELAY will be scaled with factor %d%% if used.", (int)(RandomScale*100));
 	log_it("CRON", pid, "INFO", buf, 0);
 
