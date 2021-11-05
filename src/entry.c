@@ -680,7 +680,7 @@ get_number(int *numptr, int low, const char *names[], FILE * file) {
 
 	/* no numbers, look for a string if we have any */
 	if (names) {
-		for (i=0; names[i] != NULL; i++) {
+		for (i = 0; names[i] != NULL; i++) {
 			Debug(DPARS | DEXT, ("get_num, compare(%s,%s)\n", names[i], temp));
 			if (strcasecmp(names[i], temp) == 0) {
 				*numptr = i + low;
