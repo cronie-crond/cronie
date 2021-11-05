@@ -210,7 +210,9 @@ A random number within a range specified as two numbers separated with
 a tilde is picked.  The specified range is inclusive.
 For example, 6~15 for a 'minutes' entry picks a random minute
 within 6 to 15 range.  The random number is picked when crontab file is parsed.
-The first number must be less than or equal to the second one.
+The first number must be less than or equal to the second one. You might omit
+the numbers specifying the range.  For example, ~ for a 'minutes' entry picks
+a random minute within 0 to 59 range. 
 .PP
 Lists are allowed.  A list is a set of numbers (or ranges) separated by
 commas.  Examples: "1,2,5,9", "0-4,8-12".
