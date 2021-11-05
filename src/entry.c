@@ -626,7 +626,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 
 				/* if invalid random range was selected */
 				if (num1 > num2)
-					num1 = num2 = -1;
+					return (EOF);
 
 				/* select random number in range <num1, num2>
 				 */
