@@ -62,9 +62,22 @@ static const char *ecodes[] = {
 	"out of memory"
 };
 
+typedef enum {
+	R_START,
+	R_AST,
+	R_STEP,
+	R_TERMS,
+	R_NUM1,
+	R_RANGE,
+	R_RANGE_NUM2,
+	R_RANDOM,
+	R_RANDOM_NUM2,
+	R_FINISH,
+} range_state_t;
+
 static int get_list(bitstr_t *, int, int, const char *[], int, FILE *),
-get_range(bitstr_t *, int, int, const char *[], int, FILE *),
-get_number(int *, int, const char *[], int, FILE *, const char *),
+get_range(bitstr_t *, int, int, const char *[], FILE *),
+get_number(int *, int, const char *[], FILE *),
 set_element(bitstr_t *, int, int, int);
 
 void free_entry(entry * e) {
@@ -467,11 +480,14 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 	/* process all ranges
 	 */
 	done = FALSE;
+	/* unget ch to allow get_range() to process it properly 
+	 */
+	unget_char(ch, file);
 	while (!done) {
-		if (EOF == (ch = get_range(bits, low, high, names, ch, file)))
+		if (EOF == (ch = get_range(bits, low, high, names, file)))
 			return (EOF);
 		if (ch == ',')
-			ch = get_char(file);
+			continue;
 		else
 			done = TRUE;
 	}
@@ -486,144 +502,193 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 	return (ch);
 }
 
+inline static int is_separator(int ch) {
+	switch (ch) {
+		case '\t':
+		case '\n':
+		case ' ':
+		case ',':
+			return 1;
+		default:
+			return 0;
+	}
+}
+
+
 
 static int
 get_range(bitstr_t * bits, int low, int high, const char *names[],
-	int ch, FILE * file) {
+		FILE * file) {
 	/* range = number | number "-" number [ "/" number ]
+	 *         | [number] "~" [number]
 	 */
+	
+	int ch, i, num1, num2, num3;
 
-	int i, num1, num2, num3;
+	/* default value for step
+	 */
+	num3 = 1;
+	range_state_t state = R_START;
 
-	Debug(DPARS | DEXT, ("get_range()...entering, exit won't show\n"));
-
-	if (ch == '*') {
-		/* '*' means "first-last" but can still be modified by /step
-		 */
-		num1 = low;
-		num2 = high;
-		ch = get_char(file);
-		if (ch == EOF)
-			return (EOF);
-	}
-	else {
-		ch = get_number(&num1, low, names, ch, file, ",- \t\n");
-		if (ch == EOF)
-			return (EOF);
-
-		if (ch != '-') {
-			/* not a range, it's a single number.
-			 */
-			if (EOF == set_element(bits, low, high, num1)) {
+	while (state != R_FINISH && ((ch = get_char(file)) != EOF)) {
+		switch (state) {
+			case R_START:
+				if (ch == '*') {
+					num1 = low;
+					num2 = high;
+					state = R_AST;
+					break;
+				}
+				if (ch == '~') {
+					num1 = low;
+					state = R_RANDOM;
+					break;
+				}
 				unget_char(ch, file);
+				if (get_number(&num1, low, names, file) != EOF) {
+					state = R_NUM1;
+					break;
+				}
 				return (EOF);
-			}
-			return (ch);
+
+			case R_AST:
+				if (ch == '/') {
+					state = R_STEP;
+					break;
+				}
+				if (is_separator(ch)) {
+					state = R_FINISH;
+					break;
+				}
+				return (EOF);
+
+			case R_STEP:
+				if (get_number(&num3, 0, PPC_NULL, file) != EOF) {
+					state = R_TERMS;
+					break;
+				}
+				return (EOF);
+
+			case R_TERMS:
+				if (is_separator(ch)) {
+					state = R_FINISH;
+					break;
+				}
+				return (EOF);
+
+			case R_NUM1:
+				if (ch == '-') {
+					state = R_RANGE;
+					break;
+				}
+				if (ch == '~') {
+					state = R_RANDOM;
+					break;
+				}
+				if (is_separator(ch)) {
+					num2 = num1;
+					state = R_FINISH;
+					break;
+				}
+				return (EOF);
+
+			case R_RANGE:
+				if (get_number(&num2, low, names, file) != EOF) {
+					state = R_RANGE_NUM2;
+					break;
+				}
+				return (EOF);
+
+			case R_RANGE_NUM2:
+				if (ch == '/') {
+					state = R_STEP;
+					break;
+				}
+				if (is_separator(ch)) {
+					state = R_FINISH;
+					break;
+				}
+				return (EOF);
+
+			case R_RANDOM:
+				if (is_separator(ch)) {
+					num2 = high;
+					state = R_FINISH;
+				}
+				else if (unget_char(ch, file),
+						get_number(&num2, low, names, file) != EOF) {
+					state = R_TERMS;
+				}
+				/* fail if couldn't find match on previous term
+				 */
+				else
+					return (EOF);
+
+				/* if invalid random range was selected */
+				if (num1 > num2)
+					return (EOF);
+
+				/* select random number in range <num1, num2>
+				 */
+				num1 = num2 = random() % (num2 - num1 + 1) + num1;
+				break;
+
+
+			default:
+				/* We should never get here
+				 */
+				return (EOF);
 		}
-		else {
-			/* eat the dash
-			 */
-			ch = get_char(file);
-			if (ch == EOF)
-				return (EOF);
-
-			/* get the number following the dash
-			 */
-			ch = get_number(&num2, low, names, ch, file, "/, \t\n");
-			if (ch == EOF || num1 > num2)
-				return (EOF);
-		}
 	}
-
-	/* check for step size
-	 */
-	if (ch == '/') {
-		/* eat the slash
-		 */
-		ch = get_char(file);
-		if (ch == EOF)
-			return (EOF);
-
-		/* get the step size -- note: we don't pass the
-		 * names here, because the number is not an
-		 * element id, it's a step size.  'low' is
-		 * sent as a 0 since there is no offset either.
-		 */
-		ch = get_number(&num3, 0, PPC_NULL, ch, file, ", \t\n");
-		if (ch == EOF || num3 == 0)
-			return (EOF);
-	}
-	else {
-		/* no step.  default==1.
-		 */
-		num3 = 1;
-	}
-
-	/* num1 (through i) will be validated by set_element() below, but num2
-	 * and num3 are merely used as loop condition and increment, and must
-	 * be validated separately.
-	 */
-	if (num2 < low || num2 > high || num3 > high)
+	if (state != R_FINISH || ch == EOF)
 		return (EOF);
 
-	/* range. set all elements from num1 to num2, stepping
-	 * by num3.  (the step is a downward-compatible extension
-	 * proposed conceptually by bob@acornrc, syntactically
-	 * designed then implemented by paul vixie).
-	 */
 	for (i = num1; i <= num2; i += num3)
 		if (EOF == set_element(bits, low, high, i)) {
 			unget_char(ch, file);
 			return (EOF);
 		}
-
-	return (ch);
+	return ch;
 }
 
 static int
-get_number(int *numptr, int low, const char *names[], int ch, FILE * file,
-	const char *terms) {
+get_number(int *numptr, int low, const char *names[], FILE * file) {
 	char temp[MAX_TEMPSTR], *pc;
-	int len, i;
+	int len, i, ch;
+	char *endptr;
 
 	pc = temp;
 	len = 0;
 
-	/* first look for a number */
-	while (isdigit((unsigned char) ch)) {
+	/* get all alnum characters available */
+	while (isalnum((ch = get_char(file)))) {
 		if (++len >= MAX_TEMPSTR)
 			goto bad;
 		*pc++ = (char)ch;
-		ch = get_char(file);
 	}
-	*pc = '\0';
-	if (len != 0) {
-		/* got a number, check for valid terminator */
-		if (!strchr(terms, ch))
-			goto bad;
-		*numptr = atoi(temp);
-		return (ch);
+	if (len == 0)
+		goto bad;
+
+	unget_char(ch, file);
+
+	/* try to get number */
+	*numptr = (int) strtol(temp, &endptr, 10);
+	if (*endptr == '\0' && temp != endptr) {
+		/* We have a number */
+		return 0;
 	}
 
 	/* no numbers, look for a string if we have any */
 	if (names) {
-		while (isalpha((unsigned char) ch)) {
-			if (++len >= MAX_TEMPSTR)
-				goto bad;
-			*pc++ = (char)ch;
-			ch = get_char(file);
-		}
-		*pc = '\0';
-		if (len != 0 && strchr(terms, ch)) {
-			for (i = 0; names[i] != NULL; i++) {
-				Debug(DPARS | DEXT,
-					("get_num, compare(%s,%s)\n", names[i], temp));
-				if (!strcasecmp(names[i], temp)) {
-					*numptr = i + low;
-					return (ch);
-				}
+		for (i = 0; names[i] != NULL; i++) {
+			Debug(DPARS | DEXT, ("get_num, compare(%s,%s)\n", names[i], temp));
+			if (strcasecmp(names[i], temp) == 0) {
+				*numptr = i + low;
+				return 0;
 			}
 		}
+	} else {
+		goto bad;
 	}
 
   bad:
