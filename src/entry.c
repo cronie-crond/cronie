@@ -73,7 +73,7 @@ typedef enum {
 	R_RANDOM,
 	R_RANDOM_NUM2,
 	R_FINISH,
-}range_state_t;
+} range_state_t;
 
 static int get_list(bitstr_t *, int, int, const char *[], int, FILE *),
 get_range(bitstr_t *, int, int, const char *[], FILE *),
@@ -503,7 +503,7 @@ get_list(bitstr_t * bits, int low, int high, const char *names[],
 }
 
 inline static int is_separator(int ch) {
-	switch(ch) {
+	switch (ch) {
 		case '\t':
 		case '\n':
 		case ' ':
@@ -531,7 +531,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 	range_state_t state = R_START;
 
 	while (state != R_FINISH && ((ch = get_char(file)) != EOF)) {
-		switch(state) {
+		switch (state) {
 			case R_START:
 				if (ch == '*') {
 					num1 = low;
