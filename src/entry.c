@@ -666,6 +666,7 @@ get_number(int *numptr, int low, const char *names[], FILE * file) {
 			goto bad;
 		*pc++ = (char)ch;
 	}
+	*pc = '\0';
 	if (len == 0)
 		goto bad;
 
