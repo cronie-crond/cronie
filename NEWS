@@ -1,5 +1,12 @@
 cronie NEWS -- history of user-visible changes.
 
+Release 1.6.0
+
+* crond: Add switch -f as an alias for -n
+* crond: Add random within range '~' operator
+* crond: Use the configure runstatedir directory for pid file
+* crond: Increase the maximum number of crontab entries to 10000
+
 Release 1.5.7
 
 * anacron: Fix problem of anacron not being started on some desktops

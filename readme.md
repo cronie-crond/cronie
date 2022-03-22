@@ -7,9 +7,16 @@ SELinux.
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 # Download
-Latest released version is 1.5.7.
+Latest released version is 1.6.0.
 
 User visible changes:
+
+Release 1.6.0
+
+- crond: Add switch -f as an alias for -n
+- crond: Add random within range '~' operator
+- crond: Use the configure runstatedir directory for pid file
+- crond: Increase the maximum number of crontab entries to 10000
 
 Release 1.5.7
 

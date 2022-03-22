@@ -1,3 +1,47 @@
+2022-03-22  w30023233 <wangyuhang27@huawei.com>
+
+	* Add switch -f for foreground mode
+
+2022-03-22  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Fix regression in handling */x crontab entries
+
+2022-01-05  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* get_number: Add missing NUL termination for the scanned string
+
+2021-11-08  Ondřej Pohořelský <35430604+opohorel@users.noreply.github.com>
+
+	* Add random within range '~' operator
+
+2021-11-03  Nicolas Limare <nicolas@limare.net>
+
+	* Fix RandomScale calculation
+
+2021-10-27  sgerwk <sgerwk@aol.com>
+
+	* include the case where runstate is undefined
+
+2021-10-26  sgerwk <sgerwk@aol.com>
+
+	* use the configure runstatedir directory for pid file
+
+2021-09-02  Nils Philippsen <nils@tiptoe.de>
+
+	* crond: Fix description of '-P' option
+
+2021-07-13  Danilo Spinella <danilo.spinella@suse.com>
+
+	* Increase the maximum number of crontab entries
+
+2021-04-29  Jan Staněk <jstanek@redhat.com>
+
+	* Address issues found by coverity scan
+
+2021-03-29  Christian Hesse <mail@eworm.de>
+
+	* crontab: use bold colors
+
 2021-03-29  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* Release new version 1.5.7
