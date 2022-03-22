@@ -563,7 +563,9 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 				return (EOF);
 
 			case R_STEP:
-				if (get_number(&num3, 0, PPC_NULL, file) != EOF) {
+				unget_char(ch, file);
+				if (get_number(&num3, 0, PPC_NULL, file) != EOF
+				    && num3 != 0) {
 					state = R_TERMS;
 					break;
 				}
