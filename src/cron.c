@@ -182,6 +182,7 @@ static void usage(void) {
 	fprintf(stderr, " -i         deamon runs without inotify support\n");
 	fprintf(stderr, " -m <comm>  off, or specify preferred client for sending mails\n");
 	fprintf(stderr, " -n         run in foreground\n");
+	fprintf(stderr, " -f         run in foreground, the same as -n\n");
 	fprintf(stderr, " -p         permit any crontab\n");
 	fprintf(stderr, " -P         inherit PATH from environment instead of using default value");
 	fprintf(stderr, "            of \"%s\"\n", _PATH_DEFPATH);
@@ -690,13 +691,14 @@ static void sigchld_reaper(void) {
 static void parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "hnpsiPx:m:cV"))) {
+	while (-1 != (argch = getopt(argc, argv, "hnfpsiPx:m:cV"))) {
 		switch (argch) {
 			case 'x':
 				if (!set_debug_flags(optarg))
 					usage();
 				break;
 			case 'n':
+			case 'f':
 				NoFork = 1;
 				break;
 			case 'p':
