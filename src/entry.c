@@ -595,6 +595,7 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 				return (EOF);
 
 			case R_RANGE:
+				unget_char(ch, file);
 				if (get_number(&num2, low, names, file) != EOF) {
 					state = R_RANGE_NUM2;
 					break;
