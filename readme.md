@@ -7,9 +7,13 @@ SELinux.
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 # Download
-Latest released version is 1.6.0.
+Latest released version is 1.6.1.
 
 User visible changes:
+
+Release 1.6.1
+
+- crond: Fix regression of handling ranges (x-y) in crontab
 
 Release 1.6.0
 

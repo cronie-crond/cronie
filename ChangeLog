@@ -1,3 +1,11 @@
+2022-03-23  w30023233 <wangyuhang27@huawei.com>
+
+	* Fix regression in handling 1-5 crontab entries
+
+2022-03-22  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release version 1.6.0
+
 2022-03-22  w30023233 <wangyuhang27@huawei.com>
 
 	* Add switch -f for foreground mode
