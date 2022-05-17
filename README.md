@@ -3,6 +3,8 @@
 
 *The standard **UNIX** daemon **Crond** & related tools.*
 
+<br>
+
 <div align = center>
 
 ---
@@ -21,7 +23,8 @@ It's source is based on **[Vixie Cron]** with additional security <br>
 **[PAM]** and **[SELinux]**.
 
 <br>
-
+<br>
+  
 ## Packages
 
 [![Button Arch]][Arch] <br>
