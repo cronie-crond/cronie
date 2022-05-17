@@ -9,55 +9,16 @@ SELinux.
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 
-User visible changes:
+<div align = center>
 
-Release 1.6.1
+---
 
-- crond: Fix regression of handling ranges (x-y) in crontab
+[![Button Changes]][Changes]
 
-Release 1.6.0
+---
 
-- crond: Add switch -f as an alias for -n
-- crond: Add random within range '~' operator
-- crond: Use the configure runstatedir directory for pid file
-- crond: Increase the maximum number of crontab entries to 10000
+</div>
 
-Release 1.5.7
-
-- anacron: Fix problem of anacron not being started on some desktops
-- crontab: switch off colors if NO_COLOR is set
-
-Release 1.5.6
-
-- crontab: crontab without arguments now works if stdin is not a TTY
-- crond: Fix various issues on loading the crontab databases on startup
-- anacron: Expand MAILTO and MAILFROM environment variables
-- crontab: New option to test crontab file syntax without installing it
-
-Release 1.5.5
-- Explicitly validate upper end of range and step to disallow entries
-  such as: 1-234/5678 * * * * ....
-- crond: Report missing newline before EOF in syslog so the line is not
-  completely silently ignored.
-- crontab -l colors comment lines in a different color.
-- crond: Revert "Avoid creating pid files when crond doesn't fork".
-- anacron is built by default.
-- Use non-recursive build.
-- cronnext: Allow to optionally select jobs by substring.
-
-Release 1.5.4
-- crond: Fix regression from previous release. Only first job from a crontab
-  was being run.
-
-Release 1.5.3
-- Fix CVE-2019-9704 and CVE-2019-9705 to avoid local DoS of the crond.
-- crontab: Make crontab without arguments fail.
-- crond: In PAM configuration include system-auth instead of password-auth.
-- crond: In the systemd service file restart crond if it fails.
-- crond: Use the role from the crond context for system job contexts.
-- Multiple small cleanups and fixes.
-
-The source can be downloaded from [https://github.com/cronie-crond/cronie/releases]
 
 Cronie is packaged by these distributions:
 - Fedora [https://apps.fedoraproject.org/packages/cronie]
@@ -78,8 +39,14 @@ To report bugs please use the github issue tracker of this project.
 <!----------------------------------------------------------------------------->
 
 [Releases]: https://github.com/cronie-crond/cronie/releases
+[Changes]: NEWS
 
 
 <!--------------------------------{ Badges }----------------------------------->
 
 [Badge Version]: https://img.shields.io/badge/Version-1.6.1-blue.svg?style=for-the-badge
+
+
+<!-------------------------------{ Buttons }----------------------------------->
+
+[Button Changes]: https://img.shields.io/badge/Changelog-2478b5?style=for-the-badge
