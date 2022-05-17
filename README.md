@@ -1,4 +1,6 @@
-# Cronie
+
+# Cronie    [![Badge Version]][Releases]
+
 Cronie contains the standard UNIX daemon crond that runs specified programs at
 scheduled times and related tools. The source is based on the original vixie-cron
 and has security and configuration enhancements like the ability to use pam and
@@ -6,8 +8,6 @@ SELinux.
 
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
-# Download
-Latest released version is 1.6.1.
 
 User visible changes:
 
@@ -73,3 +73,13 @@ Cronie is packaged by these distributions:
 Mailing list: `cronie-devel AT lists.fedorahosted DOT org`
 
 To report bugs please use the github issue tracker of this project.
+
+
+<!----------------------------------------------------------------------------->
+
+[Releases]: https://github.com/cronie-crond/cronie/releases
+
+
+<!--------------------------------{ Badges }----------------------------------->
+
+[Badge Version]: https://img.shields.io/badge/Version-1.6.1-blue.svg?style=for-the-badge
