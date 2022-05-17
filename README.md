@@ -13,7 +13,8 @@ And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 ---
 
-[![Button Changes]][Changes]
+[![Button Changes]][Changes]  
+[![Button Contact]][Contact]
 
 ---
 
@@ -31,17 +32,13 @@ And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 [![Button Fedora]][Fedora] <br>
 [![Button Mandriva]][Mandriva] 
 
-
-# Contact
-
-Mailing list: `cronie-devel AT lists.fedorahosted DOT org`
-
-To report bugs please use the github issue tracker of this project.
+<br>
 
 
 <!----------------------------------------------------------------------------->
 
 [Releases]: https://github.com/cronie-crond/cronie/releases
+[Contact]: mailto:cronie-devel@lists.fedorahosted.org
 [Changes]: NEWS
 
 
@@ -64,11 +61,12 @@ To report bugs please use the github issue tracker of this project.
 <!-------------------------------{ Buttons }----------------------------------->
 
 [Button Changes]: https://img.shields.io/badge/Changelog-2478b5?style=for-the-badge
+[Button Contact]: https://img.shields.io/badge/Contact-red?style=for-the-badge
 
-[Button Fedora]: https://img.shields.io/badge/Fedora-51A2DA?style=for-the-badge&logo=Fedora&logoColor=white
-[Button Mandriva]: https://img.shields.io/badge/Mandriva-0a1a22?style=for-the-badge
-[Button Gentoo]: https://img.shields.io/badge/Gentoo-54487A?style=for-the-badge&logo=Gentoo&logoColor=white
 [Button Source Mage]: https://img.shields.io/badge/Source_Mage-black?style=for-the-badge
+[Button Mandriva]: https://img.shields.io/badge/Mandriva-0a1a22?style=for-the-badge
 [Button OpenSUSE]: https://img.shields.io/badge/OpenSUSE-73BA25?style=for-the-badge&logo=OpenSUSE&logoColor=white
+[Button Fedora]: https://img.shields.io/badge/Fedora-51A2DA?style=for-the-badge&logo=Fedora&logoColor=white
+[Button Gentoo]: https://img.shields.io/badge/Gentoo-54487A?style=for-the-badge&logo=Gentoo&logoColor=white
 [Button Arch]: https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=ArchLinux&logoColor=white
 [Button Void]: https://img.shields.io/badge/Void_Linux-478061?style=for-the-badge
