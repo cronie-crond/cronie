@@ -7,19 +7,32 @@ if [ `date +%Y%m%d` = "$day" ]; then
     exit 0
 fi
 
-# Do not run jobs when on battery power
-online=1
-for psupply in /sys/class/power_supply/* ; do
-    if [ `cat "$psupply/type" 2>/dev/null`x = Mainsx ] && [ -f "$psupply/online" ]; then
-        if [ `cat "$psupply/online" 2>/dev/null`x = 1x ]; then
-            online=1
-            break
-        else
-            online=0
-        fi
+# Check whether run on battery should be allowed
+check_online=1
+if test -r /etc/default/anacron; then
+    run_on_battery=`grep ANACRON_RUN_ON_BATTERY_POWER /etc/default/anacron | awk -F'=' '{print $2}'`
+    if [ $run_on_battery = "yes" ]; then
+    check_online=0
     fi
-done
-if [ $online = 0 ]; then
-    exit 0
+fi
+
+if [ $check_online = 1 ]; then
+
+    # Do not run jobs when on battery power
+    online=1
+    for psupply in /sys/class/power_supply/* ; do
+        if [ `cat "$psupply/type" 2>/dev/null`x = Mainsx ] && [ -f "$psupply/online" ]; then
+            if [ `cat "$psupply/online" 2>/dev/null`x = 1x ]; then
+                online=1
+                break
+            else
+                online=0
+            fi
+        fi
+    done
+    if [ $online = 0 ]; then
+        exit 0
+    fi
+
 fi
 /usr/sbin/anacron -s
