@@ -8,15 +8,9 @@ if [ `date +%Y%m%d` = "$day" ]; then
 fi
 
 # Check whether run on battery should be allowed
-check_online=1
-if test -r /etc/default/anacron; then
-    run_on_battery=`grep ANACRON_RUN_ON_BATTERY_POWER /etc/default/anacron | awk -F'=' '{print $2}'`
-    if [ $run_on_battery = "yes" ]; then
-    check_online=0
-    fi
-fi
+. /etc/default/anacron
 
-if [ $check_online = 1 ]; then
+if [ $ANACRON_RUN_ON_BATTERY_POWER != "yes" ]; then
 
     # Do not run jobs when on battery power
     online=1
