@@ -10,7 +10,7 @@ fi
 # Check whether run on battery should be allowed
 . /etc/default/anacron
 
-if [ $ANACRON_RUN_ON_BATTERY_POWER != "yes" ]; then
+if [ "$ANACRON_RUN_ON_BATTERY_POWER" != "yes" ]; then
 
     # Do not run jobs when on battery power
     online=1
