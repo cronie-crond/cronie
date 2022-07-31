@@ -4,17 +4,15 @@
 *The standard **UNIX** daemon **Crond** & related tools.*
 
 <br>
+<br>
 
 <div align = center>
-
----
 
 [![Button Changes]][Changes]  
 [![Button Origin]][Origin]  
 [![Button Contact]][Contact]
 
----
-
+<br>
 <br>
 
 The Crond daemon can run programs at scheduled times. <br>
@@ -27,12 +25,15 @@ It's source is based on **[Vixie Cron]** with additional security <br>
   
 ## Packages
 
-[![Button Arch]][Arch] <br>
-[![Button Source Mage]][Source Mage] <br>
-[![Button OpenSUSE]][OpenSUSE] <br>
-[![Button Void]][Void] <br>
-[![Button Gentoo]][Gentoo] <br>
-[![Button Fedora]][Fedora] <br>
+<br>
+
+[![Button Arch]][Arch]   
+[![Button Source Mage]][Source Mage]   
+[![Button OpenSUSE]][OpenSUSE]
+
+[![Button Void]][Void]   
+[![Button Gentoo]][Gentoo]   
+[![Button Fedora]][Fedora]   
 [![Button Mandriva]][Mandriva] 
 
 </div>
@@ -64,14 +65,14 @@ It's source is based on **[Vixie Cron]** with additional security <br>
 
 <!--------------------------------{ Badges }----------------------------------->
 
-[Badge Version]: https://img.shields.io/badge/Version-1.6.1-blue.svg?style=for-the-badge
+[Badge Version]: https://img.shields.io/badge/Version-1.6.1-015d93.svg?style=for-the-badge&labelColor=blue
 
 
 <!-------------------------------{ Buttons }----------------------------------->
 
-[Button Changes]: https://img.shields.io/badge/Changelog-2478b5?style=for-the-badge
-[Button Contact]: https://img.shields.io/badge/Contact-d74078?style=for-the-badge
-[Button Origin]: https://img.shields.io/badge/Origin-36c5be?style=for-the-badge
+[Button Changes]: https://img.shields.io/badge/Changelog-2478b5?style=for-the-badge&logoColor=white&logo=Leanpub
+[Button Contact]: https://img.shields.io/badge/Contact-d74078?style=for-the-badge&logoColor=white&logo=TheConversation
+[Button Origin]: https://img.shields.io/badge/Origin-36c5be?style=for-the-badge&logoColor=white&logo=GitBook
 
 [Button Source Mage]: https://img.shields.io/badge/Source_Mage-black?style=for-the-badge
 [Button Mandriva]: https://img.shields.io/badge/Mandriva-0a1a22?style=for-the-badge
