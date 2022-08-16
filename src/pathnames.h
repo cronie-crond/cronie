@@ -53,8 +53,8 @@
 # define _PATH_BSHELL "/bin/sh"
 #endif
 
-#ifndef _PATH_DEFPATH
-# define _PATH_DEFPATH "/usr/bin:/bin"
+#ifndef _PATH_STDPATH
+# define _PATH_STDPATH "/usr/bin:/bin:/usr/sbin:/sbin"
 #endif
 
 #ifndef _PATH_TMP

@@ -376,11 +376,11 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 		char *defpath;
 
 		if (ChangePath)
-			defpath = _PATH_DEFPATH;
+			defpath = _PATH_STDPATH;
 		else {
 			defpath = getenv("PATH");
 			if (defpath == NULL)
-				defpath = _PATH_DEFPATH;
+				defpath = _PATH_STDPATH;
 		}
 
 		if (glue_strings(envstr, sizeof envstr, "PATH", defpath, '=')) {
