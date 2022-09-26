@@ -417,6 +417,37 @@ entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
 
 	Debug(DPARS, ("load_entry()...about to parse command\n"));
 
+	/* If the first character of the command is '-', it is a cron option. */
+	ch = get_char(file);
+	while (ch == '-') {
+		switch (ch = get_char(file)) {
+			case 'n':
+				/* only allow user to set the option once */
+				if ((e->flags & MAIL_WHEN_ERR) == MAIL_WHEN_ERR) {
+					ecode = e_option;
+					goto eof;
+				}
+				e->flags |= MAIL_WHEN_ERR;
+				break;
+
+			default:
+				ecode = e_option;
+				goto eof;
+		}
+
+		ch = get_char(file);
+		if (ch != '\t' && ch != ' ') {
+			ecode = e_option;
+			goto eof;
+		}
+		Skip_Blanks(ch, file);
+		if (ch == EOF || ch == '\n') {
+			ecode = e_cmd;
+			goto eof;
+		}
+	}
+	unget_char(ch, file);
+
 	/* Everything up to the next \n or EOF is part of the command...
 	 * too bad we don't know in advance how long it will be, since we
 	 * need to malloc a string for it... so, we limit it to MAX_COMMAND.

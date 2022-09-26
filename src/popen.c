@@ -167,7 +167,7 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw, char **jobe
 	return (iop);
 }
 
-int cron_pclose(FILE * iop) {
+static int cron_finalize(FILE * iop, int sig) {
 	int fdes;
 	sigset_t oset, nset;
 	WAIT_T stat_loc;
@@ -180,7 +180,12 @@ int cron_pclose(FILE * iop) {
 	fdes = fileno(iop);
 	if (pids == NULL || fdes >= fds || pids[fdes] == 0L)
 		return (-1);
-	(void) fclose(iop);
+	
+	if (!sig) {
+		(void) fclose(iop);
+	} else if (kill(pids[fdes], sig) == -1) {
+		return -1;
+	}
 
 	sigemptyset(&nset);
 	sigaddset(&nset, SIGINT);
@@ -189,6 +194,28 @@ int cron_pclose(FILE * iop) {
 	(void) sigprocmask(SIG_BLOCK, &nset, &oset);
 	while ((pid = wait(&stat_loc)) != pids[fdes] && pid != -1) ;
 	(void) sigprocmask(SIG_SETMASK, &oset, NULL);
+	
+	if (sig) {
+		(void) fclose(iop);
+	}
 	pids[fdes] = 0;
-	return (pid == -1 ? -1 : WEXITSTATUS(stat_loc));
+
+	if (pid < 0) {
+		return pid;
+	}
+
+	if (WIFEXITED(stat_loc)) {
+		return WEXITSTATUS(stat_loc);
+	} else {
+		return WTERMSIG(stat_loc);
+	}
+}
+
+int cron_pclose(FILE * iop) {
+	return cron_finalize(iop, 0);
+}
+
+int cron_pabort(FILE * iop) {
+	int esig = cron_finalize(iop, SIGKILL);
+	return esig == SIGKILL ? 0 : esig;
 }

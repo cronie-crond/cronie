@@ -48,6 +48,7 @@ typedef	struct _entry {
 #define	DOW_STAR	0x08
 #define	WHEN_REBOOT	0x10
 #define	DONT_LOG	0x20
+#define	MAIL_WHEN_ERR	0x40
 } entry;
 
 			/* the crontab database will be a list of the
