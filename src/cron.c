@@ -179,7 +179,7 @@ static void usage(void) {
 	fprintf(stderr, "\n");
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, " -h         print this message \n");
-	fprintf(stderr, " -i         deamon runs without inotify support\n");
+	fprintf(stderr, " -i         daemon runs without inotify support\n");
 	fprintf(stderr, " -m <comm>  off, or specify preferred client for sending mails\n");
 	fprintf(stderr, " -n         run in foreground\n");
 	fprintf(stderr, " -f         run in foreground, the same as -n\n");
