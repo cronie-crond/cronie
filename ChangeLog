@@ -1595,12 +1595,12 @@
 
 2009-11-27  Marcela Mašláňová <mmaslano@redhat.com>
 
-	* cronie.init: Initscript: if unprivileged user stop deamon, it
+	* cronie.init: Initscript: if unprivileged user stop daemon, it
 	should return 4.
 
 2009-11-27  Marcela Mašláňová <mmaslano@redhat.com>
 
-	* cronie.init: Initscript: if unprivileged user restart deamon, it
+	* cronie.init: Initscript: if unprivileged user restart daemon, it
 	should return 4.
 
 2009-11-05  Guido Trentalancia <guido@trentalancia.com>
