@@ -119,6 +119,19 @@ an environment variable
 .I NO_COLOR
 is set.
 .PP
+On edition or deletion of the crontab, a backup of the last crontab will be saved to
+.I $XDG_CACHE_HOME/crontab/crontab.bak
+or 
+.I $XDG_CACHE_HOME/crontab/crontab.<user>.bak
+if
+.B -u
+is used.
+If the
+.I XDG_CACHE_HOME
+environment variable is not set,
+.I $HOME/.cache
+will be used instead.
+.PP
 .SH "OPTIONS"
 .TP
 .B "\-u"
