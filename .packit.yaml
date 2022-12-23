@@ -12,3 +12,6 @@ synced_files:
 - cronie.spec
 - .packit.yaml
 upstream_package_name: cronie
+srpm_build_deps:
+- gcc
+- systemd
