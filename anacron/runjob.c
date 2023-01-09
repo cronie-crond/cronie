@@ -207,6 +207,7 @@ xwait(pid_t pid , int *status)
 static void
 launch_mailer(job_rec *jr)
 {
+    char *mailer;
     pid_t pid;
     struct stat buf;
 
@@ -247,13 +248,22 @@ launch_mailer(job_rec *jr)
 	/* fdflags = fcntl(0, F_GETFL); fdflags &= ~O_APPEND; */
 	/* fcntl(0, F_SETFL, fdflags ); */
 
-	/* Here, I basically mirrored the way /usr/sbin/sendmail is called
-	 * by cron on a Debian system, except for the "-oem" and "-or0s"
-	 * options, which don't seem to be appropriate here.
-	 * Hopefully, this will keep all the MTAs happy. */
-	execl(SENDMAIL, SENDMAIL, "-FAnacron", "-odi",
-	      jr->mailto, (char *)NULL);
-	die_e("Can't exec " SENDMAIL);
+        /* Get SENDMAIL variable from the environment if set. 
+        /* If not, will use the predefined SENDMAIL from global.h */
+        mailer = getenv("SENDMAIL");
+        
+        if (mailer == NULL) {
+            /* Here, I basically mirrored the way /usr/sbin/sendmail is called
+            * by cron on a Debian system, except for the "-oem" and "-or0s"
+            * options, which don't seem to be appropriate here.
+            * Hopefully, this will keep all the MTAs happy. */
+            execl(SENDMAIL, SENDMAIL, "-FAnacron", "-odi",
+                jr->mailto, (char *)NULL);
+            die_e("Can't exec " SENDMAIL); 
+        } else {
+            execl(mailer, mailer, (char *)NULL);
+            die_e("Can't exec the mailer");
+        }
     }
     /* parent */
     /* record mailer pid */
