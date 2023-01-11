@@ -185,7 +185,7 @@ static void usage(void) {
 	fprintf(stderr, " -f         run in foreground, the same as -n\n");
 	fprintf(stderr, " -p         permit any crontab\n");
 	fprintf(stderr, " -P         inherit PATH from environment instead of using default value");
-	fprintf(stderr, "            of \"%s\"\n", _PATH_DEFPATH);
+	fprintf(stderr, "            of \"%s\"\n", _PATH_STDPATH);
 	fprintf(stderr, " -c         enable clustering support\n");
 	fprintf(stderr, " -s         log into syslog instead of sending mails\n");
 	fprintf(stderr, " -V         print version and exit\n");
@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
 	check_spool_dir();
 
 	if (ChangePath) {
-		if (setenv("PATH", _PATH_DEFPATH, 1) < 0) {
+		if (setenv("PATH", _PATH_STDPATH, 1) < 0) {
 			log_it("CRON", pid, "DEATH", "can't setenv PATH",
 				errno);
 			exit(1);

@@ -113,7 +113,7 @@ poke_daemon(void),
 check_error(const char *), parse_args(int c, char *v[]),
 die(int) ATTRIBUTE_NORETURN;
 static int replace_cmd(void), hostset_cmd(void), hostget_cmd(void),
-test_cmd(void), check_syntax(FILE *);
+test_cmd(void), check_syntax(FILE *), backup_crontab(const char *);
 static char *host_specific_filename(const char *prefix,
 const char *suffix);
 static const char *tmp_path(void);
@@ -479,14 +479,127 @@ static void delete_cmd(void) {
 		fprintf(stderr, "path too long\n");
 		exit(ERROR_EXIT);
 	}
+	
+	if (backup_crontab(n) == -1) {
+		fprintf(stderr, "no crontab for %s\n", User);
+		exit(ERROR_EXIT);
+	}
+
 	if (unlink(n) != 0) {
-		if (errno == ENOENT)
-			fprintf(stderr, "no crontab for %s\n", User);
-		else
-			perror(n);
+		perror(n);
 		exit(ERROR_EXIT);
 	}
 	poke_daemon();
+}
+
+/* returns	0	on success
+ *		-1	on non existent crontab file
+ *		-2	on failure to write the backup file
+ */
+static int backup_crontab(const char *crontab_path) {
+	const char *env_value;
+	char backup_dir[MAX_FNAME], backup_path[MAX_FNAME];
+	int ch = '\0';
+	FILE *crontab_file;
+	FILE *backup_file;
+	struct stat sb;
+	int retval = 0;
+	
+	/* create backup directory */
+	if ((env_value = getenv("XDG_CACHE_HOME")) != NULL) {
+		if(!glue_strings(backup_dir, sizeof backup_dir, env_value, "", '\0')){
+			fprintf(stderr, "$XDG_CACHE_HOME path too long\n");
+			return -2;
+		}
+	}
+	else if ((env_value = getenv("HOME")) != NULL) {
+		if (!glue_strings(backup_dir, sizeof backup_dir, env_value,
+				".cache", '/')) {
+			fprintf(stderr, "$HOME path too long\n");
+			return -2;
+		}
+	}
+	else {
+		fprintf(stderr, "Could not find environment variable XDG_CACHE_HOME or HOME to save the backup\n");
+		return -2;
+	}
+
+	if (!glue_strings(backup_dir, sizeof backup_dir, backup_dir,
+			"crontab", '/')) {
+		fprintf(stderr, "backup path too long\n");
+		return -2;
+	}
+
+	/* create backup file */
+	if (!glue_strings(backup_path, sizeof backup_path, backup_dir,
+			"crontab", '/')) {
+		fprintf(stderr, "backup path too long\n");
+		return -2;
+	}
+
+	if (getuid() != pw->pw_uid) { // verify if -u is used
+		if (!glue_strings(backup_path, sizeof backup_path, backup_path,
+				User, '.')) {
+			fprintf(stderr, "backup path too long\n");
+			return -2;
+		}
+	}
+
+	if (!glue_strings(backup_path, sizeof backup_path, backup_path,
+			"bak", '.')) {
+		fprintf(stderr, "backup path too long\n");
+		return -2;
+	}
+
+	/* perform the backup */
+	if ((crontab_file = fopen(crontab_path, "r")) == NULL) {
+		if (errno != ENOENT) {
+			perror(crontab_path);
+			exit(ERROR_EXIT);
+		}
+		return -1;
+	}
+	
+	if (swap_uids() == -1) {
+		perror("swapping uids");
+		exit(ERROR_EXIT);
+	}
+
+	if (stat(backup_dir, &sb) < OK && errno == ENOENT) {
+		if (OK != mkdir(backup_dir, 0755)) {
+			fprintf(stderr, "%s: ", backup_dir);
+			perror("mkdir");
+			retval = -2;
+			goto swapback;
+		}
+	}
+	
+	if ((backup_file = fopen(backup_path, "w+")) == NULL) {
+		fprintf(stderr, "Failed to write to the backup file: ");
+		perror(backup_path);
+		retval = -2;
+		goto swapback;
+	}
+
+	swapback:
+	if (swap_uids_back() < OK) {
+		perror("swapping uids back");
+		exit(ERROR_EXIT);
+	}
+
+	if (retval != 0)
+		return retval;
+
+	if (EOF != ch)
+		while (EOF != (ch = get_char(crontab_file)))
+			putc(ch, backup_file);
+
+	(void) fclose(crontab_file);
+	(void) fclose(backup_file);
+
+	printf("Backup of %s's previous crontab saved to %s\n", User, backup_path);
+
+	return 0;
 }
 
 static void check_error(const char *msg) {
@@ -906,6 +1019,9 @@ static int replace_cmd(void) {
 		error = -2;
 		goto done;
 	}
+
+	backup_crontab(n);
+
 	if (rename(TempFilename, n)) {
 		fprintf(stderr, "%s: error renaming %s to %s\n",
 			ProgramName, TempFilename, n);

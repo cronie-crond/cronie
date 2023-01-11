@@ -94,6 +94,7 @@ static int child_process(entry * e, char **jobenv) {
 	char mailfrom_expanded[MAX_EMAILSTR];
 	int children = 0;
 	pid_t pid = getpid();
+	pid_t jobpid = -1;
 	struct sigaction sa;
 
 	/* Ignore SIGPIPE as we will be writing to pipes and do not want to terminate
@@ -199,7 +200,7 @@ static int child_process(entry * e, char **jobenv) {
 
 	/* fork again, this time so we can exec the user's command.
 	 */
-	switch (fork()) {
+	switch (jobpid = fork()) {
 	case -1:
 		log_it("CRON", pid, "CAN'T FORK", "child_process", errno);
 		return ERROR_EXIT;
@@ -453,7 +454,7 @@ static int child_process(entry * e, char **jobenv) {
 				if (MailCmd[0] == '\0') {
 					int len;
 
-					len = snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG, mailfrom);
+					len = snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG);
 					if (len < 0) {
 						fprintf(stderr, "mailcmd snprintf failed\n");
 						(void) _exit(ERROR_EXIT);
@@ -552,10 +553,35 @@ static int child_process(entry * e, char **jobenv) {
 				}
 #endif
 			}
-			/* only close pipe if we opened it -- i.e., we're
+			/* if -n option was specified, abort the sending
+			 * now when we read all of the command output
+			 * and thus can wait for it's exit status
+			 */
+			if (mail && e->flags & MAIL_WHEN_ERR) {
+				int jobstatus = -1;
+				if (jobpid > 0) {
+					while (waitpid(jobpid, &jobstatus, WNOHANG) == -1) {
+						if (errno == EINTR) continue;
+						log_it("CRON", getpid(), "error", "invalid job pid", errno);
+						break;
+					}
+				} else {
+					log_it("CRON", getpid(), "error", "invalid job pid", 0);
+				}
+
+				/* if everything went well, -n is set, and we have mail,
+				 * we won't be mailing – so shoot the messenger!
+				 */
+				if (WIFEXITED(jobstatus) && WEXITSTATUS(jobstatus) == EXIT_SUCCESS) {
+					Debug(DPROC, ("[%ld] aborting pipe to mail\n", (long)getpid()));
+					status = cron_pabort(mail);
+					mail = NULL;
+				}
+			}
+
+			/* only close pipe if we opened it -- i.e., we're (still)
 			 * mailing...
 			 */
-
 			if (mail) {
 				Debug(DPROC, ("[%ld] closing pipe to mail\n", (long) getpid()));
 					/* Note: the pclose will probably see
