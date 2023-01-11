@@ -2341,7 +2341,7 @@
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
-	* src/funcs.h: Change definiton from popen.c in header file.
+	* src/funcs.h: Change definition from popen.c in header file.
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
