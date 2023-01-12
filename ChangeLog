@@ -1852,7 +1852,7 @@
 2009-06-05  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* src/cron.c, src/do_command.c, src/globals.h: ValidateMailRcpts
-	removed for problems when could be enviromental settings exported
+	removed for problems when could be environmental settings exported
 	under wrong user.
 
 2009-05-29  Marcela Mašláňová <mmaslano@redhat.com>
@@ -2513,7 +2513,7 @@
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* do_command.c: 'Build enviroment' is set in pam section for better
+	* do_command.c: 'Build environment' is set in pam section for better
 	security.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
