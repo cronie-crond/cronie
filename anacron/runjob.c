@@ -277,8 +277,13 @@ launch_mailer(job_rec *jr)
 
             complain("mailer - `%s` ", mailer);
             complain("mailer_args - `%s`", mailer_args);
-
-            execl(mailer, mailer, mailer_args, (char *)NULL);
+            
+            if ( strchr(mailer_args, '-') != NULL ) {
+                    execl(mailer, mailer, mailer_args, (char *)NULL);
+                } else {
+                    execl(mailer, mailer, (char *)NULL);
+                }
+            
             die_e("Can't exec the mailer %s", mailer);
         }
     }
