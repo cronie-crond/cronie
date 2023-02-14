@@ -107,6 +107,9 @@ int expand_envvar(const char *source, char *result, size_t max_size) {
         }
 
         envvar_name = malloc(envvar_name_size + 1);
+        if (envvar_name == NULL)
+            goto too_big;
+
         strncpy(envvar_name, envvar_p, envvar_name_size);
         envvar_name[envvar_name_size] = '\0';
 
