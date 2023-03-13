@@ -223,7 +223,9 @@ For example, "0-23/2" can be used in the 'hours' field to specify command
 execution for every other hour (the alternative in the V7 standard is
 "0,\:2,\:4,\:6,\:8,\:10,\:12,\:14,\:16,\:18,\:20,\:22").  Step values are
 also permitted after an asterisk, so if specifying a job to be run every
-two hours, you can use "*/2".
+two hours, you can use "*/2". Please note that steps are evaluated just
+within the field they are applied to. For example "*/23" in hours field
+means to execute the job on the hour 0 and the hour 23 within a calendar day.
 .PP
 Names can also be used for the 'month' and 'day of week' fields.  Use the
 first three letters of the particular day or month (case does not
