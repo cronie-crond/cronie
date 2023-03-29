@@ -5,7 +5,7 @@ After=auditd.service nss-user-lookup.target systemd-user-sessions.service time-s
 [Service]
 EnvironmentFile=/etc/sysconfig/crond
 ExecStart=/usr/sbin/crond -n $CRONDARGS
-ExecReload=/bin/kill -HUP $MAINPID
+ExecReload=/bin/kill -URG $MAINPID
 KillMode=process
 Restart=on-failure
 RestartSec=30s

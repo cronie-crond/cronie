@@ -66,10 +66,11 @@ set_time(int),
 cron_sleep(int, cron_db *),
 sigchld_handler(int),
 sighup_handler(int ATTRIBUTE_UNUSED),
+sigurg_handler(int ATTRIBUTE_UNUSED),
 sigchld_reaper(void),
 sigintterm_handler(int ATTRIBUTE_UNUSED), parse_args(int c, char *v[]);
 
-static volatile sig_atomic_t got_sighup, got_sigchld, got_sigintterm;
+static volatile sig_atomic_t got_sighup, got_sigchld, got_sigintterm, got_sigurg;
 static int timeRunning, virtualTime, clockTime;
 static long GMToff;
 static int DisableInotify;
@@ -151,8 +152,9 @@ void set_cron_watched(int fd) {
 #endif
 
 static void handle_signals(cron_db * database) {
-	if (got_sighup) {
+	if (got_sighup || got_sigurg) {
 		got_sighup = 0;
+		got_sigurg = 0;
 #if defined WITH_INOTIFY
 		/* watches must be reinstated on reload */
 		if (inotify_enabled && (EnableClustering != 1)) {
@@ -243,6 +245,8 @@ int main(int argc, char *argv[]) {
 	sact.sa_handler = sigintterm_handler;
 	(void) sigaction(SIGINT, &sact, NULL);
 	(void) sigaction(SIGTERM, &sact, NULL);
+	sact.sa_handler = sigurg_handler;
+	(void) sigaction(SIGURG, &sact, NULL);
 
 	acquire_daemonlock(0);
 	set_cron_uid();
@@ -662,6 +666,10 @@ static void sigchld_handler(int x ATTRIBUTE_UNUSED) {
 
 static void sigintterm_handler(int x ATTRIBUTE_UNUSED) {
 	got_sigintterm = 1;
+}
+
+static void sigurg_handler(int x ATTRIBUTE_UNUSED) {
+	got_sigurg = 1;
 }
 
 static void sigchld_reaper(void) {
