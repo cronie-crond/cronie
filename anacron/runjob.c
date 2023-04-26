@@ -166,8 +166,8 @@ static void
 run_job(const job_rec *jr)
 /* This is called to start the job, after the fork */
 {
-    /* If outputs are not inherited from the parent, pipe outputs to temp file */
-    if (!jr->inherit_outputs) {
+    /* If mail functionality is not disabled, pipe outputs to temp file */
+    if (!jr->no_mail_output) {
         /* setup stdout and stderr */
         xclose(1);
         xclose(2);
@@ -303,11 +303,10 @@ launch_job(job_rec *jr)
 
     setup_env(jr);
 
-    /* Outputs are inherited if INHERIT_OUTPUTS is defined and non-empty  */
-    jr->inherit_outputs = getenv("INHERIT_OUTPUTS") != NULL && *getenv("INHERIT_OUTPUTS");
+    jr->no_mail_output = getenv("NO_MAIL_OUTPUT") != NULL && *getenv("NO_MAIL_OUTPUT");
 
-    /* Set up email functionality if outputs should *not* be inherited  */
-    if (!jr->inherit_outputs) {
+    /* Set up email functionality if it isn't disabled  */
+    if (!jr->no_mail_output) {
         /* Get the destination email address if set, or current user otherwise */
         mailto = getenv("MAILTO");
         if (mailto == NULL) {
@@ -389,7 +388,7 @@ tend_job(job_rec *jr, int status)
 
     update_timestamp(jr);
     unlock(jr);
-    if (!jr->inherit_outputs && file_size(jr->output_fd) > jr->mail_header_size) mail_output = 1;
+    if (!jr->no_mail_output && file_size(jr->output_fd) > jr->mail_header_size) mail_output = 1;
     else mail_output = 0;
 
     m = mail_output ? " (produced output)" : "";
@@ -407,8 +406,8 @@ tend_job(job_rec *jr, int status)
     jr->job_pid = 0;
     running_jobs--;
     if (mail_output) launch_mailer(jr);
-    /* output_fd and input_fd are only set if outputs are not inherited  */
-    if (!jr->inherit_outputs) {
+    /* output_fd and input_fd are only set if mail functionality is enabled  */
+    if (!jr->no_mail_output) {
         xclose(jr->output_fd);
         xclose(jr->input_fd);
     }
