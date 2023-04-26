@@ -163,11 +163,11 @@ setup_env(const job_rec *jr)
 }
 
 static void
-run_job(const job_rec *jr, int inherit_outputs)
+run_job(const job_rec *jr)
 /* This is called to start the job, after the fork */
 {
     /* If outputs are not inherited from the parent, pipe outputs to temp file */
-    if (!inherit_outputs) {
+    if (!jr->inherit_outputs) {
         /* setup stdout and stderr */
         xclose(1);
         xclose(2);
@@ -295,7 +295,6 @@ launch_job(job_rec *jr)
     char *mailfrom;
     char mailto_expanded[MAX_EMAILSTR];
     char mailfrom_expanded[MAX_EMAILSTR];
-    int inherit_outputs;
 
     /* get hostname */
     if (gethostname(hostname, 512)) {
@@ -304,10 +303,10 @@ launch_job(job_rec *jr)
 
     setup_env(jr);
 
-    inherit_outputs = getenv("INHERIT_OUTPUTS") != NULL;
+    jr->inherit_outputs = getenv("INHERIT_OUTPUTS") != NULL;
 
     /* Set up email functionality if outputs should *not* be inherited  */
-    if (!inherit_outputs) {
+    if (!jr->inherit_outputs) {
         /* Get the destination email address if set, or current user otherwise */
         mailto = getenv("MAILTO");
         if (mailto == NULL) {
@@ -364,7 +363,6 @@ launch_job(job_rec *jr)
             jr->mailto = mailto;
 
         jr->mail_header_size = file_size(fd);
-
     }
 
     pid = xfork();
@@ -372,7 +370,7 @@ launch_job(job_rec *jr)
     {
 	/* child */
 	in_background = 1;
-	run_job(jr, inherit_outputs);
+	run_job(jr);
 	/* execution never gets here */
     }
     /* parent */
@@ -390,7 +388,7 @@ tend_job(job_rec *jr, int status)
 
     update_timestamp(jr);
     unlock(jr);
-    if (file_size(jr->output_fd) > jr->mail_header_size) mail_output = 1;
+    if (!jr->inherit_outputs && file_size(jr->output_fd) > jr->mail_header_size) mail_output = 1;
     else mail_output = 0;
 
     m = mail_output ? " (produced output)" : "";
@@ -408,8 +406,11 @@ tend_job(job_rec *jr, int status)
     jr->job_pid = 0;
     running_jobs--;
     if (mail_output) launch_mailer(jr);
-    xclose(jr->output_fd);
-    xclose(jr->input_fd);
+    /* output_fd and input_fd are only set if outputs are not inherited  */
+    if (!jr->inherit_outputs) {
+        xclose(jr->output_fd);
+        xclose(jr->input_fd);
+    }
 }
 
 void

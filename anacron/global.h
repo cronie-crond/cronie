@@ -62,6 +62,7 @@ struct job_rec1 {
    char *ident;
    char *command;
    char *mailto;
+   int inherit_outputs;
 
    int tab_line;
    int arg_num;
