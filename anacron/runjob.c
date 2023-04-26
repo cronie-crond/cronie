@@ -303,6 +303,7 @@ launch_job(job_rec *jr)
 
     setup_env(jr);
 
+    /* Outputs are inherited if INHERIT_OUTPUTS is defined and non-empty  */
     jr->inherit_outputs = getenv("INHERIT_OUTPUTS") != NULL && *getenv("INHERIT_OUTPUTS");
 
     /* Set up email functionality if outputs should *not* be inherited  */

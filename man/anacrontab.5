@@ -81,6 +81,10 @@ and
 .I MAILTO 
 variables are expanded, so setting them as in the following example works as expected: MAILFROM=cron-$USER@cron.com ($USER is replaced by the system user) ) 
 .PP
+If
+.I INHERIT_OUTPUTS
+is defined (and non-empty), anacron's output includes the outputs of job processes and the mail functionality is disabled.
+.PP
 .PP
 Empty lines are either blank lines, line containing white spaces only, or
 lines with white spaces followed by a '#' followed by an arbitrary
