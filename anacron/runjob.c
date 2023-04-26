@@ -163,15 +163,19 @@ setup_env(const job_rec *jr)
 }
 
 static void
-run_job(const job_rec *jr)
+run_job(const job_rec *jr, int inherit_outputs)
 /* This is called to start the job, after the fork */
 {
-    /* setup stdout and stderr */
-    xclose(1);
-    xclose(2);
-    if (dup2(jr->output_fd, 1) != 1 || dup2(jr->output_fd, 2) != 2)
-	die_e("dup2() error");     /* dup2 also clears close-on-exec flag */
-    in_background = 0;  /* now, errors will be mailed to the user */
+    /* If outputs are not inherited from the parent, pipe outputs to temp file */
+    if (!inherit_outputs) {
+        /* setup stdout and stderr */
+        xclose(1);
+        xclose(2);
+        if (dup2(jr->output_fd, 1) != 1 || dup2(jr->output_fd, 2) != 2)
+        die_e("dup2() error");     /* dup2 also clears close-on-exec flag */
+        in_background = 0;  /* now, errors will be mailed to the user */
+    }
+
     if (chdir("/")) die_e("Can't chdir to '/'");
 
     if (sigprocmask(SIG_SETMASK, &old_sigmask, NULL))
@@ -291,6 +295,7 @@ launch_job(job_rec *jr)
     char *mailfrom;
     char mailto_expanded[MAX_EMAILSTR];
     char mailfrom_expanded[MAX_EMAILSTR];
+    int inherit_outputs;
 
     /* get hostname */
     if (gethostname(hostname, 512)) {
@@ -299,69 +304,75 @@ launch_job(job_rec *jr)
 
     setup_env(jr);
 
-    /* Get the destination email address if set, or current user otherwise */
-    mailto = getenv("MAILTO");
-    if (mailto == NULL) {
-        mailto = username();
-    }
-    else {
-        if (expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
-            mailto = mailto_expanded; 
+    inherit_outputs = getenv("INHERIT_OUTPUTS") != NULL;
+
+    /* Set up email functionality if outputs should *not* be inherited  */
+    if (!inherit_outputs) {
+        /* Get the destination email address if set, or current user otherwise */
+        mailto = getenv("MAILTO");
+        if (mailto == NULL) {
+            mailto = username();
         }
         else {
-            complain("The environment variable 'MAILTO' could not be expanded. The non-expanded value will be used.");
-        }     
-    }
+            if (expand_envvar(mailto, mailto_expanded, sizeof(mailto_expanded))) {
+                mailto = mailto_expanded;
+            }
+            else {
+                complain("The environment variable 'MAILTO' could not be expanded. The non-expanded value will be used.");
+            }
+        }
 
-    /* Get the source email address if set, or current user otherwise */
-    mailfrom = getenv("MAILFROM");
-    if (mailfrom == NULL) {
-        mailfrom = username();
-    }
-    else {
-        if (expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
-            mailfrom = mailfrom_expanded;
+        /* Get the source email address if set, or current user otherwise */
+        mailfrom = getenv("MAILFROM");
+        if (mailfrom == NULL) {
+            mailfrom = username();
         }
         else {
-            complain("The environment variable 'MAILFROM' could not be expanded. The non-expanded value will be used.");
-        }   
+            if (expand_envvar(mailfrom, mailfrom_expanded, sizeof(mailfrom_expanded))) {
+                mailfrom = mailfrom_expanded;
+            }
+            else {
+                complain("The environment variable 'MAILFROM' could not be expanded. The non-expanded value will be used.");
+            }
+        }
+
+        /* create temporary file for stdout and stderr of the job */
+        temp_file(jr); fd = jr->output_fd;
+        /* write mail header */
+        xwrite(fd, "From: ");
+        xwrite(fd, "Anacron <");
+        xwrite(fd, mailfrom);
+        xwrite(fd, ">\n");
+        xwrite(fd, "To: ");
+        xwrite(fd, mailto);
+        xwrite(fd, "\n");
+        xwrite(fd, "MIME-Version: 1.0\n");
+        xwrite(fd, "Content-Type: text/plain; charset=\"");
+        xwrite(fd, nl_langinfo(CODESET));
+        xwrite(fd, "\"\n");
+        xwrite(fd, "Content-Transfer-Encoding: 8bit\n");
+        xwrite(fd, "Subject: Anacron job '");
+        xwrite(fd, jr->ident);
+        xwrite(fd, "' on ");
+        xwrite(fd, hostname);
+        xwrite(fd, "\n\n");
+
+        if (*mailto == '\0')
+            jr->mailto = NULL;
+        else
+            /* ugly but works without strdup() */
+            jr->mailto = mailto;
+
+        jr->mail_header_size = file_size(fd);
+
     }
-
-    /* create temporary file for stdout and stderr of the job */
-    temp_file(jr); fd = jr->output_fd;
-    /* write mail header */
-    xwrite(fd, "From: ");
-    xwrite(fd, "Anacron <");
-    xwrite(fd, mailfrom);
-    xwrite(fd, ">\n");
-    xwrite(fd, "To: ");
-    xwrite(fd, mailto);
-    xwrite(fd, "\n");
-    xwrite(fd, "MIME-Version: 1.0\n");
-    xwrite(fd, "Content-Type: text/plain; charset=\"");
-    xwrite(fd, nl_langinfo(CODESET));
-    xwrite(fd, "\"\n");
-    xwrite(fd, "Content-Transfer-Encoding: 8bit\n");
-    xwrite(fd, "Subject: Anacron job '");
-    xwrite(fd, jr->ident);
-    xwrite(fd, "' on ");
-    xwrite(fd, hostname);
-    xwrite(fd, "\n\n");
-
-    if (*mailto == '\0')
-	jr->mailto = NULL;
-    else
-	/* ugly but works without strdup() */
-	jr->mailto = mailto;
-
-    jr->mail_header_size = file_size(fd);
 
     pid = xfork();
     if (pid == 0)
     {
 	/* child */
 	in_background = 1;
-	run_job(jr);
+	run_job(jr, inherit_outputs);
 	/* execution never gets here */
     }
     /* parent */
