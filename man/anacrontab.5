@@ -83,7 +83,7 @@ variables are expanded, so setting them as in the following example works as exp
 .PP
 If
 .I NO_MAIL_OUTPUT
-is defined (and non-empty), anacron's output includes the outputs of job processes and the mail functionality is disabled.
+is defined (and non-empty), the standard output and error descriptors of job processes are not redirected and e-mailed.
 .PP
 .PP
 Empty lines are either blank lines, line containing white spaces only, or

@@ -172,7 +172,7 @@ run_job(const job_rec *jr)
         xclose(1);
         xclose(2);
         if (dup2(jr->output_fd, 1) != 1 || dup2(jr->output_fd, 2) != 2)
-        die_e("dup2() error");     /* dup2 also clears close-on-exec flag */
+            die_e("dup2() error");     /* dup2 also clears close-on-exec flag */
         in_background = 0;  /* now, errors will be mailed to the user */
     }
 
@@ -295,6 +295,7 @@ launch_job(job_rec *jr)
     char *mailfrom;
     char mailto_expanded[MAX_EMAILSTR];
     char mailfrom_expanded[MAX_EMAILSTR];
+    char *no_mail_output;
 
     /* get hostname */
     if (gethostname(hostname, 512)) {
@@ -303,7 +304,8 @@ launch_job(job_rec *jr)
 
     setup_env(jr);
 
-    jr->no_mail_output = getenv("NO_MAIL_OUTPUT") != NULL && *getenv("NO_MAIL_OUTPUT");
+    no_mail_output = getenv("NO_MAIL_OUTPUT");
+    jr->no_mail_output = no_mail_output != NULL && *no_mail_output;
 
     /* Set up email functionality if it isn't disabled  */
     if (!jr->no_mail_output) {
@@ -388,8 +390,8 @@ tend_job(job_rec *jr, int status)
 
     update_timestamp(jr);
     unlock(jr);
-    if (!jr->no_mail_output && file_size(jr->output_fd) > jr->mail_header_size) mail_output = 1;
-    else mail_output = 0;
+
+    mail_output = !jr->no_mail_output && file_size(jr->output_fd) > jr->mail_header_size;
 
     m = mail_output ? " (produced output)" : "";
     if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
