@@ -1206,7 +1206,7 @@
 
 2011-05-26  Marcela Mašláňová <mmaslano@redhat.com>
 
-	* man/cron.8, man/crontab.1: Change of email adress of cluster
+	* man/cron.8, man/crontab.1: Change of email address of cluster
 	support author.
 
 2011-05-16  Kiyoshi OHGISHI <ohgishi@gaia.eonet.ne.jp>
