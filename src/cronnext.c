@@ -214,7 +214,7 @@ int matchuser(char *user_name, char *list) {
 }
 
 /*
- * find next sheduled job
+ * find the next scheduled job
  */
 time_t cronnext(cron_db database,
 		time_t start, time_t end,
@@ -231,7 +231,7 @@ time_t cronnext(cron_db database,
 	else if (flags & ALLJOBS)
 		printf("jobs:\n");
 
-	/* find next sheduled time */
+	/* find the next scheduled time */
 	closest = -1;
 	for (u = database.head; u; u = u->next) {
 		if (include && !matchuser(u->name, include))
@@ -343,7 +343,7 @@ int main(int argn, char *argv[]) {
 	flags = SYSTEM;
 	endtime = 0;
 	printjobs = 0;
-	start = time(NULL) / 60 * 60;
+	start = (time(NULL) + 59) / 60 * 60;
 
 	while (-1 != (opt = getopt(argn, argv, "i:e:ast:q:j:lcfhV"))) {
 		switch (opt) {
@@ -360,7 +360,7 @@ int main(int argn, char *argv[]) {
 			flags &= ~SYSTEM;
 			break;
 		case 't':
-			start = atoi(optarg) / 60 * 60;
+			start = (atoi(optarg) + 59) / 60 * 60;
 			break;
 		case 'q':
 			end = atoi(optarg) / 60 * 60;
