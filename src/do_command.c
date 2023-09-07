@@ -30,6 +30,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #include "externs.h"
 #include "funcs.h"
@@ -264,10 +265,26 @@ static int child_process(entry * e, char **jobenv) {
 		{
 			char *shell = env_get("SHELL", jobenv);
 			int fd, fdmax = TMIN(getdtablesize(), MAX_CLOSE_FD);
+			DIR *dir;
+			struct dirent *dent;
 
-			/* close all unwanted open file descriptors */
-			for(fd = STDERR + 1; fd < fdmax; fd++) {
-				close(fd);
+			/*
+			 * if /proc is mounted, we can optimize what fd can be closed,
+			 * but if it isn't available, fall back to the previous behavior.
+			 */
+			if ((dir = opendir("/proc/self/fd")) != NULL) {
+				while ((dent = readdir(dir)) != NULL) {
+					if (!strcmp(dent->d_name, ".") || !strcmp(dent->d_name, ".."))
+						continue;
+					fd = atoi(dent->d_name);
+					if (fd > STDERR_FILENO)
+						close(fd);
+				}
+			} else {
+				/* close all unwanted open file descriptors */
+				for (fd = STDERR + 1; fd < fdmax; fd++) {
+					close(fd);
+				}
 			}
 
 #if DEBUGGING
