@@ -677,6 +677,12 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 	if (state != R_FINISH || ch == EOF)
 		return (EOF);
 
+	/* Make sure the step size makes any sense */
+	if (step > 1 && step > (high_ - low_)) {
+		int max =  high_ - low_ > 0 ? high_ - low_ : 1;
+		fprintf(stderr, "Warning: Step size %i higher than possible maximum of %i\n", step, max);
+	}
+
 	for (i = low_; i <= high_; i += step)
 		if (EOF == set_element(bits, low, high, i)) {
 			unget_char(ch, file);
