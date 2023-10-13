@@ -1,5 +1,12 @@
 cronie NEWS -- history of user-visible changes.
 
+Release 1.7.0
+
+* anacron: Add support for NO_MAIL_OUTPUT environment variable
+* anacron: Support enabling anacron jobs on battery power
+* crond: Support -n crontab entry option to disable mailing the output
+* crontab: Make a backup of the crontab file on edition and deletion
+
 Release 1.6.1
 
 * crond: Fix regression of handling ranges (x-y) in crontab

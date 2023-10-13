@@ -1,4 +1,4 @@
-AC_INIT([cronie],[1.6.1])
+AC_INIT([cronie],[1.7.0])
 AC_CONFIG_HEADERS([config.h])
 AC_PREREQ([2.64])
 

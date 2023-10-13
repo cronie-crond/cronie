@@ -7,9 +7,16 @@ SELinux.
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 # Download
-Latest released version is 1.6.1.
+Latest released version is 1.7.0.
 
 User visible changes:
+
+Release 1.7.0
+
+- anacron: Add support for NO_MAIL_OUTPUT environment variable
+- anacron: Support enabling anacron jobs on battery power
+- crond: Support -n crontab entry option to disable mailing the output
+- crontab: Make a backup of the crontab file on edition and deletion
 
 Release 1.6.1
 

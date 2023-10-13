@@ -1,3 +1,115 @@
+2023-10-13  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* anacron: Use xclose() instead of fclose()
+      When replacing standard descriptors we use
+	  xclose() elsewhere and it is less error-prone.
+
+2023-09-28  Alexander Schwinn <alexxcons@xfce.org>
+
+	* Show error when step size is out of bound
+
+2023-09-28  Alexander Schwinn <alexxcons@xfce.org>
+
+	* Rename variables in 'get_range' to make code more readable
+
+2023-09-17  Jonathan Kamens <jik@kamens.us>
+
+	* Explain how to do skip values for non-multiples of the time unit
+
+2023-09-07  bwelterl <bwelterl@redhat.com>
+
+	* Optimization to close fds from /proc/self/fd in case of high
+      nofile limit after fork
+
+2023-07-25  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* cronnext: Round up the start time to whole minute
+
+2023-04-28  lilinjie <lilinjie@uniontech.com>
+
+	* fix typo
+
+2023-04-27  Johnny <39348311+JohnnyJayJay@users.noreply.github.com>
+
+	* anacron: Add support for NO_MAIL_OUTPUT environment variable
+
+2023-03-29  YoruStar <524413304@qq.com>
+
+	* Support reloading with SIGURG in addition to SIGHUP
+
+2023-03-13  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* crontab.5: Clarify the evaluation of the step values
+
+2023-02-14  Li kunyu <kunyu@nfschina.com>
+
+	* cronie_common.c: Check memory allocation result in expand_envvar() function.
+
+2023-01-12  lilinjie <102012657+uniontech-lilinjie@users.noreply.github.com>
+
+	* ChangeLog: fix typos
+
+2023-01-11  lilinjie <102012657+uniontech-lilinjie@users.noreply.github.com>
+
+	* CHANGELOG: fix typo
+
+2022-06-17  fgozzini <49639209+fgozzini@users.noreply.github.com>
+
+	* Added double quotes
+
+2022-06-15  fgozzini <49639209+fgozzini@users.noreply.github.com>
+
+	* Source directly from `/etc/default/anacron`
+
+2022-06-14  fgozzini <49639209+fgozzini@users.noreply.github.com>
+
+	* Allow user to run anacron jobs on battery
+	  The user can allow running anacron jobs on battery by adding
+      the string `ANACRON_RUN_ON_BATTERY_POWER=yes` to the
+      file `/etc/default/anacron`.
+
+2022-08-16  Antti Antinoja <antti@fennosys.fi>
+
+	* Use _PATH_STDPATH instead of _PATH_DEFPATH
+
+2022-08-24  Christopher Odenbach <odenbach@uni-paderborn.de>
+
+	* do not put <> in quotation marks
+
+2022-08-23  Christopher Odenbach <odenbach@uni-paderborn.de>
+
+	* set the return-path hard to "<>"
+
+2022-09-26  Ondřej Pohořelský <opohorel@redhat.com>
+
+	* Add -n option for crontab entries
+      The -n option causes no mail to be sent
+	  when the command finishes successfully.
+
+2022-12-16  iTrooz <itrooz@protonmail.com>
+
+	* Make a backup of the crontab file on edition and deletion
+
+2022-12-23  iTrooz <itrooz@protonmail.com>
+
+	* use packit srpm_build_deps key
+
+2022-12-16  Masanari Iida <standby24x7@gmail.com>
+
+	* man: Fix some spelling typos in anacron.8 and cronnext.1
+
+2022-12-12  lilinjie <lilinjie@uniontech.com>
+
+	* fix spelling error
+
+2022-08-31  Daniel M. Capella <polyzen@users.noreply.github.com>
+
+	* Remove excess comma
+
+2022-04-25  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release version 1.6.1
+
 2022-03-23  w30023233 <wangyuhang27@huawei.com>
 
 	* Fix regression in handling 1-5 crontab entries
