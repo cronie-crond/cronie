@@ -209,13 +209,13 @@ go_background(void)
 
     /* stdin is already closed */
 
-    if (fclose(stdout)) die_e("Can't close stdout");
+    xclose(STDOUT_FILENO);
     /* coverity[leaked_handle] – fd 1 closed automatically */
-    xopen(1, "/dev/null", O_WRONLY);
+    xopen(STDOUT_FILENO, "/dev/null", O_WRONLY);
 
-    if (fclose(stderr)) die_e("Can't close stderr");
+    xclose(STDERR_FILENO);
     /* coverity[leaked_handle] – fd 2 closed automatically */
-    xopen(2, "/dev/null", O_WRONLY);
+    xopen(STDERR_FILENO, "/dev/null", O_WRONLY);
 
     pid = xfork();
     if (pid != 0)
@@ -476,7 +476,7 @@ main(int argc, char *argv[])
 
     if (sigprocmask(0, NULL, &old_sigmask)) die_e("sigset error");
 
-    if (fclose(stdin)) die_e("Can't close stdin");
+    xclose(STDIN_FILENO);
     xopen(STDIN_FILENO, "/dev/null", O_RDONLY);
 
     if (!no_daemon && !testing_only)
