@@ -8,7 +8,9 @@ if [ `date +%Y%m%d` = "$day" ]; then
 fi
 
 # Check whether run on battery should be allowed
-. /etc/default/anacron
+if test -r /etc/default/anacron; then
+    . /etc/default/anacron
+fi
 
 if [ "$ANACRON_RUN_ON_BATTERY_POWER" != "yes" ]; then
 
