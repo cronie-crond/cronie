@@ -632,7 +632,10 @@ static void cron_sleep(int target, cron_db * db) {
 	int seconds_to_wait;
 
 	t1 = time(NULL) + GMToff;
-	seconds_to_wait = (int) (target * SECONDS_PER_MINUTE - t1) + 1;
+	seconds_to_wait = (int)((time_t)target * SECONDS_PER_MINUTE - t1);
+	/* always sleep at least once unless time goes backwards */
+	if (seconds_to_wait == 0)
+	    seconds_to_wait = 1;
 	Debug(DSCH, ("[%ld] Target time=%ld, sec-to-wait=%d\n",
 			(long) getpid(), (long) target * SECONDS_PER_MINUTE,
 			seconds_to_wait));
