@@ -579,7 +579,7 @@ static int child_process(entry * e, char **jobenv) {
 			if (mail && e->flags & MAIL_WHEN_ERR) {
 				int jobstatus = -1;
 				if (jobpid > 0) {
-					while (waitpid(jobpid, &jobstatus, WNOHANG) == -1) {
+					while (waitpid(jobpid, &jobstatus, 0) == -1) {
 						if (errno == EINTR) continue;
 						log_it("CRON", getpid(), "error", "invalid job pid", errno);
 						break;
