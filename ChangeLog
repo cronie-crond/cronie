@@ -1,3 +1,47 @@
+2023-10-25  Ondřej Pohořelský <opohorel@redhat.com>
+
+	* -n option: wait on finnishing grandchild process
+	  With `WNOHANG` we skip sending the email when waitpid() returns 0,
+	  which happens if the process is still running. Instead, using `0`
+	  parameter will wait for the process to actually stop running.
+
+2023-11-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Use empty envelope address with default mailfrom
+	  This should still reasonably fix the issue resolved in
+	  https://github.com/cronie-crond/cronie/pull/118
+	  But it would provide normal envelope address if
+	  MAILFROM is explicitly set.
+
+2023-11-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Revert "set the return-path hard to "<>""
+	  This is problematic in some use-cases. It needs to be optional.
+
+2023-11-16  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Revert "do not put <> in quotation marks"
+
+2023-10-19  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* cron_sleep(): Cast target to time_t before converting to seconds
+
+2023-10-16  Christian Hesse <mail@eworm.de>
+
+	* re-introduce the test for existence of file
+	  If the file does not exist it exits early with error... Let's source
+	  only if files acutually does exist. We still have a sane default.
+
+2023-10-13  Christian Hesse <mail@eworm.de>
+
+	* make the environment file optional
+	  Starting the daemon works without additional environment variables, so
+	  make the file optional.
+
+2023-10-13  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release version 1.7.0
+
 2023-10-13  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* anacron: Use xclose() instead of fclose()

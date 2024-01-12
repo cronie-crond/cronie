@@ -7,9 +7,16 @@ SELinux.
 And why cronie? [http://www.urbandictionary.com/define.php?term=cronie]
 
 # Download
-Latest released version is 1.7.0.
+Latest released version is 1.7.1.
 
 User visible changes:
+
+Release 1.7.1
+
+- crond: Wait on finishing the job with -n option to check
+  the exit status
+- crond: Do not set the return path to <> if non-default MAILFROM is set
+- /etc/sysconfig/crond and /etc/default/anacron files are optional
 
 Release 1.7.0
 
