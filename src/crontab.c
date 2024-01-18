@@ -504,6 +504,7 @@ static int backup_crontab(const char *crontab_path) {
 	FILE *backup_file;
 	struct stat sb;
 	int retval = 0;
+	mode_t old_umask;
 	
 	/* create backup directory */
 	if ((env_value = getenv("XDG_CACHE_HOME")) != NULL) {
@@ -574,6 +575,9 @@ static int backup_crontab(const char *crontab_path) {
 		}
 	}
 	
+	/* ensure backup file has strict permssions. Crontabs are not readable for
+	   other users and might contain sensitive information */
+	old_umask = umask(0077);
 	if ((backup_file = fopen(backup_path, "w+")) == NULL) {
 		fprintf(stderr, "Failed to write to the backup file: ");
 		perror(backup_path);
@@ -582,6 +586,8 @@ static int backup_crontab(const char *crontab_path) {
 	}
 
 	swapback:
+	umask(old_umask);
+
 	if (swap_uids_back() < OK) {
 		perror("swapping uids back");
 		exit(ERROR_EXIT);
