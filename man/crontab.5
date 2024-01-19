@@ -98,7 +98,8 @@ This option is useful if you decide to use /bin/mail instead of
 aliasing and UUCP usually does not read its mail.  If
 .I MAILFROM
 is defined (and non-empty), it is used as the envelope sender address,
-otherwise, ``root'' is used.
+otherwise, ``root'' is used. This variable is also inherited from the
+crond process environment.
 .PP 
 (Note: Both 
 .I MAILFROM

@@ -138,6 +138,7 @@ int env_set_from_environ(char ***envpp) {
 		"LC_ALL",
 		"LANGUAGE",
 		"RANDOM_DELAY",
+		"MAILFROM",
 		NULL
 	};
 	const char **name;
