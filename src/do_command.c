@@ -471,9 +471,7 @@ static int child_process(entry * e, char **jobenv) {
 				if (MailCmd[0] == '\0') {
 					int len;
 
-					/* Use empty envelope address with default mailfrom */
-					len = snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG,
-							mailfrom == e->pwd->pw_name ? "<>" : mailfrom);
+					len = snprintf(mailcmd, sizeof mailcmd, MAILFMT, MAILARG, mailfrom);
 					if (len < 0) {
 						fprintf(stderr, "mailcmd snprintf failed\n");
 						(void) _exit(ERROR_EXIT);
