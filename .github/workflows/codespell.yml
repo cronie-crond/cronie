@@ -1,0 +1,31 @@
+# Copyright (c) 2024 Sebastian Pipping <sebastian@pipping.org>
+# Licensed under GPL v2 or later
+
+name: Enforce codespell-clean spelling
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: '0 3 * * 5'  # Every Friday at 3am
+  workflow_dispatch:
+
+# Minimum permissions for security
+permissions:
+  contents: read
+
+jobs:
+  codespell:
+    name: Enforce codespell-clean spelling
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          # "accreting" is the gerund of verb "to accrete" (file obstack/obstack.h)
+          # "annualy" is a known backwards compat misspelling (file anacron/readtab.c)
+          # "dows" is plural of "day of the week" in crontab syntax (file src/entry.c)
+          # "vas" is from "Jason Vas Dias" of Red Hat, Inc. (file src/security.c)
+          # Words need to be (1) separated by a comma and (2) all lowercase!
+          ignore_words_list: accreting,annualy,dows,vas
