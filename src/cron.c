@@ -540,7 +540,7 @@ static void find_jobs(int vtime, cron_db * db, int doWild, int doNonWild, long v
 	 * It is recommended not to schedule any jobs during the hour when
 	 * the DST changes happen if job-specific timezones are used.
 	 *
-	 * Make 0-based values out of tm values so we can use them as indicies
+	 * Make 0-based values out of tm values so we can use them as indices
 	 */
 #define maketime(tz1, tz2) do { \
 	char *t = tz1; \

@@ -575,7 +575,7 @@ static int backup_crontab(const char *crontab_path) {
 		}
 	}
 	
-	/* ensure backup file has strict permssions. Crontabs are not readable for
+	/* ensure backup file has strict permissions. Crontabs are not readable for
 	   other users and might contain sensitive information */
 	old_umask = umask(0077);
 	if ((backup_file = fopen(backup_path, "w+")) == NULL) {
