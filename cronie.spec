@@ -384,7 +384,7 @@ exit 0
 
 * Thu Jun 30 2011 Tomáš Mráz <tmraz@redhat.com> - 1.4.8-4
 - drop the without systemd build condition
-- add the chkconfig readding trigger to the sysvinit subpackage
+- add the chkconfig re-adding trigger to the sysvinit subpackage
 
 * Wed Jun 29 2011 Tomáš Mráz <tmraz@redhat.com> - 1.4.8-3
 - start crond after auditd

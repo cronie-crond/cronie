@@ -343,7 +343,7 @@ static int cron_authorize_range(security_context_t scontext,
 
 #if WITH_SELINUX
 /* always uses u->scontext as the default process context, then changes the
-	 level, and retuns it in ucontextp (or NULL otherwise) */
+	 level, and returns it in ucontextp (or NULL otherwise) */
 static int
 cron_get_job_range(user * u, security_context_t * ucontextp, char **jobenv) {
 	char *range;

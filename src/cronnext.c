@@ -179,7 +179,7 @@ time_t nextmatch(entry *e, time_t start, time_t end) {
 		}
 
 		/* if time matches, return time;
-		 * check for month is redudant, but check for day is
+		 * check for month is redundant, but check for day is
 		 * necessary because we only know that either time
 		 * or time+1day match */
 		if (bit_test(e->month, current.tm_mon) &&

@@ -1,6 +1,6 @@
 2023-10-25  Ondřej Pohořelský <opohorel@redhat.com>
 
-	* -n option: wait on finnishing grandchild process
+	* -n option: wait on finishing grandchild process
 	  With `WNOHANG` we skip sending the email when waitpid() returns 0,
 	  which happens if the process is still running. Instead, using `0`
 	  parameter will wait for the process to actually stop running.
@@ -30,7 +30,7 @@
 
 	* re-introduce the test for existence of file
 	  If the file does not exist it exits early with error... Let's source
-	  only if files acutually does exist. We still have a sane default.
+	  only if files actually does exist. We still have a sane default.
 
 2023-10-13  Christian Hesse <mail@eworm.de>
 
@@ -843,7 +843,7 @@
 
 2014-03-31  Martin Poole <mpoole@redhat.com>
 
-	* src/misc.c: crond installs a signal hander for SIGINT & SIGTERM
+	* src/misc.c: crond installs a signal handler for SIGINT & SIGTERM
 	which removes the pid file and exits. This handler is not reset for
 	individual forked sub-processes which results in the condition that
 	if the child receives SIGINT or SIGTERM the pid file is erroneously
@@ -967,7 +967,7 @@
 2012-12-29  Sami Kerola <kerolasa@iki.fi>
 
 	* src/crontab.c, src/entry.c, src/macros.h, src/security.c: smatch
-	scan: fix various warningss found using smatch entry.c:396 load_entry() info: redundant null check on e->pwd
+	scan: fix various warnings found using smatch entry.c:396 load_entry() info: redundant null check on e->pwd
 	calling free() entry.c:398 load_entry() info: redundant null check
 	on e->cmd calling free() /usr/include/bits/fcntl.h:48:10: warning: preprocessor token
 	O_NOFOLLOW redefined macros.h:136:9: this was the original
@@ -1031,7 +1031,7 @@
 	* Makefile.am, cronie_common.h, src/cron.c, src/crontab.c,
 	src/security.c: compile: add function attributes Some of the argument values are not in use, and few functions does
 	not return.  Informing which will make few warning messages
-	disapper, and compiler to generate better binary.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+	disappear, and compiler to generate better binary.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
 
 2012-12-01  Sami Kerola <kerolasa@iki.fi>
 
@@ -1096,7 +1096,7 @@
 2012-11-24  Sami Kerola <kerolasa@iki.fi>
 
 	* configure.ac, src/pathnames.h: build-sys: make ./configure to
-	seach vi path Using "/usr/ucb/vi" as defaut fallback EDITOR is not going to work
+	search vi path Using "/usr/ucb/vi" as default fallback EDITOR is not going to work
 	on most of distributions where this package is installed.  That said
 	it might work somewhere, so searching the vi editor at configure
 	time is the sensible thing to do, if user does not want to define
@@ -1106,7 +1106,7 @@
 
 	* src/cron.c, src/crontab.c, src/database.c, src/do_command.c,
 	src/entry.c, src/env.c, src/macros.h, src/security.c, src/user.c: 
-	debuging: make Debug macro look like function This will make indent(1) program not to think it is a clause.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+	debugging: make Debug macro look like function This will make indent(1) program not to think it is a clause.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
 
 2012-11-24  Sami Kerola <kerolasa@iki.fi>
 
@@ -1125,7 +1125,7 @@
 	src/misc.c, src/popen.c, src/pw_dup.c, src/security.c,
 	src/structs.h, src/user.c: includes: make inclusions clean This change makes files to include what they need, instead of having
 	generic inclusion headers which will include everything to
-	everywhere.  Also the local headers havee ifndef & define
+	everywhere.  Also the local headers have ifndef & define
 	protection, which makes them to be save to include in any file,
 	without one having to think in which order the inclusions happen at
 	compile time.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
@@ -1152,7 +1152,7 @@
 
 2012-11-24  Sami Kerola <kerolasa@iki.fi>
 
-	* src/crontab.c: compliancy: do not mix declarations and code Signed-off-by: Sami Kerola <kerolasa@iki.fi>
+	* src/crontab.c: compliance: do not mix declarations and code Signed-off-by: Sami Kerola <kerolasa@iki.fi>
 
 2012-11-24  Sami Kerola <kerolasa@iki.fi>
 
@@ -1161,14 +1161,14 @@
 
 2012-11-24  Sami Kerola <kerolasa@iki.fi>
 
-	* src/database.c, src/pw_dup.c, src/security.c: assingments: remove
+	* src/database.c, src/pw_dup.c, src/security.c: assignments: remove
 	initialization if value is never used The next operation with these variables will overwrite the values
 	set at init.  Signed-off-by: Sami Kerola <kerolasa@iki.fi>
 
 2012-11-24  Sami Kerola <kerolasa@iki.fi>
 
 	* src/cron.c, src/entry.c, src/env.c, src/misc.c, src/popen.c: 
-	compliancy: use memset() rather than bzero() Reference:
+	compliance: use memset() rather than bzero() Reference:
 
 	http://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xsh_chap03.htmlSigned-off-by: Sami Kerola <kerolasa@iki.fi>
 
@@ -1662,9 +1662,9 @@
 
 2010-04-14  Michal Seben <mseben@suse.cz>
 
-	* src/security.c: Correctly reported PAM errors cron_conv could be helpfull for debug purposes, when something bad
+	* src/security.c: Correctly reported PAM errors cron_conv could be helpful for debug purposes, when something bad
 	happens with pam e.g. : expired user password - without cron_conv
-	cronie doesn't report usefull info in syslog messages  (it just
+	cronie doesn't report useful info in syslog messages  (it just
 	write no conversation function error to messages file),if you want
 	to do quick test of pam conversation function, you  could set
 	PASS_MAX_DAYS and PASS_WARN_AGE in etc/login.defs , add new user and
@@ -2148,7 +2148,7 @@
 
 2008-06-26  Marcela Mašláňová <mmaslano@redhat.com>
 
-	* man/cron.8, man/crontab.1: Updated manuals - diffent typos and
+	* man/cron.8, man/crontab.1: Updated manuals - different typos and
 	inotify support mentioned.
 
 2008-06-26  SATOH Fumiyasu <fumiyas@osstech.co.jp>
@@ -2255,7 +2255,7 @@
 2008-03-14  Marcela Mašláňová <mmaslano@redhat.com>
 
 	* configure.ac, src/cron.c, src/cron.h, src/crontab.c,
-	src/database.c, src/externs.h, src/funcs.h, src/structs.h: Rewrited
+	src/database.c, src/externs.h, src/funcs.h, src/structs.h: Rewrote
 	inotify support.
 
 2008-01-31  Marcela Mašláňová <mmaslano@redhat.com>
@@ -2285,7 +2285,7 @@
 	src/popen.c, src/pw_dup.c, src/security.c, src/user.c, stamp-h1: 
 	Added patch from Stepan Kasal, which fixed all autotools issues.
 	Also the pam's configure file is now installed directly into correct
-	path, if it's configure runned with pam.
+	path, if it's configure ran with pam.
 
 2008-01-17  Marcela Mašláňová <mmaslano@redhat.com>
 
@@ -2359,7 +2359,7 @@
 2007-11-12  Marcela Maslanova <marca@dhcp-lab-135.englab.brq.redhat.com>
 
 	* configure.ac: In configure was incorrect path for sendmail. The
-	error occured only when sendmail wasn't set up like default MTA.
+	error occurred only when sendmail wasn't set up like default MTA.
 
 2007-11-05  Marcela Maslanova <marca@dhcp-lab-135.englab.brq.redhat.com>
 
@@ -2529,7 +2529,7 @@
 
 	* cron.h, crontab.c, do_command.c, security.c: Pam authentication
 	wasn't used wise. User's crontab didn't use pam and functions, which were for pam opening etc. were
-	incorrect (wrong credetials).
+	incorrect (wrong credentials).
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
@@ -2556,11 +2556,11 @@
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
 	* security.c: Audit: new auditing message is print, when the user
-	isn't allowed to use mls range. Job wasn't runned without warning message.
+	isn't allowed to use mls range. Job wasn't run without warning message.
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
 
-	* misc.c: Because there was typo (- instead of +) jobs wasn't runned
+	* misc.c: Because there was typo (- instead of +) jobs wasn't run
 	after new year.
 
 2007-08-24  mmaslano <mmaslano@redhat.com>
@@ -2590,7 +2590,7 @@
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* crond.pam: pam.limits.so was substitued by system-auth (pam
+	* crond.pam: pam.limits.so was substituted by system-auth (pam
 	progress).
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
@@ -2643,7 +2643,7 @@
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* security.c: Fixing "security": minutely job are made realy only
+	* security.c: Fixing "security": minutely job are made really only
 	one time per minute. If the job is delayed into next minute, then it's skipped
 	for this minute.
 
@@ -2755,7 +2755,7 @@
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 
-	* misc.c: For setegid are used saved gid instead of getgid().  Now are swaped back the correct gid.
+	* misc.c: For setegid are used saved gid instead of getgid().  Now are swapped back the correct gid.
 
 2007-08-17  mmaslano <mmaslano@redhat.com>
 

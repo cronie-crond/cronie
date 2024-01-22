@@ -2,7 +2,7 @@
     Anacron - run commands periodically
     Copyright (C) 1998  Itai Tzur <itzur@actcom.co.il>
     Copyright (C) 1999  Sean 'Shaleh' Perry <shaleh@debian.org>
-    Copyirght (C) 2004  Pascal Hakim <pasc@redellipse.net>
+    Copyright (C) 2004  Pascal Hakim <pasc@redellipse.net>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
