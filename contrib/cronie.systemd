@@ -9,6 +9,24 @@ ExecReload=/bin/kill -URG $MAINPID
 KillMode=process
 Restart=on-failure
 RestartSec=30s
+KeyringMode=private
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+NoNewPrivileges=no
+PrivateDevices=no
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=no
+ProtectHostname=yes
+ProtectKernelLogs=no
+ProtectKernelModules=yes
+ProtectKernelTunables=no
+ProtectProc=invisible
+ProtectSystem=no
+RestrictNamespaces=no
+RestrictRealtime=yes
+RestrictSUIDSGID=no
 
 [Install]
 WantedBy=multi-user.target
