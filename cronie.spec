@@ -5,7 +5,7 @@
 
 Summary:   Cron daemon for executing programs at set times
 Name:      cronie
-Version:   1.7.1
+Version:   1.7.2
 Release:   0packit%{?dist}
 License:   MIT and BSD and ISC and GPLv2+
 URL:       https://github.com/cronie-crond/cronie
@@ -210,7 +210,7 @@ exit 0
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/cron.d/dailyjobs
 
 %changelog
-* Fri Jan 12 2024 Packit <packit@packit.dev> - 1.7.1-0packit
+* Mon Apr  8 2024 Packit <packit@packit.dev> - 1.7.2-0packit
 - Packit build
 
 * Mon Mar 29 2021 Tomáš Mráz <tmraz@fedoraproject.org> - 1.5.7-1

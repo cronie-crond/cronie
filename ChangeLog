@@ -1,3 +1,47 @@
+2024-04-08  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* man/crontab.5: Fix escapes in formatting
+
+2024-01-22  Sebastian Pipping <sebastian@pipping.org>
+
+	* Make GitHub Actions reject spelling errors using codespell
+
+2024-01-22  Sebastian Pipping <sebastian@pipping.org>
+
+	* Fix multiple typos
+
+2024-01-22  Sebastian Pipping <sebastian@pipping.org>
+
+	* Make GitHub Dependabot keep our GitHub Actions up to date
+
+2024-01-22  Sebastian Pipping <sebastian@pipping.org>
+
+	* Make GitHub Actions ensure that cronie keeps compiling without errors
+
+2024-01-22  Hanno Böck <990588+hannob@users.noreply.github.com>
+
+	* crontab.5: Correctly describe mail from behavior
+
+2024-01-19  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Inherit MAILFROM from the crond process environment
+      This allows setting it in /etc/sysconfig/crond or in the systemd unit.
+
+2024-01-19  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Revert "Use empty envelope address with default mailfrom"
+      This reverts commit c640f4f39e5c20995e960e4b954cd0574a96c028.
+	  This causes more harm than expected and is also strictly speaking
+	  not RFC compliant.
+
+2024-01-18  Johannes Segitz <jsegitz@suse.de>
+
+	* ensure crontab backup file has strict permssions
+
+2024-01-12  Tomas Mraz <tmraz@fedoraproject.org>
+
+	* Release version 1.7.1
+
 2023-10-25  Ondřej Pohořelský <opohorel@redhat.com>
 
 	* -n option: wait on finishing grandchild process
