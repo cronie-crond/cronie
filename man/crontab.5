@@ -298,8 +298,8 @@ crontab entry won\'t cause that entry to be executed every 35 minutes;
 instead, it will be executed twice every hour, at 0 and 35 minutes past.
 For more fine-grained control you can do something like this:
 .nf
-* * * * * if [ $(expr \( $(date +\%s) / 60 \) \% 58) = 0 ]; then echo this runs every 58 minutes; fi
-0 * * * * if [ $(expr \( $(date +\%s) / 3600 \) \% 23) = 0 ]; then echo this runs every 23 hours on the hour; fi
+* * * * * if [ $(expr \\( $(date +%s) / 60 \\) % 58) = 0 ]; then echo this runs every 58 minutes; fi
+0 * * * * if [ $(expr \\( $(date +%s) / 3600 \\) % 23) = 0 ]; then echo this runs every 23 hours on the hour; fi
 .fi
 Adjust as needed if your
 .BR date (1)
