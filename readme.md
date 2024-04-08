@@ -11,7 +11,7 @@ Latest released version is 1.7.2.
 
 User visible changes:
 
-Release 1.7.1
+Release 1.7.2
 
 - crond: Revert setting the return path to <>. It is not RFC compliant.
 - crond: Inherit MAILFROM from the crond process environment.
