@@ -30,13 +30,13 @@
 2024-01-19  Tomas Mraz <tmraz@fedoraproject.org>
 
 	* Revert "Use empty envelope address with default mailfrom"
-      This reverts commit c640f4f39e5c20995e960e4b954cd0574a96c028.
+	  This reverts commit c640f4f39e5c20995e960e4b954cd0574a96c028.
 	  This causes more harm than expected and is also strictly speaking
 	  not RFC compliant.
 
 2024-01-18  Johannes Segitz <jsegitz@suse.de>
 
-	* ensure crontab backup file has strict permssions
+	* ensure crontab backup file has strict permissions
 
 2024-01-12  Tomas Mraz <tmraz@fedoraproject.org>
 
