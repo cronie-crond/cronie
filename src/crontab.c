@@ -563,6 +563,7 @@ static int backup_crontab(const char *crontab_path) {
 	
 	if (swap_uids() == -1) {
 		perror("swapping uids");
+		(void) fclose(crontab_file);
 		exit(ERROR_EXIT);
 	}
 
@@ -590,22 +591,29 @@ static int backup_crontab(const char *crontab_path) {
 
 	if (swap_uids_back() < OK) {
 		perror("swapping uids back");
+		if (backup_file != NULL) {
+			(void) fclose(backup_file);
+		}
+		(void) fclose(crontab_file);
 		exit(ERROR_EXIT);
 	}
 
 	if (retval != 0)
-		return retval;
+		goto cleanup;
 
 	if (EOF != ch)
 		while (EOF != (ch = get_char(crontab_file)))
 			putc(ch, backup_file);
 
-	(void) fclose(crontab_file);
-	(void) fclose(backup_file);
-
 	printf("Backup of %s's previous crontab saved to %s\n", User, backup_path);
 
-	return 0;
+cleanup:
+	if (backup_file != NULL) {
+		(void) fclose(backup_file);
+	}
+	(void) fclose(crontab_file);
+
+	return retval;
 }
 
 static void check_error(const char *msg) {
