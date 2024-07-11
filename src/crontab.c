@@ -766,7 +766,7 @@ static void edit_cmd(void) {
 	if (ferror(NewCrontab)) {
 		fprintf(stderr, "%s: error while writing new crontab to %s\n",
 			ProgramName, Filename);
-	  fatal:
+  fatal:
 		unlink(Filename);
 		exit(ERROR_EXIT);
 	}
@@ -774,6 +774,11 @@ static void edit_cmd(void) {
 	if (((editor = getenv("VISUAL")) == NULL || *editor == '\0') &&
 		((editor = getenv("EDITOR")) == NULL || *editor == '\0')) {
 		editor = EDITOR;
+	}
+
+	if (!glue_strings(q, sizeof q, editor, Filename, ' ')) {
+		fprintf(stderr, "%s: %s command line too long\n", ProgramName, editor);
+		goto fatal;
 	}
 
 	/* we still have the file open.  editors will generally rewrite the
@@ -796,10 +801,6 @@ static void edit_cmd(void) {
 		}
 		if (setuid(MY_UID(pw)) < 0) {
 			perror("setuid(getuid())");
-			exit(ERROR_EXIT);
-		}
-		if (!glue_strings(q, sizeof q, editor, Filename, ' ')) {
-			fprintf(stderr, "%s: editor command line too long\n", ProgramName);
 			exit(ERROR_EXIT);
 		}
 		execlp(_PATH_BSHELL, _PATH_BSHELL, "-c", q, (char *) 0);
@@ -901,7 +902,7 @@ static void edit_cmd(void) {
 			}
 		}
 	 /*NOTREACHED*/ case -2:
-	  abandon:
+  abandon:
 		fprintf(stderr, "%s: edits left in %s\n", ProgramName, Filename);
 		goto done;
 	default:

@@ -322,6 +322,10 @@ launch_job(job_rec *jr)
                 complain("The environment variable 'MAILTO' could not be expanded. The non-expanded value will be used.");
             }
         }
+        if (mailto != NULL && (mailto = strdup(mailto)) == NULL) {
+            complain("Strdup failed for MAILTO, job not run");
+            return;
+        }
 
         /* Get the source email address if set, or current user otherwise */
         mailfrom = getenv("MAILFROM");
@@ -361,7 +365,6 @@ launch_job(job_rec *jr)
         if (*mailto == '\0')
             jr->mailto = NULL;
         else
-            /* ugly but works without strdup() */
             jr->mailto = mailto;
 
         jr->mail_header_size = file_size(fd);
