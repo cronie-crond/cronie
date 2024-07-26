@@ -81,15 +81,15 @@ static const char *Options[] = {
 };
 
 # ifdef WITH_SELINUX
-static const char *getoptargs = "u:lerisncx:VT";
+static const char *getoptargs = "u:lerisnbcx:VT";
 # else
-static const char *getoptargs = "u:lerincx:VT";
+static const char *getoptargs = "u:lerinbcx:VT";
 # endif
 #else
 # ifdef WITH_SELINUX
-static const char *getoptargs = "u:lerisncVT";
+static const char *getoptargs = "u:lerisncbVT";
 # else
-static const char *getoptargs = "u:lerincVT";
+static const char *getoptargs = "u:lerincbVT";
 # endif
 #endif
 #ifdef WITH_SELINUX
@@ -103,6 +103,7 @@ static char Host[MAXHOSTNAMELEN];
 static FILE *NewCrontab;
 static int CheckErrorCount;
 static int PromptOnDelete;
+static int NoCrontabBackup;
 static int HostSpecified;
 static enum opt_t Option;
 static struct passwd *pw;
@@ -134,6 +135,7 @@ static void usage(const char *msg) {
 	fprintf(stderr, " -i         prompt before deleting\n");
 	fprintf(stderr, " -n <host>  set host in cluster to run users' crontabs\n");
 	fprintf(stderr, " -c         get host in cluster to run users' crontabs\n");
+	fprintf(stderr, " -b         don't backup old crontab\n");
 	fprintf(stderr, " -T <file>  test a crontab file syntax\n");
 #ifdef WITH_SELINUX
 	fprintf(stderr, " -s         selinux context\n");
@@ -242,6 +244,7 @@ static void parse_args(int argc, char *argv[]) {
 	Filename[0] = '\0';
 	Option = opt_unknown;
 	PromptOnDelete = 0;
+        NoCrontabBackup = 0;
 	HostSpecified = 0;
 	while (-1 != (argch = getopt(argc, argv, getoptargs))) {
 		switch (argch) {
@@ -298,6 +301,9 @@ static void parse_args(int argc, char *argv[]) {
 				usage("only one operation permitted");
 			Option = opt_test;
 			break;
+		case 'b':
+			NoCrontabBackup = 1;
+                        break;
 		case 'i':
 			PromptOnDelete = 1;
 			break;
@@ -479,7 +485,7 @@ static void delete_cmd(void) {
 		fprintf(stderr, "path too long\n");
 		exit(ERROR_EXIT);
 	}
-	
+
 	if (backup_crontab(n) == -1) {
 		fprintf(stderr, "no crontab for %s\n", User);
 		exit(ERROR_EXIT);
@@ -505,7 +511,12 @@ static int backup_crontab(const char *crontab_path) {
 	struct stat sb;
 	int retval = 0;
 	mode_t old_umask;
-	
+
+        /* do nothing if -b on CLI */
+        if (NoCrontabBackup) {
+          return 0;
+        }
+
 	/* create backup directory */
 	if ((env_value = getenv("XDG_CACHE_HOME")) != NULL) {
 		if(!glue_strings(backup_dir, sizeof backup_dir, env_value, "", '\0')){
@@ -560,7 +571,7 @@ static int backup_crontab(const char *crontab_path) {
 		}
 		return -1;
 	}
-	
+
 	if (swap_uids() == -1) {
 		perror("swapping uids");
 		(void) fclose(crontab_file);
@@ -575,7 +586,7 @@ static int backup_crontab(const char *crontab_path) {
 			goto swapback;
 		}
 	}
-	
+
 	/* ensure backup file has strict permissions. Crontabs are not readable for
 	   other users and might contain sensitive information */
 	old_umask = umask(0077);
@@ -712,7 +723,7 @@ static void edit_cmd(void) {
 	}
 
 	Set_LineNum(1);
-	/* 
+	/*
 	 * NHEADER_LINES processing removed for clarity
 	 * (NHEADER_LINES == 0 in all Red Hat crontabs)
 	 */
@@ -844,7 +855,7 @@ static void edit_cmd(void) {
 	(void) signal(SIGINT, SIG_DFL);
 	(void) signal(SIGQUIT, SIG_DFL);
 
-	/* lstat doesn't make any harm, because 
+	/* lstat doesn't make any harm, because
 	 * the file is stat'ed only when crontab is touched
 	 */
 	if (lstat(Filename, &statbuf) < 0) {
@@ -917,7 +928,7 @@ static void edit_cmd(void) {
 }
 
 /*
-* Check if crontab file can be installed or not 
+* Check if crontab file can be installed or not
 */
 static int test_cmd(void) {
 	if (check_syntax(NewCrontab) < 0) {
@@ -1071,7 +1082,7 @@ static int check_syntax(FILE * crontab_file) {
 	char **envp = env_init();
 	int eof = FALSE;
 	int envs = 0, entries = 0;
-	
+
 	CheckErrorCount = 0;
 	Set_LineNum(1 - NHEADER_LINES);
 
