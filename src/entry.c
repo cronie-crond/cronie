@@ -90,7 +90,7 @@ void free_entry(entry * e) {
 /* return NULL if eof or syntax error occurs;
  * otherwise return a pointer to a new entry.
  */
-entry *load_entry(FILE * file, void (*error_func) (), struct passwd *pw,
+entry *load_entry(FILE * file, void (*error_func) (const char *), struct passwd *pw,
 	char **envp) {
 	/* this function reads one crontab entry -- the next -- from a file.
 	 * it skips any leading blank lines, ignores comments, and returns

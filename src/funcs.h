@@ -89,7 +89,7 @@ char		*env_get(const char *, char **),
 user		*load_user(int, struct passwd *, const char *, const char *, const char *),
 		*find_user(cron_db *, const char *, const char *);
 
-entry		*load_entry(FILE *, void (*)(), struct passwd *, char **);
+entry		*load_entry(FILE *, void (*)(const char *), struct passwd *, char **);
 
 FILE		*cron_popen(char *, const char *, struct passwd *, char **);
 
