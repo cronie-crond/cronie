@@ -425,9 +425,8 @@ static void list_cmd(void) {
 	char n[MAX_FNAME];
 	FILE *f;
 	int ch;
+	int ch_prev;
 	const int colorize = isatty(STDOUT) && getenv("NO_COLOR") == NULL;
-	int new_line = 1;
-	int in_comment = 0;
 
 	log_it(RealUser, Pid, "LIST", User, 0);
 	if (!glue_strings(n, sizeof n, SPOOL_DIR, User, '/')) {
@@ -447,20 +446,17 @@ static void list_cmd(void) {
 	Set_LineNum(1);
 	while (EOF != (ch = get_char(f))) {
 		if (colorize) {
-			if (!in_comment && new_line && ch == '#') {
-				in_comment = 1;
+			if (ch == '#')
 				fputs(COMMENT_COLOR, stdout);
-			}
-			if (in_comment && ch == '\n') {
-				in_comment = 0;
+			else if (ch == '\n')
 				fputs(RESET_COLOR, stdout);
-			}
 		}
+		
 		putchar(ch);
-		new_line = ch == '\n';
+		ch_prev = ch;
 	}
 	/* no new line at EOF */
-	if (colorize && !new_line) {
+	if (colorize && ch_prev != '\n') {
 		putchar('\n');
 		fputs(ERROR_COLOR "No end-of-line character at the end of file"
 			RESET_COLOR, stdout);
