@@ -261,7 +261,7 @@ int load_env(char *envstr, FILE * f) {
 	}
 	if (state != FINI && state != EQ2 && !(state == VALUE && !quotechar)) {
 		Debug(DPARS, ("load_env, not an env var, state = %d\n", state));
-		if (fseek(f, filepos, 0)) {
+		if (fseek(f, filepos, SEEK_SET)) {
 			return ERR;
 		}
 		Set_LineNum(fileline);

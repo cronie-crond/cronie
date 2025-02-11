@@ -264,7 +264,7 @@ static int child_process(entry * e, char **jobenv) {
 		 */
 		{
 			char *shell = env_get("SHELL", jobenv);
-			int fd, fdmax = TMIN(getdtablesize(), MAX_CLOSE_FD);
+			int fd, fdmax = TMIN(sysconf(_SC_OPEN_MAX), MAX_CLOSE_FD);
 			DIR *dir;
 			struct dirent *dent;
 

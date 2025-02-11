@@ -79,7 +79,7 @@ FILE *cron_popen(char *program, const char *type, struct passwd *pw, char **jobe
 		return (NULL);
 
 	if (!pids) {
-		if ((fds = getdtablesize()) <= 0)
+		if ((fds = sysconf(_SC_OPEN_MAX)) <= 0)
 			return (NULL);
 		if (fds > MAX_CLOSE_FD)
 			fds = MAX_CLOSE_FD; /* avoid allocating too much memory */
