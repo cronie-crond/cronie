@@ -642,6 +642,9 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 					state = R_FINISH;
 					break;
 				}
+				if (low_ > high_ && high_ == 0) {
+					high_ = 7;
+				}
 				return (EOF);
 
 			case R_RANDOM:
