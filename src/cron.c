@@ -328,9 +328,9 @@ int main(int argc, char *argv[]) {
 	else {
 		reset_watches();
 		database.ifd = fd = inotify_init();
-		fcntl(fd, F_SETFD, FD_CLOEXEC);
 		if (fd < 0)
 			log_it("CRON", pid, "INFO", "Inotify init failed", errno);
+		fcntl(fd, F_SETFD, FD_CLOEXEC);
 		set_cron_watched(fd);
 	}
 #endif
