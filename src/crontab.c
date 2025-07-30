@@ -578,7 +578,21 @@ static int backup_crontab(const char *crontab_path) {
 		exit(ERROR_EXIT);
 	}
 
+	/* Ensure the backup directory and its parent exist, creating them if necessary */
 	if (stat(backup_dir, &sb) < OK && errno == ENOENT) {
+		char *last_slash = strrchr(backup_dir, '/');
+		if (last_slash && last_slash != backup_dir) {
+			char parent_dir[MAX_FNAME];
+			size_t parent_len = last_slash - backup_dir;
+			if (parent_len < sizeof(parent_dir)) {
+				strncpy(parent_dir, backup_dir, parent_len);
+				parent_dir[parent_len] = '\0';
+				/* Check if parent directory exists before creating */
+				if (stat(parent_dir, &sb) < OK && errno == ENOENT) {
+					mkdir(parent_dir, 0700);
+				}
+			}
+		}
 		if (OK != mkdir(backup_dir, 0755)) {
 			fprintf(stderr, "%s: ", backup_dir);
 			perror("mkdir");
