@@ -34,7 +34,7 @@ jobs:
             runs-on: ubuntu-22.04
     steps:
       - name: Checkout Git branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Add Clang/LLVM repositories
         if: "${{ contains(matrix.cc, 'clang') }}"
