@@ -60,10 +60,13 @@ The
 .I RANDOM_DELAY
 variable denotes the maximum number of minutes that will be added to the
 delay in minutes variable which is specified for each job.  A
-.I RANDOM_DELAY
 set to 12 would therefore add, randomly, between 0 and 12 minutes to the
 delay in minutes for each job in that particular anacrontab.  When set to
 0, no random delay is added.
+.PP
+.I SENDMAIL 
+variable allows to assign an alternative mailer program, instead of 
+default /usr/sbin/sendmail
 .PP
 If 
 .I MAILTO
