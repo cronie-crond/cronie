@@ -317,9 +317,11 @@ parse_tab_line(char *line)
             r = match_rx("^([[:digit:]]+)-([[:digit:]]+)$", value, 2, &from, &to);
             if (r == -1) goto reg_err;
             if (r == 0) goto reg_invalid;
-            range_start = atoi(from);
-            range_stop = atoi(to);
-            if (range_stop < range_start) {
+            range_start = conv2int(from);
+            range_stop = conv2int(to);
+            if (range_start < 0 || range_start > 24 ||
+                    range_stop < 0 || range_stop > 24 ||
+                    range_stop < range_start) {
                 range_start = 0; range_stop = 0;
                 goto reg_invalid;
             }
