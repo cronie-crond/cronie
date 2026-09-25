@@ -168,6 +168,7 @@ time_t nextmatch(entry *e, time_t start, time_t end) {
 			current.tm_mday = 1;
 			current.tm_hour = 0;
 			current.tm_min = 0;
+			current.tm_isdst = -1;
 			time = mktime(&current);
 			continue;
 		}
