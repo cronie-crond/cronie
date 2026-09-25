@@ -172,10 +172,22 @@ time_t nextmatch(entry *e, time_t start, time_t end) {
 			continue;
 		}
 
-		/* neither time nor time+1day match day: increase 1 day */
-		if (!matchday(e, time) && !matchday(e, time + 24 * 60 * 60)) {
-			time += 24 * 60 * 60;
-			continue;
+		/* neither the current nor the next calendar day match: skip ahead */
+		{
+			struct tm nextday = current;
+			time_t tomorrow;
+
+			nextday.tm_mday++;
+			nextday.tm_hour = 0;
+			nextday.tm_min = 0;
+			nextday.tm_sec = 0;
+			nextday.tm_isdst = -1;
+			tomorrow = mktime(&nextday);
+
+			if (!matchday(e, time) && !matchday(e, tomorrow)) {
+				time = tomorrow;
+				continue;
+			}
 		}
 
 		/* if time matches, return time;
