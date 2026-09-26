@@ -200,6 +200,7 @@ entry *load_entry(FILE * file, void (*error_func) (const char *), struct passwd 
 			bit_nset(e->dom, 0, LAST_DOM - FIRST_DOM);
 			bit_nset(e->month, 0, LAST_MONTH - FIRST_MONTH);
 			bit_nset(e->dow, 0, LAST_DOW - FIRST_DOW);
+			e->flags |= DOM_STAR | DOW_STAR;
 		}
 		else if (!strcmp("hourly", cmd)) {
 			bit_set(e->minute, 0);
@@ -207,7 +208,7 @@ entry *load_entry(FILE * file, void (*error_func) (const char *), struct passwd 
 			bit_nset(e->dom, 0, LAST_DOM - FIRST_DOM);
 			bit_nset(e->month, 0, LAST_MONTH - FIRST_MONTH);
 			bit_nset(e->dow, 0, LAST_DOW - FIRST_DOW);
-			e->flags |= HR_STAR;
+			e->flags |= HR_STAR | DOM_STAR | DOW_STAR;
 		}
 		else {
 			ecode = e_timespec;
