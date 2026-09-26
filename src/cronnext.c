@@ -177,7 +177,18 @@ time_t nextmatch(entry *e, time_t start, time_t end) {
 			struct tm nextday = current;
 			time_t tomorrow;
 
-			nextday.tm_mday++;
+			/*
+			 * Anchor at local noon before adding 24 hours.  Across a DST
+			 * transition this stays within the following calendar day, unlike
+			 * adding 24 hours to a late-evening timestamp.
+			 */
+			nextday.tm_hour = 12;
+			nextday.tm_min = 0;
+			nextday.tm_sec = 0;
+			nextday.tm_isdst = -1;
+			tomorrow = mktime(&nextday) + 24 * 60 * 60;
+			localtime_r(&tomorrow, &nextday);
+
 			nextday.tm_hour = 0;
 			nextday.tm_min = 0;
 			nextday.tm_sec = 0;
