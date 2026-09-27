@@ -96,11 +96,53 @@ void printflags(char *indent, int flags) {
 }
 
 /*
+ * print a string as a YAML double-quoted scalar
+ */
+static void print_yaml_string(const char *value) {
+	const unsigned char *p = (const unsigned char *) value;
+
+	putchar('"');
+	for (; *p != '\0'; p++) {
+		switch (*p) {
+		case '"':
+			fputs("\\\"", stdout);
+			break;
+		case '\\':
+			fputs("\\\\", stdout);
+			break;
+		case '\b':
+			fputs("\\b", stdout);
+			break;
+		case '\f':
+			fputs("\\f", stdout);
+			break;
+		case '\n':
+			fputs("\\n", stdout);
+			break;
+		case '\r':
+			fputs("\\r", stdout);
+			break;
+		case '\t':
+			fputs("\\t", stdout);
+			break;
+		default:
+			if (*p < 0x20 || *p == 0x7f)
+				printf("\\x%02X", *p);
+			else
+				putchar(*p);
+		}
+	}
+	putchar('"');
+}
+
+/*
  * print a crontab entry
  */
 void printentry(char *indent, entry *e, time_t next) {
 	printf("%s  - user: %s\n", indent, e->pwd->pw_name);
-	printf("%s    cmd: \"%s\"\n", indent, e->cmd);
+	printf("%s    cmd: ", indent);
+	print_yaml_string(e->cmd);
+	printf("\n");
 	printf("%s    flags: 0x%02X\n", indent, e->flags);
 	printflags(indent, e->flags);
 	printf("%s    delay: %d\n", indent, e->delay);
