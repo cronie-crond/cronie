@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <pwd.h>
+#include <errno.h>
+#include <inttypes.h>
 
 #include "globals.h"
 #include "funcs.h"
@@ -392,6 +394,28 @@ void usage() {
 }
 
 /*
+ * Parse a time argument, in seconds since the Epoch, for option opt.
+ * The value is a time_t: reading it with atoi() into an int truncated every
+ * time from 2038-01-19 on, and overflowed in the + 59 rounding just below
+ * INT_MAX.  Exits on a malformed or unrepresentable value instead of
+ * silently answering for a different time.
+ */
+static time_t parse_time_arg(const char *opt, const char *arg) {
+	char *endptr;
+	intmax_t val;
+
+	errno = 0;
+	val = strtoimax(arg, &endptr, 10);
+	if (errno != 0 || endptr == arg || *endptr != '\0' ||
+	    (intmax_t)(time_t) val != val || val > INTMAX_MAX - 60) {
+		fprintf(stderr, "invalid time for %s: %s\n", opt, arg);
+		usage();
+		exit(EXIT_FAILURE);
+	}
+	return (time_t) val;
+}
+
+/*
  * main
  */
 int main(int argn, char *argv[]) {
@@ -426,10 +450,10 @@ int main(int argn, char *argv[]) {
 			flags &= ~SYSTEM;
 			break;
 		case 't':
-			start = (atoi(optarg) + 59) / 60 * 60;
+			start = (parse_time_arg("-t", optarg) + 59) / 60 * 60;
 			break;
 		case 'q':
-			end = atoi(optarg) / 60 * 60;
+			end = parse_time_arg("-q", optarg) / 60 * 60;
 			endtime = 1;
 			break;
 		case 'j':
