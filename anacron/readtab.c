@@ -274,6 +274,12 @@ unbiased_rand(long int max)
     long int rn;
     long int divisor;
 
+    /* No delay was asked for.  RAND_MAX / (max + 1) is zero for any max at or
+     * above RAND_MAX, which makes the division below a SIGFPE; a negative
+     * divisor (max overflowed by the + 1) makes the loop endless. */
+    if (max <= 0) return 0;
+    if (max >= RAND_MAX) return random();
+
     divisor = RAND_MAX / (max + 1);
 
     do {
@@ -296,6 +302,7 @@ parse_tab_line(char *line)
     char *from;
     char *to;
     char *pref_hour;
+    int random_delay;
 
     /* an empty line? */
     r = match_rx("^[ \t]*($|#)", line, 0);
@@ -330,7 +337,14 @@ parse_tab_line(char *line)
             if (r == -1) goto reg_err;
             if (r == 0) goto reg_invalid;
 
-            random_number = (int)unbiased_rand(atoi(value));
+            random_delay = conv2int(value);
+            if (random_delay < 0) {
+                complain("%s: number out of range on line %d, skipping",
+                         anacrontab, line_num);
+                return;
+            }
+
+            random_number = (int)unbiased_rand(random_delay);
             Debug(("Randomized delay set: %d", random_number));
         }
         else if (strncmp(env_var, "PREFERRED_HOUR", 14) == 0) {
