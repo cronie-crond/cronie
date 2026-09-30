@@ -324,7 +324,7 @@ parse_tab_line(char *line)
     if (r == -1) goto reg_err;
     if (r)
     {
-        if (strncmp(env_var, "START_HOURS_RANGE", 17) == 0)
+        if (strcmp(env_var, "START_HOURS_RANGE") == 0)
         {
             r = match_rx("^([[:digit:]]+)-([[:digit:]]+)$", value, 2, &from, &to);
             if (r == -1) goto reg_err;
@@ -339,7 +339,7 @@ parse_tab_line(char *line)
             }
             Debug(("Jobs will start in the %02d:00-%02d:00 range.", range_start, range_stop));
         }
-        else if (strncmp(env_var, "RANDOM_DELAY", 12) == 0) {
+        else if (strcmp(env_var, "RANDOM_DELAY") == 0) {
             r = match_rx("^([[:digit:]]+)$", value, 0);
             if (r == -1) goto reg_err;
             if (r == 0) goto reg_invalid;
@@ -354,7 +354,7 @@ parse_tab_line(char *line)
             random_number = (int)unbiased_rand(random_delay);
             Debug(("Randomized delay set: %d", random_number));
         }
-        else if (strncmp(env_var, "PREFERRED_HOUR", 14) == 0) {
+        else if (strcmp(env_var, "PREFERRED_HOUR") == 0) {
             r = match_rx("^([[:digit:]]+)$", value, 1, &pref_hour);
             if (r == -1) goto reg_err;
 
