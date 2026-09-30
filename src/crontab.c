@@ -507,10 +507,11 @@ static int backup_crontab(const char *crontab_path) {
 	char backup_dir[MAX_FNAME], backup_path[MAX_FNAME];
 	int ch = '\0';
 	FILE *crontab_file;
-	FILE *backup_file;
+	FILE *backup_file = NULL;
 	struct stat sb;
 	int retval = 0;
-	mode_t old_umask;
+	int umask_changed = 0;
+	mode_t old_umask = 0;
 
         /* do nothing if -b on CLI */
         if (NoCrontabBackup) {
@@ -604,6 +605,7 @@ static int backup_crontab(const char *crontab_path) {
 	/* ensure backup file has strict permissions. Crontabs are not readable for
 	   other users and might contain sensitive information */
 	old_umask = umask(0077);
+	umask_changed = 1;
 	if ((backup_file = fopen(backup_path, "w+")) == NULL) {
 		fprintf(stderr, "Failed to write to the backup file: ");
 		perror(backup_path);
@@ -612,7 +614,8 @@ static int backup_crontab(const char *crontab_path) {
 	}
 
 	swapback:
-	umask(old_umask);
+	if (umask_changed)
+		umask(old_umask);
 
 	if (swap_uids_back() < OK) {
 		perror("swapping uids back");
