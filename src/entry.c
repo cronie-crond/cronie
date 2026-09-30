@@ -642,6 +642,9 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 				if (low_ > high_ && high_ == 0) {
 					high_ = 7;
 				}
+				if (low_ > high_) {
+					return (EOF);
+				}
 				if (is_separator(ch)) {
 					state = R_FINISH;
 					break;
