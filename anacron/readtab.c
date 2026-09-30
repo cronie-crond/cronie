@@ -212,7 +212,7 @@ register_period_job(const char *periods, const char *delays,
 		    const char *ident, char *command)
 /* Store a job definition with a named period */
 {
-    int delay;
+    int delay, named_period;
     job_rec *jr;
     int ident_len, command_len;
 
@@ -227,11 +227,11 @@ register_period_job(const char *periods, const char *delays,
 	return;
     }
 
-    int named_period;
-
     if (!strcmp("@monthly", periods)) {
 		named_period = 1;
-    } else if (!strcmp("@yearly", periods) || !strcmp("@annually", periods) || !strcmp(/* backwards compat misspelling */"@annualy", periods)) {
+    } else if (!strcmp("@yearly", periods) ||
+               !strcmp("@annually", periods) ||
+               !strcmp(/* backwards compat misspelling */"@annualy", periods)) {
 		named_period = 2;
 	} else if (!strcmp("@daily", periods)) {
 		named_period = 3;
