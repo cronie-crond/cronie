@@ -635,15 +635,15 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 				return (EOF);
 
 			case R_RANGE_NUM2:
-				if (ch == '/') {
-					state = R_STEP;
-					break;
-				}
-				if (low_ > high_ && high_ == 0) {
+				if (low_ > high_ && high_ == 0 && high == LAST_DOW) {
 					high_ = 7;
 				}
 				if (low_ > high_) {
 					return (EOF);
+				}
+				if (ch == '/') {
+					state = R_STEP;
+					break;
 				}
 				if (is_separator(ch)) {
 					state = R_FINISH;
