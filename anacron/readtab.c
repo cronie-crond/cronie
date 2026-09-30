@@ -227,22 +227,27 @@ register_period_job(const char *periods, const char *delays,
 	return;
     }
 
+    int named_period;
+
+    if (!strcmp("@monthly", periods)) {
+		named_period = 1;
+    } else if (!strcmp("@yearly", periods) || !strcmp("@annually", periods) || !strcmp(/* backwards compat misspelling */"@annualy", periods)) {
+		named_period = 2;
+	} else if (!strcmp("@daily", periods)) {
+		named_period = 3;
+	} else if (!strcmp("@weekly", periods)) {
+		named_period = 4;
+    } else {
+		complain("%s: Unknown named period on line %d, skipping",
+			 anacrontab, line_num);
+		return;
+    }
+
     jr = obstack_alloc(&tab_o, sizeof(job_rec));
     if (jr == NULL) {
         die_e("Cannot allocate memory.");
     }
-    if (!strncmp ("@monthly", periods, 8)) {
-		jr->named_period = 1;
-    } else if (!strncmp("@yearly", periods, 7) || !strncmp("@annually", periods, 9) || !strncmp(/* backwards compat misspelling */"@annualy", periods, 8)) {
-		jr->named_period = 2;
-	} else if (!strncmp ("@daily", periods, 6)) {
-		jr->named_period = 3;
-	} else if (!strncmp ("@weekly", periods, 7)) {
-		jr->named_period = 4;
-    } else {
-		complain("%s: Unknown named period on line %d, skipping",
-			 anacrontab, line_num);
-    }
+    jr->named_period = named_period;
     jr->period = 0;
     delay += random_number;
     jr->delay = delay;
