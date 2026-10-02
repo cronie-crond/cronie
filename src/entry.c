@@ -684,6 +684,13 @@ get_range(bitstr_t * bits, int low, int high, const char *names[],
 	if (state != R_FINISH || ch == EOF)
 		return (EOF);
 
+	/* The upper end of a range is otherwise only used as a loop bound.
+	 * Validate it explicitly so an oversized endpoint cannot be skipped by
+	 * a large step and silently accepted (for example 1-234/5678).
+	 */
+	if (high_ < low || high_ > high)
+		return (EOF);
+
 	/* Make sure the step size makes any sense */
 	if (step > 1 && step > (high_ - low_)) {
 		int max =  high_ - low_ > 0 ? high_ - low_ : 1;
