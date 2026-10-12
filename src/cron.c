@@ -186,7 +186,7 @@ static void usage(void) {
 	fprintf(stderr, " -n         run in foreground\n");
 	fprintf(stderr, " -f         run in foreground, the same as -n\n");
 	fprintf(stderr, " -p         permit any crontab\n");
-	fprintf(stderr, " -P         inherit PATH from environment instead of using default value");
+	fprintf(stderr, " -P         inherit PATH from environment instead of using default value\n");
 	fprintf(stderr, "            of \"%s\"\n", _PATH_STDPATH);
 	fprintf(stderr, " -c         enable clustering support\n");
 	fprintf(stderr, " -s         log into syslog instead of sending mails\n");
