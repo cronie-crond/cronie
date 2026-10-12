@@ -36,6 +36,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "bitstring.h"
 #include "funcs.h"
@@ -699,6 +700,7 @@ get_number(int *numptr, int low, const char *names[], FILE * file) {
 	char temp[MAX_TEMPSTR], *pc;
 	int len, i, ch;
 	char *endptr;
+	long val;
 
 	pc = temp;
 	len = 0;
@@ -716,9 +718,13 @@ get_number(int *numptr, int low, const char *names[], FILE * file) {
 	unget_char(ch, file);
 
 	/* try to get number */
-	*numptr = (int) strtol(temp, &endptr, 10);
+	errno = 0;
+	val = strtol(temp, &endptr, 10);
 	if (*endptr == '\0' && temp != endptr) {
-		/* We have a number */
+		/* We have a number, reject values that do not fit an int */
+		if (errno == ERANGE || val > INT_MAX)
+			return (EOF);	/* ch was already pushed back */
+		*numptr = (int) val;
 		return 0;
 	}
 
