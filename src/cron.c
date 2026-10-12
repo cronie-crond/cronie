@@ -74,6 +74,7 @@ static volatile sig_atomic_t got_sighup, got_sigchld, got_sigintterm, got_sigurg
 static int timeRunning, virtualTime, clockTime;
 static long GMToff;
 static int DisableInotify;
+static int ForceSyslogOutput;
 
 #if defined WITH_INOTIFY
 
@@ -150,6 +151,26 @@ void set_cron_watched(int fd) {
 	inotify_enabled = 1;
 }
 #endif
+
+/*
+ * Log job output to syslog instead of mailing it when no mailer is
+ * available.  This is re-checked on every wakeup so that a sendmail
+ * installed (or removed) after crond started is taken into account.
+ */
+static void check_mailer(void) {
+	int no_mailer;
+
+	if (ForceSyslogOutput || MailCmd[0] != '\0')
+		return;
+
+	no_mailer = access(MAILARG, X_OK) != 0;
+	if (no_mailer != SyslogOutput) {
+		SyslogOutput = no_mailer;
+		log_it("CRON", getpid(), "INFO", no_mailer ?
+			"Syslog will be used instead of sendmail." :
+			"sendmail is available, job output will be mailed.", 0);
+	}
+}
 
 static void handle_signals(cron_db * database) {
 	if (got_sighup || got_sigurg) {
@@ -302,10 +323,8 @@ int main(int argc, char *argv[]) {
 
 	log_it("CRON", getpid(), "STARTUP", PACKAGE_VERSION, 0);
 
-	if (!SyslogOutput && MailCmd[0] == '\0' && access("/usr/sbin/sendmail", X_OK) != 0) {
-		SyslogOutput=1;
-		log_it("CRON", pid, "INFO","Syslog will be used instead of sendmail.", 0);
-	}
+	ForceSyslogOutput = SyslogOutput;
+	check_mailer();
 
 	pid = getpid();
 
@@ -387,6 +406,7 @@ int main(int argc, char *argv[]) {
 #else
 		load_database(&database);
 #endif
+		check_mailer();
 
 		/* shortcut for the most common case */
 		if (timeDiff == 1) {
