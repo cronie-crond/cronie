@@ -90,12 +90,10 @@ consider_job(job_rec *jr)
     if (b == -1) die_e("Error reading timestamp file %s", jr->ident);
     timestamp[8] = 0;
 
-    /* is it too early? */
+    /* Period checks require a valid previous-run timestamp. */
     if (!force && b == 8)
     {
 	int day_delta;
-	time_t jobtime;
-	struct tm *t;
 
 	if (sscanf(timestamp, "%4d%2d%2d", &ts_year, &ts_month, &ts_day) == 3)
 	    dn = day_num(ts_year, ts_month, ts_day);
@@ -152,17 +150,20 @@ consider_job(job_rec *jr)
 		return 0;
 	    }
 	}
+    }
 
-	jobtime = start_sec + jr->delay * 60;
-
-	t = localtime(&jobtime);
-	if (!now && preferred_hour != -1 && t->tm_hour != preferred_hour) {
+    /* The execution window also applies to new or invalid timestamps. */
+    if (!force && !now)
+    {
+	time_t jobtime = start_sec + jr->delay * 60;
+	struct tm *t = localtime(&jobtime);
+	if (preferred_hour != -1 && t->tm_hour != preferred_hour) {
 		Debug(("The job's %s preferred hour %d was missed, skipping the job.", jr->ident, preferred_hour));
 		xclose (jr->timestamp_fd);
 		return 0;
 	}
 
-	if (!now && range_start != -1 && range_stop != -1 && 
+	if (range_start != -1 && range_stop != -1 && 
 		(t->tm_hour < range_start || t->tm_hour >= range_stop))
 	{
 		Debug(("The job `%s' falls out of the %02d:00-%02d:00 hours range, skipping.",

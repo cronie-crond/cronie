@@ -18,6 +18,11 @@ common_nodist += anacron-paths.h
 nodist_anacron_anacron_SOURCES = $(common_nodist)
 BUILT_SOURCES += $(common_nodist)
 
+# Regression test for START_HOURS_RANGE with missing/invalid timestamps.
+TESTS = anacron/test-hour-window.sh
+LOG_COMPILER = $(SHELL)
+EXTRA_DIST += anacron/test-hour-window.sh
+
 if NEED_OBSTACK
 anacron_anacron_SOURCES += obstack/obstack.c
 endif
