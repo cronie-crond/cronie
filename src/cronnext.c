@@ -175,19 +175,20 @@ void printcrontab(user *u) {
  */
 
 /*
- * check whether time matches day of month and/or day of week; this requires
- * checking dom if dow=*, dow if dom=*, either one otherwise; see comment "the
- * dom/dow situation is odd..." in cron.c
+ * check whether time matches day of month and/or day of week; when either
+ * field uses '*' syntax both bitmaps must match, otherwise either bitmap may
+ * match. This mirrors the dom/dow logic in cron.c. The bitmap still matters
+ * for stepped forms using a star with a step value, even though the corresponding STAR flag is
+ * set.
  */
 int matchday(entry *e, time_t time) {
 	struct tm current;
 
 	localtime_r(&time, &current);
 
-	if (e->flags & DOW_STAR)
-		return bit_test(e->dom, current.tm_mday - 1);
-	if (e->flags & DOM_STAR) 
-		return bit_test(e->dow, current.tm_wday);
+	if (e->flags & (DOM_STAR | DOW_STAR))
+		return bit_test(e->dom, current.tm_mday - 1) &&
+			bit_test(e->dow, current.tm_wday);
 	return bit_test(e->dom, current.tm_mday - 1) ||
 		bit_test(e->dow, current.tm_wday);
 }
