@@ -948,7 +948,47 @@ static void edit_cmd(void) {
 * Check if crontab file can be installed or not
 */
 static int test_cmd(void) {
-	if (check_syntax(NewCrontab) < 0) {
+	FILE *crontab_file = NewCrontab;
+	FILE *tmp = NULL;
+	int ch;
+	int result;
+
+	/*
+	 * load_env() needs to seek backwards when the next line is not an
+	 * environment assignment.  Standard input can be a pipe, so normalize
+	 * stdin to a seekable stream before running the syntax checker.
+	 */
+	if (NewCrontab == stdin) {
+		if ((tmp = tmpfile()) == NULL) {
+			perror("tmpfile");
+			return (-2);
+		}
+
+		while ((ch = fgetc(NewCrontab)) != EOF) {
+			if (fputc(ch, tmp) == EOF) {
+				perror("tmpfile");
+				fclose(tmp);
+				return (-2);
+			}
+		}
+		if (ferror(NewCrontab)) {
+			perror("stdin");
+			fclose(tmp);
+			return (-2);
+		}
+		if (fflush(tmp) == EOF || fseek(tmp, 0, SEEK_SET) != 0) {
+			perror("tmpfile");
+			fclose(tmp);
+			return (-2);
+		}
+		crontab_file = tmp;
+	}
+
+	result = check_syntax(crontab_file);
+	if (tmp != NULL)
+		fclose(tmp);
+
+	if (result < 0) {
 		fprintf(stderr, "Invalid crontab file. Syntax issues were found.\n");
 		return (-2);
 	}
