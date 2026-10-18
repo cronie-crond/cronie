@@ -513,7 +513,7 @@ static void run_reboot_jobs(cron_db * db) {
 		return;
 	}
 	/* lock doesn't exist - create lock, run reboot jobs */
-	if ((reboot = creat(REBOOT_LOCK, S_IRUSR & S_IWUSR)) < 0)
+	if ((reboot = creat(REBOOT_LOCK, S_IRUSR | S_IWUSR)) < 0)
 		log_it("CRON", pid, "INFO", "Can't create lock for reboot jobs.",
 			errno);
 	else
