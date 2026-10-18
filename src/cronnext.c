@@ -266,6 +266,36 @@ time_t nextmatch(entry *e, time_t start, time_t end) {
 }
 
 /*
+ * next time matching a crontab entry, evaluated in the entry's CRON_TZ
+ * when one is set, like crond does
+ */
+time_t nextmatch_tz(entry *e, time_t start, time_t end) {
+	char *job_tz, *orig_tz;
+	time_t next;
+
+	job_tz = env_get("CRON_TZ", e->envp);
+	if (job_tz == NULL || *job_tz == '\0')
+		return nextmatch(e, start, end);
+
+	orig_tz = getenv("TZ");
+	if (orig_tz != NULL)
+		orig_tz = strdup(orig_tz);
+	setenv("TZ", job_tz, 1);
+	tzset();
+
+	next = nextmatch(e, start, end);
+
+	if (orig_tz != NULL) {
+		setenv("TZ", orig_tz, 1);
+		free(orig_tz);
+	} else
+		unsetenv("TZ");
+	tzset();
+
+	return next;
+}
+
+/*
  * match a user against a list
  */
 int matchuser(char *user_name, char *list) {
@@ -316,9 +346,9 @@ time_t cronnext(cron_db database,
 		for (e = u->crontab; e; e = e->next) {
 			if (command && strstr(e->cmd, command) == NULL)
 				continue;
-			for (next = nextmatch(e, start, end);
+			for (next = nextmatch_tz(e, start, end);
 			     next <= end;
-			     next = nextmatch(e, next + 60, end)) {
+			     next = nextmatch_tz(e, next + 60, end)) {
 				if (next < 0)
 					break;
 				if (closest < 0 || next < closest)
