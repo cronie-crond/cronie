@@ -1032,7 +1032,7 @@ static int replace_cmd(void) {
 		goto done;
 	}
 
-	file_owner = (getgid() == geteuid() &&
+	file_owner = (getuid() == geteuid() &&
 		getgid() == getegid()) ? ROOT_UID : pw->pw_uid;
 
 #ifdef HAVE_FCHOWN
