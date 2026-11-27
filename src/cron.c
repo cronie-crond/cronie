@@ -211,6 +211,7 @@ static void usage(void) {
 	fprintf(stderr, "            of \"%s\"\n", _PATH_STDPATH);
 	fprintf(stderr, " -c         enable clustering support\n");
 	fprintf(stderr, " -s         log into syslog instead of sending mails\n");
+	fprintf(stderr, " -S         ignore a whole crontab if any of its entries is invalid\n");
 	fprintf(stderr, " -V         print version and exit\n");
 	fprintf(stderr, " -x <flag>  print debug information\n");
 	fprintf(stderr, "\n");
@@ -722,7 +723,7 @@ static void sigchld_reaper(void) {
 static void parse_args(int argc, char *argv[]) {
 	int argch;
 
-	while (-1 != (argch = getopt(argc, argv, "hnfpsiPx:m:cV"))) {
+	while (-1 != (argch = getopt(argc, argv, "hnfpsSiPx:m:cV"))) {
 		switch (argch) {
 			case 'x':
 				if (!set_debug_flags(optarg))
@@ -737,6 +738,9 @@ static void parse_args(int argc, char *argv[]) {
 				break;
 			case 's':
 				SyslogOutput = 1;
+				break;
+			case 'S':
+				StrictCrontabs = 1;
 				break;
 			case 'i':
 				DisableInotify = 1;
