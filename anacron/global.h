@@ -30,6 +30,7 @@
 #define SYSLOG_FACILITY LOG_CRON
 #define EXPLAIN_LEVEL LOG_NOTICE  /* informational messages */
 #define COMPLAIN_LEVEL LOG_ERR    /* error messages */
+#define DEBUG DEBUG
 #define DEBUG_LEVEL LOG_DEBUG     /* only used when DEBUG is defined */
 
 /* Mail interface.  (All MTAs should supply this command) */

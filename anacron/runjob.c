@@ -39,6 +39,8 @@
 
 #include <langinfo.h>
 
+#include "matchrx.h"
+
 static int
 temp_file(job_rec *jr)
 /* Open a temporary file and return its file descriptor */
@@ -211,6 +213,11 @@ xwait(pid_t pid , int *status)
 static void
 launch_mailer(job_rec *jr)
 {
+    int r;
+    char *mailer;
+    char *mailer_args;
+    char *mailer_full;
+
     pid_t pid;
     struct stat buf;
 
@@ -251,13 +258,38 @@ launch_mailer(job_rec *jr)
 	/* fdflags = fcntl(0, F_GETFL); fdflags &= ~O_APPEND; */
 	/* fcntl(0, F_SETFL, fdflags ); */
 
-	/* Here, I basically mirrored the way /usr/sbin/sendmail is called
-	 * by cron on a Debian system, except for the "-oem" and "-or0s"
-	 * options, which don't seem to be appropriate here.
-	 * Hopefully, this will keep all the MTAs happy. */
-	execl(SENDMAIL, SENDMAIL, "-FAnacron", "-odi",
-	      jr->mailto, (char *)NULL);
-	die_e("Can't exec " SENDMAIL);
+        /* Get SENDMAIL variable from the environment if set. 
+        /* If not, will use the predefined SENDMAIL from global.h */
+        mailer_full = getenv("SENDMAIL");
+        
+        if (mailer_full == NULL) {
+            /* Here, I basically mirrored the way /usr/sbin/sendmail is called
+            * by cron on a Debian system, except for the "-oem" and "-or0s"
+            * options, which don't seem to be appropriate here.
+            * Hopefully, this will keep all the MTAs happy. */
+            execl(SENDMAIL, SENDMAIL, "-FAnacron", "-odi",
+                jr->mailto, (char *)NULL);
+            die_e("Can't exec " SENDMAIL); 
+        } else {
+            
+            /* Splitting into binary path and command line parameters*/
+            
+            complain("mailer_full - `%s`", mailer_full);
+           
+            strcat(mailer_full," ");
+            r = match_rx("(^[^ ]*) (.*)", mailer_full, 2, &mailer, &mailer_args);
+
+            complain("mailer - `%s` ", mailer);
+            complain("mailer_args - `%s`", mailer_args);
+            
+            if ( strchr(mailer_args, '-') != NULL ) {
+                    execl(mailer, mailer, mailer_args, (char *)NULL);
+                } else {
+                    execl(mailer, mailer, (char *)NULL);
+                }
+            
+            die_e("Can't exec the mailer %s", mailer);
+        }
     }
     /* parent */
     /* record mailer pid */
