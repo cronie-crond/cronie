@@ -27,7 +27,7 @@
 crond \- daemon to execute scheduled commands
 .SH SYNOPSIS
 .B crond
-.RB [ -c " | " -h " | " -i " | " -n " | " -p " | " -P " | " -s " | " -m \fP\fI<mail command>\fP ]
+.RB [ -c " | " -h " | " -i " | " -n " | " -p " | " -P " | " -s " | " -S " | " -m \fP\fI<mail command>\fP ]
 .br
 .B crond
 .B -x
@@ -191,6 +191,17 @@ to send the job output to the system log using
 This is useful if your system does not have
 .BR sendmail (8)
 installed or if mail is disabled.
+.TP
+.B "\-S"
+Strict mode.  If any entry of a crontab file (including
+.I /etc/crontab
+and files in
+.IR /etc/cron.d )
+cannot be parsed, the whole file is ignored instead of skipping only the
+invalid line.  The previously loaded version of that file is unloaded as
+well.  This matches the checks done by
+.BR crontab (1)
+when installing a crontab.
 .TP
 .B "\-x"
 This option allows you to set debug flags.

@@ -81,6 +81,7 @@ XTRN char       MailCmd[MAX_COMMAND+1]; /* +1 for terminator */
 XTRN char       cron_default_mail_charset[MAX_ENVSTR];
 XTRN int        EnableClustering;
 XTRN int	ChangePath;
+XTRN int	StrictCrontabs;
 XTRN double	RandomScale;
  
 #if DEBUGGING

@@ -114,7 +114,6 @@ entry *load_entry(FILE * file, void (*error_func) (const char *), struct passwd 
 	char **tenvp;
 	char *p;
 	struct passwd temppw;
-	int i;
 
 	Debug(DPARS, ("load_entry()...about to eat comments\n"));
 
@@ -484,7 +483,13 @@ entry *load_entry(FILE * file, void (*error_func) (const char *), struct passwd 
 		free(e->cmd);
 		free(e);
 	}
-	for (i = 0; i < MAX_COMMAND && ch != '\n' && !feof(file); i++)
+	/* Skip the rest of the offending line.  Do not bound this loop:
+	 * stopping in the middle of an overlong line would make the caller
+	 * parse the remainder of that line as a new, possibly valid, entry.
+	 * Check feof() rather than ch == EOF: the parsing helpers return EOF
+	 * to signal a syntax error, not only the real end of file.
+	 */
+	while (ch != '\n' && !feof(file))
 		ch = get_char(file);
 	if (ecode != e_none && error_func)
 		(*error_func) (ecodes[(int) ecode]);

@@ -33,11 +33,19 @@
 #include "globals.h"
 
 static const char *FileName;
+static int EntryErrors;
 
 static void
 log_error (const char *msg)
 {
 	log_it ("CRON", getpid (), msg, FileName, 0);
+}
+
+static void
+log_entry_error (const char *msg)
+{
+	EntryErrors++;
+	log_error (msg);
 }
 
 void
@@ -70,6 +78,8 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 	int status = TRUE, save_errno = 0;
 	char **envp = NULL, **tenvp;
 	int envs = 0, entries = 0;
+
+	EntryErrors = 0;
 
 	if (!(file = fdopen(crontab_fd, "r")))	{
 		save_errno = errno;
@@ -142,7 +152,7 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 					goto done;
 				}
 				FileName = tabname;
-				e = load_entry(file, log_error, pw, envp);
+				e = load_entry(file, log_entry_error, pw, envp);
 				if (e) {
 					e->next = u->crontab;
 					u->crontab = e;
@@ -161,6 +171,12 @@ load_user (int crontab_fd, struct passwd *pw, const char *uname,
 				envp = tenvp;
 				break;
 		}
+	}
+
+	if (StrictCrontabs && EntryErrors > 0) {
+		FileName = tabname;
+		log_error("syntax error, ignoring the whole crontab (strict mode)");
+		status = TRUE;
 	}
 
 done:
