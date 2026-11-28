@@ -963,18 +963,18 @@ static int test_cmd(void) {
 
 		while ((ch = fgetc(NewCrontab)) != EOF) {
 			if (fputc(ch, tmp) == EOF) {
-				perror("tmpfile");
+				perror("writing to tmpfile");
 				fclose(tmp);
 				return (-2);
 			}
 		}
 		if (ferror(NewCrontab)) {
-			perror("stdin");
+			perror("reading stdin");
 			fclose(tmp);
 			return (-2);
 		}
 		if (fflush(tmp) == EOF || fseek(tmp, 0, SEEK_SET) != 0) {
-			perror("tmpfile");
+			perror("flushing tmpfile");
 			fclose(tmp);
 			return (-2);
 		}
